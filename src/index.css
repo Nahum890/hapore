@@ -786,6 +786,16 @@ h3 {
 
 .tutor-body {
   min-width: 0;
+  flex: 1;
+}
+
+.tutor-name {
+  margin: 0 0 2px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--verde-monte);
 }
 
 .tutor-message {
@@ -810,6 +820,44 @@ h3 {
   margin: 8px 0 0;
   font-size: 11px;
   color: var(--texto-suave);
+}
+
+.tutor-hint-btn {
+  flex-shrink: 0;
+  align-self: center;
+}
+
+/* En PC el tutor es una franja inferior siempre visible y clara. */
+@media (min-width: 768px) {
+  .tutor-card {
+    background: var(--verde-monte);
+    color: var(--blanco);
+    border-color: var(--verde-monte);
+    padding: 14px 18px;
+    align-items: center;
+  }
+
+  .tutor-avatar {
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+  }
+
+  .tutor-name {
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .tutor-message {
+    font-size: 15px;
+  }
+
+  .tutor-es-hint,
+  .tutor-follow-up {
+    color: rgba(255, 255, 255, 0.78);
+  }
+
+  .tutor-source {
+    color: rgba(255, 255, 255, 0.55);
+  }
 }
 
 /* --- Movimiento reducido --- */

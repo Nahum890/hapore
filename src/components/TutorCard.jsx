@@ -1,8 +1,8 @@
-export default function TutorCard({ tutor }) {
-  const message = tutor?.message ?? '¡Mba\'éichapa! Eju, jahechami Física juntos.';
+export default function TutorCard({ message, esHint, followUp, onHint, showHintButton }) {
+  const text = message ?? '¡Mba\'éichapa! Eju, jahechami Física juntos.';
 
   return (
-    <section className="card tutor-card" aria-label="Tutor Jopara">
+    <section className="card tutor-card" aria-label="Tutor GuaranIA">
       <div className="tutor-avatar" aria-hidden="true">
         <svg viewBox="0 0 24 24" width="24" height="24" focusable="false">
           <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="1.5" />
@@ -12,13 +12,17 @@ export default function TutorCard({ tutor }) {
         </svg>
       </div>
       <div className="tutor-body">
-        <p className="tutor-message" role="status">{message}</p>
-        {tutor?.esHint && <p className="tutor-es-hint">{tutor.esHint}</p>}
-        {tutor?.followUp && <p className="tutor-follow-up">{tutor.followUp}</p>}
-        <p className="tutor-source">
-          Tutor offline por reglas{tutor?.source ? ` · ${tutor.source}` : ''}
-        </p>
+        <p className="tutor-name">GuaranIA</p>
+        <p className="tutor-message" role="status">{text}</p>
+        {esHint && <p className="tutor-es-hint">{esHint}</p>}
+        {followUp && <p className="tutor-follow-up">{followUp}</p>}
+        <p className="tutor-source">Tutor offline por reglas</p>
       </div>
+      {showHintButton && (
+        <button type="button" className="btn btn-light tutor-hint-btn" onClick={onHint}>
+          Ver pista
+        </button>
+      )}
     </section>
   );
 }

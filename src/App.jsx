@@ -74,6 +74,13 @@ export default function App() {
     onResult: learning.onExerciseResult,
     onMistake: (context) => ask({ type: 'mistake', ...context }),
   });
+  const handleTutorHint = () => {
+    ask({
+      type: 'hint',
+      expectedConcept: currentExercise?.expectedConcept,
+      exerciseId: currentExercise?.id,
+    });
+  };
 
   return (
     <div className="app">
@@ -145,7 +152,13 @@ export default function App() {
         )}
       </main>
 
-      <TutorCard tutor={tutor} />
+      <TutorCard
+        message={tutor?.message}
+        esHint={tutor?.esHint}
+        followUp={tutor?.followUp}
+        showHintButton={activeTab === 'simulador' && Boolean(currentExercise)}
+        onHint={handleTutorHint}
+      />
     </div>
   );
 }
