@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { drawScene } from './projectileRenderer.js';
+import StatusBadge from './StatusBadge.jsx';
 
-export default function CanvasSimulator({ mission }) {
+export default function CanvasSimulator({ mission, values, status = 'idle', result, targetDistance }) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -16,21 +17,37 @@ export default function CanvasSimulator({ mission }) {
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    drawScene(ctx, { width, height, mission });
+    drawScene(ctx, {
+      width,
+      height,
+      mission,
+      launchValues: values,
+      targetDistance,
+      landingDistance: result?.landingDistance,
+    });
     return undefined;
-  }, [mission]);
+  }, [mission, values, status, result, targetDistance]);
+
+  const statusMessage =
+    status === 'running' && !result
+      ? 'Simulando trayectoria...'
+      : result?.message;
 
   return (
     <section className="card simulator-card" aria-label="Simulador de Movimiento Parabólico">
-      <h2>Simulador</h2>
+      <div className="simulator-head">
+        <h2>Simulador</h2>
+        <StatusBadge status={status} message={statusMessage} />
+      </div>
       <p className="simulator-status">
-        {mission ? `Vista previa: ${mission.exercise.topic}` : 'Sin misión cargada'}
+        {mission ? `Concepto: ${mission.exercise.topic}` : 'Sin misión cargada'}
       </p>
-      <canvas ref={canvasRef} className="simulator-canvas" />
-      {/* TODO: controles de lanzamiento (v0, ángulo) y botón "Lanzar". */}
-      {/* TODO: animación del dron con requestAnimationFrame. */}
-      {/* TODO: dibujar la trayectoria real calculada con physics/projectileMotion. */}
-      {/* TODO: comparar el punto de caída con el objetivo y mostrar la consecuencia visual del error. */}
+      <div className={`simulator-canvas-wrap status-${status}`}>
+        <canvas ref={canvasRef} className="simulator-canvas" />
+      </div>
+      {/* TODO (motor del simulador 2D): animación del dron con requestAnimationFrame
+          siguiendo la trayectoria calculada y dibujo de la trayectoria con
+          drawTrajectory + toCanvasPoints. */}
     </section>
   );
 }

@@ -53,6 +53,17 @@ export function drawTarget(ctx, { x, y }) {
   ctx.stroke();
 }
 
+export function drawLanding(ctx, { x, y }) {
+  ctx.strokeStyle = PALETTE.tierraColorada;
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(x - 6, y - 6);
+  ctx.lineTo(x + 6, y + 6);
+  ctx.moveTo(x + 6, y - 6);
+  ctx.lineTo(x - 6, y + 6);
+  ctx.stroke();
+}
+
 export function drawProjectile(ctx, { x, y }) {
   ctx.fillStyle = PALETTE.tierraColorada;
   ctx.beginPath();
@@ -72,28 +83,42 @@ export function drawTrajectory(ctx, points) {
   ctx.stroke();
 }
 
-export function drawScene(ctx, { width, height, mission }) {
+function toNumber(value) {
+  if (typeof value === 'number') return value;
+  return Number(String(value).trim().replace(',', '.'));
+}
+
+export function drawScene(ctx, { width, height, mission, launchValues, targetDistance, landingDistance }) {
   const groundY = height - 32;
   drawSky(ctx, { width, height });
   drawGround(ctx, { width, groundY });
 
-  const worldWidth = mission?.exercise?.values ? Math.max(10, mission.exercise.values.v0 * 2.2) : 40;
+  const v0Raw = launchValues?.v0 ?? mission?.exercise?.values?.v0 ?? 20;
+  const v0 = toNumber(v0Raw);
+  const target = Number.isFinite(toNumber(targetDistance)) ? toNumber(targetDistance) : null;
+  const worldWidth = Math.max(
+    10,
+    Math.max((Number.isFinite(v0) ? v0 : 20) * 2.2, (target ?? 0) * 1.15),
+  );
   const scale = computeScale(worldWidth, 25, width, height, 24);
   const originX = 24;
 
   drawHorizontalAxis(ctx, { width, groundY, scale });
 
-  // Objetivo placeholder a la derecha del eje.
-  drawTarget(ctx, { x: width - 48, y: groundY });
+  // Objetivo en su posición física (o placeholder si aún no hay distancia).
+  drawTarget(ctx, { x: target !== null ? originX + target * scale : width - 48, y: groundY });
 
   // Dron placeholder en el punto de lanzamiento.
   drawProjectile(ctx, { x: originX, y: groundY - 7 });
 
+  // Punto de caída calculado (consecuencia visual del resultado).
+  const landing = Number.isFinite(toNumber(landingDistance)) ? toNumber(landingDistance) : null;
+  if (landing !== null) {
+    drawLanding(ctx, { x: originX + landing * scale, y: groundY });
+  }
+
   // TODO: calcular el launch con physics/projectileMotion.createLaunch(v0, ángulo)
   //   y mapear evaluateTrajectory(...) con toCanvasPoints(...) para dibujar
   //   la trayectoria real con drawTrajectory(ctx, canvasPoints).
-  // TODO: controles de lanzamiento (v0, ángulo) y botón "Lanzar".
   // TODO: animación del dron con requestAnimationFrame siguiendo la trayectoria.
-  // TODO: comparar el punto de caída con el objetivo y mostrar la consecuencia
-  //   visual del error (distancia, acierto o fallo).
 }

@@ -330,19 +330,119 @@ h3 {
 }
 
 /* --- Simulador --- */
+.simulator-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.simulator-head h2 {
+  margin: 0;
+}
+
 .simulator-status {
   margin: 0 0 10px;
   font-size: 13px;
   color: var(--texto-suave);
 }
 
+.simulator-card {
+  position: relative;
+}
+
+.simulator-canvas-wrap {
+  border-radius: 10px;
+  border: 1px solid var(--borde);
+  overflow: hidden;
+  transition: border-color 200ms ease;
+}
+
+.simulator-canvas-wrap.status-running {
+  border-color: var(--azul-itaipu);
+}
+
+.simulator-canvas-wrap.status-success {
+  border-color: var(--verde-monte);
+}
+
+.simulator-canvas-wrap.status-error {
+  border-color: var(--tierra-colorada);
+}
+
 .simulator-canvas {
   width: 100%;
   aspect-ratio: 4 / 3;
   display: block;
-  border-radius: 10px;
+  background: var(--fondo);
+}
+
+@media (min-width: 1024px) {
+  .simulator-canvas {
+    aspect-ratio: 16 / 10;
+  }
+}
+
+.simulator-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.simulator-side {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .simulator-layout {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
   border: 1px solid var(--borde);
   background: var(--fondo);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--texto-suave);
+  white-space: nowrap;
+}
+
+.status-badge svg {
+  flex-shrink: 0;
+}
+
+.status-badge.status-running {
+  background: #E6F4FC;
+  border-color: var(--azul-itaipu);
+  color: #075985;
+}
+
+.status-badge.status-success {
+  background: #E7F3EC;
+  border-color: var(--verde-monte);
+  color: #14532D;
+}
+
+.status-badge.status-error {
+  background: #F3F4F6;
+  border-color: var(--borde);
+  color: var(--gris-carbon);
+}
+
+.status-badge.status-error svg {
+  color: var(--tierra-colorada);
 }
 
 .mission-nav {
