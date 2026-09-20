@@ -70,7 +70,7 @@ export default function App() {
   return (
     <div className="app">
       <Header />
-      <ConfidenceBar confidence={learning.confidence} />
+      <ConfidenceBar value={learning.confidence} />
       <TabNavigation activeTab={activeTab} onChange={setActiveTab} />
 
       <main className="app-main">

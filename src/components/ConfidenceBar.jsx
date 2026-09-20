@@ -1,5 +1,5 @@
-export default function ConfidenceBar({ confidence }) {
-  const safeValue = Math.max(0, Math.min(100, Math.round(confidence)));
+export default function ConfidenceBar({ value }) {
+  const safeValue = Math.max(0, Math.min(100, Math.round(value)));
 
   return (
     <section className="card confidence-bar" aria-label="Nivel de Confianza">

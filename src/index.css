@@ -202,6 +202,30 @@ h3 {
   color: var(--texto-suave);
 }
 
+@media (min-width: 768px) {
+  .confidence-bar {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 14px 20px;
+  }
+
+  .confidence-row {
+    flex: 0 0 auto;
+    gap: 10px;
+  }
+
+  .confidence-track {
+    flex: 1;
+    margin: 0;
+  }
+
+  .confidence-hint {
+    flex: 0 0 auto;
+    max-width: 280px;
+  }
+}
+
 /* --- Navegación por pestañas --- */
 .tab-navigation {
   display: grid;
