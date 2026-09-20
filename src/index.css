@@ -21,6 +21,12 @@
   }
 }
 
+@media (min-width: 768px) {
+  :root {
+    --page-gutter: 24px;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
@@ -52,6 +58,18 @@ h3 {
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+@media (min-width: 768px) {
+  .app {
+    max-width: 720px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .app {
+    max-width: 1100px;
+  }
 }
 
 /* --- Cabecera --- */
@@ -105,6 +123,23 @@ h3 {
   border-radius: 10px;
   font-size: 12px;
   z-index: 10;
+}
+
+@media (max-width: 420px) {
+  .header-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pdf-button .btn {
+    width: 100%;
+  }
+
+  .pdf-note {
+    position: static;
+    width: auto;
+    margin-top: 8px;
+  }
 }
 
 /* --- Tarjetas --- */

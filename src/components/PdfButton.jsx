@@ -1,7 +1,15 @@
 import { useState } from 'react';
 
-export default function PdfButton() {
+export default function PdfButton({ onPdf }) {
   const [showNote, setShowNote] = useState(false);
+
+  const handleClick = () => {
+    if (typeof onPdf === 'function') {
+      onPdf();
+      return;
+    }
+    setShowNote((value) => !value);
+  };
 
   return (
     <div className="pdf-button">
@@ -9,7 +17,7 @@ export default function PdfButton() {
         type="button"
         className="btn btn-light"
         aria-expanded={showNote}
-        onClick={() => setShowNote((value) => !value)}
+        onClick={handleClick}
       >
         Ficha Aula PDF
       </button>
