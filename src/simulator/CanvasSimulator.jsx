@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { drawScene } from './projectileRenderer.js';
-import StatusBadge from './StatusBadge.jsx';
+import StatusBadge from '../components/StatusBadge.jsx';
 
 export default function CanvasSimulator({ mission, values, status = 'idle', result, targetDistance }) {
   const canvasRef = useRef(null);
