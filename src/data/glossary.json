@@ -1,0 +1,27 @@
+[
+  {
+    "id": "glos-trayectoria",
+    "term": "Trayectoria",
+    "definition": "Camino que recorre un proyectil: en el movimiento parabólico es una parábola."
+  },
+  {
+    "id": "glos-gravedad",
+    "term": "Gravedad (g)",
+    "definition": "Aceleración con la que la Tierra atrae los cuerpos: ≈ 9,8 m/s² cerca de la superficie."
+  },
+  {
+    "id": "glos-proyectil",
+    "term": "Proyectil",
+    "definition": "Todo cuerpo lanzado que se mueve bajo la acción de la gravedad, sin motor propio después del lanzamiento."
+  },
+  {
+    "id": "glos-dron",
+    "term": "Dron",
+    "definition": "Vehículo aéreo no tripulado. En GuaranIA es el objeto que se lanza en el simulador."
+  },
+  {
+    "id": "glos-parabola",
+    "term": "Parábola",
+    "definition": "Curva simétrica que describe el movimiento parabólico."
+  }
+]

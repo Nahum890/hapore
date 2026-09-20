@@ -1,0 +1,47 @@
+[
+  {
+    "id": "ej-01",
+    "topic": "Movimiento Parabólico",
+    "difficulty": "básico",
+    "question": "Un dron despega con velocidad inicial de 20 m/s y ángulo de 30° sobre la horizontal. ¿Cuánto vale la componente horizontal de la velocidad?",
+    "values": { "v0": 20, "angle": 30, "gravity": 9.8 },
+    "expectedConcept": "componente-horizontal",
+    "correctAnswer": 17.32,
+    "unit": "m/s",
+    "hints": [
+      "La componente horizontal no depende de la gravedad y no cambia durante el vuelo.",
+      "La componente horizontal se calcula con el coseno: vx = v0 · cos(θ).",
+      "vx = 20 · cos(30°) ≈ 20 · 0,866. Hacé la cuenta y redondeá a 2 decimales."
+    ]
+  },
+  {
+    "id": "ej-02",
+    "topic": "Movimiento Parabólico",
+    "difficulty": "básico",
+    "question": "El mismo dron se lanza con 20 m/s y 30° sobre la horizontal. ¿Cuánto vale la componente vertical de la velocidad inicial?",
+    "values": { "v0": 20, "angle": 30, "gravity": 9.8 },
+    "expectedConcept": "componente-vertical",
+    "correctAnswer": 10,
+    "unit": "m/s",
+    "hints": [
+      "En el instante inicial la componente vertical solo depende del ángulo de lanzamiento.",
+      "La componente vertical se calcula con el seno: vy = v0 · sen(θ).",
+      "vy = 20 · sen(30°) = 20 · 0,5."
+    ]
+  },
+  {
+    "id": "ej-03",
+    "topic": "Movimiento Parabólico",
+    "difficulty": "intermedio",
+    "question": "Se lanza un proyectil con velocidad inicial de 19,6 m/s y ángulo de 45°. ¿Cuál es su altura máxima?",
+    "values": { "v0": 19.6, "angle": 45, "gravity": 9.8 },
+    "expectedConcept": "altura-maxima",
+    "correctAnswer": 9.8,
+    "unit": "m",
+    "hints": [
+      "En la altura máxima la velocidad vertical vale cero.",
+      "Altura máxima: h = v0² · sen²(θ) / (2g).",
+      "h = (19,6² · sen²(45°)) / (2 · 9,8) = (384,16 · 0,5) / 19,6."
+    ]
+  }
+]

@@ -1,0 +1,34 @@
+{
+  "_reviewNote": "ATENCIÓN: los textos en jopara son un borrador inicial NO validado lingüísticamente. Deben ser revisados y aprobados por el responsable lingüístico antes de usarse con estudiantes.",
+  "greetings": [
+    "¡Mba'éichapa! Eju, jahechami Física juntos.",
+    "¡Jaha! Eñepractica: jajuhumi cuenta correcta."
+  ],
+  "fallbackHint": "Ehecha jey el enunciado, ehpyru peteî paso pequeñito. Ani aflojá: vas a poder.",
+  "errors": [
+    {
+      "errorId": "err-01",
+      "joparaHint": "Ejeringa raẽ: v0 ha'e la velocidad del inicio; vf, la del final. Ani ene ndoconfundivi.",
+      "esHint": "v0 es la velocidad inicial del lanzamiento; la velocidad final cambia durante el vuelo. Antes de calcular, pregúntate: ¿me piden la del inicio o la de otro momento?",
+      "followUp": "Probá de nuevo con el dato correcto."
+    },
+    {
+      "errorId": "err-02",
+      "joparaHint": "Vx ohóla lape'ỹme (horizontal); vy ogueraha la gravedad (vertical). Ani ene ñemboja'o.",
+      "esHint": "La horizontal usa coseno: vx = v0 · cos(θ). La vertical usa seno: vy = v0 · sen(θ). No las mezcles.",
+      "followUp": "Identificá primero qué componente te piden y después aplicá la fórmula."
+    },
+    {
+      "errorId": "err-03",
+      "joparaHint": "Ejapo raẽ ñemoambue km/h gui m/s-pe, upéi ejapo la cuenta. Ani akonfirmo unidades.",
+      "esHint": "Antes de calcular, convertí todas las unidades al mismo sistema (por ejemplo, km/h a m/s dividiendo por 3,6).",
+      "followUp": "Revisá las unidades del ejercicio y volvé a intentarlo."
+    },
+    {
+      "errorId": "err-04",
+      "joparaHint": "Altura máxima ha'e yvatevéva; alcance ha'e mombyryvéva. Ani ene ndoconfundivi.",
+      "esHint": "La altura máxima es lo más alto que llega (vertical); el alcance es lo más lejos que cae (horizontal). Son cálculos distintos.",
+      "followUp": "Releé qué pide el ejercicio: ¿altura o alcance?"
+    }
+  ]
+}

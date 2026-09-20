@@ -1,0 +1,119 @@
+import { useState } from 'react';
+import Header from './components/Header.jsx';
+import ConfidenceBar from './components/ConfidenceBar.jsx';
+import TabNavigation from './components/TabNavigation.jsx';
+import TutorCard from './components/TutorCard.jsx';
+import ExerciseCard from './components/ExerciseCard.jsx';
+import Flashcard from './components/Flashcard.jsx';
+import TeacherMode from './components/TeacherMode.jsx';
+import CanvasSimulator from './simulator/CanvasSimulator.jsx';
+import exercisesData from './data/exercises.json';
+import flashcardsData from './data/flashcards.json';
+import conceptsData from './data/concepts.json';
+import errorsData from './data/errors.json';
+import glossaryData from './data/glossary.json';
+import { useOfflineStorage } from './hooks/useOfflineStorage.js';
+import { useTutor } from './hooks/useTutor.js';
+import { useMission } from './hooks/useMission.js';
+
+function AulaView({ attempts, confidence }) {
+  return (
+    <>
+      <section className="card" aria-label="Conceptos clave">
+        <h2>Conceptos clave</h2>
+        <ul className="aula-list">
+          {conceptsData.map((concept) => (
+            <li key={concept.id} className="aula-item">
+              <h3>{concept.name}</h3>
+              <p>{concept.definition}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+      <section className="card" aria-label="Errores frecuentes">
+        <h2>Errores frecuentes</h2>
+        <ul className="aula-list">
+          {errorsData.map((error) => (
+            <li key={error.id} className="aula-item">
+              <h3>{error.name}</h3>
+              <p>{error.description}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+      <section className="card" aria-label="Glosario">
+        <h2>Glosario</h2>
+        <ul className="aula-list">
+          {glossaryData.map((entry) => (
+            <li key={entry.id} className="aula-item">
+              <h3>{entry.term}</h3>
+              <p>{entry.definition}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+      <TeacherMode attempts={attempts} confidence={confidence} />
+    </>
+  );
+}
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState('simulador');
+  const learning = useOfflineStorage();
+  const { tutor, ask } = useTutor();
+  const { mission, currentExercise, next, prev } = useMission(
+    exercisesData,
+    learning.currentExercise,
+    learning.onSelectExercise,
+  );
+
+  return (
+    <div className="app">
+      <Header />
+      <ConfidenceBar confidence={learning.confidence} />
+      <TabNavigation activeTab={activeTab} onChange={setActiveTab} />
+
+      <main className="app-main">
+        {activeTab === 'simulador' && (
+          <>
+            <CanvasSimulator mission={mission} />
+            {currentExercise && (
+              <ExerciseCard
+                exercise={currentExercise}
+                onResult={learning.onExerciseResult}
+                onAskHint={ask}
+              />
+            )}
+            <div className="mission-nav">
+              <button type="button" className="btn btn-secondary" onClick={prev}>
+                Anterior
+              </button>
+              <button type="button" className="btn btn-secondary" onClick={next}>
+                Siguiente ejercicio
+              </button>
+            </div>
+          </>
+        )}
+
+        {activeTab === 'tarjetas' && (
+          <div className="card-list">
+            {flashcardsData.map((flashcard) => (
+              <Flashcard
+                key={flashcard.id}
+                flashcard={flashcard}
+                consolidated={Boolean(learning.flashcardState[flashcard.id]?.consolidated)}
+                onConsolidate={learning.onFlashcardConsolidated}
+              />
+            ))}
+          </div>
+        )}
+
+        {activeTab === 'aula' && (
+          <AulaView attempts={learning.attempts} confidence={learning.confidence} />
+        )}
+      </main>
+
+      <TutorCard tutor={tutor} />
+    </div>
+  );
+}

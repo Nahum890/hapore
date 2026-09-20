@@ -1,0 +1,22 @@
+{
+  "name": "guarania",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "GuaranIA: PWA educativa offline para aprender Física de 3.º curso mediante aprendizaje interactivo.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test tests/*.test.js"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^5.4.11",
+    "vite-plugin-pwa": "^0.21.1"
+  }
+}

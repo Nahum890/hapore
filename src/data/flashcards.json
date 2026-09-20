@@ -1,0 +1,26 @@
+[
+  {
+    "id": "fc-01",
+    "topic": "Movimiento Parabólico",
+    "front": "¿Qué es el Movimiento Parabólico?",
+    "back": "La combinación de un movimiento horizontal (velocidad constante) y uno vertical (acelerado por la gravedad). Su trayectoria es una parábola."
+  },
+  {
+    "id": "fc-02",
+    "topic": "Movimiento Parabólico",
+    "front": "¿La componente horizontal (vx) cambia durante el vuelo?",
+    "back": "No. Si ignoramos el aire, vx permanece constante; solo cambia vy por efecto de la gravedad."
+  },
+  {
+    "id": "fc-03",
+    "topic": "Movimiento Parabólico",
+    "front": "¿En qué punto la velocidad vertical (vy) vale cero?",
+    "back": "En la altura máxima. Ahí vy = 0, pero vx sigue igual: el proyectil sigue avanzando."
+  },
+  {
+    "id": "fc-04",
+    "topic": "Movimiento Parabólico",
+    "front": "¿Qué fórmula da la altura máxima?",
+    "back": "h = v0² · sen²(θ) / (2g). Con v0 = 19,6 m/s y θ = 45°, h = 9,8 m."
+  }
+]
