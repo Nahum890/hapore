@@ -1,47 +1,135 @@
 [
   {
     "id": "ej-01",
+    "subtema": "movimiento_parabolico",
     "topic": "Movimiento Parabólico",
     "difficulty": "básico",
-    "question": "Un dron despega con velocidad inicial de 20 m/s y ángulo de 30° sobre la horizontal. ¿Cuánto vale la componente horizontal de la velocidad?",
+    "question": "Un dron despega con v0 = 20 m/s y ángulo de 30° sobre la horizontal. ¿Cuánto vale la componente horizontal (vx) de la velocidad?",
     "values": { "v0": 20, "angle": 30, "gravity": 9.8 },
     "expectedConcept": "componente-horizontal",
     "correctAnswer": 17.32,
     "unit": "m/s",
+    "targetX": 34.64,
+    "targetY": 0,
+    "tolerance": 0.05,
     "hints": [
-      "La componente horizontal no depende de la gravedad y no cambia durante el vuelo.",
-      "La componente horizontal se calcula con el coseno: vx = v0 · cos(θ).",
-      "vx = 20 · cos(30°) ≈ 20 · 0,866. Hacé la cuenta y redondeá a 2 decimales."
+      "¿Qué dos direcciones hay? Pe dron oho yvate ha tenonde.",
+      "La componente horizontal no cambia con la gravedad: vx = v0 · cos(θ).",
+      "Sustitución directa: vx = 20 · cos(30°) ≈ 20 · 0,866 = 17,32 m/s."
     ]
   },
   {
     "id": "ej-02",
+    "subtema": "movimiento_parabolico",
     "topic": "Movimiento Parabólico",
     "difficulty": "básico",
-    "question": "El mismo dron se lanza con 20 m/s y 30° sobre la horizontal. ¿Cuánto vale la componente vertical de la velocidad inicial?",
+    "question": "El mismo dron despega con v0 = 20 m/s y 30° sobre la horizontal. ¿Cuánto vale la componente vertical inicial (vy)?",
     "values": { "v0": 20, "angle": 30, "gravity": 9.8 },
     "expectedConcept": "componente-vertical",
     "correctAnswer": 10,
     "unit": "m/s",
+    "targetX": 34.64,
+    "targetY": 0,
+    "tolerance": 0.05,
     "hints": [
-      "En el instante inicial la componente vertical solo depende del ángulo de lanzamiento.",
-      "La componente vertical se calcula con el seno: vy = v0 · sen(θ).",
-      "vy = 20 · sen(30°) = 20 · 0,5."
+      "La velocidad vertical determina cuánto sube el dron antes de que la gravedad lo frene.",
+      "La componente vertical inicial se calcula con el seno: vy = v0 · sen(θ).",
+      "Sustitución directa: vy = 20 · sen(30°) = 20 · 0,5 = 10 m/s."
     ]
   },
   {
     "id": "ej-03",
+    "subtema": "movimiento_parabolico",
     "topic": "Movimiento Parabólico",
     "difficulty": "intermedio",
-    "question": "Se lanza un proyectil con velocidad inicial de 19,6 m/s y ángulo de 45°. ¿Cuál es su altura máxima?",
+    "question": "Con v0 = 20 m/s, θ = 30° y gravedad de aula g = 10 m/s², ¿cuánto dura el tiempo total de vuelo si sale y llega a la misma altura?",
+    "values": { "v0": 20, "angle": 30, "gravity": 10 },
+    "expectedConcept": "tiempo-de-vuelo",
+    "correctAnswer": 2,
+    "unit": "s",
+    "targetX": 34.64,
+    "targetY": 0,
+    "tolerance": 0.05,
+    "hints": [
+      "Mirá solo el eje vertical: en la cúspide la velocidad vertical se hace cero.",
+      "Tiempo de vuelo en suelo nivelado: T = 2 · vy / g.",
+      "Como vy = 10 m/s y g = 10 m/s², T = (2 · 10) / 10 = 2 segundos."
+    ]
+  },
+  {
+    "id": "ej-04",
+    "subtema": "movimiento_parabolico",
+    "topic": "Movimiento Parabólico",
+    "difficulty": "intermedio",
+    "question": "El dron avanza horizontalmente a vx ≈ 17,32 m/s durante un vuelo de T = 2 s. ¿Qué distancia horizontal total (alcance R) recorre?",
+    "values": { "vx": 17.32, "t": 2, "gravity": 10 },
+    "expectedConcept": "alcance",
+    "correctAnswer": 34.64,
+    "unit": "m",
+    "targetX": 34.64,
+    "targetY": 0,
+    "tolerance": 0.05,
+    "hints": [
+      "En el eje horizontal el movimiento es uniforme (MRU), no hay aceleración.",
+      "Fórmula de alcance horizontal: R = vx · T.",
+      "Multiplicación directa: R = 17,32 m/s · 2 s = 34,64 metros."
+    ]
+  },
+  {
+    "id": "ej-05",
+    "subtema": "movimiento_parabolico",
+    "topic": "Movimiento Parabólico",
+    "difficulty": "intermedio",
+    "question": "Se lanza un dron con v0 = 19,6 m/s y ángulo de 45° con g = 9,8 m/s². ¿Cuál es su altura máxima?",
     "values": { "v0": 19.6, "angle": 45, "gravity": 9.8 },
     "expectedConcept": "altura-maxima",
     "correctAnswer": 9.8,
     "unit": "m",
+    "targetX": 39.2,
+    "targetY": 0,
+    "tolerance": 0.05,
     "hints": [
-      "En la altura máxima la velocidad vertical vale cero.",
-      "Altura máxima: h = v0² · sen²(θ) / (2g).",
-      "h = (19,6² · sen²(45°)) / (2 · 9,8) = (384,16 · 0,5) / 19,6."
+      "En el punto más alto toda la energía cinética vertical se transformó en altura.",
+      "Fórmula de altura máxima: Hmax = v0² · sen²(θ) / (2g).",
+      "Hmax = (19,6² · sen²(45°)) / (2 · 9,8) = (384,16 · 0,5) / 19,6 = 9,8 metros."
+    ]
+  },
+  {
+    "id": "ej-06",
+    "subtema": "movimiento_parabolico",
+    "topic": "Movimiento Parabólico",
+    "difficulty": "avanzado",
+    "question": "Misión Alto Paraná: Un puesto sanitario está a 40 m de distancia a la misma altura. Si v0 = 20 m/s y g = 10 m/s², ¿qué ángulo θ (en grados) logra llegar exactamente al objetivo?",
+    "values": { "v0": 20, "targetDistance": 40, "gravity": 10 },
+    "expectedConcept": "alcance",
+    "correctAnswer": 45,
+    "unit": "°",
+    "targetX": 40,
+    "targetY": 0,
+    "tolerance": 0.5,
+    "hints": [
+      "El alcance máximo de cualquier proyectil se logra cuando el término sen(2θ) alcanza su valor máximo.",
+      "R = (v0² · sen(2θ)) / g. Sustituyendo: 40 = (400 · sen(2θ)) / 10 -> sen(2θ) = 1.",
+      "Si sen(2θ) = 1, entonces 2θ = 90°, por lo que θ = 45°."
+    ]
+  },
+  {
+    "id": "ej-07",
+    "subtema": "movimiento_parabolico",
+    "topic": "Movimiento Parabólico",
+    "difficulty": "avanzado",
+    "question": "Lanzamos dos drones con v0 = 20 m/s y g = 10 m/s²: el dron A a 30° y el dron B a 60°. Si el dron A alcanzó 34,64 m, ¿cuál es el alcance del dron B?",
+    "values": { "v0": 20, "angleA": 30, "angleB": 60, "gravity": 10 },
+    "expectedConcept": "alcance",
+    "correctAnswer": 34.64,
+    "unit": "m",
+    "targetX": 34.64,
+    "targetY": 0,
+    "tolerance": 0.05,
+    "hints": [
+      "Compará sen(2 · 30°) con sen(2 · 60°): sen(60°) = sen(120°).",
+      "Los ángulos complementarios (que suman 90°) tienen el mismo alcance horizontal en condiciones ideales.",
+      "Por simetría trigonométrica, el alcance de 60° es idéntico al de 30°: 34,64 metros."
     ]
   }
 ]
