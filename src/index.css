@@ -239,14 +239,33 @@ h3 {
 
 .tab {
   min-height: var(--touch-min);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   border: none;
   background: transparent;
   border-radius: 10px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--texto-suave);
   cursor: pointer;
   transition: background-color 150ms ease, color 150ms ease;
+}
+
+.tab-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (min-width: 768px) {
+  .tab {
+    flex-direction: row;
+    gap: 8px;
+    font-size: 15px;
+  }
 }
 
 .tab.is-active {
