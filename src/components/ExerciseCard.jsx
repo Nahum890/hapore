@@ -1,41 +1,14 @@
-import { useEffect, useState } from 'react';
-import { getHint, hasHintsLeft } from '../pedagogy/hintEngine.js';
-import { validateExercise } from '../physics/physicsValidator.js';
-
-export default function ExerciseCard({ exercise, onResult, onAskHint }) {
-  const [answer, setAnswer] = useState('');
-  const [feedback, setFeedback] = useState(null);
-  const [hintsUsed, setHintsUsed] = useState(0);
-  const [currentHint, setCurrentHint] = useState(null);
-
-  useEffect(() => {
-    setAnswer('');
-    setFeedback(null);
-    setHintsUsed(0);
-    setCurrentHint(null);
-  }, [exercise?.id]);
-
-  const handleCheck = () => {
-    const result = validateExercise(exercise, answer);
-    setFeedback(result);
-    onResult?.({ correct: result.correct, hintsUsed });
-    if (!result.correct) {
-      onAskHint?.({
-        type: 'mistake',
-        expectedConcept: exercise.expectedConcept,
-        exerciseId: exercise.id,
-      });
-    }
-  };
-
-  const handleHint = () => {
-    if (!hasHintsLeft(exercise, hintsUsed)) return;
-    setCurrentHint(getHint(exercise, hintsUsed));
-    setHintsUsed(hintsUsed + 1);
-  };
-
-  const noHintsLeft = !hasHintsLeft(exercise, hintsUsed);
-
+export default function ExerciseCard({
+  exercise,
+  answer,
+  feedback,
+  hintsUsed,
+  currentHint,
+  hasHints,
+  onChange,
+  onCheck,
+  onHint,
+}) {
   return (
     <section className="card exercise-card" aria-label={`Ejercicio ${exercise.id}`}>
       <div className="exercise-meta">
@@ -43,7 +16,7 @@ export default function ExerciseCard({ exercise, onResult, onAskHint }) {
         <span className="chip chip-difficulty">{exercise.difficulty}</span>
       </div>
       <p className="exercise-question">{exercise.question}</p>
-      <div className="values-chips">
+      <div className="values-chips" aria-label="Datos del ejercicio">
         {Object.entries(exercise.values ?? {}).map(([key, value]) => (
           <span key={key} className="chip">
             {key} = {String(value).replace('.', ',')}
@@ -62,7 +35,7 @@ export default function ExerciseCard({ exercise, onResult, onAskHint }) {
           autoComplete="off"
           placeholder="Ej: 17,32"
           value={answer}
-          onChange={(event) => setAnswer(event.target.value)}
+          onChange={(event) => onChange(event.target.value)}
         />
         <span className="answer-unit">{exercise.unit}</span>
       </div>
@@ -70,12 +43,12 @@ export default function ExerciseCard({ exercise, onResult, onAskHint }) {
         <button
           type="button"
           className="btn btn-secondary"
-          onClick={handleHint}
-          disabled={noHintsLeft}
+          onClick={onHint}
+          disabled={!hasHints}
         >
-          {noHintsLeft ? 'Sin más pistas' : 'Pedir pista'}
+          {hasHints ? 'Pedir pista' : 'Sin más pistas'}
         </button>
-        <button type="button" className="btn btn-primary" onClick={handleCheck}>
+        <button type="button" className="btn btn-primary" onClick={onCheck}>
           Comprobar
         </button>
       </div>
@@ -85,12 +58,24 @@ export default function ExerciseCard({ exercise, onResult, onAskHint }) {
         </div>
       )}
       {feedback && (
-        <div className={`feedback ${feedback.correct ? 'correct' : 'incorrect'}`} role="status">
-          {feedback.correct
-            ? '¡Ikatu! Respuesta correcta.'
-            : feedback.message ?? 'Todavía no. Mirá la pista del tutor y volvé a intentarlo.'}
+        <div className={`feedback ${feedback.status}`} role="status">
+          <span className={`feedback-icon ${feedback.status}`} aria-hidden="true">
+            {feedback.status === 'success' ? (
+              <svg viewBox="0 0 24 24" width="16" height="16" focusable="false">
+                <path d="M5 12.5 L10 17.5 L19 7" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" width="16" height="16" focusable="false">
+                <path d="M12 4 L21 19 H3 Z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                <line x1="12" y1="10" x2="12" y2="14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <circle cx="12" cy="16.6" r="0.9" fill="currentColor" />
+              </svg>
+            )}
+          </span>
+          {feedback.message}
         </div>
       )}
+      {/* TODO (integración): recibir hint del tutor cuando el estudiante se equivoca. */}
     </section>
   );
 }

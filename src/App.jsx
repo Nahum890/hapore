@@ -17,6 +17,7 @@ import { useOfflineStorage } from './hooks/useOfflineStorage.js';
 import { useTutor } from './hooks/useTutor.js';
 import { useMission } from './hooks/useMission.js';
 import { useSimulator } from './hooks/useSimulator.js';
+import { useExerciseState } from './hooks/useExerciseState.js';
 
 function AulaView({ attempts, confidence }) {
   return (
@@ -69,6 +70,10 @@ export default function App() {
     learning.onSelectExercise,
   );
   const simulator = useSimulator(currentExercise, { targetDistance: 40, tolerance: 2.5 });
+  const exercise = useExerciseState(currentExercise, {
+    onResult: learning.onExerciseResult,
+    onMistake: (context) => ask({ type: 'mistake', ...context }),
+  });
 
   return (
     <div className="app">
@@ -91,8 +96,14 @@ export default function App() {
                 {currentExercise && (
                   <ExerciseCard
                     exercise={currentExercise}
-                    onResult={learning.onExerciseResult}
-                    onAskHint={ask}
+                    answer={exercise.answer}
+                    feedback={exercise.feedback}
+                    hintsUsed={exercise.hintsUsed}
+                    currentHint={exercise.currentHint}
+                    hasHints={exercise.hasHints}
+                    onChange={exercise.changeAnswer}
+                    onCheck={exercise.check}
+                    onHint={exercise.requestHint}
                   />
                 )}
                 <LaunchPanel

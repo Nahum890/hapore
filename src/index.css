@@ -623,6 +623,17 @@ h3 {
   border-radius: 10px;
   padding: 12px;
   font-size: 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.feedback-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
 }
 
 .feedback.correct {
@@ -631,10 +642,21 @@ h3 {
   border: 1px solid #B5D9C4;
 }
 
-.feedback.incorrect {
-  background: #FBEAE4;
-  color: #7C2D12;
-  border: 1px solid #EFC4B0;
+.feedback.correct .feedback-icon {
+  color: var(--verde-monte);
+}
+
+/* El error se comunica como consecuencia física, no como castigo:
+   fondo neutro con acento Terracota solo en el icono y el borde. */
+.feedback.error {
+  background: #F3F4F6;
+  color: var(--gris-carbon);
+  border: 1px solid var(--borde);
+  border-left: 4px solid var(--tierra-colorada);
+}
+
+.feedback.error .feedback-icon {
+  color: var(--tierra-colorada);
 }
 
 .hint-box {
