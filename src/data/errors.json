@@ -1,30 +1,50 @@
 [
   {
     "id": "err-01",
-    "name": "Confundir velocidad inicial con velocidad final",
-    "description": "Usar v0 cuando el ejercicio pide la velocidad en otro momento del vuelo (o al revés).",
-    "example": "En la altura máxima la velocidad vertical es 0, no la vy del lanzamiento.",
+    "key": "confunde_velocidades",
+    "name": "Confundir velocidad inicial con velocidad en el vuelo",
+    "description": "Usar v0 cuando el ejercicio pide la velocidad en la cúspide (donde vy = 0) o en otro instante t.",
+    "example": "En la altura máxima la velocidad vertical es 0 m/s, no la vy inicial del lanzamiento.",
     "expectedConcept": "componente-vertical"
   },
   {
     "id": "err-02",
+    "key": "confunde_componentes",
     "name": "Confundir componentes horizontal y vertical",
-    "description": "Usar seno para vx o coseno para vy (o mezclarlas al interpretar el resultado).",
-    "example": "vx = v0 · cos(θ) y vy = v0 · sen(θ): el coseno va con la horizontal.",
+    "description": "Usar seno para vx o coseno para vy, o asumir que toda la velocidad v0 va en dirección horizontal.",
+    "example": "vx = v0 · cos(θ) y vy = v0 · sen(θ). En el suelo solo avanza con vx.",
     "expectedConcept": "componente-horizontal"
   },
   {
     "id": "err-03",
-    "name": "Olvidar convertir unidades",
-    "description": "Mezclar km/h con m/s, o metros con kilómetros, antes de calcular.",
-    "example": "72 km/h = 20 m/s: primero convertí, después aplicá las fórmulas.",
-    "expectedConcept": "altura-maxima"
+    "key": "olvida_gravedad",
+    "name": "Omitir el efecto de la gravedad",
+    "description": "Calcular la posición vertical como si fuera velocidad constante sin restar el término -0.5·g·t².",
+    "example": "y(t) = y0 + vy·t - 0.5·g·t². La gravedad siempre tira hacia abajo con g = 9,8 m/s².",
+    "expectedConcept": "tiempo-de-vuelo"
   },
   {
     "id": "err-04",
-    "name": "Confundir altura máxima con alcance",
-    "description": "Calcular la altura (vertical) cuando el ejercicio pide el alcance (horizontal), o al revés.",
-    "example": "La altura máxima se mide en metros hacia arriba; el alcance, en metros horizontales.",
+    "key": "mezcla_unidades",
+    "name": "Mezclar unidades sin convertir",
+    "description": "Operar km/h junto con m/s o minutos con segundos sin homogeneizar previamente.",
+    "example": "72 km/h equivalen a 20 m/s (dividiendo entre 3,6).",
     "expectedConcept": "altura-maxima"
+  },
+  {
+    "id": "err-05",
+    "key": "angulo_desfasado",
+    "name": "Desajuste de ángulo de lanzamiento",
+    "description": "Elegir un ángulo demasiado rasante (<25°) o excesivo (>70°) que acorta drásticamente el alcance.",
+    "example": "Para alcanzar 40 m con 20 m/s, el ángulo óptimo es 45°. A 20° o 70° el dron cae antes.",
+    "expectedConcept": "alcance"
+  },
+  {
+    "id": "err-06",
+    "key": "confunde_altura_alcance",
+    "name": "Confundir altura máxima con alcance horizontal",
+    "description": "Calcular la coordenada vertical máxima (Hmax) cuando el problema pide la distancia recorrida en el suelo (R).",
+    "example": "Hmax se mide hacia arriba en el eje Y; el alcance R se mide a lo largo del eje X.",
+    "expectedConcept": "alcance"
   }
 ]

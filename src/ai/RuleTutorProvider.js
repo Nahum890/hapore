@@ -1,5 +1,5 @@
-import tutorData from '../data/tutor_jopara.json';
-import errorsData from '../data/errors.json';
+import tutorData from '../data/tutor_jopara.json' with { type: 'json' };
+import errorsData from '../data/errors.json' with { type: 'json' };
 
 /**
  * Tutor 100% offline basado en reglas.

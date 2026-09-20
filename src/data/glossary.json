@@ -2,26 +2,57 @@
   {
     "id": "glos-trayectoria",
     "term": "Trayectoria",
-    "definition": "Camino que recorre un proyectil: en el movimiento parabólico es una parábola."
+    "joparaTerm": "Pe trayectoria",
+    "definition": "Camino geométrico continuo que describe el dron en el aire. En movimiento parabólico forma una curva simétrica.",
+    "ejemploJopara": "Pe dron trayectoria ojapo peteĩ parábola iporãva."
   },
   {
     "id": "glos-gravedad",
     "term": "Gravedad (g)",
-    "definition": "Aceleración con la que la Tierra atrae los cuerpos: ≈ 9,8 m/s² cerca de la superficie."
+    "joparaTerm": "Pe gravedad",
+    "definition": "Aceleración de atracción hacia el centro de la Tierra (≈ 9,8 m/s² o convención de aula 10 m/s²). Actúa únicamente en el eje vertical Y.",
+    "ejemploJopara": "Pe gravedad omboguejy el dron con -0.5*g*t²."
   },
   {
-    "id": "glos-proyectil",
-    "term": "Proyectil",
-    "definition": "Todo cuerpo lanzado que se mueve bajo la acción de la gravedad, sin motor propio después del lanzamiento."
+    "id": "glos-velocidad-inicial",
+    "term": "Velocidad inicial (v0)",
+    "joparaTerm": "La velocidad inicial",
+    "definition": "Magnitud vectorial de la rapidez con la que el dron abandona el punto de lanzamiento.",
+    "ejemploJopara": "La velocidad inicial imbarete, pero tekotevẽ jaikuaa pe ángulo."
   },
   {
-    "id": "glos-dron",
-    "term": "Dron",
-    "definition": "Vehículo aéreo no tripulado. En GuaranIA es el objeto que se lanza en el simulador."
+    "id": "glos-angulo",
+    "term": "Ángulo de tiro (θ)",
+    "joparaTerm": "El ángulo",
+    "definition": "Inclinación de la velocidad inicial respecto a la horizontal, medida en grados sexagesimales (0° a 90°).",
+    "ejemploJopara": "Ñamoambuéke el ángulo ha jahechami mba'éichapa okambia pe vuelo."
   },
   {
-    "id": "glos-parabola",
-    "term": "Parábola",
-    "definition": "Curva simétrica que describe el movimiento parabólico."
+    "id": "glos-componente-vertical",
+    "term": "Componente vertical (vy)",
+    "joparaTerm": "Pe componente vertical",
+    "definition": "Fracción de la velocidad que eleva el proyectil contra el campo gravitatorio.",
+    "ejemploJopara": "Pe componente vertical ogueraha yvate pe dron."
+  },
+  {
+    "id": "glos-componente-horizontal",
+    "term": "Componente horizontal (vx)",
+    "joparaTerm": "Pe componente horizontal",
+    "definition": "Fracción de la velocidad que desplaza el proyectil sobre el suelo a rapidez constante.",
+    "ejemploJopara": "Pe componente horizontal ombopya'e el avance tenonde gotyo."
+  },
+  {
+    "id": "glos-alcance",
+    "term": "Alcance horizontal (R)",
+    "joparaTerm": "Pe alcance",
+    "definition": "Distancia máxima en línea recta que logra recorrer el objeto sobre el suelo antes de caer.",
+    "ejemploJopara": "Pe alcance oikotevẽ 40 metros og̃uahẽ hag̃ua pe puesto-pe."
+  },
+  {
+    "id": "glos-kyhyjey",
+    "term": "Kyhyje'ỹ",
+    "joparaTerm": "Kyhyje'ỹ",
+    "definition": "Filosofía pedagógica guaraní que significa 'sin miedo'. Aprender mediante experimentación iterativa sin temor a equivocarse.",
+    "ejemploJopara": "Ñamba'apo kyhyje'ỹme: cada error ha'e peteĩ oportunidad de aprendizaje."
   }
 ]

@@ -1,34 +1,119 @@
 {
-  "_reviewNote": "ATENCIÓN: los textos en jopara son un borrador inicial NO validado lingüísticamente. Deben ser revisados y aprobados por el responsable lingüístico antes de usarse con estudiantes.",
   "greetings": [
-    "¡Mba'éichapa! Eju, jahechami Física juntos.",
-    "¡Jaha! Eñepractica: jajuhumi cuenta correcta."
+    "¡Mba'éichapa! Sos bienvenido a GuaranIA. Eju, jahechami ko física kyhyje'ỹme.",
+    "¡Mba'éichapa! Ko'ápe ñañepyrũta jaipapa pe dron trayectoria reheve.",
+    "¡Maitei! Ani rekyhyje rejavy hag̃ua: jajapóvo ejercicio jaaprende porãve."
   ],
-  "fallbackHint": "Ehecha jey el enunciado, ehpyru peteî paso pequeñito. Ani aflojá: vas a poder.",
+  "fallbackHint": "Emañamína pe enunciado rehe ha jaha paso a paso. Ani reñedesespera: ikatu jey reha'ã.",
   "errors": [
     {
       "errorId": "err-01",
-      "joparaHint": "Ejeringa raẽ: v0 ha'e la velocidad del inicio; vf, la del final. Ani ene ndoconfundivi.",
-      "esHint": "v0 es la velocidad inicial del lanzamiento; la velocidad final cambia durante el vuelo. Antes de calcular, pregúntate: ¿me piden la del inicio o la de otro momento?",
-      "followUp": "Probá de nuevo con el dato correcto."
+      "errorKey": "confunde_velocidades",
+      "joparaHint": "¡Emañami! v0 ha'e la velocidad del inicio; en la cúspide pe vy oiko cero. Ani rembojehe'a.",
+      "esHint": "v0 es la velocidad inicial del lanzamiento. En el punto más alto, la componente vertical vale cero.",
+      "followUp": "Ehechami jey mba'e momentoguápa ojerure pe ejercicio.",
+      "levels": {
+        "nivel_1": "¡Emañami pe dron rehe! Oñepyrũvo pya'e oho, pero yvate og̃uahẽvo opyta sapy'a.",
+        "nivel_2": "Nemandu'áke: la velocidad vertical okambia siempre pe gravedad rehe.",
+        "nivel_3": "En la altura máxima vy = 0 m/s. Solo la velocidad horizontal vx opyta constante.",
+        "nivel_4": "Eipuru vy = 0 pe punto más alto-pe oikotevẽramo."
+      }
     },
     {
       "errorId": "err-02",
-      "joparaHint": "Vx ohóla lape'ỹme (horizontal); vy ogueraha la gravedad (vertical). Ani ene ñemboja'o.",
-      "esHint": "La horizontal usa coseno: vx = v0 · cos(θ). La vertical usa seno: vy = v0 · sen(θ). No las mezcles.",
-      "followUp": "Identificá primero qué componente te piden y después aplicá la fórmula."
+      "errorKey": "confunde_componentes",
+      "joparaHint": "Emañami pe velocidad rehe. ¿Opavave 20 m/s-pa oho horizontalmente? Nemandu'áke: la velocidad oñemboja'o mokõime.",
+      "esHint": "La velocidad inicial se descompone: vx usa coseno (horizontal) y vy usa seno (vertical). No van todas en una sola dirección.",
+      "followUp": "Para saber cuánto avanza en el suelo, necesitamos vx = v0 · cos(θ).",
+      "levels": {
+        "nivel_1": "¡Emañami! Pe dron nohoiva'erã tenonde añónte, oho yvate ha tenonde simultáneamente.",
+        "nivel_2": "Mokõi componente oĩ: vx oho yvýre con coseno, vy oho yvate con seno.",
+        "nivel_3": "Eipuru vx = v0 · cos(θ) pe avance horizontal-pe g̃uarã.",
+        "nivel_4": "vx = 20 · cos(30°) ≈ 20 · 0,866 = 17,32 m/s."
+      }
     },
     {
       "errorId": "err-03",
-      "joparaHint": "Ejapo raẽ ñemoambue km/h gui m/s-pe, upéi ejapo la cuenta. Ani akonfirmo unidades.",
-      "esHint": "Antes de calcular, convertí todas las unidades al mismo sistema (por ejemplo, km/h a m/s dividiendo por 3,6).",
-      "followUp": "Revisá las unidades del ejercicio y volvé a intentarlo."
+      "errorKey": "olvida_gravedad",
+      "joparaHint": "En X oho de forma uniforme, pero mba'épa oiko Y-pe pe gravedad rehe? Pe gravedad omboguejy el dron con -0.5*g*t².",
+      "esHint": "En el eje horizontal no hay aceleración (MRU), pero en el eje vertical la gravedad frena la subida y acelera la caída (MRUV).",
+      "followUp": "¡Ani nderesarái pe gravedad omboguejyha el dron!",
+      "levels": {
+        "nivel_1": "¿Mba'érepa ho'a jey el dron? Oĩ peteĩ fuerza omboguejýva chupe.",
+        "nivel_2": "Pe gravedad g = 9,8 m/s² (o 10 m/s²) omba'apo siempre verticalmente hacia abajo.",
+        "nivel_3": "Ecuación vertical: y(t) = y0 + vy·t - 0.5·g·t². Pe término cuadrático ha'e pe gravedad.",
+        "nivel_4": "Para calcular el tiempo total: T = 2 · vy / g."
+      }
     },
     {
       "errorId": "err-04",
-      "joparaHint": "Altura máxima ha'e yvatevéva; alcance ha'e mombyryvéva. Ani ene ndoconfundivi.",
-      "esHint": "La altura máxima es lo más alto que llega (vertical); el alcance es lo más lejos que cae (horizontal). Son cálculos distintos.",
-      "followUp": "Releé qué pide el ejercicio: ¿altura o alcance?"
+      "errorKey": "mezcla_unidades",
+      "joparaHint": "Primero ñambojoja umi unidadkuéra, ani ñamixpa. Emoambue km/h gui m/s-pe.",
+      "esHint": "Antes de operar con las fórmulas, convertí todas las magnitudes al Sistema Internacional (m/s y metros).",
+      "followUp": "Edividi 3,6-pe rehasa hag̃ua km/h gui m/s-pe.",
+      "levels": {
+        "nivel_1": "Fíjate en las unidades: km/h ha m/s ndaha'éi peteĩchagua.",
+        "nivel_2": "Pe gravedad oĩ m/s²-pe, upévare la velocidad tekotevẽ oĩ m/s-pe avei.",
+        "nivel_3": "Regla: v (m/s) = v (km/h) / 3,6.",
+        "nivel_4": "Ejemplo: 72 km/h / 3,6 = 20 m/s."
+      }
+    },
+    {
+      "errorId": "err-05",
+      "errorKey": "angulo_desfasado",
+      "joparaHint": "¡Emañami pe trayectoria rehe! Pe ángulo omoĩ chupe muy rasante o muy empinado. Ñamoambuéke pe inclinación.",
+      "esHint": "El ángulo cambia la proporción entre altura y distancia. El alcance depende de sen(2θ).",
+      "followUp": "¿Mba'épa oikóta si aumentamos o disminuimos el ángulo en el simulador?",
+      "levels": {
+        "nivel_1": "¡Emañami pe trayectoria rehe! ¿Ho'a mboyvepa o pasa de largo?",
+        "nivel_2": "Pe ángulo de 45° ome'ẽ el máximo alcance posible en terreno plano.",
+        "nivel_3": "R = (v0² · sen(2θ)) / g. ¿Mba'e ángulo-pa ome'ẽ sen(2θ) = 1?",
+        "nivel_4": "2θ tekotevẽ oiko 90°, upévare θ = 45°."
+      }
+    },
+    {
+      "errorId": "err-06",
+      "errorKey": "confunde_altura_alcance",
+      "joparaHint": "Altura máxima ha'e yvatevéva (eje Y); alcance ha'e mombyryvéva pe yvýre (eje X). Ani reconfundi.",
+      "esHint": "La altura máxima Hmax mide cuánto subió el dron; el alcance R mide cuántos metros avanzó en horizontal.",
+      "followUp": "Releé qué pide el ejercicio: ¿cuánto sube o cuánto avanza?",
+      "levels": {
+        "nivel_1": "¿Yvatepa ojerure tépa mombyry pe suelo ári?",
+        "nivel_2": "Altura máxima se calcula con vy inicial; alcance depende de vx y del tiempo de vuelo.",
+        "nivel_3": "Hmax = (v0² · sen²θ) / (2g) vs R = (v0² · sen(2θ)) / g.",
+        "nivel_4": "Para la altura usa Hmax; para el alcance usa R."
+      }
     }
-  ]
+  ],
+  "movimiento_parabolico": {
+    "confunde_componentes": [
+      "Emañami pe velocidad rehe. ¿Opavave 20 m/s-pa oho horizontalmente?",
+      "Nemandu'áke: la velocidad se divide en dos partes: v0x con coseno y v0y con seno.",
+      "Para saber cuánto avanza en el suelo, necesitamos v0x = v0 * cos(θ)."
+    ],
+    "olvida_gravedad": [
+      "En X oho de forma uniforme, pero mba'épa oiko Y-pe pe gravedad rehe?",
+      "Pe gravedad omboguejy el dron con -0.5*g*t². ¡No te olvides de restar ese efecto!"
+    ],
+    "mezcla_unidades": [
+      "Primero ñambojoja umi unidadkuéra, ani ñamixpa.",
+      "Pe gravedad oĩ m/s²-pe, upévare emoambue raẽ km/h gui m/s-pe."
+    ],
+    "angulo_rasante": [
+      "Pe ángulo imichĩeterei ha oho rasante. Ho'a pya'e pe dron yvýpe.",
+      "Embohetavemi pe ángulo ikatu hag̃uáicha ojupi yvate ha ogana tiempo de vuelo."
+    ],
+    "angulo_excesivo": [
+      "Pe ángulo ijyvateterei: ojupi heta pero ndohói mombyry tenonde.",
+      "Emboguejymi pe ángulo 45° gotyo egana hag̃ua mayor alcance horizontal."
+    ],
+    "velocidad_insuficiente": [
+      "Pe velocidad inicial imboguejyeterei hína. Pe dron no llegáiri al objetivo.",
+      "Jahechami jey pe relación: alcance R proporcional a v0²."
+    ],
+    "velocidad_excesiva": [
+      "Pya'eterei reho. Pe valor ohasa pe oñeikotevẽva.",
+      "Emboguejymi pe velocidad inicial ani hag̃ua ohasa pe pista."
+    ]
+  }
 }
