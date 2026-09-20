@@ -8,19 +8,28 @@ import {
 
 export function useOfflineStorage() {
   const [state, setState] = useState(loadLearningState);
+  const [hintsUsed, setHintsUsed] = useState(0);
 
   const onExerciseResult = (result) => setState(recordExerciseResult(result));
   const onFlashcardConsolidated = (flashcardId) => setState(recordFlashcardConsolidated(flashcardId));
-  const onSelectExercise = (exerciseId) => setState(setCurrentExercise(exerciseId));
+  const onSelectExercise = (exerciseId) => {
+    setHintsUsed(0);
+    setState(setCurrentExercise(exerciseId));
+  };
+  const incrementHints = () => setHintsUsed((prev) => prev + 1);
+  const resetHints = () => setHintsUsed(0);
 
   return {
     confidence: state.confidence,
     currentExercise: state.currentExercise,
     attempts: state.attempts,
     flashcardState: state.flashcardState,
+    hintsUsed,
     onExerciseResult,
     onFlashcardConsolidated,
     onSelectExercise,
+    incrementHints,
+    resetHints,
   };
 }
 

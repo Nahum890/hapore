@@ -2,16 +2,14 @@ import { useEffect, useState } from 'react';
 import { getHint, hasHintsLeft } from '../pedagogy/hintEngine.js';
 import { validateExercise } from '../physics/physicsValidator.js';
 
-export default function ExerciseCard({ exercise, onResult, onAskHint }) {
+export default function ExerciseCard({ exercise, onResult, onAskHint, hintsUsed = 0, onIncrementHint }) {
   const [answer, setAnswer] = useState('');
   const [feedback, setFeedback] = useState(null);
-  const [hintsUsed, setHintsUsed] = useState(0);
   const [currentHint, setCurrentHint] = useState(null);
 
   useEffect(() => {
     setAnswer('');
     setFeedback(null);
-    setHintsUsed(0);
     setCurrentHint(null);
   }, [exercise?.id]);
 
@@ -22,8 +20,12 @@ export default function ExerciseCard({ exercise, onResult, onAskHint }) {
     if (!result.correct) {
       onAskHint?.({
         type: 'mistake',
-        expectedConcept: exercise.expectedConcept,
+        topic: exercise.topic,
         exerciseId: exercise.id,
+        expectedConcept: exercise.expectedConcept,
+        studentAnswer: result.student ?? answer,
+        expectedAnswer: result.expected ?? null,
+        hintLevel: hintsUsed + 1,
       });
     }
   };
@@ -31,7 +33,7 @@ export default function ExerciseCard({ exercise, onResult, onAskHint }) {
   const handleHint = () => {
     if (!hasHintsLeft(exercise, hintsUsed)) return;
     setCurrentHint(getHint(exercise, hintsUsed));
-    setHintsUsed(hintsUsed + 1);
+    onIncrementHint?.();
   };
 
   const noHintsLeft = !hasHintsLeft(exercise, hintsUsed);
