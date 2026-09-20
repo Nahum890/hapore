@@ -1,24 +1,31 @@
 import { useState } from 'react';
+import { generateGuaraniaPdf } from './PrintableSheet.jsx';
 
 export default function PdfButton() {
-  const [showNote, setShowNote] = useState(false);
+  const [generating, setGenerating] = useState(false);
+
+  const handleClick = () => {
+    try {
+      setGenerating(true);
+      generateGuaraniaPdf();
+    } catch (error) {
+      console.error('Error generando Ficha Aula PDF:', error);
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   return (
     <div className="pdf-button">
       <button
         type="button"
         className="btn btn-light"
-        aria-expanded={showNote}
-        onClick={() => setShowNote((value) => !value)}
+        onClick={handleClick}
+        disabled={generating}
+        title="Descargar Ficha de Estudio en PDF para imprimir sin internet"
       >
-        Ficha Aula PDF
+        {generating ? 'Generando...' : '📄 Ficha Aula PDF'}
       </button>
-      {showNote && (
-        <p className="pdf-note" role="status">
-          Módulo en desarrollo: la Ficha Aula PDF estará disponible pronto.
-        </p>
-      )}
-      {/* TODO: generar el PDF del aula en el cliente (próximo commit). */}
     </div>
   );
 }
