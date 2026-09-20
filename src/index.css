@@ -782,6 +782,31 @@ h3 {
   font-size: 14px;
 }
 
+/* Modo docente como banda horizontal en PC/proyector. */
+@media (min-width: 768px) {
+  .teacher-mode {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .teacher-mode h2 {
+    margin: 0;
+    flex: 0 0 auto;
+  }
+
+  .teacher-note {
+    flex: 1;
+    margin: 0;
+  }
+
+  .teacher-stats {
+    flex-direction: row;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+}
+
 /* --- Tutor --- */
 .tutor-card {
   display: flex;
@@ -874,6 +899,39 @@ h3 {
 
   .tutor-source {
     color: rgba(255, 255, 255, 0.55);
+  }
+}
+
+/* --- Aula: layout para PC y proyector --- */
+.aula-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.aula-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+/* En móvil el aula se simplifica: sin simulador duplicado. */
+@media (max-width: 767px) {
+  .aula-simulator {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .aula-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 1024px) {
+  .aula-layout {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    align-items: start;
   }
 }
 

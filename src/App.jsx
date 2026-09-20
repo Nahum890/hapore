@@ -19,42 +19,49 @@ import { useMission } from './hooks/useMission.js';
 import { useSimulator } from './hooks/useSimulator.js';
 import { useExerciseState } from './hooks/useExerciseState.js';
 
-function AulaView({ attempts, confidence }) {
+function AulaView({ mission, attempts, confidence }) {
   return (
     <>
-      <section className="card" aria-label="Conceptos clave">
-        <h2>Conceptos clave</h2>
-        <ul className="aula-list">
-          {conceptsData.map((concept) => (
-            <li key={concept.id} className="aula-item">
-              <h3>{concept.name}</h3>
-              <p>{concept.definition}</p>
-            </li>
-          ))}
-        </ul>
-      </section>
-      <section className="card" aria-label="Errores frecuentes">
-        <h2>Errores frecuentes</h2>
-        <ul className="aula-list">
-          {errorsData.map((error) => (
-            <li key={error.id} className="aula-item">
-              <h3>{error.name}</h3>
-              <p>{error.description}</p>
-            </li>
-          ))}
-        </ul>
-      </section>
-      <section className="card" aria-label="Glosario">
-        <h2>Glosario</h2>
-        <ul className="aula-list">
-          {glossaryData.map((entry) => (
-            <li key={entry.id} className="aula-item">
-              <h3>{entry.term}</h3>
-              <p>{entry.definition}</p>
-            </li>
-          ))}
-        </ul>
-      </section>
+      <div className="aula-layout">
+        <div className="aula-simulator">
+          <CanvasSimulator mission={mission} />
+        </div>
+        <section className="card" aria-label="Conceptos clave">
+          <h2>Conceptos clave</h2>
+          <ul className="aula-list">
+            {conceptsData.map((concept) => (
+              <li key={concept.id} className="aula-item">
+                <h3>{concept.name}</h3>
+                <p>{concept.definition}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+      <div className="aula-grid">
+        <section className="card" aria-label="Errores frecuentes">
+          <h2>Errores frecuentes</h2>
+          <ul className="aula-list">
+            {errorsData.map((error) => (
+              <li key={error.id} className="aula-item">
+                <h3>{error.name}</h3>
+                <p>{error.description}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+        <section className="card" aria-label="Glosario">
+          <h2>Glosario</h2>
+          <ul className="aula-list">
+            {glossaryData.map((entry) => (
+              <li key={entry.id} className="aula-item">
+                <h3>{entry.term}</h3>
+                <p>{entry.definition}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
       <TeacherMode attempts={attempts} confidence={confidence} />
     </>
   );
@@ -148,7 +155,11 @@ export default function App() {
         )}
 
         {activeTab === 'aula' && (
-          <AulaView attempts={learning.attempts} confidence={learning.confidence} />
+          <AulaView
+            mission={mission}
+            attempts={learning.attempts}
+            confidence={learning.confidence}
+          />
         )}
       </main>
 
