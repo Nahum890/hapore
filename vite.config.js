@@ -103,7 +103,7 @@ export default defineConfig(({ mode }) => {
         // El manifest se mantiene como archivo estático en public/manifest.webmanifest.
         manifest: false,
         workbox: {
-          globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}'],
+          globPatterns: ['**/*.{js,css,html,svg,png,webmanifest,json}'],
           navigateFallback: '/index.html',
         },
       }),
