@@ -6,6 +6,7 @@ import TutorCard from './components/TutorCard.jsx';
 import ExerciseCard from './components/ExerciseCard.jsx';
 import Flashcard from './components/Flashcard.jsx';
 import TeacherMode from './components/TeacherMode.jsx';
+import LaunchPanel from './components/LaunchPanel.jsx';
 import CanvasSimulator from './simulator/CanvasSimulator.jsx';
 import exercisesData from './data/exercises.json';
 import flashcardsData from './data/flashcards.json';
@@ -15,6 +16,7 @@ import glossaryData from './data/glossary.json';
 import { useOfflineStorage } from './hooks/useOfflineStorage.js';
 import { useTutor } from './hooks/useTutor.js';
 import { useMission } from './hooks/useMission.js';
+import { useSimulator } from './hooks/useSimulator.js';
 
 function AulaView({ attempts, confidence }) {
   return (
@@ -66,6 +68,7 @@ export default function App() {
     learning.currentExercise,
     learning.onSelectExercise,
   );
+  const simulator = useSimulator(currentExercise, { targetDistance: 40, tolerance: 2.5 });
 
   return (
     <div className="app">
@@ -76,14 +79,32 @@ export default function App() {
       <main className="app-main">
         {activeTab === 'simulador' && (
           <>
-            <CanvasSimulator mission={mission} />
-            {currentExercise && (
-              <ExerciseCard
-                exercise={currentExercise}
-                onResult={learning.onExerciseResult}
-                onAskHint={ask}
+            <div className="simulator-layout">
+              <CanvasSimulator
+                mission={mission}
+                values={simulator.values}
+                status={simulator.status}
+                result={simulator.result}
+                targetDistance={simulator.targetDistance}
               />
-            )}
+              <div className="simulator-side">
+                {currentExercise && (
+                  <ExerciseCard
+                    exercise={currentExercise}
+                    onResult={learning.onExerciseResult}
+                    onAskHint={ask}
+                  />
+                )}
+                <LaunchPanel
+                  values={simulator.values}
+                  status={simulator.status}
+                  result={simulator.result}
+                  onChange={simulator.changeValues}
+                  onLaunch={simulator.launch}
+                  onReset={simulator.reset}
+                />
+              </div>
+            </div>
             <div className="mission-nav">
               <button type="button" className="btn btn-secondary" onClick={prev}>
                 Anterior

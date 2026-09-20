@@ -445,6 +445,75 @@ h3 {
   color: var(--tierra-colorada);
 }
 
+/* --- Controles de lanzamiento --- */
+.launch-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.launch-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.launch-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--texto-suave);
+}
+
+.launch-field-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.launch-field input {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--touch-min);
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  padding: 0 12px;
+  font-size: 16px;
+  font-family: inherit;
+  background: var(--blanco);
+  color: var(--gris-carbon);
+}
+
+.launch-field input:focus-visible {
+  outline: 2px solid var(--azul-itaipu);
+  outline-offset: 1px;
+}
+
+.launch-unit {
+  font-size: 14px;
+  color: var(--texto-suave);
+  white-space: nowrap;
+}
+
+.launch-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.launch-actions .btn-primary {
+  grid-column: 1 / -1;
+}
+
+.launch-actions:has(.btn-secondary) .btn-primary {
+  grid-column: auto;
+}
+
+.launch-status-row {
+  margin-top: 12px;
+}
+
 .mission-nav {
   display: grid;
   grid-template-columns: 1fr 1fr;
