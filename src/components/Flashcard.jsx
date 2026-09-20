@@ -26,7 +26,7 @@ export default function Flashcard({ flashcard, consolidated, onConsolidate }) {
           {consolidated && <span className="chip chip-consolidated">Consolidada</span>}
           <div className="flashcard-actions">
             <button type="button" className="btn btn-primary" onClick={handleConsolidate}>
-              Aikuaa porãma
+              ¡Aikuaa porãma!
             </button>
             <button
               type="button"

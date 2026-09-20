@@ -727,6 +727,23 @@ h3 {
   gap: 10px;
 }
 
+/* En PC las tarjetas aprovechan el espacio horizontal en grilla. */
+@media (min-width: 1024px) {
+  .card-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+
+  .flashcard-inner {
+    min-height: 260px;
+  }
+
+  .flashcard-text {
+    font-size: 17px;
+  }
+}
+
 /* --- Aula --- */
 .aula-list {
   list-style: none;
