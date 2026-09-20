@@ -16,7 +16,7 @@ export default function ExerciseCard({ exercise, onResult, onAskHint, hintsUsed 
   const handleCheck = () => {
     const result = validateExercise(exercise, answer);
     setFeedback(result);
-    onResult?.({ correct: result.correct, hintsUsed });
+    onResult?.({ correct: result.correct, hintsUsed, exerciseId: exercise.id });
     if (!result.correct) {
       onAskHint?.({
         type: 'mistake',

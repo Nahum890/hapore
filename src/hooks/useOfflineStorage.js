@@ -23,6 +23,7 @@ export function useOfflineStorage() {
     confidence: state.confidence,
     currentExercise: state.currentExercise,
     attempts: state.attempts,
+    completed: state.completed,
     flashcardState: state.flashcardState,
     hintsUsed,
     onExerciseResult,

@@ -20,6 +20,7 @@ export const STORAGE_KEYS = {
   CURRENT_EXERCISE: 'guarania:currentExercise',
   ATTEMPTS: 'guarania:attempts',
   FLASHCARD_STATE: 'guarania:flashcardState',
+  COMPLETED: 'guarania:completed',
 };
 
 export function readJSON(key, fallback) {
