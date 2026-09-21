@@ -30,9 +30,18 @@ export default function ExerciseCard({ exercise, onResult, onAskHint, hintsUsed 
     }
   };
 
-  const handleHint = () => {
+  const handleHint = async () => {
     if (!hasHintsLeft(exercise, hintsUsed)) return;
-    setCurrentHint(getHint(exercise, hintsUsed));
+    const level = hintsUsed + 1;
+    const response = await onAskHint?.({
+      type: 'hint',
+      topic: exercise.topic,
+      exerciseId: exercise.id,
+      expectedConcept: exercise.expectedConcept,
+      hintLevel: level,
+    });
+    const tutorText = response?.available === false ? null : response?.message;
+    setCurrentHint(tutorText ?? getHint(exercise, hintsUsed));
     onIncrementHint?.();
   };
 
@@ -83,7 +92,7 @@ export default function ExerciseCard({ exercise, onResult, onAskHint, hintsUsed 
       </div>
       {currentHint && (
         <div className="hint-box" role="status">
-          <strong>Pista {hintsUsed}:</strong> {currentHint}
+          <strong>Pista {hintsUsed} de 5:</strong> {currentHint}
         </div>
       )}
       {feedback && (
