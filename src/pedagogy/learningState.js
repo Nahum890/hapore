@@ -7,10 +7,11 @@ export function loadLearningState() {
     currentExercise: readJSON(STORAGE_KEYS.CURRENT_EXERCISE, null),
     attempts: readJSON(STORAGE_KEYS.ATTEMPTS, 0),
     flashcardState: readJSON(STORAGE_KEYS.FLASHCARD_STATE, {}),
+    completed: readJSON(STORAGE_KEYS.COMPLETED, []),
   };
 }
 
-export function recordExerciseResult({ correct, hintsUsed = 0 } = {}) {
+export function recordExerciseResult({ correct, hintsUsed = 0, exerciseId = null } = {}) {
   const reward = !correct
     ? CONFIDENCE_REWARDS.mistake
     : hintsUsed > 0
@@ -19,6 +20,12 @@ export function recordExerciseResult({ correct, hintsUsed = 0 } = {}) {
   increaseConfidence(reward);
   const attempts = readJSON(STORAGE_KEYS.ATTEMPTS, 0) + 1;
   writeJSON(STORAGE_KEYS.ATTEMPTS, attempts);
+  if (correct && exerciseId) {
+    const completed = readJSON(STORAGE_KEYS.COMPLETED, []);
+    if (!completed.includes(exerciseId)) {
+      writeJSON(STORAGE_KEYS.COMPLETED, [...completed, exerciseId]);
+    }
+  }
   return loadLearningState();
 }
 

@@ -82,6 +82,8 @@ export default function App() {
                 exercise={currentExercise}
                 onResult={learning.onExerciseResult}
                 onAskHint={ask}
+                hintsUsed={learning.hintsUsed}
+                onIncrementHint={learning.incrementHints}
               />
             )}
             <div className="mission-nav">

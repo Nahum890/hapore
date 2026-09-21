@@ -31,3 +31,37 @@ export function buildTutorPrompt(context = {}) {
   parts.push('No repitas pistas anteriores y no reveles la respuesta final.');
   return parts.join(' ');
 }
+
+/**
+ * Prompt para el diagnóstico cerrado que entrega el motor de Física.
+ * El modelo solo interpreta y redacta la guía pedagógica en Jopara:
+ * jamás calcula trayectoria, alcance o tiempo de vuelo, ni valida números.
+ */
+export function buildDiagnosticPrompt(context = {}) {
+  const {
+    message,
+    subtema,
+    ejercicio,
+    respuestaAlumno,
+    respuestaCorrecta,
+    tipoError,
+    nivelPista = 0,
+  } = context;
+  const parts = [];
+  if (message) parts.push(`Consulta del estudiante: ${message}.`);
+  if (subtema) parts.push(`Subtema: ${subtema}.`);
+  if (ejercicio) parts.push(`Ejercicio: ${ejercicio}.`);
+  if (respuestaAlumno !== null && respuestaAlumno !== undefined) {
+    parts.push(`Respuesta del alumno: ${respuestaAlumno}.`);
+  }
+  if (respuestaCorrecta !== null && respuestaCorrecta !== undefined) {
+    parts.push(`Resultado correcto (ya calculado por el motor de Física): ${respuestaCorrecta}.`);
+  }
+  if (tipoError) parts.push(`Tipo de error detectado: ${tipoError}.`);
+  parts.push(`Nivel de pista: ${nivelPista}.`);
+  parts.push(
+    'Redactá una guía pedagógica progresiva en jopara, corta para pantalla de celular.',
+    'No reveles el resultado final, no repitas pistas anteriores y no valides números.',
+  );
+  return parts.join(' ');
+}

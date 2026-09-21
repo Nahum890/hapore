@@ -1,14 +1,13 @@
-import { buildTutorPrompt, SYSTEM_PROMPT } from './prompt.js';
+import RuleTutorProvider from './RuleTutorProvider.js';
 
 /**
- * Implementación preparada para un modelo de IA local (por ejemplo,
- * Transformers.js u otro runtime que corra en el navegador).
+ * Conector de IA generativa vía endpoint /api/chat (proxy seguro en el
+ * servidor; la API key vive solo del lado servidor, nunca en el bundle).
  *
- * En este primer commit NO se descarga ni integra ningún modelo:
- * respond() devuelve un mensaje de módulo en desarrollo. La aplicación
- * completa funciona con RuleTutorProvider.
+ * Si la llamada falla, delega de forma segura en RuleTutorProvider
+ * (tutor offline por reglas) sin romper la experiencia del estudiante.
  *
- * Para conectar el modelo en el futuro:
+ * Para un modelo local futuro (por ejemplo, Transformers.js):
  *  1. Cargar el runtime dentro de esta clase (no en los componentes).
  *  2. Usar buildTutorPrompt(context) + SYSTEM_PROMPT para armar el prompt.
  *  3. Mantener el contrato respond(context) de AIProvider.
@@ -17,15 +16,45 @@ export default class LocalAIProvider {
   constructor(options = {}) {
     this.id = 'local-ai';
     this.options = options;
+    this.fallback = options.fallback ?? new RuleTutorProvider();
   }
 
   async respond(context = {}) {
-    const prompt = buildTutorPrompt(context);
-    return {
-      message: 'El tutor con modelo local todavía no está conectado. Sigo funcionando por reglas.',
-      promptPreview: { system: SYSTEM_PROMPT, user: prompt },
-      source: this.id,
-      available: false,
-    };
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: context.message ?? 'Ayuda con el ejercicio',
+          context: {
+            subtema: context.topic ?? context.expectedConcept ?? null,
+            ejercicio: context.exerciseId ?? context.exercise?.id ?? null,
+            respuestaAlumno: context.studentAnswer ?? null,
+            respuestaCorrecta: context.expectedAnswer ?? null,
+            tipoError: context.errorType ?? context.expectedConcept ?? null,
+            nivelPista: context.hintLevel ?? 0,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Servicio de API online no disponible');
+      }
+
+      const data = await response.json();
+      const text = data.text || data.reply;
+      if (!text) {
+        throw new Error('Respuesta de IA vacía');
+      }
+
+      return {
+        message: text,
+        source: this.id,
+        available: true,
+      };
+    } catch (error) {
+      console.warn('Conexión con IA online fallida. Usando RuleTutorProvider.', error);
+      return this.fallback.respond(context);
+    }
   }
 }
