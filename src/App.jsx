@@ -60,7 +60,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('simulador');
   const learning = useOfflineStorage();
   const { tutor, ask } = useTutor();
-  const { mission, currentExercise, next, prev } = useMission(
+  const { mission, currentExercise, index, next, prev } = useMission(
     exercisesData,
     learning.currentExercise,
     learning.onSelectExercise,
@@ -85,7 +85,7 @@ export default function App() {
               />
             )}
             <div className="mission-nav">
-              <button type="button" className="btn btn-secondary" onClick={prev}>
+              <button type="button" className="btn btn-secondary" onClick={prev} disabled={index === 0}>
                 Anterior
               </button>
               <button type="button" className="btn btn-secondary" onClick={next}>
