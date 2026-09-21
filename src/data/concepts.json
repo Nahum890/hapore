@@ -7,26 +7,26 @@
   {
     "id": "componente-horizontal",
     "name": "Componente horizontal (vx)",
-    "definition": "Parte de la velocidad que apunta en dirección horizontal. No cambia durante el vuelo: vx = v0 · cos(θ)."
+    "definition": "Parte de la velocidad que apunta en dirección horizontal. No cambia durante el vuelo: vx = v0 * cos(ángulo)."
   },
   {
     "id": "componente-vertical",
     "name": "Componente vertical (vy)",
-    "definition": "Parte de la velocidad que apunta hacia arriba o abajo. Disminuye al subir por efecto de la gravedad: vy = v0 · sen(θ) − g·t."
+    "definition": "Parte de la velocidad que apunta hacia arriba o abajo. Disminuye al subir por efecto de la gravedad: vy = v0y - g * t, con v0y = v0 * sen(ángulo)."
   },
   {
     "id": "altura-maxima",
     "name": "Altura máxima",
-    "definition": "Punto más alto de la trayectoria. Ahí la velocidad vertical vale cero: h = v0² · sen²(θ) / (2g)."
+    "definition": "Punto más alto de la trayectoria. Ahí la velocidad vertical vale cero: h = (v0² * sen²(ángulo)) / (2 * g)."
   },
   {
     "id": "alcance",
     "name": "Alcance",
-    "definition": "Distancia horizontal recorrida desde el lanzamiento hasta la caída: R = v0² · sen(2θ) / g."
+    "definition": "Distancia horizontal recorrida desde el lanzamiento hasta la caída: R = (v0² * sen(2 * ángulo)) / g."
   },
   {
     "id": "tiempo-de-vuelo",
     "name": "Tiempo de vuelo",
-    "definition": "Tiempo total que el proyectil pasa en el aire: t = 2 · v0 · sen(θ) / g."
+    "definition": "Tiempo total que el proyectil pasa en el aire: T = (2 * v0y) / g, con v0y = v0 * sen(ángulo)."
   }
 ]
