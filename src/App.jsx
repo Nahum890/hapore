@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import Header from './components/Header.jsx';
 import ConfidenceBar from './components/ConfidenceBar.jsx';
-import TabNavigation from './components/TabNavigation.jsx';
 import TutorCard from './components/TutorCard.jsx';
 import ExerciseCard from './components/ExerciseCard.jsx';
 import Flashcard from './components/Flashcard.jsx';
@@ -69,9 +68,8 @@ export default function App() {
 
   return (
     <div className="app">
-      <Header />
+      <Header activeTab={activeTab} onChange={setActiveTab} />
       <ConfidenceBar confidence={learning.confidence} />
-      <TabNavigation activeTab={activeTab} onChange={setActiveTab} />
 
       <main className="app-main">
         {activeTab === 'simulador' && (
