@@ -15,7 +15,7 @@
     {
       "errorId": "err-02",
       "joparaHint": "Vx ohóla lape'ỹme (horizontal); vy ogueraha la gravedad (vertical). Ani ene ñemboja'o.",
-      "esHint": "La horizontal usa coseno: vx = v0 · cos(θ). La vertical usa seno: vy = v0 · sen(θ). No las mezcles.",
+      "esHint": "La horizontal usa coseno: vx = v0 * cos(ángulo). La vertical usa seno: v0y = v0 * sen(ángulo). No las mezcles.",
       "followUp": "Identificá primero qué componente te piden y después aplicá la fórmula."
     },
     {
