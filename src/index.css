@@ -498,17 +498,18 @@ h3 {
 .flashcard {
   padding: 0;
   overflow: hidden;
+  perspective: 1000px;
 }
 
 .flashcard-inner {
   position: relative;
   width: 100%;
-  min-height: 230px;
-  transition: transform 350ms ease;
+  min-height: 280px;
+  transition: transform 0.6s ease;
   transform-style: preserve-3d;
 }
 
-.flashcard.is-flipped .flashcard-inner {
+.flashcard-inner.is-flipped {
   transform: rotateY(180deg);
 }
 
@@ -546,10 +547,48 @@ h3 {
   font-weight: 500;
 }
 
+.flashcard-jopara {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--texto-suave);
+}
+
+.flashcard-formula {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border: 1px dashed var(--verde-monte);
+  border-radius: 10px;
+  background: var(--blanco);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--verde-monte);
+}
+
 .flashcard-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.flashcard-actions .btn {
+  font-size: 12px;
+  padding: 8px;
+  white-space: normal;
+}
+
+/* --- Mazo de tarjetas --- */
+.deck-view {
+  display: flex;
+  flex-direction: column;
   gap: 10px;
+}
+
+.deck-counter {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--texto-suave);
+  text-align: center;
 }
 
 /* --- Aula --- */
