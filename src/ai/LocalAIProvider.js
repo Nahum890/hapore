@@ -27,11 +27,20 @@ export default class LocalAIProvider {
         body: JSON.stringify({
           message: context.message ?? 'Ayuda con el ejercicio',
           context: {
-            subtema: context.topic ?? context.expectedConcept ?? null,
+            tipo: context.tipo ?? null,
+            subtema: context.topic ?? context.subtema ?? context.expectedConcept ?? null,
             ejercicio: context.exerciseId ?? context.exercise?.id ?? null,
-            respuestaAlumno: context.studentAnswer ?? null,
-            respuestaCorrecta: context.expectedAnswer ?? null,
-            tipoError: context.errorType ?? context.expectedConcept ?? null,
+            respuestaAlumno:
+              context.studentAnswer ?? context.respuestaAlumno ?? context.respuesta ?? null,
+            respuestaCorrecta:
+              context.expectedAnswer ?? context.respuestaCorrecta ?? null,
+            explicacion: context.explicacion ?? null,
+            esCercana: context.esCercana ?? null,
+            coincidentes: context.coincidentes ?? null,
+            esVerdadero: context.esVerdadero ?? null,
+            marcadoVerdadero: context.marcadoVerdadero ?? null,
+            justificacion: context.justificacion ?? null,
+            tipoError: context.errorType ?? context.tipoError ?? context.expectedConcept ?? null,
             nivelPista: context.hintLevel ?? 0,
           },
         }),
