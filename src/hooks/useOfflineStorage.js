@@ -10,17 +10,7 @@ export function useOfflineStorage() {
   const [state, setState] = useState(loadLearningState);
   const [hintsUsed, setHintsUsed] = useState(0);
 
-  const onExerciseResult = (result) => {
-    const alreadyCounted =
-      Boolean(result?.correct) &&
-      Boolean(result?.exerciseId) &&
-      state.completed.includes(result.exerciseId);
-    if (alreadyCounted) {
-      // El ejercicio ya contó su recompensa: la confianza no vuelve a subir.
-      return state;
-    }
-    setState(recordExerciseResult(result));
-  };
+  const onExerciseResult = (result) => setState(recordExerciseResult(result));
   const onFlashcardConsolidated = (flashcardId) => setState(recordFlashcardConsolidated(flashcardId));
   const onSelectExercise = (exerciseId) => {
     setHintsUsed(0);

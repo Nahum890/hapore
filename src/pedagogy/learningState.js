@@ -12,19 +12,20 @@ export function loadLearningState() {
 }
 
 export function recordExerciseResult({ correct, hintsUsed = 0, exerciseId = null } = {}) {
-  const reward = !correct
+  const completed = readJSON(STORAGE_KEYS.COMPLETED, []);
+  const alreadyCompleted = Boolean(correct && exerciseId && completed.includes(exerciseId));
+  const reward = alreadyCompleted
     ? CONFIDENCE_REWARDS.mistake
-    : hintsUsed > 0
-      ? CONFIDENCE_REWARDS.exerciseWithHints
-      : CONFIDENCE_REWARDS.exerciseClean;
+    : !correct
+      ? CONFIDENCE_REWARDS.mistake
+      : hintsUsed > 0
+        ? CONFIDENCE_REWARDS.exerciseWithHints
+        : CONFIDENCE_REWARDS.exerciseClean;
   increaseConfidence(reward);
   const attempts = readJSON(STORAGE_KEYS.ATTEMPTS, 0) + 1;
   writeJSON(STORAGE_KEYS.ATTEMPTS, attempts);
-  if (correct && exerciseId) {
-    const completed = readJSON(STORAGE_KEYS.COMPLETED, []);
-    if (!completed.includes(exerciseId)) {
-      writeJSON(STORAGE_KEYS.COMPLETED, [...completed, exerciseId]);
-    }
+  if (correct && exerciseId && !alreadyCompleted) {
+    writeJSON(STORAGE_KEYS.COMPLETED, [...completed, exerciseId]);
   }
   return loadLearningState();
 }
