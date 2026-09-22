@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import quizBank from '../ai/quizBank.json';
 import { buildQuiz, matchAnswer, shuffle } from '../ai/quizEngine.js';
-import { aiProvider } from '../ai/AIProvider.js';
+import { createAIProvider } from '../ai/AIProvider.js';
 
 export const QUIZ_MIN_QUANTITY = 5;
 export const QUIZ_MAX_QUANTITY = 50;
@@ -15,7 +15,7 @@ function quizStatement(question) {
 export function useQuiz(flashcards) {
   const providerRef = useRef(null);
   if (!providerRef.current) {
-    providerRef.current = aiProvider;
+    providerRef.current = createAIProvider();
   }
 
   const [step, setStep] = useState('cantidad');
