@@ -320,8 +320,8 @@
     "tema": "Vectores",
     "tipo": "abierta",
     "pregunta": "¿Cómo se calcula la velocidad resultante cuando hay viento?",
-    "respuesta": "Sumando vectorialmente la velocidad del dron y la del viento: V resultante = (V del dron) + (V del viento).",
-    "respuestaJopara": "V resultante = (V del dron) + (V del viento): pe suma vectorial rehe.",
+    "respuesta": "Sumando vectorialmente la velocidad del dron y la del viento: V_resultante = V_dron + V_viento.",
+    "respuestaJopara": "V_resultante = V_dron + V_viento: pe suma vectorial rehe.",
     "claves": [
       "suma",
       "dron",
