@@ -20,7 +20,7 @@ export default function TeacherMode({ attempts, confidence, classConfig, onJoinC
           : 'Generá un código de clase para configurar la sesión, o unite al aula de tu profesor. Todo funciona en modo avión.'}
       </p>
 
-      <div className="teacher-stats">
+      <ul className="teacher-stats">
         <li>Intentos registrados: {attempts}</li>
         <li>XP acumulada: {Number(confidence) || 0}</li>
       </ul>
