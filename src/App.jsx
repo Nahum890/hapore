@@ -112,9 +112,20 @@ function RepasoView({ quiz, onCardConsolidated }) {
           onReviewLater={quiz.reviewLaterCard}
         />
       )}
-      <button type="button" className="btn btn-secondary" onClick={quiz.skipToQuiz}>
-        Ir directo al cuestionario
-      </button>
+      {quiz.seenAll ? (
+        <button type="button" className="btn btn-primary" onClick={quiz.skipToQuiz}>
+          ¡Empezar Cuestionario!
+        </button>
+      ) : (
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={quiz.skipToQuiz}
+          disabled
+        >
+          Empezar Cuestionario ({quiz.seenIds.size}/{quiz.deckSize} vistas)
+        </button>
+      )}
     </section>
   );
 }

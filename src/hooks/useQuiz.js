@@ -68,6 +68,8 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
   const [step, setStep] = useState('cantidad');
   const [quantity, setQuantity] = useState(0);
   const [deck, setDeck] = useState([]);
+  const [deckSize, setDeckSize] = useState(0);
+  const [seenIds, setSeenIds] = useState(() => new Set());
   const [consolidatedIds, setConsolidatedIds] = useState(() => new Set());
   const [questions, setQuestions] = useState([]);
   const [questionIndex, setQuestionIndex] = useState(0);
@@ -140,8 +142,11 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
         Math.max(Number(qty) || QUIZ_MIN_QUANTITY, QUIZ_MIN_QUANTITY),
         maxAvailable,
       );
+      const newDeck = buildRepasoDeck(clamped);
       setQuantity(clamped);
-      setDeck(buildRepasoDeck(clamped));
+      setDeck(newDeck);
+      setDeckSize(newDeck.length);
+      setSeenIds(new Set());
       setStep('repaso');
     },
     [buildRepasoDeck, maxAvailable],
@@ -194,14 +199,17 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
   const currentCard = deck[0] ?? null;
 
   const consolidateCard = useCallback((flashcardId) => {
+    setSeenIds((prev) => new Set(prev).add(flashcardId));
     setConsolidatedIds((prev) => new Set(prev).add(flashcardId));
     setDeck((prev) => prev.filter((card) => card.id !== flashcardId));
   }, []);
 
-  const reviewLaterCard = useCallback(() => {
+  const reviewLaterCard = useCallback((flashcardId) => {
+    setSeenIds((prev) => new Set(prev).add(flashcardId));
     setDeck((prev) => {
       if (prev.length <= 1) return prev;
-      const [current, ...rest] = prev;
+      const current = prev.find((card) => card.id === flashcardId) ?? prev[0];
+      const rest = prev.filter((card) => card.id !== current.id);
       return [...rest, current];
     });
   }, []);
@@ -337,6 +345,8 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
     setStep('cantidad');
     setQuantity(0);
     setDeck([]);
+    setDeckSize(0);
+    setSeenIds(new Set());
     setConsolidatedIds(new Set());
     setQuestions([]);
     setQuestionIndex(0);
@@ -350,6 +360,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
   }, []);
 
   const charlaLeft = Math.max(0, FREE_CHAT_EXCHANGES - charlaUsed);
+  const seenAll = deckSize > 0 && seenIds.size >= deckSize;
 
   return {
     step,
@@ -357,6 +368,8 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
     deck,
     currentCard,
     consolidatedIds,
+    seenIds,
+    seenAll,
     questions,
     questionIndex,
     currentQuestion,
