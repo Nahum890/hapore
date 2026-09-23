@@ -26,6 +26,10 @@ export const SYSTEM_PROMPT = [
   'Estructura de pistas: Nivel 1 observación visual de la pantalla; Nivel 2 relación conceptual sin fórmulas; Nivel 3 fórmula aplicable en texto claro sin sustituir valores; Nivel 4 paso intermedio o despeje numérico; Nivel 5 sustitución directa y acción concreta.',
   'Nunca valides resultados numéricos: la corrección la calcula el motor de Física de la app.',
   'Si el estudiante se equivoca, señalá el error frecuente asociado y proponé un paso concreto.',
+  'En el cuestionario teórico: interpretá las respuestas del alumno de todas las maneras posibles (sinónimos, otras redacciones).',
+  'Si en el cuestionario la respuesta se acerca a la correcta, mostrale la respuesta real y explicale por qué se acercó.',
+  'Si en el cuestionario el alumno se equivoca, alentalo con palabras de ánimo (por ejemplo: "No pasa nada, fue un buen intento") y dale la respuesta correcta en jopara.',
+  'En las preguntas de verdadero o falso: si marca verdadero y es correcto, confirmale y explicale el porqué; si marca falso, evaluá su justificación y explicale el porqué.',
   'Mantené las respuestas cortas para pantalla de celular.',
 ].join(' ');
 
@@ -76,6 +80,51 @@ export function buildDiagnosticPrompt(context = {}) {
     'Redactá una guía pedagógica progresiva en jopara, corta para pantalla de celular.',
     'Nunca uses LaTeX, símbolos de dólar, barras invertidas, llaves ni guiones bajos: solo texto plano legible.',
     'No reveles el resultado final, no repitas pistas anteriores y no valides números.',
+  );
+  return parts.join(' ');
+}
+
+/**
+ * Prompt para la corrección del cuestionario teórico (verdadero/falso y
+ * preguntas abiertas). A diferencia del diagnóstico de física, acá SÍ se
+ * revela la respuesta real: el objetivo es que el alumno aprenda del chat.
+ */
+export function buildQuizEvaluationPrompt(context = {}) {
+  const {
+    message,
+    subtema,
+    pregunta,
+    respuestaAlumno,
+    respuestaCorrecta,
+    explicacion,
+    esCercana = false,
+    coincidentes = [],
+    esVerdadero,
+    marcadoVerdadero,
+    justificacion,
+  } = context;
+  const parts = [];
+  parts.push(`Corrección de cuestionario teórico. Subtema: ${subtema ?? 'desconocido'}.`);
+  if (pregunta) parts.push(`Pregunta: ${pregunta}.`);
+  if (typeof esVerdadero === 'boolean') {
+    parts.push(
+      `La afirmación es ${esVerdadero ? 'verdadera' : 'falsa'} y el alumno marcó: ${marcadoVerdadero ? 'verdadero' : 'falso'}.`,
+    );
+  }
+  if (respuestaAlumno) parts.push(`Respuesta del alumno: ${respuestaAlumno}.`);
+  if (justificacion) parts.push(`Justificación del alumno: ${justificacion}.`);
+  if (respuestaCorrecta) parts.push(`Respuesta correcta: ${respuestaCorrecta}.`);
+  if (explicacion) parts.push(`Explicación real: ${explicacion}.`);
+  if (esCercana && coincidentes.length) {
+    parts.push(`El alumno acertó en estas ideas: ${coincidentes.join(', ')}.`);
+  }
+  parts.push(
+    'Interpretá la respuesta del alumno de todas las maneras posibles (sinónimos, otras redacciones, ideas equivalentes).',
+    'Si su respuesta se acerca a la real, confirmale y explicale por qué se acercó.',
+    'Si se equivocó, alentalo con palabras de ánimo (por ejemplo: "No pasa nada, fue un buen intento") y dale la respuesta correcta con su explicación en jopara.',
+    'Respondé en jopara, corto para pantalla de celular, en texto plano legible.',
+    'Nunca uses LaTeX, símbolos de dólar, barras invertidas, llaves ni guiones bajos.',
+    'Nunca valides resultados numéricos de problemas: esto es teoría del cuestionario.',
   );
   return parts.join(' ');
 }
