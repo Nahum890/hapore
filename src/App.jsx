@@ -86,7 +86,7 @@ export default function App() {
   return (
     <div className="app">
       <Header activeTab={activeTab} onChange={setActiveTab} />
-      <ConfidenceBar confidence={learning.confidence} />
+      <ConfidenceBar xp={learning.xp} level={learning.level} />
 
       <main className="app-main">
         {activeTab === 'simulador' && (
