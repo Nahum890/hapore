@@ -114,167 +114,236 @@ function RepasoView({ quiz, onCardConsolidated }) {
   );
 }
 
-function QuizView({ quiz }) {
-  const question = quiz.currentQuestion;
-  const score = quiz.chat.filter((entry) => entry.tutor?.correct).length;
+function ChatsView({ quiz }) {
   const logRef = useRef(null);
 
   useEffect(() => {
     logRef.current?.scrollTo?.({ top: logRef.current.scrollHeight, behavior: 'smooth' });
-  }, [quiz.chat.length, quiz.answered]);
+  }, [quiz.chat.length, quiz.charlaLog.length, quiz.answered]);
 
-  if (!question) return null;
-
-  const isVf = question.tipo === 'vf';
-  const openInputStyle = {
-    width: '100%',
-    minHeight: 'var(--touch-min)',
-    border: '1px solid var(--borde)',
-    borderRadius: '10px',
-    padding: '10px 12px',
-    fontSize: '16px',
-    fontFamily: 'inherit',
-    background: 'var(--blanco)',
-    color: 'var(--gris-carbon)',
-    resize: 'vertical',
-  };
-  const tutorBubbleStyle = (correct) => ({
-    margin: '6px 0 0',
-    padding: '10px 12px',
-    borderRadius: '10px',
-    fontSize: '14px',
-    background: correct ? '#E7F3EC' : '#FBEAE4',
-    color: correct ? '#14532D' : '#7C2D12',
-    border: `1px solid ${correct ? '#B5D9C4' : '#EFC4B0'}`,
-  });
+  const score = quiz.chat.filter((entry) => entry.tutor?.correct).length;
 
   return (
-    <section className="card" aria-label="Cuestionario con el tutor">
+    <section className="card chats-view" aria-label="Chats con el tutor">
       <div className="quiz-head">
-        <h2>Cuestionario con el tutor</h2>
-        <span className="chip">
-          Pregunta {quiz.questionIndex + 1} de {quiz.questions.length}
-        </span>
-        <span className="chip chip-consolidated">Acertadas: {score}</span>
+        <h2>Chats con el tutor</h2>
+        {quiz.step === 'quiz' && (
+          <>
+            <span className="chip">
+              Pregunta {quiz.questionIndex + 1} de {quiz.questions.length}
+            </span>
+            <span className="chip chip-consolidated">Acertadas: {score}</span>
+          </>
+        )}
+        {quiz.step === 'charla' && (
+          <span className="chip">Preguntas libres disponibles: {quiz.charlaLeft}/8</span>
+        )}
       </div>
 
-      <div className="quiz-chat" ref={logRef}>
-        {quiz.chat.map((entry, position) => (
-          <div key={`${quiz.questionIndex}-${position}`} className="quiz-entry">
-            <p className="quiz-statement">{entry.statement}</p>
-            <p className="quiz-student">Vos: {entry.studentText}</p>
-            <div style={tutorBubbleStyle(entry.tutor?.correct)} role="status">
-              {entry.tutor?.message}
+      <div className="chats-scroll" ref={logRef}>
+        {quiz.step === 'cantidad' && (
+          <div className="chat-bubble chat-tutor-bubble">
+            ¡Hola! Completá el repaso de las flashcards para empezar el cuestionario acá.
+          </div>
+        )}
+        {quiz.step === 'repaso' && (
+          <div className="chat-bubble chat-tutor-bubble">
+            ¡Hola! Seguí repasando las tarjetas: cuando termines, el cuestionario empieza acá.
+          </div>
+        )}
+
+        {quiz.chat.map((entry, position) =>
+          entry.closing ? (
+            <div key={`closing-${position}`} className="chat-bubble chat-tutor-bubble" role="status">
+              {entry.message}
             </div>
+          ) : (
+            <div key={`quiz-${position}`} className="chat-entry">
+              <div className="chat-bubble chat-tutor-bubble">{entry.statement}</div>
+              <div className="chat-bubble chat-alumno-bubble">Vos: {entry.studentText}</div>
+              <div
+                className={`chat-bubble ${entry.tutor?.correct ? 'chat-correct' : 'chat-incorrect'}`}
+                role="status"
+              >
+                {entry.tutor?.message}
+              </div>
+            </div>
+          ),
+        )}
+
+        {quiz.charlaLog.map((message, position) => (
+          <div
+            key={`charla-${position}`}
+            className={`chat-bubble ${
+              message.role === 'alumno' ? 'chat-alumno-bubble' : 'chat-tutor-bubble'
+            }`}
+          >
+            {message.text}
           </div>
         ))}
-        <div className="quiz-entry">
-          <p className="quiz-statement">{isVf ? question.enunciado : question.pregunta}</p>
-          {isVf && <span className="chip">Verdadero o falso</span>}
-        </div>
+
+        {quiz.step === 'quiz' && quiz.currentQuestion && (
+          <div className="chat-entry">
+            <div className="chat-bubble chat-tutor-bubble">
+              {quiz.currentQuestion.tipo === 'vf'
+                ? quiz.currentQuestion.enunciado
+                : quiz.currentQuestion.pregunta}
+              {quiz.currentQuestion.tipo === 'vf' && <span className="chip">Verdadero o falso</span>}
+            </div>
+          </div>
+        )}
       </div>
 
-      {quiz.answered ? (
-        <button type="button" className="btn btn-primary quiz-send" onClick={quiz.nextQuestion}>
-          {quiz.questionIndex + 1 >= quiz.questions.length ? 'Ver resultado' : 'Siguiente pregunta'}
-        </button>
-      ) : isVf ? (
-        <>
-          <div className="quiz-actions">
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={quiz.markTrue}
-              disabled={quiz.busy}
-            >
-              Verdadero
+      {quiz.step === 'quiz' && quiz.currentQuestion && (
+        <div className="chats-input-area">
+          {quiz.answered ? (
+            <button type="button" className="btn btn-primary quiz-send" onClick={quiz.nextQuestion}>
+              {quiz.questionIndex + 1 >= quiz.questions.length ? 'Cerrar y charlar' : 'Siguiente pregunta'}
             </button>
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={quiz.markFalse}
-              disabled={quiz.busy}
-            >
-              Falso
-            </button>
-          </div>
-          {quiz.awaitingJustification && (
-            <div className="quiz-justification">
-              <p className="quiz-justification-label">
-                Justificá por qué marcaste que es falso:
-              </p>
-              <textarea
-                className="quiz-input"
-                rows={3}
-                placeholder="Escribí tu justificación..."
-                value={quiz.justificationText}
-                onChange={(event) => quiz.setJustificationText(event.target.value)}
-                disabled={quiz.busy}
-              />
+          ) : quiz.currentQuestion.tipo === 'vf' ? (
+            <>
               <div className="quiz-actions">
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={quiz.sendJustification}
-                  disabled={quiz.busy || !quiz.justificationText.trim()}
+                  onClick={quiz.markTrue}
+                  disabled={quiz.busy}
                 >
-                  Enviar justificación
+                  Verdadero
                 </button>
                 <button
                   type="button"
                   className="btn btn-secondary"
-                  onClick={quiz.cancelJustification}
+                  onClick={quiz.markFalse}
                   disabled={quiz.busy}
                 >
-                  Cancelar
+                  Falso
                 </button>
               </div>
-            </div>
+              {quiz.awaitingJustification && (
+                <div className="quiz-justification">
+                  <p className="quiz-justification-label">
+                    Justificá por qué marcaste que es falso:
+                  </p>
+                  <textarea
+                    className="quiz-input"
+                    rows={2}
+                    placeholder="Escribí tu justificación..."
+                    value={quiz.justificationText}
+                    onChange={(event) => quiz.setJustificationText(event.target.value)}
+                    disabled={quiz.busy}
+                  />
+                  <div className="quiz-actions">
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={quiz.sendJustification}
+                      disabled={quiz.busy || !quiz.justificationText.trim()}
+                    >
+                      Enviar
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={quiz.cancelJustification}
+                      disabled={quiz.busy}
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <form
+              className="quiz-justification"
+              onSubmit={(event) => {
+                event.preventDefault();
+                quiz.answerOpen(quiz.justificationText.trim());
+              }}
+            >
+              <input
+                className="quiz-input"
+                type="text"
+                inputMode="text"
+                autoComplete="off"
+                placeholder="Escribí tu respuesta..."
+                value={quiz.justificationText}
+                onChange={(event) => quiz.setJustificationText(event.target.value)}
+                disabled={quiz.busy}
+              />
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={quiz.busy || !quiz.justificationText.trim()}
+              >
+                Enviar
+              </button>
+            </form>
           )}
-        </>
-      ) : (
-        <form
-          className="quiz-justification"
-          onSubmit={(event) => {
-            event.preventDefault();
-            quiz.answerOpen(quiz.justificationText.trim());
-          }}
-        >
-          <input
-            className="quiz-input"
-            type="text"
-            inputMode="text"
-            autoComplete="off"
-            placeholder="Escribí tu respuesta..."
-            value={quiz.justificationText}
-            onChange={(event) => quiz.setJustificationText(event.target.value)}
-            disabled={quiz.busy}
-          />
-          <button
-            type="submit"
-            className="btn btn-primary quiz-send"
-            disabled={quiz.busy || !quiz.justificationText.trim()}
-          >
-            Responder
-          </button>
-        </form>
+        </div>
       )}
-    </section>
-  );
-}
 
-function QuizResultView({ quiz }) {
-  const score = quiz.chat.filter((entry) => entry.tutor?.correct).length;
-  return (
-    <section className="card" aria-label="Resultado del repaso">
-      <h2>¡Terminaste el repaso!</h2>
-      <p className="deck-selector-note">
-        Acertadas: {score} de {quiz.questions.length}. El tutor te guio con explicaciones y
-        alientos en jopara.
-      </p>
-      <button type="button" className="btn btn-primary" onClick={quiz.restart}>
-        Volver a empezar
-      </button>
+      {quiz.step === 'charla' && (
+        <div className="chats-input-area">
+          <form
+            className="quiz-justification"
+            onSubmit={(event) => {
+              event.preventDefault();
+              quiz.askFreeQuestion();
+            }}
+          >
+            <input
+              className="quiz-input"
+              type="text"
+              inputMode="text"
+              autoComplete="off"
+              placeholder={
+                quiz.charlaLeft > 0 ? 'Preguntame lo que quieras...' : 'Sin preguntas libres disponibles'
+              }
+              value={quiz.charlaText}
+              onChange={(event) => quiz.setCharlaText(event.target.value)}
+              disabled={quiz.busy || quiz.charlaLeft <= 0}
+            />
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={quiz.busy || quiz.charlaLeft <= 0 || !quiz.charlaText.trim()}
+            >
+              Enviar
+            </button>
+          </form>
+          <button type="button" className="btn btn-secondary quiz-send" onClick={quiz.finish}>
+            Terminar y ver resultado
+          </button>
+        </div>
+      )}
+
+      {quiz.step === 'fin' && (
+        <div className="chats-input-area">
+          <p className="deck-selector-note">
+            Acertadas: {score} de {quiz.questions.length}. El tutor te guio con explicaciones y
+            alientos en jopara.
+          </p>
+          <button type="button" className="btn btn-primary quiz-send" onClick={quiz.restart}>
+            Volver a empezar
+          </button>
+        </div>
+      )}
+
+      {quiz.history.length > 0 && (
+        <details className="chat-history">
+          <summary>Historial de conversaciones ({quiz.history.length})</summary>
+          <ul className="chat-history-list">
+            {[...quiz.history].reverse().map((session) => (
+              <li key={session.id} className="chat-history-item">
+                <strong>{session.fecha}</strong> · {session.tema} · {session.mensajes?.length ?? 0}{' '}
+                mensajes
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
     </section>
   );
 }
@@ -288,7 +357,10 @@ export default function App() {
     learning.currentExercise,
     learning.onSelectExercise,
   );
-  const quiz = useQuiz(flashcardsData);
+  const quiz = useQuiz(flashcardsData, {
+    onMoveToChat: () => setActiveTab('chats'),
+    onQuizAnswer: learning.onQuizAnswer,
+  });
 
   const handleCardConsolidated = (flashcardId) => {
     learning.onFlashcardConsolidated(flashcardId);
@@ -330,10 +402,10 @@ export default function App() {
             {quiz.step === 'repaso' && (
               <RepasoView quiz={quiz} onCardConsolidated={handleCardConsolidated} />
             )}
-            {quiz.step === 'quiz' && <QuizView quiz={quiz} />}
-            {quiz.step === 'fin' && <QuizResultView quiz={quiz} />}
           </>
         )}
+
+        {activeTab === 'chats' && <ChatsView quiz={quiz} />}
 
         {activeTab === 'aula' && (
           <AulaView attempts={learning.attempts} confidence={learning.confidence} />
