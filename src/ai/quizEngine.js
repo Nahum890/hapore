@@ -71,6 +71,44 @@ export function buildQuiz(bank, quantity) {
   return mixed.slice(0, clamped);
 }
 
+/**
+ * Encuentra la mejor coincidencia conceptual del banco para la pregunta
+ * del estudiante (soporte offline de la charla libre): matcheo tolerante
+ * por palabras clave y raíces de palabras.
+ */
+export function findBestMatch(question, bank) {
+  const userText = normalizeText(question);
+  if (!userText) return null;
+  const userWords = new Set(userText.split(' ').filter((word) => word.length > 3));
+  let best = null;
+  let bestScore = 0;
+  for (const entry of bank ?? []) {
+    const haystack = normalizeText(
+      [entry?.pregunta, entry?.enunciado, entry?.respuesta, entry?.explicacion, entry?.tema]
+        .filter(Boolean)
+        .join(' '),
+    );
+    const entryWords = new Set(haystack.split(' ').filter((word) => word.length > 3));
+    let hits = 0;
+    for (const word of userWords) {
+      if (entryWords.has(word)) {
+        hits += 1;
+      } else if (word.length >= 6 && haystack.includes(word.slice(0, 5))) {
+        hits += 1;
+      }
+    }
+    const score = userWords.size ? hits / userWords.size : 0;
+    if (score > bestScore) {
+      bestScore = score;
+      best = entry;
+    }
+  }
+  if (best && bestScore >= 0.25) {
+    return { entry: best, score: bestScore };
+  }
+  return null;
+}
+
 const QUIZ_ENCOURAGEMENTS = [
   '¡Ndaipóri problema! Fue un buen intento.',
   '¡Ani kaneo! Casi lo tenés, seguí así.',

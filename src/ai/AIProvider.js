@@ -1,6 +1,7 @@
 import RuleTutorProvider from './RuleTutorProvider.js';
 import LocalAIProvider from './LocalAIProvider.js';
-import { buildQuizFeedback } from './quizEngine.js';
+import { buildQuizFeedback, findBestMatch } from './quizEngine.js';
+import quizBank from './quizBank.json';
 
 /**
  * Interfaz conceptual AIProvider.
@@ -117,6 +118,40 @@ class AIProvider {
     }
 
     return this.localAI.respond(quizContext);
+  }
+
+  /**
+   * Ventana de Charla Libre: el estudiante pregunta con sus palabras.
+   * - Sin red: banco de respuestas de soporte conceptual enriquecido
+   *   (matcheo tolerante contra el banco de preguntas local).
+   * - Con red: respuesta natural del modelo (con fallback automático al banco).
+   */
+  async answerFreeQuestion(context = {}) {
+    const question = context.message ?? '';
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      const match = findBestMatch(question, quizBank);
+      if (match) {
+        const { entry } = match;
+        const body = entry.respuesta ?? entry.explicacion ?? '';
+        const jopara = entry.respuestaJopara ?? entry.explicacionJopara ?? '';
+        return {
+          message: `${entry.pregunta ?? entry.enunciado ?? ''} ${body} ${jopara}`.trim(),
+          source: 'RuleTutorProvider (Offline)',
+          available: true,
+        };
+      }
+      return {
+        message:
+          'Estoy en modo offline ahora: probá preguntarme sobre la trayectoria, pe gravedad, las flashcards o la Ley de Hooke.',
+        source: 'RuleTutorProvider (Offline)',
+        available: true,
+      };
+    }
+    return this.localAI.respond({
+      tipo: 'charla_libre',
+      message: question,
+      subtema: context.subtema,
+    });
   }
 }
 

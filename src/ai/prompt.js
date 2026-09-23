@@ -85,6 +85,27 @@ export function buildDiagnosticPrompt(context = {}) {
 }
 
 /**
+ * Prompt para la Charla Libre: el estudiante pregunta con sus palabras y el
+ * tutor responde con explicaciones claras en jopara (sin copular ni
+ * preposiciones foráneas, según los módulos lingüísticos).
+ */
+export function buildFreeChatPrompt(context = {}) {
+  const { message, subtema } = context;
+  const parts = [];
+  parts.push('Charla libre con el estudiante sobre el tema de la clase.');
+  if (subtema) parts.push(`Subtema actual: ${subtema}.`);
+  if (message) parts.push(`Pregunta del estudiante: ${message}.`);
+  parts.push(
+    'Respondé con una explicación clara, amable y pedagógica en jopara natural.',
+    'Mantené los términos científicos en español (pe trayectoria, pe gravedad, la velocidad inicial).',
+    'Nunca uses LaTeX, símbolos de dólar, barras invertidas, llaves ni guiones bajos de énfasis: solo texto plano legible.',
+    'Si la pregunta va más allá del tema, respondé brevemente y volvé a invitar a practicar Física.',
+    'Mantené la respuesta corta para pantalla de celular.',
+  );
+  return parts.join(' ');
+}
+
+/**
  * Prompt para la corrección del cuestionario teórico (verdadero/falso y
  * preguntas abiertas). A diferencia del diagnóstico de física, acá SÍ se
  * revela la respuesta real: el objetivo es que el alumno aprenda del chat.

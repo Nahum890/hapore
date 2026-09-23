@@ -1,7 +1,7 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
-import { SYSTEM_PROMPT, buildDiagnosticPrompt, buildQuizEvaluationPrompt } from './src/ai/prompt.js';
+import { SYSTEM_PROMPT, buildDiagnosticPrompt, buildQuizEvaluationPrompt, buildFreeChatPrompt } from './src/ai/prompt.js';
 import { sanitizeMarkup } from './src/utils/validation.js';
 
 // Modelo primario configurable por .env (GEMINI_MODEL). Si falla
@@ -92,10 +92,13 @@ function apiChatPlugin(apiKey, primaryModel) {
         return;
       }
       try {
-        const isQuizEvaluation = body.context?.tipo === 'evaluacion_cuestionario';
-        const prompt = isQuizEvaluation
-          ? buildQuizEvaluationPrompt(body.context ?? {})
-          : buildDiagnosticPrompt(body.context ?? {});
+        const context = body.context ?? {};
+        const promptByTipo = {
+          evaluacion_cuestionario: buildQuizEvaluationPrompt,
+          charla_libre: buildFreeChatPrompt,
+        };
+        const buildPrompt = promptByTipo[context.tipo] ?? buildDiagnosticPrompt;
+        const prompt = buildPrompt(context);
         const text = await callGemini(prompt);
         res.setHeader('Content-Type', 'application/json');
         res.end(JSON.stringify({ text }));

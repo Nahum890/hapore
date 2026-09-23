@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 const MENU_ITEMS = [
   { id: 'simulador', label: 'Misión / Simulador 2D' },
   { id: 'tarjetas', label: 'Fichas de Repaso (Flashcards)' },
-  { id: 'aula', label: 'Vista del Docente / Proyector' },
+  { id: 'chats', label: 'Chats e Historial' },
+  { id: 'aula', label: 'Vista del Docente / Modo Aula' },
 ];
 
 export default function MobileMenu({ activeTab, onChange }) {
