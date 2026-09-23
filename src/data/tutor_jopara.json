@@ -225,5 +225,11 @@
       "esHint": "La altura máxima es lo más alto que llega (vertical); el alcance es lo más lejos que cae (horizontal). Son cálculos distintos.",
       "followUp": "Releé qué pide el ejercicio: ¿altura o alcance?"
     }
-  ]
+  ],
+  "sectionGreetings": {
+    "simulador": "¡Mba'éichapa! Acá podés experimentar el vuelo del dron en Alto Paraná. Cambiá el ángulo y la velocidad para ver la trayectoria exacta.",
+    "tarjetas": "¡Hola! Estas fichas te ayudan a memorizar la teoría clave antes del cuestionario. Dale la vuelta a cada tarjeta para comprobar lo que sabés.",
+    "chats": "Bienvenido al espacio de diálogo. Respondé con tus palabras, acá aprendemos sin miedo a equivocarnos.",
+    "aula": "Espacio de clase: conectate con el código de tu profesor o proyectá los parámetros en la pizarra."
+  }
 }

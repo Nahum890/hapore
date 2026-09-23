@@ -362,6 +362,10 @@ export default function App() {
     onQuizAnswer: learning.onQuizAnswer,
   });
 
+  useEffect(() => {
+    ask({ type: 'section', section: activeTab });
+  }, [activeTab, ask]);
+
   const handleCardConsolidated = (flashcardId) => {
     learning.onFlashcardConsolidated(flashcardId);
     quiz.consolidateCard(flashcardId);

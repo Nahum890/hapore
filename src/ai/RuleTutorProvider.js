@@ -34,12 +34,26 @@ export default class RuleTutorProvider {
   async respond(context = {}) {
     const { type = 'hint' } = context;
     if (type === 'welcome') return this.#welcome();
+    if (type === 'section') return this.#sectionGreeting(context);
     if (type === 'mistake') return this.#mistakeResponse(context);
     return this.#hintResponse(context);
   }
 
   #welcome() {
     const greeting = this.data.greetings?.[0] ?? '¡Mba\'éichapa!';
+    return {
+      message: greeting,
+      source: this.id,
+      available: true,
+    };
+  }
+
+  #sectionGreeting(context) {
+    const greetings = this.data.sectionGreetings ?? {};
+    const greeting =
+      greetings[context.section] ??
+      this.data.greetings?.[0] ??
+      '¡Mba\'éichapa!';
     return {
       message: greeting,
       source: this.id,
