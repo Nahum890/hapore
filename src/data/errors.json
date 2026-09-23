@@ -10,7 +10,7 @@
     "id": "err-02",
     "name": "Confundir componentes horizontal y vertical",
     "description": "Usar seno para vx o coseno para vy (o mezclarlas al interpretar el resultado).",
-    "example": "vx = v0 · cos(θ) y vy = v0 · sen(θ): el coseno va con la horizontal.",
+    "example": "vx = v0 * cos(ángulo) y v0y = v0 * sen(ángulo): el coseno va con la horizontal.",
     "expectedConcept": "componente-horizontal"
   },
   {

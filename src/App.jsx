@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import Header from './components/Header.jsx';
 import ConfidenceBar from './components/ConfidenceBar.jsx';
-import TabNavigation from './components/TabNavigation.jsx';
 import TutorCard from './components/TutorCard.jsx';
 import ExerciseCard from './components/ExerciseCard.jsx';
 import Flashcard from './components/Flashcard.jsx';
@@ -61,17 +60,33 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('simulador');
   const learning = useOfflineStorage();
   const { tutor, ask } = useTutor();
-  const { mission, currentExercise, next, prev } = useMission(
+  const { mission, currentExercise, index, next, prev } = useMission(
     exercisesData,
     learning.currentExercise,
     learning.onSelectExercise,
   );
 
+  const [deckOrder, setDeckOrder] = useState(() => flashcardsData.map((card) => card.id));
+  const [deckIndex, setDeckIndex] = useState(0);
+  const currentCard =
+    flashcardsData.find((card) => card.id === deckOrder[deckIndex]) ?? flashcardsData[0];
+
+  const handleFlashcardConsolidated = (flashcardId) => {
+    learning.onFlashcardConsolidated(flashcardId);
+    setDeckIndex((prev) => Math.min(prev + 1, deckOrder.length - 1));
+  };
+
+  const handleFlashcardReviewLater = (flashcardId) => {
+    setDeckOrder((prev) => {
+      const rest = prev.filter((id) => id !== flashcardId);
+      return rest.length === prev.length ? prev : [...rest, flashcardId];
+    });
+  };
+
   return (
     <div className="app">
-      <Header />
+      <Header activeTab={activeTab} onChange={setActiveTab} />
       <ConfidenceBar confidence={learning.confidence} />
-      <TabNavigation activeTab={activeTab} onChange={setActiveTab} />
 
       <main className="app-main">
         {activeTab === 'simulador' && (
@@ -87,7 +102,7 @@ export default function App() {
               />
             )}
             <div className="mission-nav">
-              <button type="button" className="btn btn-secondary" onClick={prev}>
+              <button type="button" className="btn btn-secondary" onClick={prev} disabled={index === 0}>
                 Anterior
               </button>
               <button type="button" className="btn btn-secondary" onClick={next}>
@@ -97,17 +112,19 @@ export default function App() {
           </>
         )}
 
-        {activeTab === 'tarjetas' && (
-          <div className="card-list">
-            {flashcardsData.map((flashcard) => (
-              <Flashcard
-                key={flashcard.id}
-                flashcard={flashcard}
-                consolidated={Boolean(learning.flashcardState[flashcard.id]?.consolidated)}
-                onConsolidate={learning.onFlashcardConsolidated}
-              />
-            ))}
-          </div>
+        {activeTab === 'tarjetas' && currentCard && (
+          <section className="deck-view" aria-label="Mazo de tarjetas de repaso">
+            <p className="deck-counter">
+              Tarjeta {deckIndex + 1} de {deckOrder.length}
+            </p>
+            <Flashcard
+              key={currentCard.id}
+              flashcard={currentCard}
+              consolidated={Boolean(learning.flashcardState[currentCard.id]?.consolidated)}
+              onConsolidate={handleFlashcardConsolidated}
+              onReviewLater={handleFlashcardReviewLater}
+            />
+          </section>
         )}
 
         {activeTab === 'aula' && (

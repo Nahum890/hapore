@@ -1,11 +1,12 @@
 import tutorData from '../data/tutor_jopara.json';
 import errorsData from '../data/errors.json';
-import hintLevelsData from '../data/hint_levels.json';
+
+export const HINT_LEVELS_MAX = 5;
 
 /**
  * Tutor 100% offline basado en reglas.
  * Usa JSON local (saludos, pistas jopara, errores frecuentes, pistas
- * progresivas nivel 1-4) para responder sin conexión y sin ningún modelo de IA.
+ * progresivas nivel 1-5) para responder sin conexión y sin ningún modelo de IA.
  *
  * Regla técnica: este módulo NO calcula trayectoria, alcance ni tiempo de
  * vuelo; recibe el diagnóstico cerrado del motor físico y solo interpreta.
@@ -15,7 +16,7 @@ export default class RuleTutorProvider {
     this.id = 'rule-tutor';
     this.data = options.data ?? tutorData;
     this.errors = options.errors ?? errorsData;
-    this.levels = options.levels ?? hintLevelsData;
+    this.levels = options.levels ?? tutorData.hintLevels;
   }
 
   async respond(context = {}) {
@@ -46,7 +47,7 @@ export default class RuleTutorProvider {
   }
 
   #levelResponse(context) {
-    const clampedLevel = Math.min(Math.max(Number(context.hintLevel) || 1, 1), 4);
+    const clampedLevel = Math.min(Math.max(Number(context.hintLevel) || 1, 1), HINT_LEVELS_MAX);
     const key = `nivel_${clampedLevel}`;
     const byErrorType = this.levels?.byErrorType ?? {};
     const byConcept = this.levels?.byConcept ?? {};

@@ -2,25 +2,33 @@
   {
     "id": "fc-01",
     "topic": "Movimiento Parabólico",
-    "front": "¿Qué es el Movimiento Parabólico?",
-    "back": "La combinación de un movimiento horizontal (velocidad constante) y uno vertical (acelerado por la gravedad). Su trayectoria es una parábola."
+    "frente_es": "¿Qué es el Movimiento Parabólico?",
+    "frente_jopara": "¿Mba'épa pe Movimiento Parabólico?",
+    "dorso_concepto": "La combinación de un movimiento horizontal (velocidad constante) y uno vertical (acelerado por la gravedad). Su trayectoria es una parábola.",
+    "formula": "x = v0x * t ; y = v0y * t - 0,5 * g * t²"
   },
   {
     "id": "fc-02",
     "topic": "Movimiento Parabólico",
-    "front": "¿La componente horizontal (vx) cambia durante el vuelo?",
-    "back": "No. Si ignoramos el aire, vx permanece constante; solo cambia vy por efecto de la gravedad."
+    "frente_es": "¿La componente horizontal (vx) cambia durante el vuelo?",
+    "frente_jopara": "¿Oho pa'e la velocidad horizontal (vx) pe vuelo pukukuepe?",
+    "dorso_concepto": "No. Si ignoramos el aire, vx permanece constante; solo cambia la velocidad vertical por efecto de la gravedad.",
+    "formula": "vx = v0 * cos(ángulo)"
   },
   {
     "id": "fc-03",
     "topic": "Movimiento Parabólico",
-    "front": "¿En qué punto la velocidad vertical (vy) vale cero?",
-    "back": "En la altura máxima. Ahí vy = 0, pero vx sigue igual: el proyectil sigue avanzando."
+    "frente_es": "¿En qué punto la velocidad vertical vale cero?",
+    "frente_jopara": "¿Moõ pe velocidad vertical opytu'pa cero?",
+    "dorso_concepto": "En la altura máxima. Ahí la velocidad vertical vale cero, pero la horizontal sigue igual: el proyectil sigue avanzando.",
+    "formula": "v0y = v0 * sen(ángulo) ; en la altura máxima, la velocidad vertical = 0"
   },
   {
     "id": "fc-04",
     "topic": "Movimiento Parabólico",
-    "front": "¿Qué fórmula da la altura máxima?",
-    "back": "h = v0² · sen²(θ) / (2g). Con v0 = 19,6 m/s y θ = 45°, h = 9,8 m."
+    "frente_es": "¿Qué fórmula da la altura máxima?",
+    "frente_jopara": "¿Mba'e fórmula ome pe altura máxima?",
+    "dorso_concepto": "La altura máxima depende de la componente vertical y de la gravedad. Con v0 = 19,6 m/s y ángulo = 45°, la altura máxima es 9,8 m.",
+    "formula": "h = (v0² * sen²(ángulo)) / (2 * g)"
   }
 ]

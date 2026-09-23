@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { SYSTEM_PROMPT, buildDiagnosticPrompt } from './src/ai/prompt.js';
+import { sanitizeMarkup } from './src/utils/validation.js';
 
 // Modelo primario configurable por .env (GEMINI_MODEL). Si falla
 // (deprecación o alta demanda), se conmuta automáticamente al alias
@@ -47,7 +48,7 @@ function apiChatPlugin(apiKey, primaryModel) {
     if (!text) {
       throw new Error('Respuesta de IA vacía');
     }
-    return text;
+    return sanitizeMarkup(text);
   }
 
   async function callGemini(prompt) {

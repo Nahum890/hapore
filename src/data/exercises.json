@@ -10,8 +10,8 @@
     "unit": "m/s",
     "hints": [
       "La componente horizontal no depende de la gravedad y no cambia durante el vuelo.",
-      "La componente horizontal se calcula con el coseno: vx = v0 · cos(θ).",
-      "vx = 20 · cos(30°) ≈ 20 · 0,866. Hacé la cuenta y redondeá a 2 decimales."
+      "La componente horizontal se calcula con el coseno: vx = v0 * cos(ángulo).",
+      "vx = 20 * cos(30°) = 20 * 0,866. Hacé la cuenta y redondeá a 2 decimales."
     ]
   },
   {
@@ -25,8 +25,8 @@
     "unit": "m/s",
     "hints": [
       "En el instante inicial la componente vertical solo depende del ángulo de lanzamiento.",
-      "La componente vertical se calcula con el seno: vy = v0 · sen(θ).",
-      "vy = 20 · sen(30°) = 20 · 0,5."
+      "La componente vertical se calcula con el seno: v0y = v0 * sen(ángulo).",
+      "v0y = 20 * sen(30°) = 20 * 0,5."
     ]
   },
   {
@@ -40,8 +40,8 @@
     "unit": "m",
     "hints": [
       "En la altura máxima la velocidad vertical vale cero.",
-      "Altura máxima: h = v0² · sen²(θ) / (2g).",
-      "h = (19,6² · sen²(45°)) / (2 · 9,8) = (384,16 · 0,5) / 19,6."
+      "Altura máxima: h = (v0² * sen²(ángulo)) / (2 * g).",
+      "h = (19,6² * 0,5) / 19,6 = (384,16 * 0,5) / 19,6."
     ]
   }
 ]

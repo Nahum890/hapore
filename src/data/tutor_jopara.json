@@ -5,6 +5,61 @@
     "¡Jaha! Eñepractica: jajuhumi cuenta correcta."
   ],
   "fallbackHint": "Ehecha jey el enunciado, ehpyru peteî paso pequeñito. Ani aflojá: vas a poder.",
+  "hintLevels": {
+    "byErrorType": {
+      "angulo_bajo": {
+        "nivel_1": "¡Emañami! El dron cayó muy rápido antes de la meta... Mirá en la pantalla cómo va muy rasante y se estrella contra el suelo.",
+        "nivel_2": "Falta altura porque el ángulo fue muy bajo y la gravedad lo atrajo rápido al suelo: sin elevación, no hay tiempo de vuelo.",
+        "nivel_3": "Acordate que el alcance depende de: R = (v0² * sen(2 * ángulo)) / g.",
+        "nivel_4": "Para 40 metros con v0 = 20 m/s: necesitamos que sen(2 * ángulo) sea igual a 1.",
+        "nivel_5": "Ingresá un ángulo de 45 grados en el selector para lograr el aterrizaje exacto."
+      },
+      "angulo_halo": {
+        "nivel_1": "¡Oho yvateiterei! Mirá la pantalla: el dron subió un montón pero avanzó poco hacia adelante.",
+        "nivel_2": "Toda la velocidad se fue hacia arriba; la parte horizontal quedó muy reducida y por eso no llega a la meta.",
+        "nivel_3": "La parte horizontal se calcula con: vx = v0 * cos(ángulo). Con ángulos muy altos, el coseno se achica.",
+        "nivel_4": "Con v0 = 20 m/s y ángulo = 80 grados: vx = 20 * cos(80°), que es apenas 3,47 m/s.",
+        "nivel_5": "Bajá el ángulo a 45 grados en el selector para equilibrar la subida y el avance."
+      },
+      "velocidad_corta": {
+        "nivel_1": "Ndaipóri alcance! Mirá la pantalla: el dron cae antes de llegar al puesto.",
+        "nivel_2": "Falta velocidad inicial: con poca fuerza de lanzamiento, el dron no alcanza la distancia objetivo.",
+        "nivel_3": "El alcance crece con el cuadrado de la velocidad: R = (v0² * sen(2 * ángulo)) / g.",
+        "nivel_4": "Si duplicás v0, el alcance se cuadruplica: probá subiendo la velocidad de despegue.",
+        "nivel_5": "Aumentá la velocidad de despegue a 20 m/s o más para compensar los metros faltantes."
+      },
+      "confunde_componentes": {
+        "nivel_1": "Emañami pe velocidad rehe. ¿Opavave 20 m/s-pa oho horizontalmente? Mirá la descomposición en la pantalla.",
+        "nivel_2": "La velocidad se divide en dos partes: una horizontal (hacia adelante) y una vertical (hacia arriba). No se usa el valor total directo.",
+        "nivel_3": "Para la parte horizontal usá el coseno: vx = v0 * cos(ángulo); para la vertical, el seno: v0y = v0 * sen(ángulo).",
+        "nivel_4": "Con v0 = 20 m/s y ángulo = 30 grados: vx = 20 * cos(30°) y v0y = 20 * sen(30°) = 10.",
+        "nivel_5": "Ingresá 17,32 m/s en la respuesta: la parte horizontal es 20 * cos(30°) redondeada a 2 decimales."
+      }
+    },
+    "byConcept": {
+      "componente-horizontal": {
+        "nivel_1": "¡Emañami pe velocidad rehe! Mirá la pantalla: el dron avanza hacia adelante con una sola parte de la velocidad, no con todo el valor.",
+        "nivel_2": "La velocidad se separa en dos direcciones: una parte va hacia adelante y otra hacia arriba. Lo que pusiste parece ser la magnitud total, no la parte horizontal.",
+        "nivel_3": "La parte horizontal se calcula con el coseno: vx = v0 * cos(ángulo).",
+        "nivel_4": "Con v0 = 20 m/s y ángulo = 30 grados: vx = 20 * cos(30°). El coseno de 30° es aproximadamente 0,866.",
+        "nivel_5": "Ingresá 17,32 m/s en la respuesta: es 20 * 0,866 redondeado a 2 decimales."
+      },
+      "componente-vertical": {
+        "nivel_1": "¡Emañami! Mirá la pantalla: el dron despega hacia arriba con un empuje que depende del ángulo de lanzamiento.",
+        "nivel_2": "El impulso hacia arriba todavía no depende de la gravedad: solo del ángulo con el que despega el dron.",
+        "nivel_3": "La parte vertical inicial se calcula con el seno: v0y = v0 * sen(ángulo).",
+        "nivel_4": "Con v0 = 20 m/s y ángulo = 30 grados: v0y = 20 * sen(30°). El seno de 30° es 0,5.",
+        "nivel_5": "Ingresá 10 m/s en la respuesta: es 20 * 0,5."
+      },
+      "altura-maxima": {
+        "nivel_1": "¡Emañami pe altura rehe! Mirá la pantalla: el punto más alto del dron es donde deja de subir y empieza a caer.",
+        "nivel_2": "En el punto más alto, la subida se frena por completo por efecto de la gravedad: ahí la velocidad vertical vale cero.",
+        "nivel_3": "La altura máxima se calcula con: h = (v0² * sen²(ángulo)) / (2 * g).",
+        "nivel_4": "Con v0 = 19,6 m/s y ángulo = 45 grados: primero calculá v0² = 384,16; el seno de 45° al cuadrado es 0,5.",
+        "nivel_5": "Ingresá 9,8 m en la respuesta: es (384,16 * 0,5) / 19,6."
+      }
+    }
+  },
   "errors": [
     {
       "errorId": "err-01",
@@ -15,7 +70,7 @@
     {
       "errorId": "err-02",
       "joparaHint": "Vx ohóla lape'ỹme (horizontal); vy ogueraha la gravedad (vertical). Ani ene ñemboja'o.",
-      "esHint": "La horizontal usa coseno: vx = v0 · cos(θ). La vertical usa seno: vy = v0 · sen(θ). No las mezcles.",
+      "esHint": "La horizontal usa coseno: vx = v0 * cos(ángulo). La vertical usa seno: v0y = v0 * sen(ángulo). No las mezcles.",
       "followUp": "Identificá primero qué componente te piden y después aplicá la fórmula."
     },
     {
