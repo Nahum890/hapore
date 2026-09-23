@@ -9,6 +9,7 @@ const BITMASK_BY_SUBTEMA = {
 };
 
 const BASE36_ALPHABET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const MASK_LETTERS = 'ABCDEFGHIJKLMNOP';
 
 const TEMA_MATCHERS = [
   { id: 'parabolico', match: (tema) => tema.includes('parabolico') },
@@ -30,7 +31,7 @@ export function encodeClassConfig({ flashcards = 10, subtemas = [], ejercicios =
   for (const subtema of enabled) {
     mask |= BITMASK_BY_SUBTEMA[subtema] ?? 0;
   }
-  const maskChar = BASE36_ALPHABET[mask] ?? BASE36_ALPHABET[15];
+  const maskChar = MASK_LETTERS[mask] ?? MASK_LETTERS[15];
   const flashcardsPart = String(clampedFlashcards).padStart(2, '0');
   const ejerciciosPart = String(clampedEjercicios).padStart(2, '0');
   return `${CODE_PREFIX}${flashcardsPart}${maskChar}${ejerciciosPart}`;
@@ -40,7 +41,7 @@ export function decodeClassConfig(code) {
   const match = CODE_PATTERN.exec(String(code ?? '').trim().toUpperCase());
   if (!match) return null;
   const flashcards = Math.min(20, Math.max(5, parseInt(match[1], 10)));
-  const mask = BASE36_ALPHABET.indexOf(match[2]);
+  const mask = MASK_LETTERS.indexOf(match[2]);
   const ejercicios = Math.min(10, Math.max(1, parseInt(match[3], 10)));
   if (mask < 0) return null;
   const subtemas = TEMA_MATCHERS.filter((tema) => (mask & BITMASK_BY_SUBTEMA[tema.id]) !== 0).map(

@@ -13,6 +13,8 @@ export function normalizeText(text) {
 
 const MATCH_CORRECT = 0.8;
 const MATCH_CLOSE = 0.5;
+const TEXT_MATCH_CORRECT = 0.5;
+const TEXT_MATCH_CLOSE = 0.25;
 
 /**
  * Interpreta la respuesta del alumno de todas las maneras posibles:
@@ -40,6 +42,34 @@ export function matchAnswer(question, userAnswer) {
   return {
     correct: score >= MATCH_CORRECT,
     close: score >= MATCH_CLOSE && score < MATCH_CORRECT,
+    score,
+    coincidentes,
+  };
+}
+
+/**
+ * Matcheo tolerante de texto libre (justificaciones y charla libre):
+ * compara por palabras clave y raíces, aceptando sinónimos e ideas afines.
+ */
+export function matchText(userAnswer, expectedText) {
+  const user = normalizeText(userAnswer);
+  const expected = normalizeText(expectedText);
+  if (!user) {
+    return { correct: false, close: false, score: 0, coincidentes: [] };
+  }
+  const expectedWords = [...new Set(expected.split(' ').filter((word) => word.length > 3))];
+  if (expectedWords.length === 0) {
+    return { correct: false, close: false, score: 0, coincidentes: [] };
+  }
+  const coincidentes = expectedWords.filter((word) => {
+    if (user.includes(word)) return true;
+    const stem = word.length >= 6 ? word.slice(0, 5) : word;
+    return user.includes(stem);
+  });
+  const score = coincidentes.length / expectedWords.length;
+  return {
+    correct: score >= TEXT_MATCH_CORRECT,
+    close: score >= TEXT_MATCH_CLOSE && score < TEXT_MATCH_CORRECT,
     score,
     coincidentes,
   };
