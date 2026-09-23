@@ -1,62 +1,202 @@
 {
-  "_reviewNote": "ATENCIÓN: los textos en jopara son un borrador inicial NO validado lingüísticamente. Deben ser revisados y aprobados por el responsable lingüístico antes de usarse con estudiantes.",
   "greetings": [
     "¡Mba'éichapa! Eju, jahechami Física juntos.",
     "¡Jaha! Eñepractica: jajuhumi cuenta correcta."
   ],
   "fallbackHint": "Ehecha jey el enunciado, ehpyru peteî paso pequeñito. Ani aflojá: vas a poder.",
+  "_reviewNote": "ATENCIÓN: los textos en jopara son un borrador inicial NO validado lingüísticamente. Deben ser revisados y aprobados por el responsable lingüístico antes de usarse con estudiantes.",
   "hintLevels": {
     "byErrorType": {
       "angulo_bajo": {
-        "nivel_1": "¡Emañami! El dron cayó muy rápido antes de la meta... Mirá en la pantalla cómo va muy rasante y se estrella contra el suelo.",
-        "nivel_2": "Falta altura porque el ángulo fue muy bajo y la gravedad lo atrajo rápido al suelo: sin elevación, no hay tiempo de vuelo.",
-        "nivel_3": "Acordate que el alcance depende de: R = (v0² * sen(2 * ángulo)) / g.",
-        "nivel_4": "Para 40 metros con v0 = 20 m/s: necesitamos que sen(2 * ángulo) sea igual a 1.",
-        "nivel_5": "Ingresá un ángulo de 45 grados en el selector para lograr el aterrizaje exacto."
+        "nivel_1": [
+          "¡Emañami! El dron cayó muy rápido antes de la meta... Mirá en la pantalla cómo va muy rasante y se estrella contra el suelo.",
+          "¡Emañamína pe dron rehe! Oho muy rasante ha ho'a yvýpe objetivo mboyve. ¿Mba'épa oiko pe altura rehe?",
+          "¡Emañami! Mirá la pantalla: el dron no se eleva y cae antes de llegar a la meta."
+        ],
+        "nivel_2": [
+          "Falta altura porque el ángulo fue muy bajo y la gravedad lo atrajo rápido al suelo: sin elevación, no hay tiempo de vuelo.",
+          "Pe velocidad imbarete, pero pe ángulo michĩeterei: la gravedad lo atrajo rápido al suelo.",
+          "Falta elevación porque el ángulo fue muy bajo y la gravedad lo atrajo rápido."
+        ],
+        "nivel_3": [
+          "Acordate que el alcance depende de: R = (v0² * sen(2 * ángulo)) / g.",
+          "Nemandu'áke: el alcance depende de R = (v0² * sen(2 * ángulo)) / g.",
+          "La fórmula del alcance: R = (v0² * sen(2 * ángulo)) / g. Fijate en el ángulo."
+        ],
+        "nivel_4": [
+          "Para 40 metros con v0 = 20 m/s: necesitamos que sen(2 * ángulo) sea igual a 1.",
+          "Con 40 metros y v0 = 20 m/s: buscamos sen(2 * ángulo) = 1.",
+          "Para llegar a los 40 m con 20 m/s: la relación pide sen(2 * ángulo) igual a 1."
+        ],
+        "nivel_5": [
+          "Ingresá un ángulo de 45 grados en el selector para lograr el aterrizaje exacto.",
+          "Configurá un ángulo de 45 grados en el control para lograr el aterrizaje exacto.",
+          "Probá con 45 grados en el selector: es el ángulo que logra el aterrizaje exacto."
+        ]
       },
       "angulo_halo": {
-        "nivel_1": "¡Oho yvateiterei! Mirá la pantalla: el dron subió un montón pero avanzó poco hacia adelante.",
-        "nivel_2": "Toda la velocidad se fue hacia arriba; la parte horizontal quedó muy reducida y por eso no llega a la meta.",
-        "nivel_3": "La parte horizontal se calcula con: vx = v0 * cos(ángulo). Con ángulos muy altos, el coseno se achica.",
-        "nivel_4": "Con v0 = 20 m/s y ángulo = 80 grados: vx = 20 * cos(80°), que es apenas 3,47 m/s.",
-        "nivel_5": "Bajá el ángulo a 45 grados en el selector para equilibrar la subida y el avance."
+        "nivel_1": [
+          "¡Oho yvateiterei! Mirá la pantalla: el dron subió un montón pero avanzó poco hacia adelante.",
+          "¡Emañami! El dron se fue muy arriba y le faltó avance: mirá cómo casi no llega a la meta.",
+          "¡Oho yvateiterei! La trayectoria quedó muy vertical: mirá en la pantalla cuán poco avanzó."
+        ],
+        "nivel_2": [
+          "Toda la velocidad se fue hacia arriba; la parte horizontal quedó muy reducida y por eso no llega a la meta.",
+          "Pe energía opa oho ape yvate: la parte horizontal quedó muy reducida.",
+          "El ángulo fue muy alto: la gravedad lo frenó antes y le faltó avance horizontal."
+        ],
+        "nivel_3": [
+          "La parte horizontal se calcula con: vx = v0 * cos(ángulo). Con ángulos muy altos, el coseno se achica.",
+          "Nemandu'áke: el alcance horizontal depende de v0x = v0 * cos(ángulo). Con ángulos muy altos, el coseno se achica.",
+          "Fijate en la fórmula: vx = v0 * cos(ángulo). A más ángulo, menos avance horizontal."
+        ],
+        "nivel_4": [
+          "Con v0 = 20 m/s y ángulo = 80 grados: vx = 20 * cos(80°), que es apenas 3,47 m/s.",
+          "Con 80 grados y 20 m/s: vx = 20 * cos(80°) = 3,47 m/s, muy poco para llegar.",
+          "Si el ángulo es 80 grados: vx = 20 * cos(80°). Fijate qué chico queda el avance."
+        ],
+        "nivel_5": [
+          "Bajá el ángulo a 45 grados en el selector para equilibrar la subida y el avance.",
+          "Configurá 45 grados en el control: equilibra la subida y el avance horizontal.",
+          "Probá bajando el ángulo a 45 grados: es el punto equilibrado para el alcance."
+        ]
       },
       "velocidad_corta": {
-        "nivel_1": "Ndaipóri alcance! Mirá la pantalla: el dron cae antes de llegar al puesto.",
-        "nivel_2": "Falta velocidad inicial: con poca fuerza de lanzamiento, el dron no alcanza la distancia objetivo.",
-        "nivel_3": "El alcance crece con el cuadrado de la velocidad: R = (v0² * sen(2 * ángulo)) / g.",
-        "nivel_4": "Si duplicás v0, el alcance se cuadruplica: probá subiendo la velocidad de despegue.",
-        "nivel_5": "Aumentá la velocidad de despegue a 20 m/s o más para compensar los metros faltantes."
+        "nivel_1": [
+          "Ndaipóri alcance! Mirá la pantalla: el dron cae antes de llegar al puesto.",
+          "¡Emañami! El dron se quedó corto: cae antes del objetivo de entrega.",
+          "Ndaipóri alcance! Mirá la trayectoria: el dron no llega al puesto."
+        ],
+        "nivel_2": [
+          "Falta velocidad inicial: con poca fuerza de lanzamiento, el dron no alcanza la distancia objetivo.",
+          "Falta velocidad de despegue: el dron se queda antes de la meta.",
+          "La fuerza de lanzamiento fue poca: por eso el dron no alcanza la distancia objetivo."
+        ],
+        "nivel_3": [
+          "El alcance crece con el cuadrado de la velocidad: R = (v0² * sen(2 * ángulo)) / g.",
+          "Nemandu'áke: el alcance R es proporcional al cuadrado de la velocidad v0².",
+          "La fórmula muestra: R = (v0² * sen(2 * ángulo)) / g. El cuadrado de la velocidad pesa mucho."
+        ],
+        "nivel_4": [
+          "Si duplicás v0, el alcance se cuadruplica: probá subiendo la velocidad de despegue.",
+          "Duplicando la velocidad de despegue, el alcance se cuadruplica.",
+          "Más velocidad, mucho más alcance: el cuadrado de v0 manda en la fórmula."
+        ],
+        "nivel_5": [
+          "Aumentá la velocidad de despegue a 20 m/s o más para compensar los metros faltantes.",
+          "Configurá 20 m/s o más en la velocidad de despegue para llegar a la meta.",
+          "Subí la velocidad de despegue a 20 m/s: así compensás los metros faltantes."
+        ]
       },
       "confunde_componentes": {
-        "nivel_1": "Emañami pe velocidad rehe. ¿Opavave 20 m/s-pa oho horizontalmente? Mirá la descomposición en la pantalla.",
-        "nivel_2": "La velocidad se divide en dos partes: una horizontal (hacia adelante) y una vertical (hacia arriba). No se usa el valor total directo.",
-        "nivel_3": "Para la parte horizontal usá el coseno: vx = v0 * cos(ángulo); para la vertical, el seno: v0y = v0 * sen(ángulo).",
-        "nivel_4": "Con v0 = 20 m/s y ángulo = 30 grados: vx = 20 * cos(30°) y v0y = 20 * sen(30°) = 10.",
-        "nivel_5": "Ingresá 17,32 m/s en la respuesta: la parte horizontal es 20 * cos(30°) redondeada a 2 decimales."
+        "nivel_1": [
+          "Emañami pe velocidad rehe. ¿Opavave 20 m/s-pa oho horizontalmente? Mirá la descomposición en la pantalla.",
+          "¡Emañami! ¿Todo el valor de la velocidad va hacia adelante? Mirá la descomposición en pantalla.",
+          "Emañami pe velocidad rehe: mirá si todo el valor avanza en línea recta."
+        ],
+        "nivel_2": [
+          "La velocidad se divide en dos partes: una horizontal (hacia adelante) y una vertical (hacia arriba). No se usa el valor total directo.",
+          "Pe velocidad oñemboja'o dos partes-pe: horizontal ha vertical. El valor total no va todo para adelante.",
+          "Una parte de la velocidad va hacia adelante y otra hacia arriba: no se usa el valor completo."
+        ],
+        "nivel_3": [
+          "Para la parte horizontal usá el coseno: vx = v0 * cos(ángulo); para la vertical, el seno: v0y = v0 * sen(ángulo).",
+          "La horizontal usa el coseno (vx = v0 * cos(ángulo)); la vertical usa el seno (v0y = v0 * sen(ángulo)).",
+          "Nemandu'áke: vx = v0 * cos(ángulo) para la horizontal; v0y = v0 * sen(ángulo) para la vertical."
+        ],
+        "nivel_4": [
+          "Con v0 = 20 m/s y ángulo = 30 grados: vx = 20 * cos(30°) y v0y = 20 * sen(30°) = 10.",
+          "Con 20 m/s y 30 grados: la horizontal es vx = 20 * cos(30°) y la vertical v0y = 20 * sen(30°) = 10 m/s.",
+          "Calculá las dos partes: vx = 20 * cos(30°) hacia adelante; v0y = 20 * sen(30°) = 10 hacia arriba."
+        ],
+        "nivel_5": [
+          "Ingresá 17,32 m/s en la respuesta: la parte horizontal es 20 * cos(30°) redondeada a 2 decimales.",
+          "Ingresá 17,32 m/s: es la componente horizontal 20 * cos(30°) redondeada.",
+          "La respuesta es 17,32 m/s: la parte horizontal de 20 m/s con 30 grados."
+        ]
       }
     },
     "byConcept": {
       "componente-horizontal": {
-        "nivel_1": "¡Emañami pe velocidad rehe! Mirá la pantalla: el dron avanza hacia adelante con una sola parte de la velocidad, no con todo el valor.",
-        "nivel_2": "La velocidad se separa en dos direcciones: una parte va hacia adelante y otra hacia arriba. Lo que pusiste parece ser la magnitud total, no la parte horizontal.",
-        "nivel_3": "La parte horizontal se calcula con el coseno: vx = v0 * cos(ángulo).",
-        "nivel_4": "Con v0 = 20 m/s y ángulo = 30 grados: vx = 20 * cos(30°). El coseno de 30° es aproximadamente 0,866.",
-        "nivel_5": "Ingresá 17,32 m/s en la respuesta: es 20 * 0,866 redondeado a 2 decimales."
+        "nivel_1": [
+          "¡Emañami pe velocidad rehe! Mirá la pantalla: el dron avanza hacia adelante con una sola parte de la velocidad, no con todo el valor.",
+          "¡Emañami! El dron avanza con una parte de la velocidad: mirá si todo el valor va hacia adelante.",
+          "Emañami pe velocidad rehe: la pantalla muestra que solo una parte avanza en línea recta."
+        ],
+        "nivel_2": [
+          "La velocidad se separa en dos direcciones: una parte va hacia adelante y otra hacia arriba. Lo que pusiste parece ser la magnitud total, no la parte horizontal.",
+          "Pe velocidad oñemboja'o dos partes-pe: una va adelante, otra arriba. Tu valor parece ser la magnitud total.",
+          "Una parte de la velocidad va hacia adelante y otra hacia arriba: el valor completo no es la parte horizontal."
+        ],
+        "nivel_3": [
+          "La parte horizontal se calcula con el coseno: vx = v0 * cos(ángulo).",
+          "Para saber cuánto avanza hacia adelante: vx = v0 * cos(ángulo).",
+          "Nemandu'áke: la componente horizontal es vx = v0 * cos(ángulo)."
+        ],
+        "nivel_4": [
+          "Con v0 = 20 m/s y ángulo = 30 grados: vx = 20 * cos(30°). El coseno de 30° es aproximadamente 0,866.",
+          "Con 20 m/s y 30 grados: vx = 20 * cos(30°) = 20 * 0,866.",
+          "Calculá: vx = 20 * cos(30°). El coseno de 30° ronda 0,866."
+        ],
+        "nivel_5": [
+          "Ingresá 17,32 m/s en la respuesta: es 20 * 0,866 redondeado a 2 decimales.",
+          "Ingresá 17,32 m/s: la componente horizontal de 20 m/s con 30 grados.",
+          "La respuesta es 17,32 m/s: 20 * 0,866 redondeado."
+        ]
       },
       "componente-vertical": {
-        "nivel_1": "¡Emañami! Mirá la pantalla: el dron despega hacia arriba con un empuje que depende del ángulo de lanzamiento.",
-        "nivel_2": "El impulso hacia arriba todavía no depende de la gravedad: solo del ángulo con el que despega el dron.",
-        "nivel_3": "La parte vertical inicial se calcula con el seno: v0y = v0 * sen(ángulo).",
-        "nivel_4": "Con v0 = 20 m/s y ángulo = 30 grados: v0y = 20 * sen(30°). El seno de 30° es 0,5.",
-        "nivel_5": "Ingresá 10 m/s en la respuesta: es 20 * 0,5."
+        "nivel_1": [
+          "¡Emañami! Mirá la pantalla: el dron despega hacia arriba con un empuje que depende del ángulo de lanzamiento.",
+          "¡Emañami pe dron rehe! Mirá cómo despega hacia arriba: el empuje depende del ángulo.",
+          "Emañami: el impulso hacia arriba del despegue depende del ángulo de lanzamiento."
+        ],
+        "nivel_2": [
+          "El impulso hacia arriba todavía no depende de la gravedad: solo del ángulo con el que despega el dron.",
+          "Pe impulso hacia arriba rehe gravedad ndoikói: solo el ángulo de despegue manda.",
+          "El impulso vertical inicial depende del ángulo de lanzamiento, no de la gravedad."
+        ],
+        "nivel_3": [
+          "La parte vertical inicial se calcula con el seno: v0y = v0 * sen(ángulo).",
+          "El impulso hacia arriba es: v0y = v0 * sen(ángulo).",
+          "Nemandu'áke: la componente vertical inicial es v0y = v0 * sen(ángulo)."
+        ],
+        "nivel_4": [
+          "Con v0 = 20 m/s y ángulo = 30 grados: v0y = 20 * sen(30°). El seno de 30° es 0,5.",
+          "Con 20 m/s y 30 grados: v0y = 20 * sen(30°) = 20 * 0,5.",
+          "Calculá: v0y = 20 * sen(30°). El seno de 30° es 0,5."
+        ],
+        "nivel_5": [
+          "Ingresá 10 m/s en la respuesta: es 20 * 0,5.",
+          "Ingresá 10 m/s: la componente vertical de 20 m/s con 30 grados.",
+          "La respuesta es 10 m/s: 20 * sen(30°) = 20 * 0,5."
+        ]
       },
       "altura-maxima": {
-        "nivel_1": "¡Emañami pe altura rehe! Mirá la pantalla: el punto más alto del dron es donde deja de subir y empieza a caer.",
-        "nivel_2": "En el punto más alto, la subida se frena por completo por efecto de la gravedad: ahí la velocidad vertical vale cero.",
-        "nivel_3": "La altura máxima se calcula con: h = (v0² * sen²(ángulo)) / (2 * g).",
-        "nivel_4": "Con v0 = 19,6 m/s y ángulo = 45 grados: primero calculá v0² = 384,16; el seno de 45° al cuadrado es 0,5.",
-        "nivel_5": "Ingresá 9,8 m en la respuesta: es (384,16 * 0,5) / 19,6."
+        "nivel_1": [
+          "¡Emañami pe altura rehe! Mirá la pantalla: el punto más alto del dron es donde deja de subir y empieza a caer.",
+          "¡Emañami! Mirá en la pantalla el punto más alto: ahí el dron deja de subir y empieza a caer.",
+          "Emañami pe altura rehe: el punto más alto de la trayectoria es donde la subida se frena."
+        ],
+        "nivel_2": [
+          "En el punto más alto, la subida se frena por completo por efecto de la gravedad: ahí la velocidad vertical vale cero.",
+          "Pe gravedad omboty la subida pe punto más alto-pe: ahí la velocidad vertical vale cero.",
+          "En el punto más alto la subida se frena por la gravedad: la velocidad vertical llega a cero."
+        ],
+        "nivel_3": [
+          "La altura máxima se calcula con: h = (v0² * sen²(ángulo)) / (2 * g).",
+          "Nemandu'áke: la altura máxima es h = (v0² * sen²(ángulo)) / (2 * g).",
+          "La fórmula de la altura máxima: h = (v0² * sen²(ángulo)) / (2 * g)."
+        ],
+        "nivel_4": [
+          "Con v0 = 19,6 m/s y ángulo = 45 grados: primero calculá v0² = 384,16; el seno de 45° al cuadrado es 0,5.",
+          "Con 19,6 m/s y 45 grados: v0² = 384,16 y sen²(45°) = 0,5.",
+          "Calculá por partes: v0² = 384,16; el seno de 45° al cuadrado da 0,5."
+        ],
+        "nivel_5": [
+          "Ingresá 9,8 m en la respuesta: es (384,16 * 0,5) / 19,6.",
+          "Ingresá 9,8 m: la altura máxima con 19,6 m/s y 45 grados.",
+          "La respuesta es 9,8 m: (384,16 * 0,5) / 19,6."
+        ]
       }
     }
   },
