@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react';
-import { getHint, hasHintsLeft } from '../pedagogy/hintEngine.js';
+import { hasHintsLeft } from '../pedagogy/hintEngine.js';
 import { validateExercise } from '../physics/physicsValidator.js';
 
 export default function ExerciseCard({ exercise, onResult, onAskHint, hintsUsed = 0, onIncrementHint }) {
   const [answer, setAnswer] = useState('');
   const [feedback, setFeedback] = useState(null);
-  const [currentHint, setCurrentHint] = useState(null);
 
   useEffect(() => {
     setAnswer('');
     setFeedback(null);
-    setCurrentHint(null);
   }, [exercise?.id]);
 
   const handleCheck = () => {
@@ -33,15 +31,13 @@ export default function ExerciseCard({ exercise, onResult, onAskHint, hintsUsed 
   const handleHint = async () => {
     if (!hasHintsLeft(exercise, hintsUsed)) return;
     const level = hintsUsed + 1;
-    const response = await onAskHint?.({
+    await onAskHint?.({
       type: 'hint',
       topic: exercise.topic,
       exerciseId: exercise.id,
       expectedConcept: exercise.expectedConcept,
       hintLevel: level,
     });
-    const tutorText = response?.available === false ? null : response?.message;
-    setCurrentHint(tutorText ?? getHint(exercise, hintsUsed));
     onIncrementHint?.();
   };
 
@@ -90,16 +86,11 @@ export default function ExerciseCard({ exercise, onResult, onAskHint, hintsUsed 
           Comprobar
         </button>
       </div>
-      {currentHint && (
-        <div className="hint-box" role="status">
-          <strong>Pista {hintsUsed} de 5:</strong> {currentHint}
-        </div>
-      )}
       {feedback && (
         <div className={`feedback ${feedback.correct ? 'correct' : 'incorrect'}`} role="status">
           {feedback.correct
             ? '¡Ikatu! Respuesta correcta.'
-            : feedback.message ?? 'Todavía no. Mirá la pista del tutor y volvé a intentarlo.'}
+            : feedback.message ?? 'Todavía no. Mirá el mensaje del tutor y volvé a intentarlo.'}
         </div>
       )}
     </section>

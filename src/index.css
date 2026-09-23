@@ -484,16 +484,6 @@ h3 {
   border: 1px solid #EFC4B0;
 }
 
-.hint-box {
-  margin-top: 12px;
-  background: #FDF3E3;
-  color: #78350F;
-  border: 1px solid #F0D9A8;
-  border-radius: 10px;
-  padding: 12px;
-  font-size: 14px;
-}
-
 /* --- Flashcards --- */
 .flashcard {
   padding: 0;
