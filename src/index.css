@@ -789,6 +789,61 @@ h3 {
   color: var(--texto-suave);
 }
 
+.teacher-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  padding: 12px;
+  background: var(--fondo);
+}
+
+.teacher-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gris-carbon);
+}
+
+.teacher-subtemas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.teacher-subtema {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gris-carbon);
+}
+
+.class-code-display {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--verde-monte);
+  background: #E7F3EC;
+  border: 1px solid #B5D9C4;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.teacher-error {
+  margin: 0;
+  font-size: 13px;
+  color: #7C2D12;
+  background: #FBEAE4;
+  border: 1px solid #EFC4B0;
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
 .teacher-stats {
   list-style: none;
   margin: 0;

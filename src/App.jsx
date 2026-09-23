@@ -16,7 +16,7 @@ import { useTutor } from './hooks/useTutor.js';
 import { useMission } from './hooks/useMission.js';
 import { useQuiz } from './hooks/useQuiz.js';
 
-function AulaView({ attempts, confidence }) {
+function AulaView({ attempts, xp, classConfig, onJoinClass }) {
   return (
     <>
       <section className="card" aria-label="Conceptos clave">
@@ -52,7 +52,12 @@ function AulaView({ attempts, confidence }) {
           ))}
         </ul>
       </section>
-      <TeacherMode attempts={attempts} confidence={confidence} />
+      <TeacherMode
+        attempts={attempts}
+        confidence={xp}
+        classConfig={classConfig}
+        onJoinClass={onJoinClass}
+      />
     </>
   );
 }
@@ -350,6 +355,7 @@ function ChatsView({ quiz }) {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('simulador');
+  const [classConfig, setClassConfig] = useState(null);
   const learning = useOfflineStorage();
   const { tutor, ask } = useTutor();
   const { mission, currentExercise, index, next, prev } = useMission(
@@ -360,6 +366,7 @@ export default function App() {
   const quiz = useQuiz(flashcardsData, {
     onMoveToChat: () => setActiveTab('chats'),
     onQuizAnswer: learning.onQuizAnswer,
+    classConfig,
   });
 
   useEffect(() => {
@@ -369,6 +376,10 @@ export default function App() {
   const handleCardConsolidated = (flashcardId) => {
     learning.onFlashcardConsolidated(flashcardId);
     quiz.consolidateCard(flashcardId);
+  };
+
+  const handleJoinClass = (config) => {
+    setClassConfig(config);
   };
 
   return (
@@ -412,7 +423,12 @@ export default function App() {
         {activeTab === 'chats' && <ChatsView quiz={quiz} />}
 
         {activeTab === 'aula' && (
-          <AulaView attempts={learning.attempts} confidence={learning.confidence} />
+          <AulaView
+            attempts={learning.attempts}
+            xp={learning.xp}
+            classConfig={classConfig}
+            onJoinClass={handleJoinClass}
+          />
         )}
       </main>
 

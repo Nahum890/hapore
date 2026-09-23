@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import quizBank from '../ai/quizBank.json';
 import { buildQuiz, matchAnswer, matchText, shuffle } from '../ai/quizEngine.js';
 import { readJSON, writeJSON, STORAGE_KEYS } from '../utils/storage.js';
+import { temaMatchesSubtemas } from '../utils/classCode.js';
 import { createAIProvider } from '../ai/AIProvider.js';
 
 export const QUIZ_MIN_QUANTITY = 5;
@@ -57,7 +58,7 @@ function formatMessages(chatEntries, charlaEntries) {
   return mensajes.filter((message) => message.text);
 }
 
-export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer } = {}) {
+export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } = {}) {
   const providerRef = useRef(null);
   if (!providerRef.current) {
     providerRef.current = createAIProvider();
@@ -81,24 +82,41 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer } = {}) {
   const [history, setHistory] = useState(() => readJSON(STORAGE_KEYS.CHAT_HISTORY, []));
 
   const repasoAvailable = useMemo(() => {
-    const abiertas = quizBank.filter((question) => question.tipo === 'abierta').length;
-    return (flashcards?.length ?? 0) + abiertas;
-  }, [flashcards]);
+    const abiertas = quizBank.filter(
+      (question) =>
+        question.tipo === 'abierta' &&
+        temaMatchesSubtemas(question.tema, classConfig?.subtemas),
+    ).length;
+    const reales = (flashcards ?? []).filter((card) =>
+      temaMatchesSubtemas(card.topic, classConfig?.subtemas),
+    ).length;
+    return abiertas + reales;
+  }, [flashcards, classConfig]);
 
-  const maxAvailable = Math.min(QUIZ_MAX_QUANTITY, Math.max(QUIZ_MIN_QUANTITY, repasoAvailable));
+  const maxAvailable = Math.min(
+    QUIZ_MAX_QUANTITY,
+    Math.max(QUIZ_MIN_QUANTITY, repasoAvailable),
+    Math.min(QUIZ_MAX_QUANTITY, Math.max(QUIZ_MIN_QUANTITY, classConfig?.flashcards ?? QUIZ_MAX_QUANTITY)),
+  );
 
   const buildRepasoDeck = useCallback(
     (qty) => {
-      const real = (flashcards ?? []).map((card) => ({
-        id: card.id,
-        tema: card.topic,
-        frente: card.frente_es ?? card.front ?? '',
-        jopara: card.frente_jopara ?? '',
-        dorso: card.dorso_concepto ?? card.back ?? '',
-        formula: card.formula ?? '',
-      }));
+      const real = (flashcards ?? [])
+        .filter((card) => temaMatchesSubtemas(card.topic, classConfig?.subtemas))
+        .map((card) => ({
+          id: card.id,
+          tema: card.topic,
+          frente: card.frente_es ?? card.front ?? '',
+          jopara: card.frente_jopara ?? '',
+          dorso: card.dorso_concepto ?? card.back ?? '',
+          formula: card.formula ?? '',
+        }));
       const teoricas = quizBank
-        .filter((question) => question.tipo === 'abierta')
+        .filter(
+          (question) =>
+            question.tipo === 'abierta' &&
+            temaMatchesSubtemas(question.tema, classConfig?.subtemas),
+        )
         .map((question) => ({
           id: question.id,
           tema: question.tema,
@@ -113,7 +131,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer } = {}) {
       );
       return shuffle([...real, ...teoricas]).slice(0, clamped);
     },
-    [flashcards, maxAvailable],
+    [flashcards, classConfig, maxAvailable],
   );
 
   const chooseQuantity = useCallback(
@@ -150,7 +168,10 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer } = {}) {
   }, []);
 
   const startQuiz = useCallback(() => {
-    const quizQuestions = buildQuiz(quizBank, quantity);
+    const filteredBank = quizBank.filter((question) =>
+      temaMatchesSubtemas(question.tema, classConfig?.subtemas),
+    );
+    const quizQuestions = buildQuiz(filteredBank, quantity);
     sessionRef.current = `chat-${Date.now()}`;
     setQuestions(quizQuestions);
     setQuestionIndex(0);
@@ -162,7 +183,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer } = {}) {
     setJustificationText('');
     setStep('quiz');
     onMoveToChat?.();
-  }, [quantity, onMoveToChat]);
+  }, [quantity, onMoveToChat, classConfig]);
 
   useEffect(() => {
     if (step === 'repaso' && deck.length === 0 && consolidatedIds.size > 0) {
