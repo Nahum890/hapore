@@ -3,6 +3,7 @@ import {
   loadLearningState,
   recordExerciseResult,
   recordFlashcardConsolidated,
+  recordQuizAnswer,
   setCurrentExercise,
 } from '../pedagogy/learningState.js';
 
@@ -12,6 +13,7 @@ export function useOfflineStorage() {
 
   const onExerciseResult = (result) => setState(recordExerciseResult(result));
   const onFlashcardConsolidated = (flashcardId) => setState(recordFlashcardConsolidated(flashcardId));
+  const onQuizAnswer = (result) => setState(recordQuizAnswer(result));
   const onSelectExercise = (exerciseId) => {
     setHintsUsed(0);
     setState(setCurrentExercise(exerciseId));
@@ -25,9 +27,12 @@ export function useOfflineStorage() {
     attempts: state.attempts,
     completed: state.completed,
     flashcardState: state.flashcardState,
+    xp: state.xp,
+    level: state.level,
     hintsUsed,
     onExerciseResult,
     onFlashcardConsolidated,
+    onQuizAnswer,
     onSelectExercise,
     incrementHints,
     resetHints,

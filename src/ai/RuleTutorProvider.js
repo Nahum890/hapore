@@ -4,6 +4,18 @@ import errorsData from '../data/errors.json';
 export const HINT_LEVELS_MAX = 5;
 
 /**
+ * Helper: selecciona aleatoriamente una variante sintáctica de la lista de
+ * pistas del nivel para evitar respuestas repetitivas en modo offline.
+ * Acepta arrays de variantes o textos simples (retrocompatibilidad).
+ */
+export function obtenerVariantePista(variants) {
+  if (Array.isArray(variants) && variants.length > 0) {
+    return variants[Math.floor(Math.random() * variants.length)];
+  }
+  return variants ?? null;
+}
+
+/**
  * Tutor 100% offline basado en reglas.
  * Usa JSON local (saludos, pistas jopara, errores frecuentes, pistas
  * progresivas nivel 1-5) para responder sin conexión y sin ningún modelo de IA.
@@ -22,12 +34,26 @@ export default class RuleTutorProvider {
   async respond(context = {}) {
     const { type = 'hint' } = context;
     if (type === 'welcome') return this.#welcome();
+    if (type === 'section') return this.#sectionGreeting(context);
     if (type === 'mistake') return this.#mistakeResponse(context);
     return this.#hintResponse(context);
   }
 
   #welcome() {
     const greeting = this.data.greetings?.[0] ?? '¡Mba\'éichapa!';
+    return {
+      message: greeting,
+      source: this.id,
+      available: true,
+    };
+  }
+
+  #sectionGreeting(context) {
+    const greetings = this.data.sectionGreetings ?? {};
+    const greeting =
+      greetings[context.section] ??
+      this.data.greetings?.[0] ??
+      '¡Mba\'éichapa!';
     return {
       message: greeting,
       source: this.id,
@@ -53,10 +79,14 @@ export default class RuleTutorProvider {
     const byConcept = this.levels?.byConcept ?? {};
 
     if (context.errorType && byErrorType[context.errorType]) {
-      return byErrorType[context.errorType][key] ?? byErrorType[context.errorType].nivel_1;
+      return obtenerVariantePista(
+        byErrorType[context.errorType][key] ?? byErrorType[context.errorType].nivel_1,
+      );
     }
     if (context.expectedConcept && byConcept[context.expectedConcept]) {
-      return byConcept[context.expectedConcept][key] ?? byConcept[context.expectedConcept].nivel_1;
+      return obtenerVariantePista(
+        byConcept[context.expectedConcept][key] ?? byConcept[context.expectedConcept].nivel_1,
+      );
     }
     return null;
   }
