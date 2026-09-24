@@ -3,42 +3,42 @@
     "id": "movimiento-parabolico",
     "name": "Movimiento Parabólico",
     "definition": "Movimiento bidimensional que resulta de componer un avance horizontal uniforme (MRU) con un movimiento vertical bajo aceleración gravitatoria constante (MRUV). Su trayectoria es una parábola simétrica.",
-    "formula": "y(x) = x · tan(θ) - (g / (2 · v0² · cos²θ)) · x²"
+    "formula": "y(x) = x * tan(ángulo) - (g / (2 * v0² * cos²(ángulo))) * x²"
   },
   {
     "id": "componente-horizontal",
     "name": "Componente horizontal (vx)",
     "definition": "Proyección del vector velocidad inicial sobre el eje X. Al no existir aceleración horizontal (despreciando el rozamiento del aire), permanece constante durante todo el recorrido.",
-    "formula": "vx = v0 · cos(θ)"
+    "formula": "vx = v0 * cos(ángulo)"
   },
   {
     "id": "componente-vertical",
     "name": "Componente vertical (vy)",
     "definition": "Proyección del vector velocidad sobre el eje Y. Disminuye de forma continua durante la fase de ascenso a razón de 9,8 m/s cada segundo debido a la gravedad terrestre, anulándose en el punto más alto.",
-    "formula": "vy(t) = v0 · sen(θ) - g · t"
+    "formula": "vy(t) = v0 * sen(ángulo) - g * t"
   },
   {
     "id": "tiempo-de-vuelo",
     "name": "Tiempo de vuelo (T)",
     "definition": "Duración temporal total desde el instante de despegue hasta que el proyectil regresa al mismo nivel horizontal de lanzamiento.",
-    "formula": "T = (2 · v0 · sen(θ)) / g"
+    "formula": "T = (2 * v0 * sen(ángulo)) / g"
   },
   {
     "id": "altura-maxima",
     "name": "Altura máxima (Hmax)",
     "definition": "Cota vertical máxima alcanzada por el proyectil sobre el punto de origen, ocurrida en el instante t = T / 2 cuando vy = 0.",
-    "formula": "Hmax = (v0² · sen²θ) / (2g)"
+    "formula": "Hmax = (v0² * sen²(ángulo)) / (2 * g)"
   },
   {
     "id": "alcance",
     "name": "Alcance horizontal (R)",
     "definition": "Distancia total recorrida a lo largo del suelo horizontal entre el punto de despegue y el punto de impacto final.",
-    "formula": "R = (v0² · sen(2θ)) / g"
+    "formula": "R = (v0² * sen(2 * ángulo)) / g"
   },
   {
     "id": "angulo-optimo",
     "name": "Ángulo de alcance máximo",
-    "definition": "En terreno plano y sin resistencia del aire, el ángulo de 45° maximiza el factor sen(2θ) = sen(90°) = 1, ofreciendo la mayor distancia posible para una velocidad dada.",
-    "formula": "θ_max = 45°"
+    "definition": "En terreno plano y sin resistencia del aire, el ángulo de 45° maximiza el factor sen(2 * ángulo) = sen(90°) = 1, ofreciendo la mayor distancia posible para una velocidad dada.",
+    "formula": "ángulo_max = 45°"
   }
 ]

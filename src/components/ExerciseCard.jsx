@@ -1,37 +1,44 @@
 import { useEffect, useState } from 'react';
-import { getHint, hasHintsLeft } from '../pedagogy/hintEngine.js';
+import { hasHintsLeft } from '../pedagogy/hintEngine.js';
 import { validateExercise } from '../physics/physicsValidator.js';
 
-export default function ExerciseCard({ exercise, onResult, onAskHint }) {
+export default function ExerciseCard({ exercise, onResult, onAskHint, hintsUsed = 0, onIncrementHint }) {
   const [answer, setAnswer] = useState('');
   const [feedback, setFeedback] = useState(null);
-  const [hintsUsed, setHintsUsed] = useState(0);
-  const [currentHint, setCurrentHint] = useState(null);
 
   useEffect(() => {
     setAnswer('');
     setFeedback(null);
-    setHintsUsed(0);
-    setCurrentHint(null);
   }, [exercise?.id]);
 
   const handleCheck = () => {
     const result = validateExercise(exercise, answer);
     setFeedback(result);
-    onResult?.({ correct: result.correct, hintsUsed });
+    onResult?.({ correct: result.correct, hintsUsed, exerciseId: exercise.id });
     if (!result.correct) {
       onAskHint?.({
         type: 'mistake',
-        expectedConcept: exercise.expectedConcept,
+        topic: exercise.topic,
         exerciseId: exercise.id,
+        expectedConcept: exercise.expectedConcept,
+        studentAnswer: result.student ?? answer,
+        expectedAnswer: result.expected ?? null,
+        hintLevel: hintsUsed + 1,
       });
     }
   };
 
-  const handleHint = () => {
+  const handleHint = async () => {
     if (!hasHintsLeft(exercise, hintsUsed)) return;
-    setCurrentHint(getHint(exercise, hintsUsed));
-    setHintsUsed(hintsUsed + 1);
+    const level = hintsUsed + 1;
+    await onAskHint?.({
+      type: 'hint',
+      topic: exercise.topic,
+      exerciseId: exercise.id,
+      expectedConcept: exercise.expectedConcept,
+      hintLevel: level,
+    });
+    onIncrementHint?.();
   };
 
   const noHintsLeft = !hasHintsLeft(exercise, hintsUsed);
@@ -79,16 +86,11 @@ export default function ExerciseCard({ exercise, onResult, onAskHint }) {
           Comprobar
         </button>
       </div>
-      {currentHint && (
-        <div className="hint-box" role="status">
-          <strong>Pista {hintsUsed}:</strong> {currentHint}
-        </div>
-      )}
       {feedback && (
         <div className={`feedback ${feedback.correct ? 'correct' : 'incorrect'}`} role="status">
           {feedback.correct
             ? '¡Ikatu! Respuesta correcta.'
-            : feedback.message ?? 'Todavía no. Mirá la pista del tutor y volvé a intentarlo.'}
+            : feedback.message ?? 'Todavía no. Mirá el mensaje del tutor y volvé a intentarlo.'}
         </div>
       )}
     </section>
