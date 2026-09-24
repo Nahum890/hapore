@@ -160,5 +160,176 @@
       "Los ángulos complementarios (que suman 90°) tienen el mismo alcance horizontal en condiciones ideales.",
       "Por simetría trigonométrica, el alcance de 60° es idéntico al de 30°: 34,64 metros."
     ]
+  },
+  {
+    "id": "ej-cinematica-1",
+    "subtema": "cinematica",
+    "topic": "Cinemática",
+    "difficulty": "básico",
+    "question": "Un dron recorre 120 m en 10 s. ¿Cuál es su rapidez media?",
+    "values": {
+      "distancia": 120,
+      "tiempo": 10
+    },
+    "expectedConcept": "rapidez-media",
+    "correctAnswer": 12,
+    "unit": "m/s",
+    "hints": [
+      "Identificá la distancia y el tiempo.",
+      "Rapidez media = distancia / tiempo.",
+      "120 / 10 = 12 m/s."
+    ]
+  },
+  {
+    "id": "ej-cinematica-2",
+    "subtema": "cinematica",
+    "topic": "Cinemática",
+    "difficulty": "intermedio",
+    "question": "Un carrito mantiene una rapidez de 4 m/s durante 15 s. ¿Qué distancia recorre?",
+    "values": {
+      "rapidez": 4,
+      "tiempo": 15
+    },
+    "expectedConcept": "rapidez-media",
+    "correctAnswer": 60,
+    "unit": "m",
+    "hints": [
+      "La rapidez indica cuántos metros avanza cada segundo.",
+      "En movimiento uniforme: distancia = rapidez * tiempo.",
+      "4 * 15 = 60 m."
+    ]
+  },
+  {
+    "id": "ej-cinematica-3",
+    "subtema": "cinematica",
+    "topic": "Cinemática",
+    "difficulty": "intermedio",
+    "question": "Un ciclista avanza a 6 m/s y recorre 180 m. ¿Cuánto tiempo tarda?",
+    "values": {
+      "rapidez": 6,
+      "distancia": 180
+    },
+    "expectedConcept": "rapidez-media",
+    "correctAnswer": 30,
+    "unit": "s",
+    "hints": [
+      "Se busca el tiempo necesario para completar el recorrido.",
+      "tiempo = distancia / rapidez.",
+      "180 / 6 = 30 s."
+    ]
+  },
+  {
+    "id": "ej-vectores-1",
+    "subtema": "vectores",
+    "topic": "Vectores",
+    "difficulty": "básico",
+    "question": "Un dron vuela a 8 m/s al este respecto del aire. El viento sopla a 2 m/s al este. ¿Cuál es la rapidez del dron respecto del suelo?",
+    "values": {
+      "velocidadDron": 8,
+      "velocidadViento": 2
+    },
+    "expectedConcept": "vector-resultante",
+    "correctAnswer": 10,
+    "unit": "m/s",
+    "hints": [
+      "Ambas velocidades apuntan al mismo sentido.",
+      "En el mismo eje se suman las componentes con su signo.",
+      "8 + 2 = 10 m/s hacia el este."
+    ]
+  },
+  {
+    "id": "ej-vectores-2",
+    "subtema": "vectores",
+    "topic": "Vectores",
+    "difficulty": "intermedio",
+    "question": "Un dron vuela a 8 m/s al este respecto del aire. El viento sopla a 3 m/s al oeste. ¿Cuál es su rapidez respecto del suelo?",
+    "values": {
+      "velocidadDron": 8,
+      "velocidadViento": -3
+    },
+    "expectedConcept": "vector-resultante",
+    "correctAnswer": 5,
+    "unit": "m/s",
+    "hints": [
+      "El viento se opone al avance.",
+      "Tomá el este como positivo: la velocidad del viento es negativa.",
+      "8 + (-3) = 5 m/s hacia el este."
+    ]
+  },
+  {
+    "id": "ej-vectores-3",
+    "subtema": "vectores",
+    "topic": "Vectores",
+    "difficulty": "intermedio",
+    "question": "Dos desplazamientos perpendiculares miden 3 m al este y 4 m al norte. ¿Cuánto mide el desplazamiento resultante?",
+    "values": {
+      "componenteX": 3,
+      "componenteY": 4
+    },
+    "expectedConcept": "vector-resultante",
+    "correctAnswer": 5,
+    "unit": "m",
+    "hints": [
+      "Los desplazamientos forman los catetos de un triángulo rectángulo.",
+      "Magnitud de la resultante = raíz de (x² + y²).",
+      "Raíz de (3² + 4²) = raíz de 25 = 5 m."
+    ]
+  },
+  {
+    "id": "ej-hooke-1",
+    "subtema": "hooke",
+    "topic": "Ley de Hooke",
+    "difficulty": "básico",
+    "question": "Un resorte tiene rigidez k = 200 N/m y se estira 0,05 m. ¿Cuál es la magnitud de su fuerza elástica?",
+    "values": {
+      "k": 200,
+      "x": 0.05
+    },
+    "expectedConcept": "ley-hooke",
+    "correctAnswer": 10,
+    "unit": "N",
+    "hints": [
+      "La fuerza depende de la rigidez y del estiramiento.",
+      "Magnitud de la fuerza: F = k * x.",
+      "200 * 0,05 = 10 N."
+    ]
+  },
+  {
+    "id": "ej-hooke-2",
+    "subtema": "hooke",
+    "topic": "Ley de Hooke",
+    "difficulty": "intermedio",
+    "question": "Una fuerza de 12 N estira un resorte 0,04 m. ¿Cuál es su constante elástica k?",
+    "values": {
+      "fuerza": 12,
+      "x": 0.04
+    },
+    "expectedConcept": "ley-hooke",
+    "correctAnswer": 300,
+    "unit": "N/m",
+    "hints": [
+      "La constante indica la rigidez del resorte.",
+      "Despejá la ley de Hooke: k = F / x.",
+      "12 / 0,04 = 300 N/m."
+    ]
+  },
+  {
+    "id": "ej-hooke-3",
+    "subtema": "hooke",
+    "topic": "Ley de Hooke",
+    "difficulty": "intermedio",
+    "question": "Un resorte de k = 150 N/m soporta una fuerza de magnitud 6 N. ¿Cuánto se deforma?",
+    "values": {
+      "k": 150,
+      "fuerza": 6
+    },
+    "expectedConcept": "ley-hooke",
+    "correctAnswer": 0.04,
+    "unit": "m",
+    "hints": [
+      "Se busca la deformación en metros.",
+      "Despejá la ley de Hooke: x = F / k.",
+      "6 / 150 = 0,04 m, equivalentes a 4 cm."
+    ]
   }
 ]

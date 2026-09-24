@@ -110,5 +110,155 @@
     "frente_jopara": "¿Mba'épa oiko pe dron yvate og̃uahẽvo?",
     "dorso_concepto": "En la cúspide vy = 0 m/s, pero vx sigue empujando hacia adelante.",
     "subtopic": "Altura Máxima"
+  },
+  {
+    "id": "fc-cinematica-1",
+    "topic": "Cinemática",
+    "front": "¿Cómo se calcula la rapidez media?",
+    "back": "Dividí la distancia total por el tiempo total.",
+    "formula": "rapidez media = distancia / tiempo",
+    "frente_es": "¿Cómo se calcula la rapidez media?",
+    "frente_jopara": "",
+    "dorso_concepto": "Dividí la distancia total por el tiempo total."
+  },
+  {
+    "id": "fc-cinematica-2",
+    "topic": "Cinemática",
+    "front": "¿Qué caracteriza al movimiento rectilíneo uniforme?",
+    "back": "La trayectoria es recta y la velocidad permanece constante.",
+    "formula": "distancia = rapidez * tiempo",
+    "frente_es": "¿Qué caracteriza al movimiento rectilíneo uniforme?",
+    "frente_jopara": "",
+    "dorso_concepto": "La trayectoria es recta y la velocidad permanece constante."
+  },
+  {
+    "id": "fc-cinematica-3",
+    "topic": "Cinemática",
+    "front": "¿Cómo se calcula el tiempo en un movimiento uniforme?",
+    "back": "Dividí la distancia recorrida por la rapidez constante.",
+    "formula": "tiempo = distancia / rapidez",
+    "frente_es": "¿Cómo se calcula el tiempo en un movimiento uniforme?",
+    "frente_jopara": "",
+    "dorso_concepto": "Dividí la distancia recorrida por la rapidez constante."
+  },
+  {
+    "id": "fc-cinematica-4",
+    "topic": "Cinemática",
+    "front": "¿Son iguales distancia y desplazamiento?",
+    "back": "La distancia mide el camino recorrido. El desplazamiento une el punto inicial con el final y tiene dirección.",
+    "formula": "velocidad media = desplazamiento / tiempo",
+    "frente_es": "¿Son iguales distancia y desplazamiento?",
+    "frente_jopara": "",
+    "dorso_concepto": "La distancia mide el camino recorrido. El desplazamiento une el punto inicial con el final y tiene dirección."
+  },
+  {
+    "id": "fc-cinematica-5",
+    "topic": "Cinemática",
+    "front": "¿Qué mide la aceleración media?",
+    "back": "El cambio de velocidad por cada unidad de tiempo. Su unidad es m/s².",
+    "formula": "aceleración media = (velocidad final - velocidad inicial) / tiempo",
+    "frente_es": "¿Qué mide la aceleración media?",
+    "frente_jopara": "",
+    "dorso_concepto": "El cambio de velocidad por cada unidad de tiempo. Su unidad es m/s²."
+  },
+  {
+    "id": "fc-vectores-1",
+    "topic": "Vectores",
+    "front": "¿Qué caracteriza a un vector?",
+    "back": "Tiene magnitud, dirección y sentido.",
+    "formula": "vector = (componente X, componente Y)",
+    "frente_es": "¿Qué caracteriza a un vector?",
+    "frente_jopara": "",
+    "dorso_concepto": "Tiene magnitud, dirección y sentido."
+  },
+  {
+    "id": "fc-vectores-2",
+    "topic": "Vectores",
+    "front": "¿Cómo se suman vectores del mismo eje?",
+    "back": "Se suman sus componentes con signo, según el sentido elegido como positivo.",
+    "formula": "Rx = Ax + Bx",
+    "frente_es": "¿Cómo se suman vectores del mismo eje?",
+    "frente_jopara": "",
+    "dorso_concepto": "Se suman sus componentes con signo, según el sentido elegido como positivo."
+  },
+  {
+    "id": "fc-vectores-3",
+    "topic": "Vectores",
+    "front": "¿Cómo influye un viento a favor?",
+    "back": "Su componente se suma a la del dron para obtener la velocidad respecto del suelo.",
+    "formula": "Vsuelo = Vdron + Vviento",
+    "frente_es": "¿Cómo influye un viento a favor?",
+    "frente_jopara": "",
+    "dorso_concepto": "Su componente se suma a la del dron para obtener la velocidad respecto del suelo."
+  },
+  {
+    "id": "fc-vectores-4",
+    "topic": "Vectores",
+    "front": "¿Cómo se calcula la magnitud de dos componentes perpendiculares?",
+    "back": "Aplicá el teorema de Pitágoras a las componentes.",
+    "formula": "magnitud = raíz de (x² + y²)",
+    "frente_es": "¿Cómo se calcula la magnitud de dos componentes perpendiculares?",
+    "frente_jopara": "",
+    "dorso_concepto": "Aplicá el teorema de Pitágoras a las componentes."
+  },
+  {
+    "id": "fc-vectores-5",
+    "topic": "Vectores",
+    "front": "¿Una magnitud vectorial puede representarse con un solo número?",
+    "back": "En un eje se usa un número con signo; en dos dimensiones hacen falta las componentes o magnitud y dirección.",
+    "formula": "V = (Vx, Vy)",
+    "frente_es": "¿Una magnitud vectorial puede representarse con un solo número?",
+    "frente_jopara": "",
+    "dorso_concepto": "En un eje se usa un número con signo; en dos dimensiones hacen falta las componentes o magnitud y dirección."
+  },
+  {
+    "id": "fc-hooke-1",
+    "topic": "Ley de Hooke",
+    "front": "¿Qué relaciona la ley de Hooke?",
+    "back": "Relaciona la fuerza elástica con la deformación, dentro del límite elástico.",
+    "formula": "magnitud F = k * x",
+    "frente_es": "¿Qué relaciona la ley de Hooke?",
+    "frente_jopara": "",
+    "dorso_concepto": "Relaciona la fuerza elástica con la deformación, dentro del límite elástico."
+  },
+  {
+    "id": "fc-hooke-2",
+    "topic": "Ley de Hooke",
+    "front": "¿Qué representa la constante k?",
+    "back": "La rigidez del resorte. Cuanto mayor es k, más fuerza se necesita para una misma deformación.",
+    "formula": "k = F / x, en N/m",
+    "frente_es": "¿Qué representa la constante k?",
+    "frente_jopara": "",
+    "dorso_concepto": "La rigidez del resorte. Cuanto mayor es k, más fuerza se necesita para una misma deformación."
+  },
+  {
+    "id": "fc-hooke-3",
+    "topic": "Ley de Hooke",
+    "front": "¿En qué unidad se usa la deformación x?",
+    "back": "En metros, si la fuerza se expresa en newtons y k en N/m.",
+    "formula": "1 cm = 0,01 m",
+    "frente_es": "¿En qué unidad se usa la deformación x?",
+    "frente_jopara": "",
+    "dorso_concepto": "En metros, si la fuerza se expresa en newtons y k en N/m."
+  },
+  {
+    "id": "fc-hooke-4",
+    "topic": "Ley de Hooke",
+    "front": "¿Hacia dónde apunta la fuerza restauradora?",
+    "back": "En sentido opuesto a la deformación: intenta devolver el resorte a su posición de equilibrio.",
+    "formula": "F = -k * x",
+    "frente_es": "¿Hacia dónde apunta la fuerza restauradora?",
+    "frente_jopara": "",
+    "dorso_concepto": "En sentido opuesto a la deformación: intenta devolver el resorte a su posición de equilibrio."
+  },
+  {
+    "id": "fc-hooke-5",
+    "topic": "Ley de Hooke",
+    "front": "¿Se cumple la ley de Hooke para cualquier estiramiento?",
+    "back": "No. Solo describe el comportamiento proporcional dentro del límite elástico del resorte.",
+    "formula": "F / x = k, en la región elástica",
+    "frente_es": "¿Se cumple la ley de Hooke para cualquier estiramiento?",
+    "frente_jopara": "",
+    "dorso_concepto": "No. Solo describe el comportamiento proporcional dentro del límite elástico del resorte."
   }
 ]

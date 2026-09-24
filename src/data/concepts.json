@@ -40,5 +40,23 @@
     "name": "Ángulo de alcance máximo",
     "definition": "En terreno plano y sin resistencia del aire, el ángulo de 45° maximiza el factor sen(2 * ángulo) = sen(90°) = 1, ofreciendo la mayor distancia posible para una velocidad dada.",
     "formula": "ángulo_max = 45°"
+  },
+  {
+    "id": "rapidez-media",
+    "name": "Rapidez media",
+    "definition": "La rapidez media relaciona la distancia recorrida con el tiempo empleado. Se expresa en m/s cuando la distancia está en metros y el tiempo en segundos.",
+    "formula": "rapidez media = distancia / tiempo"
+  },
+  {
+    "id": "vector-resultante",
+    "name": "Vector resultante",
+    "definition": "Un vector tiene magnitud, dirección y sentido. La resultante se obtiene sumando sus componentes en cada eje; los sentidos opuestos llevan signos distintos.",
+    "formula": "Vx resultante = Vx1 + Vx2"
+  },
+  {
+    "id": "ley-hooke",
+    "name": "Ley de Hooke",
+    "definition": "Dentro del límite elástico, la magnitud de la fuerza de un resorte es proporcional a su deformación. La fuerza restauradora apunta en sentido opuesto a esa deformación.",
+    "formula": "magnitud de la fuerza = rigidez * deformación"
   }
 ]

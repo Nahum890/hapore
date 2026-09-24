@@ -46,5 +46,29 @@
     "description": "Elegir un ángulo demasiado rasante (<25°) o excesivo (>70°) que acorta drásticamente el alcance.",
     "example": "Para alcanzar 40 m con 20 m/s, el ángulo óptimo es 45°. A 20° o 70° el dron cae antes.",
     "expectedConcept": "alcance"
+  },
+  {
+    "id": "err-cinematica",
+    "key": "cinematica-concepto",
+    "name": "Revisar Cinemática",
+    "description": "Confundir la distancia recorrida con el desplazamiento o invertir distancia y tiempo.",
+    "example": "120 / 10 = 12 m/s.",
+    "expectedConcept": "rapidez-media"
+  },
+  {
+    "id": "err-vectores",
+    "key": "vectores-concepto",
+    "name": "Revisar Vectores",
+    "description": "Sumar las magnitudes sin considerar la dirección y el sentido de cada componente.",
+    "example": "8 + 2 = 10 m/s hacia el este.",
+    "expectedConcept": "vector-resultante"
+  },
+  {
+    "id": "err-hooke",
+    "key": "hooke-concepto",
+    "name": "Revisar Ley de Hooke",
+    "description": "Usar centímetros como si fueran metros o aplicar la relación fuera del límite elástico.",
+    "example": "200 * 0,05 = 10 N.",
+    "expectedConcept": "ley-hooke"
   }
 ]

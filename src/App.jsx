@@ -15,6 +15,8 @@ import { useOfflineStorage } from './hooks/useOfflineStorage.js';
 import { useTutor } from './hooks/useTutor.js';
 import { useMission } from './hooks/useMission.js';
 import { useQuiz } from './hooks/useQuiz.js';
+import { readJSON, writeJSON } from './utils/storage.js';
+import { decodeClassConfig, encodeClassConfig, temaMatchesSubtemas } from './utils/classCode.js';
 
 function AulaView({ attempts, xp, classConfig, onJoinClass }) {
   return (
@@ -101,6 +103,7 @@ function RepasoView({ quiz, onCardConsolidated }) {
         <Flashcard
           key={card.id}
           flashcard={{
+            id: card.id,
             topic: card.tema,
             frente_es: card.frente,
             frente_jopara: card.jopara,
@@ -186,6 +189,8 @@ function ChatsView({ quiz }) {
             </div>
           ),
         )}
+
+        {quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-streaming" aria-live="off">{quiz.streamText}</div>}
 
         {quiz.charlaLog.map((message, position) => (
           <div
@@ -329,7 +334,7 @@ function ChatsView({ quiz }) {
               Enviar
             </button>
           </form>
-          <button type="button" className="btn btn-secondary quiz-send" onClick={quiz.finish}>
+          <button type="button" className="btn btn-secondary quiz-send" onClick={quiz.finish} disabled={quiz.busy}>
             Terminar y ver resultado
           </button>
         </div>
@@ -366,11 +371,14 @@ function ChatsView({ quiz }) {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('simulador');
-  const [classConfig, setClassConfig] = useState(null);
+  const [classConfig, setClassConfig] = useState(() => decodeClassConfig(readJSON('guarania:classCode', null)));
+  const visibleExercises = classConfig
+    ? exercisesData.filter((exercise) => temaMatchesSubtemas(exercise.topic, classConfig.subtemas)).slice(0, classConfig.ejercicios)
+    : exercisesData;
   const learning = useOfflineStorage();
   const { tutor, ask } = useTutor();
   const { mission, currentExercise, index, next, prev } = useMission(
-    exercisesData,
+    visibleExercises,
     learning.currentExercise,
     learning.onSelectExercise,
   );
@@ -390,6 +398,7 @@ export default function App() {
   };
 
   const handleJoinClass = (config) => {
+    writeJSON('guarania:classCode', config ? encodeClassConfig(config) : null);
     setClassConfig(config);
   };
 

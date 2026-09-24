@@ -54,5 +54,26 @@
     "joparaTerm": "Kyhyje'ỹ",
     "definition": "Filosofía pedagógica guaraní que significa 'sin miedo'. Aprender mediante experimentación iterativa sin temor a equivocarse.",
     "ejemploJopara": "Ñamba'apo kyhyje'ỹme: cada error ha'e peteĩ oportunidad de aprendizaje."
+  },
+  {
+    "id": "glos-cinematica",
+    "term": "Rapidez media",
+    "joparaTerm": "Rapidez media",
+    "definition": "La rapidez media relaciona la distancia recorrida con el tiempo empleado. Se expresa en m/s cuando la distancia está en metros y el tiempo en segundos.",
+    "translationStatus": "pending"
+  },
+  {
+    "id": "glos-vectores",
+    "term": "Vector resultante",
+    "joparaTerm": "Vector resultante",
+    "definition": "Un vector tiene magnitud, dirección y sentido. La resultante se obtiene sumando sus componentes en cada eje; los sentidos opuestos llevan signos distintos.",
+    "translationStatus": "pending"
+  },
+  {
+    "id": "glos-hooke",
+    "term": "Ley de Hooke",
+    "joparaTerm": "Ley de Hooke",
+    "definition": "Dentro del límite elástico, la magnitud de la fuerza de un resorte es proporcional a su deformación. La fuerza restauradora apunta en sentido opuesto a esa deformación.",
+    "translationStatus": "pending"
   }
 ]
