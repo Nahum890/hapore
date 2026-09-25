@@ -1,40 +1,36 @@
-import { useState } from 'react';
-
-export default function Flashcard({ flashcard, consolidated, onConsolidate }) {
+import { useEffect, useRef, useState } from 'react';
+export default function Flashcard({ flashcard, consolidated, onConsolidate, onReviewLater }) {
   const [flipped, setFlipped] = useState(false);
-
-  const handleConsolidate = () => {
-    onConsolidate?.(flashcard.id);
+  const [leaving, setLeaving] = useState(false);
+  const timer = useRef(null), locked = useRef(false), answerRef = useRef(null);
+  useEffect(() => {
+    setFlipped(false); setLeaving(false); locked.current = false;
+    return () => clearTimeout(timer.current);
+  }, [flashcard?.id]);
+  useEffect(() => { if (flipped) answerRef.current?.focus({ preventScroll: true }); }, [flipped]);
+  const advance = callback => {
+    if (locked.current || !flipped) return;
+    locked.current = true; setLeaving(true);
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    timer.current = setTimeout(() => {
+      callback?.(flashcard?.id);
+      // A one-card review-later keeps the same component mounted.
+      setFlipped(false); setLeaving(false); locked.current = false;
+    }, reduced ? 0 : 160);
   };
-
+  const front = flashcard?.frente_es ?? flashcard?.front ?? '';
   return (
-    <section className="card flashcard" aria-label={`Tarjeta: ${flashcard.front}`}>
-      <div className={`flashcard-inner ${flipped ? 'is-flipped' : ''}`}>
-        <div className="flashcard-face flashcard-front">
-          <p className="flashcard-topic">{flashcard.topic}</p>
-          <p className="flashcard-text">{flashcard.front}</p>
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => setFlipped(true)}
-          >
-            Mostrar respuesta
-          </button>
+    <section className={'card flashcard deck-card-enter ' + (leaving ? 'deck-card-leave' : '')} aria-label={'Tarjeta: ' + front} aria-busy={leaving}>
+      <div className={'flashcard-inner ' + (flipped ? 'is-flipped' : '')}>
+        <div className="flashcard-face flashcard-front" aria-hidden={flipped} inert={flipped ? '' : undefined}>
+          <div><p className="flashcard-topic">{flashcard?.topic || 'Repaso de Física'}</p><h3 className="flashcard-text">{front}</h3>{flashcard?.frente_jopara && <p className="flashcard-jopara">{flashcard.frente_jopara}</p>}</div>
+          <button type="button" className="btn btn-secondary" tabIndex={flipped ? -1 : 0} onClick={() => setFlipped(true)}>Mostrar respuesta</button>
         </div>
-        <div className="flashcard-face flashcard-back">
-          <p className="flashcard-text">{flashcard.back}</p>
-          {consolidated && <span className="chip chip-consolidated">Consolidada</span>}
+        <div className="flashcard-face flashcard-back" aria-hidden={!flipped} inert={!flipped ? '' : undefined}>
+          <div ref={answerRef} tabIndex={-1} className="flashcard-answer"><p className="flashcard-topic">{flashcard?.topic || 'Respuesta'}</p><p className="flashcard-text">{flashcard?.dorso_concepto ?? flashcard?.back ?? ''}</p>{flashcard?.formula && <p className="flashcard-formula">{flashcard.formula}</p>}{consolidated && <span className="chip chip-consolidated">Consolidada</span>}</div>
           <div className="flashcard-actions">
-            <button type="button" className="btn btn-primary" onClick={handleConsolidate}>
-              Aikuaa porãma
-            </button>
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={() => setFlipped(false)}
-            >
-              Ahecha jey pota
-            </button>
+            <button type="button" className="btn btn-primary" tabIndex={flipped ? 0 : -1} disabled={leaving} onClick={() => advance(onConsolidate)}>¡Aikuaa porãma! (Lo tengo claro)</button>
+            <button type="button" className="btn btn-secondary" tabIndex={flipped ? 0 : -1} disabled={leaving} onClick={() => advance(onReviewLater)}>Ahecha jey pota (Repasar luego)</button>
           </div>
         </div>
       </div>

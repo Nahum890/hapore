@@ -1,49 +1,144 @@
 [
   {
+    "id": "ej-termo-01", "topic": "Termodinámica", "difficulty": "básico", "subtema": "calor_especifico",
+    "question": "Para calentar 0,5 kg de agua para el mate, la temperatura sube de 20 °C a 30 °C. Con c = 4200 J/(kg·°C), ¿cuánto calor recibió el agua?",
+    "questionJopara": "Pe y mate-rã hakuve 20 °C guive 30 °C peve. ¿Mboy J de calor-pa ohupyty?",
+    "values": { "masa": 0.5, "calorEspecifico": 4200, "temperaturaInicial": 20, "temperaturaFinal": 30 },
+    "expectedConcept": "calor-sensible", "correctAnswer": 21000, "unit": "J", "tolerance": 0.02,
+    "hints": ["¿Mboy grado-pa subió? Calculá primero el cambio de temperatura: final menos inicial.", "El calor sensible se calcula con Q = m · c · ΔT. La masa va en kg.", "ΔT = 30 - 20 = 10 °C. Entonces Q = 0,5 · 4200 · 10 = 21000 J."]
+  },
+  {
+    "id": "ej-termo-02", "topic": "Termodinámica", "difficulty": "intermedio", "subtema": "calor_especifico",
+    "question": "Un recipiente contiene 0,2 kg de agua a 25 °C. Recibe 8400 J sin pérdidas. Con c = 4200 J/(kg·°C), ¿cuál es su temperatura final?",
+    "questionJopara": "Pe y oñepyrũ 25 °C-pe ha ohupyty 8400 J. ¿Mboy °C-pe opa?",
+    "values": { "masa": 0.2, "calorEspecifico": 4200, "temperaturaInicial": 25, "calor": 8400 },
+    "expectedConcept": "temperatura-final", "correctAnswer": 35, "unit": "°C", "tolerance": 0.02,
+    "hints": ["Pe temperatura final sube. Primero averiguá cuántos grados aumentó.", "Despejá ΔT = Q / (m · c) y luego sumá la temperatura inicial.", "ΔT = 8400 / (0,2 · 4200) = 10 °C. Temperatura final = 25 + 10 = 35 °C."]
+  },
+  {
+    "id": "ej-termo-03", "topic": "Termodinámica", "difficulty": "intermedio", "subtema": "equilibrio_termico",
+    "question": "Para preparar agua templada se mezclan 0,2 kg de agua a 60 °C con 0,3 kg de agua a 20 °C. Sin pérdidas de calor y con igual calor específico, ¿qué temperatura final alcanza la mezcla?",
+    "questionJopara": "Ñambojehe'a y haku ha y ro'ysã. ¿Mboy °C-pe opyta pe mezcla?",
+    "values": { "masaCaliente": 0.2, "temperaturaCaliente": 60, "masaFria": 0.3, "temperaturaFria": 20 },
+    "expectedConcept": "equilibrio-termico", "correctAnswer": 36, "unit": "°C", "tolerance": 0.02,
+    "hints": ["La temperatura final queda entre 20 °C y 60 °C. ¿Qué porción tiene más masa?", "Como ambas porciones son agua, T = (m₁T₁ + m₂T₂) / (m₁ + m₂).", "T = (0,2 · 60 + 0,3 · 20) / 0,5 = 36 °C."]
+  },
+  {
+    "id": "ej-termo-04", "topic": "Termodinámica", "difficulty": "avanzado", "subtema": "calor_especifico",
+    "question": "Una olla con 0,4 kg de agua pasa de 28 °C a 48 °C. Si no hay pérdidas y c = 4200 J/(kg·°C), ¿qué energía térmica absorbió?",
+    "questionJopara": "Pe y olla-pe hakuve 28 °C guive 48 °C peve. ¿Mboy J-pa ohupyty?",
+    "values": { "masa": 0.4, "calorEspecifico": 4200, "temperaturaInicial": 28, "temperaturaFinal": 48 },
+    "expectedConcept": "calor-sensible", "correctAnswer": 33600, "unit": "J", "tolerance": 0.02,
+    "hints": ["Mirá la diferencia de temperaturas, ani reipurúi solo la temperatura final.", "Usá Q = m · c · (Tf - Ti).", "ΔT = 20 °C; Q = 0,4 · 4200 · 20 = 33600 J."]
+  },
+  {
+    "id": "ej-optica-01", "topic": "Óptica", "difficulty": "básico", "subtema": "reflexion",
+    "question": "Un rayo de sol llega a un espejo con un ángulo de incidencia de 35° medido desde la normal. ¿Cuál es el ángulo de reflexión?",
+    "questionJopara": "Pe luz oguahẽ espejo-pe 35° normal guive. ¿Mboy grado-pa pe reflexión?",
+    "values": { "anguloIncidencia": 35 }, "expectedConcept": "ley-reflexion", "correctAnswer": 35, "unit": "°", "tolerance": 0.02,
+    "hints": ["Mirá la línea normal: ambos ángulos se miden desde ella, no desde el espejo.", "La ley de reflexión dice que el ángulo de incidencia es igual al de reflexión.", "Si el ángulo de incidencia es 35°, el de reflexión también es 35°."]
+  },
+  {
+    "id": "ej-optica-02", "topic": "Óptica", "difficulty": "intermedio", "subtema": "espejo_plano",
+    "question": "Una linterna está a 40 cm frente a un espejo plano. ¿A qué distancia detrás del espejo aparece su imagen?",
+    "questionJopara": "Pe linterna oĩ 40 cm espejo renondépe. ¿Mboy cm-pa ojekuaa pe imagen espejo kupépe?",
+    "values": { "distanciaObjeto": 40 }, "expectedConcept": "espejo-plano", "correctAnswer": 40, "unit": "cm", "tolerance": 0.02,
+    "hints": ["Pensá en la simetría: la imagen parece estar detrás del espejo.", "En un espejo plano, la distancia de la imagen al espejo es igual a la del objeto al espejo.", "La linterna está a 40 cm, así que su imagen aparece a 40 cm detrás del espejo."]
+  },
+  {
+    "id": "ej-optica-03", "topic": "Óptica", "difficulty": "intermedio", "subtema": "refraccion",
+    "question": "La luz viaja en un vidrio a 200000000 m/s. Si en el vacío viaja a 300000000 m/s, ¿cuál es el índice de refracción del vidrio?",
+    "questionJopara": "Pe luz oho vidrio-pe 200000000 m/s, vacío-pe 300000000 m/s. ¿Mboy-pa pe índice de refracción?",
+    "values": { "velocidadVacio": 300000000, "velocidadMedio": 200000000 }, "expectedConcept": "indice-refraccion", "correctAnswer": 1.5, "unit": "sin unidad", "tolerance": 0.02,
+    "hints": ["¿La luz va más rápido o más lento dentro del vidrio?", "El índice se calcula como n = c / v. No lleva unidad porque se dividen dos velocidades.", "n = 300000000 / 200000000 = 1,5, sin unidad."]
+  },
+  {
+    "id": "ej-optica-04", "topic": "Óptica", "difficulty": "avanzado", "subtema": "reflexion",
+    "question": "Un rayo ilumina un espejo del aula y forma 25° con la superficie del espejo. ¿Qué ángulo de reflexión forma con la normal?",
+    "questionJopara": "Pe luz ojapo 25° espejo superficie rehe. ¿Mboy grado-pa pe reflexión normal guive?",
+    "values": { "anguloSuperficie": 25 }, "expectedConcept": "ley-reflexion", "correctAnswer": 65, "unit": "°", "tolerance": 0.02,
+    "hints": ["Atención: el ángulo dado está medido desde la superficie, no desde la normal.", "La normal es perpendicular al espejo: primero calculá 90° - 25°.", "El ángulo de incidencia con la normal es 65°. Por la ley de reflexión, el de reflexión también es 65°."]
+  },
+  {
     "id": "ej-01",
-    "subtema": "movimiento_parabolico",
     "topic": "Movimiento Parabólico",
     "difficulty": "básico",
     "question": "Un dron despega con v0 = 20 m/s y ángulo de 30° sobre la horizontal. ¿Cuánto vale la componente horizontal (vx) de la velocidad?",
-    "values": { "v0": 20, "angle": 30, "gravity": 9.8 },
+    "values": {
+      "v0": 20,
+      "angle": 30,
+      "gravity": 9.8
+    },
     "expectedConcept": "componente-horizontal",
     "correctAnswer": 17.32,
     "unit": "m/s",
-    "targetX": 34.64,
-    "targetY": 0,
-    "tolerance": 0.05,
     "hints": [
       "¿Qué dos direcciones hay? Pe dron oho yvate ha tenonde.",
-      "La componente horizontal no cambia con la gravedad: vx = v0 · cos(θ).",
-      "Sustitución directa: vx = 20 · cos(30°) ≈ 20 · 0,866 = 17,32 m/s."
-    ]
+      "La componente horizontal no cambia con la gravedad: vx = v0 * cos(ángulo).",
+      "Sustitución directa: vx = 20 * cos(30°) ≈ 20 * 0,866 = 17,32 m/s."
+    ],
+    "subtema": "movimiento_parabolico",
+    "targetX": 34.64,
+    "targetY": 0,
+    "tolerance": 0.05
   },
   {
     "id": "ej-02",
-    "subtema": "movimiento_parabolico",
     "topic": "Movimiento Parabólico",
     "difficulty": "básico",
     "question": "El mismo dron despega con v0 = 20 m/s y 30° sobre la horizontal. ¿Cuánto vale la componente vertical inicial (vy)?",
-    "values": { "v0": 20, "angle": 30, "gravity": 9.8 },
+    "values": {
+      "v0": 20,
+      "angle": 30,
+      "gravity": 9.8
+    },
     "expectedConcept": "componente-vertical",
     "correctAnswer": 10,
     "unit": "m/s",
-    "targetX": 34.64,
-    "targetY": 0,
-    "tolerance": 0.05,
     "hints": [
       "La velocidad vertical determina cuánto sube el dron antes de que la gravedad lo frene.",
-      "La componente vertical inicial se calcula con el seno: vy = v0 · sen(θ).",
-      "Sustitución directa: vy = 20 · sen(30°) = 20 · 0,5 = 10 m/s."
-    ]
+      "La componente vertical inicial se calcula con el seno: vy = v0 * sen(ángulo).",
+      "Sustitución directa: vy = 20 * sen(30°) = 20 * 0,5 = 10 m/s."
+    ],
+    "subtema": "movimiento_parabolico",
+    "targetX": 34.64,
+    "targetY": 0,
+    "tolerance": 0.05
   },
   {
     "id": "ej-03",
+    "topic": "Movimiento Parabólico",
+    "difficulty": "intermedio",
+    "question": "Se lanza un dron con v0 = 19,6 m/s y ángulo de 45° con g = 9,8 m/s². ¿Cuál es su altura máxima?",
+    "values": {
+      "v0": 19.6,
+      "angle": 45,
+      "gravity": 9.8
+    },
+    "expectedConcept": "altura-maxima",
+    "correctAnswer": 9.8,
+    "unit": "m",
+    "hints": [
+      "En el punto más alto toda la energía cinética vertical se transformó en altura.",
+      "Fórmula de altura máxima: Hmax = v0² * sen²(ángulo) / (2 * g).",
+      "Hmax = (19,6² * sen²(45°)) / (2 * 9,8) = (384,16 * 0,5) / 19,6 = 9,8 metros."
+    ],
+    "subtema": "movimiento_parabolico",
+    "targetX": 39.2,
+    "targetY": 0,
+    "tolerance": 0.05
+  },
+  {
+    "id": "ej-mec-03",
     "subtema": "movimiento_parabolico",
     "topic": "Movimiento Parabólico",
     "difficulty": "intermedio",
-    "question": "Con v0 = 20 m/s, θ = 30° y gravedad de aula g = 10 m/s², ¿cuánto dura el tiempo total de vuelo si sale y llega a la misma altura?",
-    "values": { "v0": 20, "angle": 30, "gravity": 10 },
+    "question": "Con v0 = 20 m/s, ángulo = 30° y gravedad de aula g = 10 m/s², ¿cuánto dura el tiempo total de vuelo si sale y llega a la misma altura?",
+    "values": {
+      "v0": 20,
+      "angle": 30,
+      "gravity": 10
+    },
     "expectedConcept": "tiempo-de-vuelo",
     "correctAnswer": 2,
     "unit": "s",
@@ -52,8 +147,8 @@
     "tolerance": 0.05,
     "hints": [
       "Mirá solo el eje vertical: en la cúspide la velocidad vertical se hace cero.",
-      "Tiempo de vuelo en suelo nivelado: T = 2 · vy / g.",
-      "Como vy = 10 m/s y g = 10 m/s², T = (2 · 10) / 10 = 2 segundos."
+      "Tiempo de vuelo en suelo nivelado: T = 2 * vy / g.",
+      "Como vy = 10 m/s y g = 10 m/s², T = (2 * 10) / 10 = 2 segundos."
     ]
   },
   {
@@ -62,7 +157,11 @@
     "topic": "Movimiento Parabólico",
     "difficulty": "intermedio",
     "question": "El dron avanza horizontalmente a vx ≈ 17,32 m/s durante un vuelo de T = 2 s. ¿Qué distancia horizontal total (alcance R) recorre?",
-    "values": { "vx": 17.32, "t": 2, "gravity": 10 },
+    "values": {
+      "vx": 17.32,
+      "t": 2,
+      "gravity": 10
+    },
     "expectedConcept": "alcance",
     "correctAnswer": 34.64,
     "unit": "m",
@@ -71,27 +170,8 @@
     "tolerance": 0.05,
     "hints": [
       "En el eje horizontal el movimiento es uniforme (MRU), no hay aceleración.",
-      "Fórmula de alcance horizontal: R = vx · T.",
-      "Multiplicación directa: R = 17,32 m/s · 2 s = 34,64 metros."
-    ]
-  },
-  {
-    "id": "ej-05",
-    "subtema": "movimiento_parabolico",
-    "topic": "Movimiento Parabólico",
-    "difficulty": "intermedio",
-    "question": "Se lanza un dron con v0 = 19,6 m/s y ángulo de 45° con g = 9,8 m/s². ¿Cuál es su altura máxima?",
-    "values": { "v0": 19.6, "angle": 45, "gravity": 9.8 },
-    "expectedConcept": "altura-maxima",
-    "correctAnswer": 9.8,
-    "unit": "m",
-    "targetX": 39.2,
-    "targetY": 0,
-    "tolerance": 0.05,
-    "hints": [
-      "En el punto más alto toda la energía cinética vertical se transformó en altura.",
-      "Fórmula de altura máxima: Hmax = v0² · sen²(θ) / (2g).",
-      "Hmax = (19,6² · sen²(45°)) / (2 · 9,8) = (384,16 · 0,5) / 19,6 = 9,8 metros."
+      "Fórmula de alcance horizontal: R = vx * T.",
+      "Multiplicación directa: R = 17,32 m/s * 2 s = 34,64 metros."
     ]
   },
   {
@@ -99,8 +179,12 @@
     "subtema": "movimiento_parabolico",
     "topic": "Movimiento Parabólico",
     "difficulty": "avanzado",
-    "question": "Misión Alto Paraná: Un puesto sanitario está a 40 m de distancia a la misma altura. Si v0 = 20 m/s y g = 10 m/s², ¿qué ángulo θ (en grados) logra llegar exactamente al objetivo?",
-    "values": { "v0": 20, "targetDistance": 40, "gravity": 10 },
+    "question": "Misión Alto Paraná: Un puesto sanitario está a 40 m de distancia a la misma altura. Si v0 = 20 m/s y g = 10 m/s², ¿qué ángulo ángulo (en grados) logra llegar exactamente al objetivo?",
+    "values": {
+      "v0": 20,
+      "targetDistance": 40,
+      "gravity": 10
+    },
     "expectedConcept": "alcance",
     "correctAnswer": 45,
     "unit": "°",
@@ -108,9 +192,9 @@
     "targetY": 0,
     "tolerance": 0.5,
     "hints": [
-      "El alcance máximo de cualquier proyectil se logra cuando el término sen(2θ) alcanza su valor máximo.",
-      "R = (v0² · sen(2θ)) / g. Sustituyendo: 40 = (400 · sen(2θ)) / 10 -> sen(2θ) = 1.",
-      "Si sen(2θ) = 1, entonces 2θ = 90°, por lo que θ = 45°."
+      "El alcance máximo de cualquier proyectil se logra cuando el término sen(2 * ángulo) alcanza su valor máximo.",
+      "R = (v0² * sen(2 * ángulo)) / g. Sustituyendo: 40 = (400 * sen(2 * ángulo)) / 10 -> sen(2 * ángulo) = 1.",
+      "Si sen(2 * ángulo) = 1, entonces 2 * ángulo = 90°, por lo que ángulo = 45°."
     ]
   },
   {
@@ -119,7 +203,12 @@
     "topic": "Movimiento Parabólico",
     "difficulty": "avanzado",
     "question": "Lanzamos dos drones con v0 = 20 m/s y g = 10 m/s²: el dron A a 30° y el dron B a 60°. Si el dron A alcanzó 34,64 m, ¿cuál es el alcance del dron B?",
-    "values": { "v0": 20, "angleA": 30, "angleB": 60, "gravity": 10 },
+    "values": {
+      "v0": 20,
+      "angleA": 30,
+      "angleB": 60,
+      "gravity": 10
+    },
     "expectedConcept": "alcance",
     "correctAnswer": 34.64,
     "unit": "m",
@@ -127,9 +216,180 @@
     "targetY": 0,
     "tolerance": 0.05,
     "hints": [
-      "Compará sen(2 · 30°) con sen(2 · 60°): sen(60°) = sen(120°).",
+      "Compará sen(2 * 30°) con sen(2 * 60°): sen(60°) = sen(120°).",
       "Los ángulos complementarios (que suman 90°) tienen el mismo alcance horizontal en condiciones ideales.",
       "Por simetría trigonométrica, el alcance de 60° es idéntico al de 30°: 34,64 metros."
+    ]
+  },
+  {
+    "id": "ej-cinematica-1",
+    "subtema": "cinematica",
+    "topic": "Cinemática",
+    "difficulty": "básico",
+    "question": "Un dron recorre 120 m en 10 s. ¿Cuál es su rapidez media?",
+    "values": {
+      "distancia": 120,
+      "tiempo": 10
+    },
+    "expectedConcept": "rapidez-media",
+    "correctAnswer": 12,
+    "unit": "m/s",
+    "hints": [
+      "Identificá la distancia y el tiempo.",
+      "Rapidez media = distancia / tiempo.",
+      "120 / 10 = 12 m/s."
+    ]
+  },
+  {
+    "id": "ej-cinematica-2",
+    "subtema": "cinematica",
+    "topic": "Cinemática",
+    "difficulty": "intermedio",
+    "question": "Un carrito mantiene una rapidez de 4 m/s durante 15 s. ¿Qué distancia recorre?",
+    "values": {
+      "rapidez": 4,
+      "tiempo": 15
+    },
+    "expectedConcept": "rapidez-media",
+    "correctAnswer": 60,
+    "unit": "m",
+    "hints": [
+      "La rapidez indica cuántos metros avanza cada segundo.",
+      "En movimiento uniforme: distancia = rapidez * tiempo.",
+      "4 * 15 = 60 m."
+    ]
+  },
+  {
+    "id": "ej-cinematica-3",
+    "subtema": "cinematica",
+    "topic": "Cinemática",
+    "difficulty": "intermedio",
+    "question": "Un ciclista avanza a 6 m/s y recorre 180 m. ¿Cuánto tiempo tarda?",
+    "values": {
+      "rapidez": 6,
+      "distancia": 180
+    },
+    "expectedConcept": "rapidez-media",
+    "correctAnswer": 30,
+    "unit": "s",
+    "hints": [
+      "Se busca el tiempo necesario para completar el recorrido.",
+      "tiempo = distancia / rapidez.",
+      "180 / 6 = 30 s."
+    ]
+  },
+  {
+    "id": "ej-vectores-1",
+    "subtema": "vectores",
+    "topic": "Vectores",
+    "difficulty": "básico",
+    "question": "Un dron vuela a 8 m/s al este respecto del aire. El viento sopla a 2 m/s al este. ¿Cuál es la rapidez del dron respecto del suelo?",
+    "values": {
+      "velocidadDron": 8,
+      "velocidadViento": 2
+    },
+    "expectedConcept": "vector-resultante",
+    "correctAnswer": 10,
+    "unit": "m/s",
+    "hints": [
+      "Ambas velocidades apuntan al mismo sentido.",
+      "En el mismo eje se suman las componentes con su signo.",
+      "8 + 2 = 10 m/s hacia el este."
+    ]
+  },
+  {
+    "id": "ej-vectores-2",
+    "subtema": "vectores",
+    "topic": "Vectores",
+    "difficulty": "intermedio",
+    "question": "Un dron vuela a 8 m/s al este respecto del aire. El viento sopla a 3 m/s al oeste. ¿Cuál es su rapidez respecto del suelo?",
+    "values": {
+      "velocidadDron": 8,
+      "velocidadViento": -3
+    },
+    "expectedConcept": "vector-resultante",
+    "correctAnswer": 5,
+    "unit": "m/s",
+    "hints": [
+      "El viento se opone al avance.",
+      "Tomá el este como positivo: la velocidad del viento es negativa.",
+      "8 + (-3) = 5 m/s hacia el este."
+    ]
+  },
+  {
+    "id": "ej-vectores-3",
+    "subtema": "vectores",
+    "topic": "Vectores",
+    "difficulty": "intermedio",
+    "question": "Dos desplazamientos perpendiculares miden 3 m al este y 4 m al norte. ¿Cuánto mide el desplazamiento resultante?",
+    "values": {
+      "componenteX": 3,
+      "componenteY": 4
+    },
+    "expectedConcept": "vector-resultante",
+    "correctAnswer": 5,
+    "unit": "m",
+    "hints": [
+      "Los desplazamientos forman los catetos de un triángulo rectángulo.",
+      "Magnitud de la resultante = raíz de (x² + y²).",
+      "Raíz de (3² + 4²) = raíz de 25 = 5 m."
+    ]
+  },
+  {
+    "id": "ej-hooke-1",
+    "subtema": "hooke",
+    "topic": "Ley de Hooke",
+    "difficulty": "básico",
+    "question": "Un resorte tiene rigidez k = 200 N/m y se estira 0,05 m. ¿Cuál es la magnitud de su fuerza elástica?",
+    "values": {
+      "k": 200,
+      "x": 0.05
+    },
+    "expectedConcept": "ley-hooke",
+    "correctAnswer": 10,
+    "unit": "N",
+    "hints": [
+      "La fuerza depende de la rigidez y del estiramiento.",
+      "Magnitud de la fuerza: F = k * x.",
+      "200 * 0,05 = 10 N."
+    ]
+  },
+  {
+    "id": "ej-hooke-2",
+    "subtema": "hooke",
+    "topic": "Ley de Hooke",
+    "difficulty": "intermedio",
+    "question": "Una fuerza de 12 N estira un resorte 0,04 m. ¿Cuál es su constante elástica k?",
+    "values": {
+      "fuerza": 12,
+      "x": 0.04
+    },
+    "expectedConcept": "ley-hooke",
+    "correctAnswer": 300,
+    "unit": "N/m",
+    "hints": [
+      "La constante indica la rigidez del resorte.",
+      "Despejá la ley de Hooke: k = F / x.",
+      "12 / 0,04 = 300 N/m."
+    ]
+  },
+  {
+    "id": "ej-hooke-3",
+    "subtema": "hooke",
+    "topic": "Ley de Hooke",
+    "difficulty": "intermedio",
+    "question": "Un resorte de k = 150 N/m soporta una fuerza de magnitud 6 N. ¿Cuánto se deforma?",
+    "values": {
+      "k": 150,
+      "fuerza": 6
+    },
+    "expectedConcept": "ley-hooke",
+    "correctAnswer": 0.04,
+    "unit": "m",
+    "hints": [
+      "Se busca la deformación en metros.",
+      "Despejá la ley de Hooke: x = F / k.",
+      "6 / 150 = 0,04 m, equivalentes a 4 cm."
     ]
   }
 ]

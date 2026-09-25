@@ -34,5 +34,5 @@ export function validateAnswer(expected, studentAnswer, options = {}) {
 }
 
 export function validateExercise(exercise, studentAnswer) {
-  return validateAnswer(exercise.correctAnswer, studentAnswer, { unit: exercise.unit });
+  return validateAnswer(exercise.correctAnswer, studentAnswer, { unit: exercise.unit, tolerance: exercise.tolerance ?? DEFAULT_TOLERANCE });
 }

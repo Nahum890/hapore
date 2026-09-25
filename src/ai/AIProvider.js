@@ -1,32 +1,25 @@
 import RuleTutorProvider from './RuleTutorProvider.js';
 import LocalAIProvider from './LocalAIProvider.js';
 
-/**
- * Interfaz conceptual AIProvider.
- *
- * Todo provider debe implementar:
- *   respond(context) -> Promise<{
- *     message: string,        // texto para mostrar al estudiante
- *     esHint?: string,        // apoyo adicional en castellano
- *     followUp?: string,      // invitación a reintentar
- *     source: string,         // identificador del provider
- *     available: boolean,     // si el provider está operativo
- *   }>
- *
- * Los componentes NUNCA importan librerías de modelos directamente:
- * solo consumen esta fábrica. Para conectar un modelo local en el futuro
- * (por ejemplo, Transformers.js), se implementa dentro de LocalAIProvider
- * sin modificar el resto de la aplicación.
- */
-
-export const PROVIDER_KINDS = {
-  RULES: 'rules',
-  LOCAL: 'local',
-};
-
-export function createAIProvider(kind = PROVIDER_KINDS.RULES, options = {}) {
-  if (kind === PROVIDER_KINDS.LOCAL) {
-    return new LocalAIProvider(options);
+export const PROVIDER_KINDS = { RULES: 'rules', LOCAL: 'local', ORCHESTRATOR: 'orchestrator' };
+class AIProvider {
+  constructor(options = {}) {
+    this.ruleTutor = new RuleTutorProvider(options);
+    this.localAI = new LocalAIProvider({ ...options, fallback: this.ruleTutor });
   }
-  return new RuleTutorProvider(options);
+  respond(context = {}) {
+    return this.localAI.respond(context);
+  }
+  explainError(context = {}) { return this.respond(context); }
+  evaluateQuizAnswer(context = {}) {
+    return this.respond({ ...context, tipo: 'evaluacion_cuestionario', subtema: context.tema ?? context.subtema, ejercicio: context.preguntaId ?? context.ejercicio });
+  }
+  answerFreeQuestion(context = {}) {
+    return this.respond({ ...context, tipo: 'charla_libre' });
+  }
+}
+export function createAIProvider(kind = PROVIDER_KINDS.ORCHESTRATOR, options = {}) {
+  if (kind === PROVIDER_KINDS.LOCAL) return new LocalAIProvider(options);
+  if (kind === PROVIDER_KINDS.RULES) return new RuleTutorProvider(options);
+  return new AIProvider(options);
 }

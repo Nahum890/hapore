@@ -1,17 +1,25 @@
 {
   "greetings": [
-    "¡Mba'éichapa! Sos bienvenido a GuaranIA. Eju, jahechami ko física kyhyje'ỹme.",
+    "¡Mba'éichapa! Sos bienvenido a PyFis IA. Eju, jahechami ko física kyhyje'ỹme.",
     "¡Mba'éichapa! Ko'ápe ñañepyrũta jaipapa pe dron trayectoria reheve.",
-    "¡Maitei! Ani rekyhyje rejavy hag̃ua: jajapóvo ejercicio jaaprende porãve."
+    "¡Maitei! Ani rekyhyje rejavy hag̃ua: jajapóvo ejercicio jaaprende porãve.",
+    "¡Mba'éichapa! Eju, jahechami Física juntos.",
+    "¡Jaha! Eñepractica: jajuhumi cuenta correcta."
   ],
-  "fallbackHint": "Emañamína pe enunciado rehe ha jaha paso a paso. Ani reñedesespera: ikatu jey reha'ã.",
+  "fallbackHint": "Ehecha jey el enunciado, ehpyru peteî paso pequeñito. Ani aflojá: vas a poder.",
   "errors": [
+    { "errorId": "err-termo-01", "joparaHint": "Ani rejavy: primero ehecha cuánto subió la temperatura, no uses solo el valor final.", "esHint": "En Q = m · c · ΔT, ΔT es temperatura final menos inicial.", "followUp": "Calculá esa diferencia y probá otra vez.", "levels": { "nivel_1": "Mirá las dos temperaturas del agua.", "nivel_2": "¿Mboy grado-pa subió realmente?", "nivel_3": "Usá Q = m · c · (Tf - Ti).", "nivel_4": "Restá final menos inicial antes de multiplicar.", "nivel_5": "Reemplazá los valores y revisá que el calor esté en J." } },
+    { "errorId": "err-termo-02", "joparaHint": "Pe aumento de temperatura no es la temperatura final: sumale la inicial.", "esHint": "Primero calculá ΔT = Q/(m·c), después Tf = Ti + ΔT.", "followUp": "¿Cuántos grados aumentó y desde cuánto empezó?", "levels": { "nivel_1": "Buscá la temperatura de partida.", "nivel_2": "El calor te da un aumento, no la lectura final.", "nivel_3": "Tf = Ti + Q/(m·c).", "nivel_4": "Calculá Q/(m·c) y agregá Ti.", "nivel_5": "Comprobá el resultado final en °C." } },
+    { "errorId": "err-termo-03", "joparaHint": "Pe y hetavéva influye más en la mezcla: tené en cuenta las masas.", "esHint": "El promedio de temperaturas debe ponderarse con la masa de cada porción de agua.", "followUp": "Revisá qué porción tiene más masa.", "levels": { "nivel_1": "La respuesta queda entre las dos temperaturas.", "nivel_2": "La porción más grande pesa más en el resultado.", "nivel_3": "T = (m1·T1 + m2·T2)/(m1+m2).", "nivel_4": "Multiplicá cada masa por su temperatura.", "nivel_5": "Sumá los productos y dividí por la masa total." } },
+    { "errorId": "err-optica-01", "joparaHint": "Pe ángulo oñemedi normal guive, no desde la superficie del espejo.", "esHint": "La normal es perpendicular al espejo; el ángulo con la superficie es complementario.", "followUp": "Dibujá la normal y medí desde esa línea.", "levels": { "nivel_1": "Ubicá el espejo y su normal.", "nivel_2": "La normal forma 90° con la superficie.", "nivel_3": "Ángulo con normal = 90° - ángulo con superficie.", "nivel_4": "Calculá el complementario antes de reflejar.", "nivel_5": "El ángulo reflejado coincide con el incidente desde la normal." } },
+    { "errorId": "err-optica-02", "joparaHint": "Pe imagen está espejo kupépe, a la misma distancia del objeto.", "esHint": "Medí ambas distancias desde el espejo, sin duplicarlas.", "followUp": "Compará la distancia delante y detrás.", "levels": { "nivel_1": "Mirá el objeto delante del espejo.", "nivel_2": "La imagen es simétrica respecto al espejo.", "nivel_3": "Distancia de imagen = distancia de objeto.", "nivel_4": "Copiá la distancia al otro lado.", "nivel_5": "Indicá la distancia desde el espejo en cm." } },
+    { "errorId": "err-optica-03", "joparaHint": "Ani reinvertí: velocidad en vacío va arriba en n = c/v.", "esHint": "El índice n es c dividido por la velocidad en el material; no lleva unidad.", "followUp": "¿Cuál de las dos velocidades es mayor?", "levels": { "nivel_1": "Compará la rapidez en vacío y en vidrio.", "nivel_2": "En vidrio la luz viaja más lento.", "nivel_3": "Usá n = c/v.", "nivel_4": "Dividí la rapidez en vacío por la del vidrio.", "nivel_5": "Comprobá que n sea mayor que 1 y no tenga unidad." } },
     {
       "errorId": "err-01",
       "errorKey": "confunde_velocidades",
-      "joparaHint": "¡Emañami! v0 ha'e la velocidad del inicio; en la cúspide pe vy oiko cero. Ani rembojehe'a.",
-      "esHint": "v0 es la velocidad inicial del lanzamiento. En el punto más alto, la componente vertical vale cero.",
-      "followUp": "Ehechami jey mba'e momentoguápa ojerure pe ejercicio.",
+      "joparaHint": "Ejeringa raẽ: v0 ha'e la velocidad del inicio; vf, la del final. Ani ene ndoconfundivi.",
+      "esHint": "v0 es la velocidad inicial del lanzamiento; la velocidad final cambia durante el vuelo. Antes de calcular, pregúntate: ¿me piden la del inicio o la de otro momento?",
+      "followUp": "Probá de nuevo con el dato correcto.",
       "levels": {
         "nivel_1": "¡Emañami pe dron rehe! Oñepyrũvo pya'e oho, pero yvate og̃uahẽvo opyta sapy'a.",
         "nivel_2": "Nemandu'áke: la velocidad vertical okambia siempre pe gravedad rehe.",
@@ -22,18 +30,18 @@
     {
       "errorId": "err-02",
       "errorKey": "confunde_componentes",
-      "joparaHint": "Emañami pe velocidad rehe. ¿Opavave 20 m/s-pa oho horizontalmente? Nemandu'áke: la velocidad oñemboja'o mokõime.",
-      "esHint": "La velocidad inicial se descompone: vx usa coseno (horizontal) y vy usa seno (vertical). No van todas en una sola dirección.",
-      "followUp": "Para saber cuánto avanza en el suelo, necesitamos vx = v0 · cos(θ).",
+      "joparaHint": "Vx ohóla lape'ỹme (horizontal); vy ogueraha la gravedad (vertical). Ani ene ñemboja'o.",
+      "esHint": "La horizontal usa coseno: vx = v0 * cos(ángulo). La vertical usa seno: v0y = v0 * sen(ángulo). No las mezcles.",
+      "followUp": "Identificá primero qué componente te piden y después aplicá la fórmula.",
       "levels": {
         "nivel_1": "¡Emañami! Pe dron nohoiva'erã tenonde añónte, oho yvate ha tenonde simultáneamente.",
         "nivel_2": "Mokõi componente oĩ: vx oho yvýre con coseno, vy oho yvate con seno.",
-        "nivel_3": "Eipuru vx = v0 · cos(θ) pe avance horizontal-pe g̃uarã.",
-        "nivel_4": "vx = 20 · cos(30°) ≈ 20 · 0,866 = 17,32 m/s."
+        "nivel_3": "Eipuru vx = v0 * cos(ángulo) pe avance horizontal-pe g̃uarã.",
+        "nivel_4": "vx = 20 * cos(30°) ≈ 20 * 0,866 = 17,32 m/s."
       }
     },
     {
-      "errorId": "err-03",
+      "errorId": "err-mec-03",
       "errorKey": "olvida_gravedad",
       "joparaHint": "En X oho de forma uniforme, pero mba'épa oiko Y-pe pe gravedad rehe? Pe gravedad omboguejy el dron con -0.5*g*t².",
       "esHint": "En el eje horizontal no hay aceleración (MRU), pero en el eje vertical la gravedad frena la subida y acelera la caída (MRUV).",
@@ -41,16 +49,16 @@
       "levels": {
         "nivel_1": "¿Mba'érepa ho'a jey el dron? Oĩ peteĩ fuerza omboguejýva chupe.",
         "nivel_2": "Pe gravedad g = 9,8 m/s² (o 10 m/s²) omba'apo siempre verticalmente hacia abajo.",
-        "nivel_3": "Ecuación vertical: y(t) = y0 + vy·t - 0.5·g·t². Pe término cuadrático ha'e pe gravedad.",
-        "nivel_4": "Para calcular el tiempo total: T = 2 · vy / g."
+        "nivel_3": "Ecuación vertical: y(t) = y0 + vy*t - 0.5*g*t². Pe término cuadrático ha'e pe gravedad.",
+        "nivel_4": "Para calcular el tiempo total: T = 2 * vy / g."
       }
     },
     {
-      "errorId": "err-04",
+      "errorId": "err-03",
       "errorKey": "mezcla_unidades",
-      "joparaHint": "Primero ñambojoja umi unidadkuéra, ani ñamixpa. Emoambue km/h gui m/s-pe.",
-      "esHint": "Antes de operar con las fórmulas, convertí todas las magnitudes al Sistema Internacional (m/s y metros).",
-      "followUp": "Edividi 3,6-pe rehasa hag̃ua km/h gui m/s-pe.",
+      "joparaHint": "Ejapo raẽ ñemoambue km/h gui m/s-pe, upéi ejapo la cuenta. Ani akonfirmo unidades.",
+      "esHint": "Antes de calcular, convertí todas las unidades al mismo sistema (por ejemplo, km/h a m/s dividiendo por 3,6).",
+      "followUp": "Revisá las unidades del ejercicio y volvé a intentarlo.",
       "levels": {
         "nivel_1": "Fíjate en las unidades: km/h ha m/s ndaha'éi peteĩchagua.",
         "nivel_2": "Pe gravedad oĩ m/s²-pe, upévare la velocidad tekotevẽ oĩ m/s-pe avei.",
@@ -59,29 +67,71 @@
       }
     },
     {
-      "errorId": "err-05",
+      "errorId": "err-mec-05",
       "errorKey": "angulo_desfasado",
       "joparaHint": "¡Emañami pe trayectoria rehe! Pe ángulo omoĩ chupe muy rasante o muy empinado. Ñamoambuéke pe inclinación.",
-      "esHint": "El ángulo cambia la proporción entre altura y distancia. El alcance depende de sen(2θ).",
+      "esHint": "El ángulo cambia la proporción entre altura y distancia. El alcance depende de sen(2 * ángulo).",
       "followUp": "¿Mba'épa oikóta si aumentamos o disminuimos el ángulo en el simulador?",
       "levels": {
         "nivel_1": "¡Emañami pe trayectoria rehe! ¿Ho'a mboyvepa o pasa de largo?",
         "nivel_2": "Pe ángulo de 45° ome'ẽ el máximo alcance posible en terreno plano.",
-        "nivel_3": "R = (v0² · sen(2θ)) / g. ¿Mba'e ángulo-pa ome'ẽ sen(2θ) = 1?",
-        "nivel_4": "2θ tekotevẽ oiko 90°, upévare θ = 45°."
+        "nivel_3": "R = (v0² * sen(2 * ángulo)) / g. ¿Mba'e ángulo-pa ome'ẽ sen(2 * ángulo) = 1?",
+        "nivel_4": "2 * ángulo tekotevẽ oiko 90°, upévare ángulo = 45°."
       }
     },
     {
-      "errorId": "err-06",
+      "errorId": "err-04",
       "errorKey": "confunde_altura_alcance",
-      "joparaHint": "Altura máxima ha'e yvatevéva (eje Y); alcance ha'e mombyryvéva pe yvýre (eje X). Ani reconfundi.",
-      "esHint": "La altura máxima Hmax mide cuánto subió el dron; el alcance R mide cuántos metros avanzó en horizontal.",
-      "followUp": "Releé qué pide el ejercicio: ¿cuánto sube o cuánto avanza?",
+      "joparaHint": "Altura máxima ha'e yvatevéva; alcance ha'e mombyryvéva. Ani ene ndoconfundivi.",
+      "esHint": "La altura máxima es lo más alto que llega (vertical); el alcance es lo más lejos que cae (horizontal). Son cálculos distintos.",
+      "followUp": "Releé qué pide el ejercicio: ¿altura o alcance?",
       "levels": {
         "nivel_1": "¿Yvatepa ojerure tépa mombyry pe suelo ári?",
         "nivel_2": "Altura máxima se calcula con vy inicial; alcance depende de vx y del tiempo de vuelo.",
-        "nivel_3": "Hmax = (v0² · sen²θ) / (2g) vs R = (v0² · sen(2θ)) / g.",
+        "nivel_3": "Hmax = (v0² * sen²(ángulo)) / (2 * g) vs R = (v0² * sen(2 * ángulo)) / g.",
         "nivel_4": "Para la altura usa Hmax; para el alcance usa R."
+      }
+    },
+    {
+      "errorId": "err-cinematica",
+      "errorKey": "cinematica-concepto",
+      "joparaHint": "Identificá los datos y la magnitud que se pide.",
+      "esHint": "La rapidez media relaciona la distancia recorrida con el tiempo empleado. Se expresa en m/s cuando la distancia está en metros y el tiempo en segundos.",
+      "followUp": "Probá de nuevo con la relación correcta.",
+      "levels": {
+        "nivel_1": "Identificá los datos y la magnitud que se pide.",
+        "nivel_2": "La rapidez media relaciona la distancia recorrida con el tiempo empleado. Se expresa en m/s cuando la distancia está en metros y el tiempo en segundos.",
+        "nivel_3": "rapidez media = distancia / tiempo",
+        "nivel_4": "Despejá la incógnita antes de sustituir los datos.",
+        "nivel_5": "Revisá la operación final y escribí la unidad del resultado."
+      }
+    },
+    {
+      "errorId": "err-vectores",
+      "errorKey": "vectores-concepto",
+      "joparaHint": "Identificá los datos y la magnitud que se pide.",
+      "esHint": "Un vector tiene magnitud, dirección y sentido. La resultante se obtiene sumando sus componentes en cada eje; los sentidos opuestos llevan signos distintos.",
+      "followUp": "Probá de nuevo con la relación correcta.",
+      "levels": {
+        "nivel_1": "Identificá los datos y la magnitud que se pide.",
+        "nivel_2": "Un vector tiene magnitud, dirección y sentido. La resultante se obtiene sumando sus componentes en cada eje; los sentidos opuestos llevan signos distintos.",
+        "nivel_3": "Vx resultante = Vx1 + Vx2",
+        "nivel_4": "Despejá la incógnita antes de sustituir los datos.",
+        "nivel_5": "Revisá la operación final y escribí la unidad del resultado."
+      }
+    },
+    {
+      "errorId": "err-hooke",
+      "errorKey": "hooke-concepto",
+      "joparaHint": "Identificá los datos y la magnitud que se pide.",
+      "esHint": "Dentro del límite elástico, la magnitud de la fuerza de un resorte es proporcional a su deformación. La fuerza restauradora apunta en sentido opuesto a esa deformación.",
+      "followUp": "Probá de nuevo con la relación correcta.",
+      "levels": {
+        "nivel_1": "Identificá los datos y la magnitud que se pide.",
+        "nivel_2": "Dentro del límite elástico, la magnitud de la fuerza de un resorte es proporcional a su deformación. La fuerza restauradora apunta en sentido opuesto a esa deformación.",
+        "nivel_3": "magnitud de la fuerza = rigidez * deformación",
+        "nivel_4": "Despejá la incógnita antes de sustituir los datos.",
+        "nivel_5": "Revisá la operación final y escribí la unidad del resultado."
       }
     }
   ],
@@ -89,7 +139,7 @@
     "confunde_componentes": [
       "Emañami pe velocidad rehe. ¿Opavave 20 m/s-pa oho horizontalmente?",
       "Nemandu'áke: la velocidad se divide en dos partes: v0x con coseno y v0y con seno.",
-      "Para saber cuánto avanza en el suelo, necesitamos v0x = v0 * cos(θ)."
+      "Para saber cuánto avanza en el suelo, necesitamos v0x = v0 * cos(ángulo)."
     ],
     "olvida_gravedad": [
       "En X oho de forma uniforme, pero mba'épa oiko Y-pe pe gravedad rehe?",
@@ -115,5 +165,357 @@
       "Pya'eterei reho. Pe valor ohasa pe oñeikotevẽva.",
       "Emboguejymi pe velocidad inicial ani hag̃ua ohasa pe pista."
     ]
-  }
+  },
+  "_reviewNote": "Los textos jopara existentes siguen pendientes de revisión por una persona competente en guaraní paraguayo. Las ampliaciones nuevas se redactaron en castellano; no constituyen traducciones validadas.",
+  "hintLevels": {
+    "byErrorType": {
+      "angulo_bajo": {
+        "nivel_1": [
+          "¡Emañami! El dron cayó muy rápido antes de la meta... Mirá en la pantalla cómo va muy rasante y se estrella contra el suelo.",
+          "¡Emañamína pe dron rehe! Oho muy rasante ha ho'a yvýpe objetivo mboyve. ¿Mba'épa oiko pe altura rehe?",
+          "¡Emañami! Mirá la pantalla: el dron no se eleva y cae antes de llegar a la meta.",
+          "Primero observá qué dato pide el ejercicio y qué información ofrece."
+        ],
+        "nivel_2": [
+          "Falta altura porque el ángulo fue muy bajo y la gravedad lo atrajo rápido al suelo: sin elevación, no hay tiempo de vuelo.",
+          "Pe velocidad imbarete, pero pe ángulo michĩeterei: la gravedad lo atrajo rápido al suelo.",
+          "Falta elevación porque el ángulo fue muy bajo y la gravedad lo atrajo rápido.",
+          "Relacioná el movimiento horizontal con el vertical, tratándolos por separado."
+        ],
+        "nivel_3": [
+          "Acordate que el alcance depende de: R = (v0² * sen(2 * ángulo)) / g.",
+          "Nemandu'áke: el alcance depende de R = (v0² * sen(2 * ángulo)) / g.",
+          "La fórmula del alcance: R = (v0² * sen(2 * ángulo)) / g. Fijate en el ángulo.",
+          "Escribí la fórmula correspondiente antes de poner números."
+        ],
+        "nivel_4": [
+          "Para 40 metros con v0 = 20 m/s: necesitamos que sen(2 * ángulo) sea igual a 1.",
+          "Con 40 metros y v0 = 20 m/s: buscamos sen(2 * ángulo) = 1.",
+          "Para llegar a los 40 m con 20 m/s: la relación pide sen(2 * ángulo) igual a 1.",
+          "Resolvé una operación a la vez y conservá las unidades."
+        ],
+        "nivel_5": [
+          "Ingresá un ángulo de 45 grados en el selector para lograr el aterrizaje exacto.",
+          "Configurá un ángulo de 45 grados en el control para lograr el aterrizaje exacto.",
+          "Probá con 45 grados en el selector: es el ángulo que logra el aterrizaje exacto.",
+          "Comprobá la unidad y el redondeo del resultado antes de responder."
+        ]
+      },
+      "angulo_halo": {
+        "nivel_1": [
+          "¡Oho yvateiterei! Mirá la pantalla: el dron subió un montón pero avanzó poco hacia adelante.",
+          "¡Emañami! El dron se fue muy arriba y le faltó avance: mirá cómo casi no llega a la meta.",
+          "¡Oho yvateiterei! La trayectoria quedó muy vertical: mirá en la pantalla cuán poco avanzó.",
+          "Primero observá qué dato pide el ejercicio y qué información ofrece."
+        ],
+        "nivel_2": [
+          "Toda la velocidad se fue hacia arriba; la parte horizontal quedó muy reducida y por eso no llega a la meta.",
+          "Pe energía opa oho ape yvate: la parte horizontal quedó muy reducida.",
+          "El ángulo fue muy alto: la gravedad lo frenó antes y le faltó avance horizontal.",
+          "Relacioná el movimiento horizontal con el vertical, tratándolos por separado."
+        ],
+        "nivel_3": [
+          "La parte horizontal se calcula con: vx = v0 * cos(ángulo). Con ángulos muy altos, el coseno se achica.",
+          "Nemandu'áke: el alcance horizontal depende de v0x = v0 * cos(ángulo). Con ángulos muy altos, el coseno se achica.",
+          "Fijate en la fórmula: vx = v0 * cos(ángulo). A más ángulo, menos avance horizontal.",
+          "Escribí la fórmula correspondiente antes de poner números."
+        ],
+        "nivel_4": [
+          "Con v0 = 20 m/s y ángulo = 80 grados: vx = 20 * cos(80°), que es apenas 3,47 m/s.",
+          "Con 80 grados y 20 m/s: vx = 20 * cos(80°) = 3,47 m/s, muy poco para llegar.",
+          "Si el ángulo es 80 grados: vx = 20 * cos(80°). Fijate qué chico queda el avance.",
+          "Resolvé una operación a la vez y conservá las unidades."
+        ],
+        "nivel_5": [
+          "Bajá el ángulo a 45 grados en el selector para equilibrar la subida y el avance.",
+          "Configurá 45 grados en el control: equilibra la subida y el avance horizontal.",
+          "Probá bajando el ángulo a 45 grados: es el punto equilibrado para el alcance.",
+          "Comprobá la unidad y el redondeo del resultado antes de responder."
+        ]
+      },
+      "velocidad_corta": {
+        "nivel_1": [
+          "Ndaipóri alcance! Mirá la pantalla: el dron cae antes de llegar al puesto.",
+          "¡Emañami! El dron se quedó corto: cae antes del objetivo de entrega.",
+          "Ndaipóri alcance! Mirá la trayectoria: el dron no llega al puesto.",
+          "Primero observá qué dato pide el ejercicio y qué información ofrece."
+        ],
+        "nivel_2": [
+          "Falta velocidad inicial: con poca fuerza de lanzamiento, el dron no alcanza la distancia objetivo.",
+          "Falta velocidad de despegue: el dron se queda antes de la meta.",
+          "La fuerza de lanzamiento fue poca: por eso el dron no alcanza la distancia objetivo.",
+          "Relacioná el movimiento horizontal con el vertical, tratándolos por separado."
+        ],
+        "nivel_3": [
+          "El alcance crece con el cuadrado de la velocidad: R = (v0² * sen(2 * ángulo)) / g.",
+          "Nemandu'áke: el alcance R es proporcional al cuadrado de la velocidad v0².",
+          "La fórmula muestra: R = (v0² * sen(2 * ángulo)) / g. El cuadrado de la velocidad pesa mucho.",
+          "Escribí la fórmula correspondiente antes de poner números."
+        ],
+        "nivel_4": [
+          "Si duplicás v0, el alcance se cuadruplica: probá subiendo la velocidad de despegue.",
+          "Duplicando la velocidad de despegue, el alcance se cuadruplica.",
+          "Más velocidad, mucho más alcance: el cuadrado de v0 manda en la fórmula.",
+          "Resolvé una operación a la vez y conservá las unidades."
+        ],
+        "nivel_5": [
+          "Aumentá la velocidad de despegue a 20 m/s o más para compensar los metros faltantes.",
+          "Configurá 20 m/s o más en la velocidad de despegue para llegar a la meta.",
+          "Subí la velocidad de despegue a 20 m/s: así compensás los metros faltantes.",
+          "Comprobá la unidad y el redondeo del resultado antes de responder."
+        ]
+      },
+      "confunde_componentes": {
+        "nivel_1": [
+          "Emañami pe velocidad rehe. ¿Opavave 20 m/s-pa oho horizontalmente? Mirá la descomposición en la pantalla.",
+          "¡Emañami! ¿Todo el valor de la velocidad va hacia adelante? Mirá la descomposición en pantalla.",
+          "Emañami pe velocidad rehe: mirá si todo el valor avanza en línea recta.",
+          "Primero observá qué dato pide el ejercicio y qué información ofrece."
+        ],
+        "nivel_2": [
+          "La velocidad se divide en dos partes: una horizontal (hacia adelante) y una vertical (hacia arriba). No se usa el valor total directo.",
+          "Pe velocidad oñemboja'o dos partes-pe: horizontal ha vertical. El valor total no va todo para adelante.",
+          "Una parte de la velocidad va hacia adelante y otra hacia arriba: no se usa el valor completo.",
+          "Relacioná el movimiento horizontal con el vertical, tratándolos por separado."
+        ],
+        "nivel_3": [
+          "Para la parte horizontal usá el coseno: vx = v0 * cos(ángulo); para la vertical, el seno: v0y = v0 * sen(ángulo).",
+          "La horizontal usa el coseno (vx = v0 * cos(ángulo)); la vertical usa el seno (v0y = v0 * sen(ángulo)).",
+          "Nemandu'áke: vx = v0 * cos(ángulo) para la horizontal; v0y = v0 * sen(ángulo) para la vertical.",
+          "Escribí la fórmula correspondiente antes de poner números."
+        ],
+        "nivel_4": [
+          "Con v0 = 20 m/s y ángulo = 30 grados: vx = 20 * cos(30°) y v0y = 20 * sen(30°) = 10.",
+          "Con 20 m/s y 30 grados: la horizontal es vx = 20 * cos(30°) y la vertical v0y = 20 * sen(30°) = 10 m/s.",
+          "Calculá las dos partes: vx = 20 * cos(30°) hacia adelante; v0y = 20 * sen(30°) = 10 hacia arriba.",
+          "Resolvé una operación a la vez y conservá las unidades."
+        ],
+        "nivel_5": [
+          "Ingresá 17,32 m/s en la respuesta: la parte horizontal es 20 * cos(30°) redondeada a 2 decimales.",
+          "Ingresá 17,32 m/s: es la componente horizontal 20 * cos(30°) redondeada.",
+          "La respuesta es 17,32 m/s: la parte horizontal de 20 m/s con 30 grados.",
+          "Comprobá la unidad y el redondeo del resultado antes de responder."
+        ]
+      }
+    },
+    "byConcept": {
+      "componente-horizontal": {
+        "nivel_1": [
+          "¡Emañami pe velocidad rehe! Mirá la pantalla: el dron avanza hacia adelante con una sola parte de la velocidad, no con todo el valor.",
+          "¡Emañami! El dron avanza con una parte de la velocidad: mirá si todo el valor va hacia adelante.",
+          "Emañami pe velocidad rehe: la pantalla muestra que solo una parte avanza en línea recta.",
+          "Primero observá qué dato pide el ejercicio y qué información ofrece."
+        ],
+        "nivel_2": [
+          "La velocidad se separa en dos direcciones: una parte va hacia adelante y otra hacia arriba. Lo que pusiste parece ser la magnitud total, no la parte horizontal.",
+          "Pe velocidad oñemboja'o dos partes-pe: una va adelante, otra arriba. Tu valor parece ser la magnitud total.",
+          "Una parte de la velocidad va hacia adelante y otra hacia arriba: el valor completo no es la parte horizontal.",
+          "Relacioná el movimiento horizontal con el vertical, tratándolos por separado."
+        ],
+        "nivel_3": [
+          "La parte horizontal se calcula con el coseno: vx = v0 * cos(ángulo).",
+          "Para saber cuánto avanza hacia adelante: vx = v0 * cos(ángulo).",
+          "Nemandu'áke: la componente horizontal es vx = v0 * cos(ángulo).",
+          "Escribí la fórmula correspondiente antes de poner números."
+        ],
+        "nivel_4": [
+          "Con v0 = 20 m/s y ángulo = 30 grados: vx = 20 * cos(30°). El coseno de 30° es aproximadamente 0,866.",
+          "Con 20 m/s y 30 grados: vx = 20 * cos(30°) = 20 * 0,866.",
+          "Calculá: vx = 20 * cos(30°). El coseno de 30° ronda 0,866.",
+          "Resolvé una operación a la vez y conservá las unidades."
+        ],
+        "nivel_5": [
+          "Ingresá 17,32 m/s en la respuesta: es 20 * 0,866 redondeado a 2 decimales.",
+          "Ingresá 17,32 m/s: la componente horizontal de 20 m/s con 30 grados.",
+          "La respuesta es 17,32 m/s: 20 * 0,866 redondeado.",
+          "Comprobá la unidad y el redondeo del resultado antes de responder."
+        ]
+      },
+      "componente-vertical": {
+        "nivel_1": [
+          "¡Emañami! Mirá la pantalla: el dron despega hacia arriba con un empuje que depende del ángulo de lanzamiento.",
+          "¡Emañami pe dron rehe! Mirá cómo despega hacia arriba: el empuje depende del ángulo.",
+          "Emañami: el impulso hacia arriba del despegue depende del ángulo de lanzamiento.",
+          "Primero observá qué dato pide el ejercicio y qué información ofrece."
+        ],
+        "nivel_2": [
+          "El impulso hacia arriba todavía no depende de la gravedad: solo del ángulo con el que despega el dron.",
+          "Pe impulso hacia arriba rehe gravedad ndoikói: solo el ángulo de despegue manda.",
+          "El impulso vertical inicial depende del ángulo de lanzamiento, no de la gravedad.",
+          "Relacioná el movimiento horizontal con el vertical, tratándolos por separado."
+        ],
+        "nivel_3": [
+          "La parte vertical inicial se calcula con el seno: v0y = v0 * sen(ángulo).",
+          "El impulso hacia arriba es: v0y = v0 * sen(ángulo).",
+          "Nemandu'áke: la componente vertical inicial es v0y = v0 * sen(ángulo).",
+          "Escribí la fórmula correspondiente antes de poner números."
+        ],
+        "nivel_4": [
+          "Con v0 = 20 m/s y ángulo = 30 grados: v0y = 20 * sen(30°). El seno de 30° es 0,5.",
+          "Con 20 m/s y 30 grados: v0y = 20 * sen(30°) = 20 * 0,5.",
+          "Calculá: v0y = 20 * sen(30°). El seno de 30° es 0,5.",
+          "Resolvé una operación a la vez y conservá las unidades."
+        ],
+        "nivel_5": [
+          "Ingresá 10 m/s en la respuesta: es 20 * 0,5.",
+          "Ingresá 10 m/s: la componente vertical de 20 m/s con 30 grados.",
+          "La respuesta es 10 m/s: 20 * sen(30°) = 20 * 0,5.",
+          "Comprobá la unidad y el redondeo del resultado antes de responder."
+        ]
+      },
+      "altura-maxima": {
+        "nivel_1": [
+          "¡Emañami pe altura rehe! Mirá la pantalla: el punto más alto del dron es donde deja de subir y empieza a caer.",
+          "¡Emañami! Mirá en la pantalla el punto más alto: ahí el dron deja de subir y empieza a caer.",
+          "Emañami pe altura rehe: el punto más alto de la trayectoria es donde la subida se frena.",
+          "Primero observá qué dato pide el ejercicio y qué información ofrece."
+        ],
+        "nivel_2": [
+          "En el punto más alto, la subida se frena por completo por efecto de la gravedad: ahí la velocidad vertical vale cero.",
+          "Pe gravedad omboty la subida pe punto más alto-pe: ahí la velocidad vertical vale cero.",
+          "En el punto más alto la subida se frena por la gravedad: la velocidad vertical llega a cero.",
+          "Relacioná el movimiento horizontal con el vertical, tratándolos por separado."
+        ],
+        "nivel_3": [
+          "La altura máxima se calcula con: h = (v0² * sen²(ángulo)) / (2 * g).",
+          "Nemandu'áke: la altura máxima es h = (v0² * sen²(ángulo)) / (2 * g).",
+          "La fórmula de la altura máxima: h = (v0² * sen²(ángulo)) / (2 * g).",
+          "Escribí la fórmula correspondiente antes de poner números."
+        ],
+        "nivel_4": [
+          "Con v0 = 19,6 m/s y ángulo = 45 grados: primero calculá v0² = 384,16; el seno de 45° al cuadrado es 0,5.",
+          "Con 19,6 m/s y 45 grados: v0² = 384,16 y sen²(45°) = 0,5.",
+          "Calculá por partes: v0² = 384,16; el seno de 45° al cuadrado da 0,5.",
+          "Resolvé una operación a la vez y conservá las unidades."
+        ],
+        "nivel_5": [
+          "Ingresá 9,8 m en la respuesta: es (384,16 * 0,5) / 19,6.",
+          "Ingresá 9,8 m: la altura máxima con 19,6 m/s y 45 grados.",
+          "La respuesta es 9,8 m: (384,16 * 0,5) / 19,6.",
+          "Comprobá la unidad y el redondeo del resultado antes de responder."
+        ]
+      },
+      "rapidez-media": {
+        "nivel_1": [
+          "Identificá los datos y la magnitud que se pide.",
+          "Releé el enunciado y separá lo conocido de lo desconocido.",
+          "Anotá cada valor con su unidad.",
+          "Observá qué parte del problema necesitás encontrar."
+        ],
+        "nivel_2": [
+          "La rapidez media relaciona la distancia recorrida con el tiempo empleado. Se expresa en m/s cuando la distancia está en metros y el tiempo en segundos.",
+          "Relacioná los datos: La rapidez media relaciona la distancia recorrida con el tiempo empleado. Se expresa en m/s cuando la distancia está en metros y el tiempo en segundos.",
+          "Pensá en esta idea: La rapidez media relaciona la distancia recorrida con el tiempo empleado. Se expresa en m/s cuando la distancia está en metros y el tiempo en segundos.",
+          "Antes de calcular, recordá: La rapidez media relaciona la distancia recorrida con el tiempo empleado. Se expresa en m/s cuando la distancia está en metros y el tiempo en segundos."
+        ],
+        "nivel_3": [
+          "rapidez media = distancia / tiempo",
+          "Usá esta relación: rapidez media = distancia / tiempo",
+          "La fórmula que conecta los datos es rapidez media = distancia / tiempo",
+          "Escribí primero rapidez media = distancia / tiempo"
+        ],
+        "nivel_4": [
+          "Despejá la incógnita antes de sustituir los datos.",
+          "Comprobá que todas las unidades sean compatibles.",
+          "Reemplazá cada símbolo por el dato correspondiente.",
+          "Hacé la operación paso a paso, conservando las unidades."
+        ],
+        "nivel_5": [
+          "Revisá la operación final y escribí la unidad del resultado.",
+          "Comprobá si el resultado tiene sentido con los datos.",
+          "Usá el valor calculado para responder al enunciado.",
+          "Revisá signos, unidades y redondeo antes de comprobar."
+        ]
+      },
+      "vector-resultante": {
+        "nivel_1": [
+          "Identificá los datos y la magnitud que se pide.",
+          "Releé el enunciado y separá lo conocido de lo desconocido.",
+          "Anotá cada valor con su unidad.",
+          "Observá qué parte del problema necesitás encontrar."
+        ],
+        "nivel_2": [
+          "Un vector tiene magnitud, dirección y sentido. La resultante se obtiene sumando sus componentes en cada eje; los sentidos opuestos llevan signos distintos.",
+          "Relacioná los datos: Un vector tiene magnitud, dirección y sentido. La resultante se obtiene sumando sus componentes en cada eje; los sentidos opuestos llevan signos distintos.",
+          "Pensá en esta idea: Un vector tiene magnitud, dirección y sentido. La resultante se obtiene sumando sus componentes en cada eje; los sentidos opuestos llevan signos distintos.",
+          "Antes de calcular, recordá: Un vector tiene magnitud, dirección y sentido. La resultante se obtiene sumando sus componentes en cada eje; los sentidos opuestos llevan signos distintos."
+        ],
+        "nivel_3": [
+          "Vx resultante = Vx1 + Vx2",
+          "Usá esta relación: Vx resultante = Vx1 + Vx2",
+          "La fórmula que conecta los datos es Vx resultante = Vx1 + Vx2",
+          "Escribí primero Vx resultante = Vx1 + Vx2"
+        ],
+        "nivel_4": [
+          "Despejá la incógnita antes de sustituir los datos.",
+          "Comprobá que todas las unidades sean compatibles.",
+          "Reemplazá cada símbolo por el dato correspondiente.",
+          "Hacé la operación paso a paso, conservando las unidades."
+        ],
+        "nivel_5": [
+          "Revisá la operación final y escribí la unidad del resultado.",
+          "Comprobá si el resultado tiene sentido con los datos.",
+          "Usá el valor calculado para responder al enunciado.",
+          "Revisá signos, unidades y redondeo antes de comprobar."
+        ]
+      },
+      "ley-hooke": {
+        "nivel_1": [
+          "Identificá los datos y la magnitud que se pide.",
+          "Releé el enunciado y separá lo conocido de lo desconocido.",
+          "Anotá cada valor con su unidad.",
+          "Observá qué parte del problema necesitás encontrar."
+        ],
+        "nivel_2": [
+          "Dentro del límite elástico, la magnitud de la fuerza de un resorte es proporcional a su deformación. La fuerza restauradora apunta en sentido opuesto a esa deformación.",
+          "Relacioná los datos: Dentro del límite elástico, la magnitud de la fuerza de un resorte es proporcional a su deformación. La fuerza restauradora apunta en sentido opuesto a esa deformación.",
+          "Pensá en esta idea: Dentro del límite elástico, la magnitud de la fuerza de un resorte es proporcional a su deformación. La fuerza restauradora apunta en sentido opuesto a esa deformación.",
+          "Antes de calcular, recordá: Dentro del límite elástico, la magnitud de la fuerza de un resorte es proporcional a su deformación. La fuerza restauradora apunta en sentido opuesto a esa deformación."
+        ],
+        "nivel_3": [
+          "magnitud de la fuerza = rigidez * deformación",
+          "Usá esta relación: magnitud de la fuerza = rigidez * deformación",
+          "La fórmula que conecta los datos es magnitud de la fuerza = rigidez * deformación",
+          "Escribí primero magnitud de la fuerza = rigidez * deformación"
+        ],
+        "nivel_4": [
+          "Despejá la incógnita antes de sustituir los datos.",
+          "Comprobá que todas las unidades sean compatibles.",
+          "Reemplazá cada símbolo por el dato correspondiente.",
+          "Hacé la operación paso a paso, conservando las unidades."
+        ],
+        "nivel_5": [
+          "Revisá la operación final y escribí la unidad del resultado.",
+          "Comprobá si el resultado tiene sentido con los datos.",
+          "Usá el valor calculado para responder al enunciado.",
+          "Revisá signos, unidades y redondeo antes de comprobar."
+        ]
+      }
+    }
+  },
+  "sectionGreetings": {
+    "simulador": "¡Mba'éichapa! Leé el ejercicio, escribí tu respuesta y tocá Comprobar con el simulador. Vas a ver una escena que corresponde a ese tema.",
+    "tarjetas": "¡Hola! Estas fichas te ayudan a memorizar la teoría clave antes del cuestionario. Dale la vuelta a cada tarjeta para comprobar lo que sabés.",
+    "chats": "Bienvenido al espacio de diálogo. Respondé con tus palabras, acá aprendemos sin miedo a equivocarnos.",
+    "aula": "Espacio de clase: conectate con el código de tu profesor o proyectá los parámetros en la pizarra."
+  },
+  "topicSupport": [
+    { "tema": "Termodinámica", "pregunta": "Calor y temperatura del agua para el mate", "respuesta": "Calor es energía transferida. Para agua sin cambio de estado: Q = m · c · (Tf - Ti). Primero calculá la diferencia de temperatura. Pe y más caliente cede calor a la más fría." },
+    { "tema": "Óptica", "pregunta": "Reflexión de luz en espejo y refracción en vaso de agua", "respuesta": "En un espejo, incidencia y reflexión se miden desde la normal y son iguales. En agua, la luz cambia de dirección al pasar al aire: pe pajita parece doblada por refracción." },
+    {
+      "tema": "Cinemática",
+      "pregunta": "Rapidez media",
+      "respuesta": "La rapidez media relaciona la distancia recorrida con el tiempo empleado. Se expresa en m/s cuando la distancia está en metros y el tiempo en segundos."
+    },
+    {
+      "tema": "Vectores",
+      "pregunta": "Vector resultante",
+      "respuesta": "Un vector tiene magnitud, dirección y sentido. La resultante se obtiene sumando sus componentes en cada eje; los sentidos opuestos llevan signos distintos."
+    },
+    {
+      "tema": "Ley de Hooke",
+      "pregunta": "Ley de Hooke",
+      "respuesta": "Dentro del límite elástico, la magnitud de la fuerza de un resorte es proporcional a su deformación. La fuerza restauradora apunta en sentido opuesto a esa deformación."
+    }
+  ]
 }

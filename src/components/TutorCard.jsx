@@ -1,23 +1,26 @@
+import { useEffect, useRef, useState } from 'react';
 export default function TutorCard({ tutor }) {
-  const message = tutor?.message ?? '¡Mba\'éichapa! Eju, jahechami Física juntos.';
-
+  const message = tutor?.message ?? '¡Mba’éichapa! Vamos a aprender Física paso a paso.';
+  const [history, setHistory] = useState([]);
+  const previous = useRef(null);
+  useEffect(() => {
+    if (tutor?.streaming) return;
+    if (previous.current?.message !== message) {
+      const old = previous.current;
+      if (old && old.message !== 'Cargando tutor...') setHistory(items => [...items, old].slice(-3));
+      previous.current = { message, esHint: tutor?.esHint };
+    }
+  }, [message, tutor?.esHint, tutor?.streaming]);
+  const source = tutor?.source === 'local-ai' ? 'IA con conexión' : tutor?.source === 'local-model' ? 'Modelo en el dispositivo' : 'Tutor disponible sin conexión';
   return (
     <section className="card tutor-card" aria-label="Tutor Jopara">
-      <div className="tutor-avatar" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="24" height="24" focusable="false">
-          <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="1.5" />
-          <circle cx="9" cy="10" r="1.4" fill="currentColor" />
-          <circle cx="15" cy="10" r="1.4" fill="currentColor" />
-          <path d="M8.5 14.5 Q 12 17 15.5 14.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-        </svg>
-      </div>
+      <div className="tutor-avatar" aria-hidden="true">P</div>
       <div className="tutor-body">
-        <p className="tutor-message" role="status">{message}</p>
+        <p className="tutor-message" role="status" aria-live="polite">{message}</p>
         {tutor?.esHint && <p className="tutor-es-hint">{tutor.esHint}</p>}
         {tutor?.followUp && <p className="tutor-follow-up">{tutor.followUp}</p>}
-        <p className="tutor-source">
-          Tutor offline por reglas{tutor?.source ? ` · ${tutor.source}` : ''}
-        </p>
+        <p className="tutor-source">{source}</p>
+        {history.length > 0 && <details className="tutor-history"><summary>Mensajes anteriores ({history.length})</summary><ol>{history.map((item, index) => <li key={index}><p>{item.message}</p>{item.esHint && <small>{item.esHint}</small>}</li>)}</ol></details>}
       </div>
     </section>
   );

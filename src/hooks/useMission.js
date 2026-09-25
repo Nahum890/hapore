@@ -24,7 +24,8 @@ export function useMission(exercises, currentExerciseId, onChange) {
   const goTo = useCallback(
     (targetIndex) => {
       if (exercises.length === 0) return;
-      const nextExercise = exercises[(targetIndex + exercises.length) % exercises.length];
+      const clampedIndex = Math.min(Math.max(targetIndex, 0), exercises.length - 1);
+      const nextExercise = exercises[clampedIndex];
       if (nextExercise && nextExercise.id !== currentExerciseId) {
         onChange?.(nextExercise.id);
       }

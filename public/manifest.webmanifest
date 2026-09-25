@@ -1,6 +1,6 @@
 {
-  "name": "GuaranIA",
-  "short_name": "GuaranIA",
+  "name": "PyFis IA",
+  "short_name": "PyFis IA",
   "description": "PWA educativa offline para aprender Física de 3.º curso mediante aprendizaje interactivo.",
   "lang": "es",
   "start_url": "/",

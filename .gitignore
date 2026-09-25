@@ -4,3 +4,6 @@ dev-dist/
 *.local
 .DS_Store
 npm-debug.log*
+.env
+.env.*.local
+/modificacion propia/

@@ -1,77 +1,73 @@
-import tutorData from '../data/tutor_jopara.json' with { type: 'json' };
-import errorsData from '../data/errors.json' with { type: 'json' };
+import { errors as errorsData, exercises, quizBank, tutorJopara as tutorData } from '../data/catalogs.js';
+import { buildQuizFeedback, evaluateQuizContext, findBestMatch, normalizeText } from './quizEngine.js';
+import { sanitizeMarkup } from '../utils/validation.js';
 
-/**
- * Tutor 100% offline basado en reglas.
- * Usa JSON local (saludos, pistas jopara, errores frecuentes) para responder
- * sin conexión y sin ningún modelo de IA.
- */
+export const HINT_LEVELS_MAX = 5;
+export function obtenerVariantePista(variants, previous) {
+  if (!Array.isArray(variants)) return variants ?? null;
+  const choices = variants.filter(text => typeof text === 'string' && text.trim());
+  const fresh = choices.filter(text => text !== previous);
+  const pool = fresh.length ? fresh : choices;
+  return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
+}
+
 export default class RuleTutorProvider {
   constructor(options = {}) {
     this.id = 'rule-tutor';
     this.data = options.data ?? tutorData;
     this.errors = options.errors ?? errorsData;
+    this.exercises = options.exercises ?? exercises;
+    this.bank = options.bank ?? quizBank;
+    this.levels = options.levels ?? this.data.hintLevels;
+    this.previous = new Map();
   }
-
+  choose(key, variants) {
+    const text = obtenerVariantePista(variants, this.previous.get(key));
+    this.previous.set(key, text);
+    return text;
+  }
+  result(message, extra = {}) {
+    return { message: sanitizeMarkup(message || this.data.fallbackHint || 'Revisá el enunciado paso a paso.'), source: this.id, available: true, ...extra };
+  }
   async respond(context = {}) {
-    const { type = 'hint' } = context;
-    if (type === 'welcome') return this.#welcome();
-    if (type === 'mistake') return this.#mistakeResponse(context);
-    return this.#hintResponse(context);
-  }
-
-  #welcome() {
-    const greeting = this.data.greetings?.[0] ?? '¡Mba\'éichapa!';
-    return {
-      message: greeting,
-      source: this.id,
-      available: true,
-    };
-  }
-
-  #findError(context) {
-    const { errorId, expectedConcept } = context;
-    if (errorId) {
-      return this.errors.find((error) => error.id === errorId) ?? null;
+    if (context.tipo === 'evaluacion_cuestionario') {
+      const verdict = evaluateQuizContext(context);
+      return this.result(buildQuizFeedback({ ...context, esCorrecta: verdict.correct }), verdict);
     }
-    if (expectedConcept) {
-      return this.errors.find((error) => error.expectedConcept === expectedConcept) ?? null;
+    if (context.tipo === 'charla_libre') {
+      const question = normalizeText(context.message);
+      const offlineTopic = /\b(haku|calor|temperatura|terere|mate)\b/.test(question) ? 'Termodinámica'
+        : /\b(luz|tesape|espejo|pajita|refraccion)\b/.test(question) ? 'Óptica' : null;
+      const offlineAnswer = offlineTopic && this.data.topicSupport?.find(item => item.tema === offlineTopic);
+      if (offlineAnswer) return this.result(offlineAnswer.respuesta);
+      const match = findBestMatch(context.message, this.bank);
+      if (match) return this.result([match.entry.respuesta || match.entry.explicacion, match.entry.respuestaJopara || match.entry.explicacionJopara].filter(Boolean).join(' '));
+      const concept = findBestMatch(context.message, this.data.topicSupport ?? []);
+      return this.result(concept?.entry.respuesta || 'Puedo ayudarte con termodinámica y óptica. También hay ejercicios complementarios de movimiento y vectores. Probá con una pregunta sobre calor, temperatura, espejos o luz.');
     }
-    return null;
-  }
-
-  #mistakeResponse(context) {
-    const error = this.#findError(context);
-    const entry = error
-      ? this.data.errors?.find((item) => item.errorId === error.id)
-      : null;
-    if (!entry) {
-      return {
-        message: this.data.fallbackHint ?? 'Revisá el enunciado y probá paso a paso.',
-        source: this.id,
-        available: true,
-      };
+    if (context.type === 'welcome') return this.result(this.choose('welcome', this.data.greetings));
+    if (context.type === 'section') {
+      if (context.section === 'simulador' && context.exerciseId) return this.result(`Ahora practicamos ${context.topic ?? 'Física'}. Escribí tu respuesta y comprobala con la escena de este ejercicio.`);
+      if (context.section === 'aula') return this.result(context.role === 'maestro' ? 'En Aula docente elegí los temas de Física de 3.º y compartí el código con tus estudiantes.' : 'En Mi clase ingresá el código que te dio tu docente para practicar los mismos temas.');
+      return this.result(this.choose('section:' + context.section, this.data.sectionGreetings?.[context.section] ?? this.data.greetings));
     }
-    return {
-      message: entry.joparaHint,
-      esHint: entry.esHint,
-      followUp: entry.followUp,
-      source: this.id,
-      available: true,
-    };
-  }
 
-  #hintResponse(context) {
-    const error = this.#findError(context);
-    const entry = error
-      ? this.data.errors?.find((item) => item.errorId === error.id)
-      : null;
-    return {
-      message: entry?.joparaHint ?? this.data.fallbackHint ?? 'Vamos paso a paso: releé el enunciado.',
+    const error = this.errors.find(item => context.errorId ? item.id === context.errorId : item.expectedConcept === context.expectedConcept);
+    const entry = this.data.errors?.find(item => item.errorId === error?.id);
+    const level = Math.min(HINT_LEVELS_MAX, Math.max(1, Math.floor(Number(context.hintLevel) || 1)));
+    const levelKey = 'nivel_' + level;
+    // Exercise-specific hints prevent a generic numeric answer being used for a different problem.
+    const exercise = context.exercise ?? this.exercises.find(item => item.id === (context.exerciseId ?? context.ejercicio));
+    const specific = this.levels?.byExercise?.[exercise?.id]?.[levelKey];
+    let variants = specific ?? this.levels?.byErrorType?.[context.errorType]?.[levelKey];
+    if (!variants && exercise?.hints?.length) {
+      const index = level <= 2 ? 0 : level === 3 ? 1 : 2;
+      variants = exercise.hints[Math.min(index, exercise.hints.length - 1)];
+    }
+    variants ??= this.levels?.byConcept?.[context.expectedConcept]?.[levelKey] ?? entry?.levels?.[levelKey] ?? entry?.joparaHint;
+    return this.result(this.choose([exercise?.id, context.errorType, context.expectedConcept, level].join(':'), variants), {
       esHint: entry?.esHint,
       followUp: entry?.followUp,
-      source: this.id,
-      available: true,
-    };
+    });
   }
 }

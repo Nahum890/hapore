@@ -1,44 +1,68 @@
 [
+  { "id": "calor-sensible", "name": "Calor sensible", "definition": "Energía transferida que cambia la temperatura sin cambiar el estado de la sustancia. En agua líquida, Q = m · c · (Tf - Ti).", "formula": "Q = m · c · ΔT" },
+  { "id": "temperatura-final", "name": "Temperatura final", "definition": "La temperatura final se obtiene sumando a la inicial el aumento causado por el calor recibido, si no hay pérdidas ni cambio de estado.", "formula": "Tf = Ti + Q / (m · c)" },
+  { "id": "equilibrio-termico", "name": "Equilibrio térmico", "definition": "Dos porciones de agua en contacto intercambian calor hasta alcanzar una misma temperatura. Sin pérdidas y con igual calor específico, la temperatura final es un promedio ponderado por las masas.", "formula": "T = (m1 · T1 + m2 · T2) / (m1 + m2)" },
+  { "id": "ley-reflexion", "name": "Ley de reflexión", "definition": "El ángulo de incidencia es igual al ángulo de reflexión. Ambos se miden desde la normal, perpendicular a la superficie del espejo.", "formula": "ángulo de incidencia = ángulo de reflexión" },
+  { "id": "espejo-plano", "name": "Imagen en espejo plano", "definition": "La imagen virtual aparece detrás del espejo a la misma distancia a la que se encuentra el objeto delante de él.", "formula": "distancia de imagen = distancia de objeto" },
+  { "id": "indice-refraccion", "name": "Índice de refracción", "definition": "Relación entre la rapidez de la luz en el vacío y en un material transparente. El índice es adimensional y mayor o igual que 1.", "formula": "n = c / v" },
   {
     "id": "movimiento-parabolico",
     "name": "Movimiento Parabólico",
     "definition": "Movimiento bidimensional que resulta de componer un avance horizontal uniforme (MRU) con un movimiento vertical bajo aceleración gravitatoria constante (MRUV). Su trayectoria es una parábola simétrica.",
-    "formula": "y(x) = x · tan(θ) - (g / (2 · v0² · cos²θ)) · x²"
+    "formula": "y(x) = x * tan(ángulo) - (g / (2 * v0² * cos²(ángulo))) * x²"
   },
   {
     "id": "componente-horizontal",
     "name": "Componente horizontal (vx)",
     "definition": "Proyección del vector velocidad inicial sobre el eje X. Al no existir aceleración horizontal (despreciando el rozamiento del aire), permanece constante durante todo el recorrido.",
-    "formula": "vx = v0 · cos(θ)"
+    "formula": "vx = v0 * cos(ángulo)"
   },
   {
     "id": "componente-vertical",
     "name": "Componente vertical (vy)",
     "definition": "Proyección del vector velocidad sobre el eje Y. Disminuye de forma continua durante la fase de ascenso a razón de 9,8 m/s cada segundo debido a la gravedad terrestre, anulándose en el punto más alto.",
-    "formula": "vy(t) = v0 · sen(θ) - g · t"
+    "formula": "vy(t) = v0 * sen(ángulo) - g * t"
   },
   {
     "id": "tiempo-de-vuelo",
     "name": "Tiempo de vuelo (T)",
     "definition": "Duración temporal total desde el instante de despegue hasta que el proyectil regresa al mismo nivel horizontal de lanzamiento.",
-    "formula": "T = (2 · v0 · sen(θ)) / g"
+    "formula": "T = (2 * v0 * sen(ángulo)) / g"
   },
   {
     "id": "altura-maxima",
     "name": "Altura máxima (Hmax)",
     "definition": "Cota vertical máxima alcanzada por el proyectil sobre el punto de origen, ocurrida en el instante t = T / 2 cuando vy = 0.",
-    "formula": "Hmax = (v0² · sen²θ) / (2g)"
+    "formula": "Hmax = (v0² * sen²(ángulo)) / (2 * g)"
   },
   {
     "id": "alcance",
     "name": "Alcance horizontal (R)",
     "definition": "Distancia total recorrida a lo largo del suelo horizontal entre el punto de despegue y el punto de impacto final.",
-    "formula": "R = (v0² · sen(2θ)) / g"
+    "formula": "R = (v0² * sen(2 * ángulo)) / g"
   },
   {
     "id": "angulo-optimo",
     "name": "Ángulo de alcance máximo",
-    "definition": "En terreno plano y sin resistencia del aire, el ángulo de 45° maximiza el factor sen(2θ) = sen(90°) = 1, ofreciendo la mayor distancia posible para una velocidad dada.",
-    "formula": "θ_max = 45°"
+    "definition": "En terreno plano y sin resistencia del aire, el ángulo de 45° maximiza el factor sen(2 * ángulo) = sen(90°) = 1, ofreciendo la mayor distancia posible para una velocidad dada.",
+    "formula": "ángulo_max = 45°"
+  },
+  {
+    "id": "rapidez-media",
+    "name": "Rapidez media",
+    "definition": "La rapidez media relaciona la distancia recorrida con el tiempo empleado. Se expresa en m/s cuando la distancia está en metros y el tiempo en segundos.",
+    "formula": "rapidez media = distancia / tiempo"
+  },
+  {
+    "id": "vector-resultante",
+    "name": "Vector resultante",
+    "definition": "Un vector tiene magnitud, dirección y sentido. La resultante se obtiene sumando sus componentes en cada eje; los sentidos opuestos llevan signos distintos.",
+    "formula": "Vx resultante = Vx1 + Vx2"
+  },
+  {
+    "id": "ley-hooke",
+    "name": "Ley de Hooke",
+    "definition": "Dentro del límite elástico, la magnitud de la fuerza de un resorte es proporcional a su deformación. La fuerza restauradora apunta en sentido opuesto a esa deformación.",
+    "formula": "magnitud de la fuerza = rigidez * deformación"
   }
 ]

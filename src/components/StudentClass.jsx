@@ -1,0 +1,25 @@
+import { useState } from 'react';
+import { validClassCode } from './TeacherMode.jsx';
+
+export default function StudentClass({ classConfig, onJoinClass }) {
+  const [code, setCode] = useState('');
+  const [error, setError] = useState('');
+  const join = event => {
+    event.preventDefault();
+    const config = validClassCode(code);
+    if (!config) { setError('Ese código no es válido. Pedile a tu docente que te lo vuelva a compartir.'); return; }
+    setError(''); onJoinClass(config);
+  };
+  return <section className="card student-class" aria-labelledby="student-class-title">
+    <span className="panel-eyebrow">MI CLASE</span>
+    <h2 id="student-class-title">{classConfig ? 'Ya estás en una clase' : 'Unite a la clase de tu docente'}</h2>
+    {classConfig ? <>
+      <p>Los temas, las tarjetas y los ejercicios de la clase ya se aplicaron a tu cuenta.</p>
+      <div className="student-class-summary"><span>Temas seleccionados</span><strong>{classConfig.subtemas.length}</strong><span>Ejercicios</span><strong>{classConfig.ejercicios}</strong><span>Tarjetas</span><strong>{classConfig.flashcards}</strong></div>
+      <button className="btn btn-secondary" type="button" onClick={() => onJoinClass(null)}>Salir de la clase</button>
+    </> : <>
+      <p>Escribí el código que te dio tu docente. La práctica y el repaso se ajustarán a esa clase.</p>
+      <form onSubmit={join} className="student-class-form"><label htmlFor="student-class-code">Código de clase</label><div><input id="student-class-code" className="quiz-input" type="text" autoComplete="off" autoCapitalize="characters" spellCheck={false} maxLength={8} value={code} onChange={event => { setCode(event.target.value.toUpperCase()); setError(''); }} placeholder="Ingresá el código" /><button className="btn btn-primary" type="submit" disabled={!code.trim()}>Unirme</button></div>{error && <p role="alert" className="field-error">{error}</p>}</form>
+    </>}
+  </section>;
+}

@@ -1,0 +1,582 @@
+[
+  { "id": "q-termo-01", "tema": "Termodinámica", "tipo": "abierta", "pregunta": "Si calentás agua para el mate, ¿qué cambia: el calor o la temperatura del agua? Explicá la diferencia.", "respuesta": "El agua recibe calor, que es energía transferida, y su temperatura aumenta; calor y temperatura no son lo mismo.", "respuestaJopara": "Pe y ohupyty calor, ha ipytu'u térmico okambia: temperatura ojupi.", "claves": ["calor", "energia", "temperatura", "aumenta"], "explicacion": "El calor se transfiere; la temperatura mide el estado térmico del agua." },
+  { "id": "q-termo-02", "tema": "Termodinámica", "tipo": "abierta", "pregunta": "Al mezclar dos cantidades diferentes de agua, una caliente y otra fría, ¿por qué la temperatura final no es siempre el promedio simple?", "respuesta": "Porque depende de la masa de cada porción: la temperatura final se pondera por las masas si el calor específico es igual y no hay pérdidas.", "respuestaJopara": "Pe y hetavéva oguereko mayor peso pe temperatura final-pe.", "claves": ["masa", "temperatura", "pondera", "perdidas"], "explicacion": "En la mezcla, el calor cedido por el agua caliente iguala al recibido por la fría." },
+  { "id": "q-termo-03", "tema": "Termodinámica", "tipo": "vf", "enunciado": "Durante el calentamiento del agua, un aumento de 10 °C equivale a una diferencia de temperatura de 10 K.", "esVerdadero": true, "explicacion": "Un cambio de un grado Celsius tiene el mismo tamaño que un cambio de un kelvin; solo difiere el punto cero.", "explicacionJopara": "Pe diferencia de temperatura ha'e peteĩcha °C ha K-pe." },
+  { "id": "q-optica-01", "tema": "Óptica", "tipo": "abierta", "pregunta": "¿Por qué una pajita dentro de un vaso de agua parece doblada aunque está recta?", "respuesta": "Porque la luz se refracta al pasar del agua al aire: cambia de rapidez y dirección; la pajita sigue recta.", "respuestaJopara": "Pe luz okambia dirección osẽvo y gui aire-pe; pajita ndojekarẽi.", "claves": ["luz", "refracta", "agua", "aire"], "explicacion": "El rayo cambia de dirección en la frontera entre dos medios." },
+  { "id": "q-optica-02", "tema": "Óptica", "tipo": "abierta", "pregunta": "En un espejo plano, ¿desde qué línea se mide el ángulo de incidencia?", "respuesta": "Desde la normal, que es perpendicular a la superficie del espejo.", "respuestaJopara": "Pe ángulo oñemedi normal guive, perpendicular espejo rehe.", "claves": ["normal", "perpendicular", "espejo"], "explicacion": "Medir desde la superficie daría el ángulo complementario, no el de incidencia." },
+  { "id": "q-optica-03", "tema": "Óptica", "tipo": "vf", "enunciado": "En un espejo plano, la imagen aparece a la misma distancia detrás del espejo que el objeto delante de él.", "esVerdadero": true, "explicacion": "La imagen es virtual y simétrica respecto al plano del espejo.", "explicacionJopara": "Pe imagen oĩ espejo kupépe, distancia peteĩcha." },
+  {
+    "id": "q-mp-01",
+    "tema": "Movimiento Parabólico",
+    "tipo": "abierta",
+    "pregunta": "¿Qué es el Movimiento Parabólico?",
+    "respuesta": "La combinación de un movimiento horizontal con velocidad constante y un movimiento vertical acelerado por la gravedad; su trayectoria es una parábola.",
+    "respuestaJopara": "Peteî movimiento horizontal (constante) ha peteî vertical (gravedad rehegua) joapy; pe trayectoria ha'e peteî parábola.",
+    "claves": [
+      "combinacion",
+      "horizontal",
+      "vertical",
+      "gravedad",
+      "parabola"
+    ],
+    "explicacion": "El dron avanza hacia adelante a velocidad constante mientras la gravedad lo acelera hacia abajo: la unión de los dos movimientos dibuja una parábola."
+  },
+  {
+    "id": "q-mp-02",
+    "tema": "Movimiento Parabólico",
+    "tipo": "abierta",
+    "pregunta": "¿Por qué la componente horizontal de la velocidad no cambia durante el vuelo?",
+    "respuesta": "Porque ignorando el aire no hay fuerza horizontal: la única fuerza es la gravedad, que actúa hacia abajo.",
+    "respuestaJopara": "Ndairévi aire: pe fuerza oiko gravedad rehe, ogo'êvo ape yvýpe.",
+    "claves": [
+      "aire",
+      "fuerza",
+      "horizontal",
+      "gravedad"
+    ],
+    "explicacion": "La velocidad horizontal vale vx = v0 * cos(ángulo) y, sin resistencia del aire, nada la frena ni la acelera."
+  },
+  {
+    "id": "q-mp-03",
+    "tema": "Movimiento Parabólico",
+    "tipo": "abierta",
+    "pregunta": "¿Qué le ocurre a la velocidad vertical durante la subida del dron?",
+    "respuesta": "Disminuye hasta llegar a cero en la altura máxima, porque la gravedad la frena.",
+    "respuestaJopara": "Pe gravedad omboy chupe: vy oguepe'ẽ ha oiko cero-pe pe altura máxima-pe.",
+    "claves": [
+      "disminuye",
+      "cero",
+      "altura",
+      "gravedad",
+      "frena"
+    ],
+    "explicacion": "Al subir, la gravedad frena la componente vertical hasta que vale cero en el punto más alto; después la acelera hacia abajo."
+  },
+  {
+    "id": "q-mp-04",
+    "tema": "Movimiento Parabólico",
+    "tipo": "abierta",
+    "pregunta": "¿Qué forma tiene la trayectoria del proyectil?",
+    "respuesta": "Una parábola.",
+    "respuestaJopara": "Peteî parábola.",
+    "claves": [
+      "parabola"
+    ],
+    "explicacion": "La unión del avance horizontal constante con la caída acelerada dibuja una parábola."
+  },
+  {
+    "id": "q-mp-05",
+    "tema": "Movimiento Parabólico",
+    "tipo": "abierta",
+    "pregunta": "¿Qué pasa con la velocidad horizontal en la altura máxima?",
+    "respuesta": "Sigue igual: la componente horizontal no cambia, por eso el proyectil sigue avanzando hacia adelante.",
+    "respuestaJopara": "Opavave la vx: nomanba, upévo el dron oho gueteri lape.",
+    "claves": [
+      "horizontal",
+      "cambia",
+      "avanza",
+      "sigue"
+    ],
+    "explicacion": "En la altura máxima solo la velocidad vertical vale cero; la horizontal (vx = v0 * cos(ángulo)) sigue constante."
+  },
+  {
+    "id": "q-mp-06",
+    "tema": "Movimiento Parabólico",
+    "tipo": "abierta",
+    "pregunta": "¿De qué depende el alcance horizontal máximo del dron?",
+    "respuesta": "De la velocidad inicial al cuadrado y del ángulo de lanzamiento: R = (v0² * sen(2 * ángulo)) / g.",
+    "respuestaJopara": "Pe v0² ha pe ángulo rehe: R = (v0² * sen(2 * ángulo)) / g.",
+    "claves": [
+      "velocidad",
+      "angulo",
+      "alcance"
+    ],
+    "explicacion": "R = (v0² * sen(2 * ángulo)) / g: a más velocidad y con ángulo cerca de 45 grados, más lejos aterriza."
+  },
+  {
+    "id": "q-mp-07",
+    "tema": "Movimiento Parabólico",
+    "tipo": "vf",
+    "enunciado": "En el movimiento parabólico, la componente horizontal de la velocidad permanece constante durante todo el vuelo.",
+    "esVerdadero": true,
+    "explicacion": "Si ignoramos el aire, no hay fuerza horizontal: vx = v0 * cos(ángulo) y no cambia.",
+    "explicacionJopara": "Ndairévi aire: pe vx nomanba oikope pe vuelo pukukuepe."
+  },
+  {
+    "id": "q-mp-08",
+    "tema": "Movimiento Parabólico",
+    "tipo": "vf",
+    "enunciado": "En la altura máxima, la velocidad vertical del dron vale cero.",
+    "esVerdadero": true,
+    "explicacion": "Ahí la subida se frena por completo por efecto de la gravedad; luego empieza a caer.",
+    "explicacionJopara": "Pe gravedad omboty la subida: vy oiko cero-pe upépe."
+  },
+  {
+    "id": "q-mp-09",
+    "tema": "Movimiento Parabólico",
+    "tipo": "vf",
+    "enunciado": "La gravedad acelera el movimiento horizontal del proyectil.",
+    "esVerdadero": false,
+    "explicacion": "La gravedad actúa solo hacia abajo (vertical); el movimiento horizontal mantiene velocidad constante.",
+    "explicacionJopara": "Pe gravedad oiko ape yvýpe; pe horizontal oiko constante."
+  },
+  {
+    "id": "q-mp-10",
+    "tema": "Movimiento Parabólico",
+    "tipo": "vf",
+    "enunciado": "El tiempo de vuelo depende solo de la componente vertical: T = (2 * v0y) / g.",
+    "esVerdadero": true,
+    "explicacion": "Cuanto mayor es el impulso hacia arriba (v0y = v0 * sen(ángulo)), más segundos permanece en el aire.",
+    "explicacionJopara": "Pe v0y oha mbarete: T = (2 * v0y) / g ha oho hetave segundo."
+  },
+  {
+    "id": "q-mp-11",
+    "tema": "Movimiento Parabólico",
+    "tipo": "vf",
+    "enunciado": "Cuanto mayor es el ángulo de lanzamiento, mayor es siempre el alcance.",
+    "esVerdadero": false,
+    "explicacion": "El alcance máximo se logra a 45 grados: ángulos muy altos reducen la componente horizontal y el dron cae antes.",
+    "explicacionJopara": "45 grado-pe pe alcance oiko máximo: ángulo yvateiteréi-pe, vx oñemombyry ha ho'a mboyve."
+  },
+  {
+    "id": "q-mp-12",
+    "tema": "Movimiento Parabólico",
+    "tipo": "vf",
+    "enunciado": "La trayectoria de un proyectil es una línea recta.",
+    "esVerdadero": false,
+    "explicacion": "Es una parábola: la combinación de avance horizontal y caída acelerada curva el camino.",
+    "explicacionJopara": "Ndaipóri línea recta: ha'e peteî parábola."
+  },
+  {
+    "id": "q-mp-13",
+    "tema": "Movimiento Parabólico",
+    "tipo": "vf",
+    "enunciado": "En el vuelo, las velocidades se calculan por separado: la horizontal con coseno y la vertical con seno.",
+    "esVerdadero": true,
+    "explicacion": "vx = v0 * cos(ángulo) y v0y = v0 * sen(ángulo): cada componente usa su función trigonométrica.",
+    "explicacionJopara": "vx rehe coseno, v0y rehe seno: ani ene ñemboja'o."
+  },
+  {
+    "id": "q-mp-14",
+    "tema": "Movimiento Parabólico",
+    "tipo": "vf",
+    "enunciado": "Durante la caída, la velocidad vertical del proyectil aumenta.",
+    "esVerdadero": true,
+    "explicacion": "En la caída la gravedad acelera el movimiento vertical: la velocidad crece hacia abajo hasta tocar el suelo.",
+    "explicacionJopara": "Pe gravedad omboguejy pya'e: pe vy ohóvo mbarete ape yvýpe."
+  },
+  {
+    "id": "q-cin-01",
+    "tema": "Cinemática",
+    "tipo": "abierta",
+    "pregunta": "¿Qué es la velocidad media y cómo se calcula?",
+    "respuesta": "Es la rapidez promedio: se calcula dividiendo la distancia recorrida entre el tiempo empleado: v = d / t.",
+    "respuestaJopara": "Pe rapidez promedio: v = d / t, distancia entre tiempo.",
+    "claves": [
+      "rapidez",
+      "promedio",
+      "distancia",
+      "tiempo",
+      "divide"
+    ],
+    "explicacion": "v = d / t: la velocidad media (cinemática lineal) es la rapidez promedio entre dos puntos."
+  },
+  {
+    "id": "q-cin-02",
+    "tema": "Cinemática",
+    "tipo": "abierta",
+    "pregunta": "¿Qué unidades se usan para la velocidad en el sistema internacional?",
+    "respuesta": "Metros por segundo (m/s). Los kilómetros por hora se convierten dividiendo por 3,6.",
+    "respuestaJopara": "Metro por segundo (m/s); pe km/h oñemoambue 3,6-pe odividiendo.",
+    "claves": [
+      "metros",
+      "segundo",
+      "ms",
+      "36",
+      "convierte"
+    ],
+    "explicacion": "La velocidad se mide en m/s: para pasar de km/h a m/s se divide por 3,6."
+  },
+  {
+    "id": "q-cin-03",
+    "tema": "Cinemática",
+    "tipo": "abierta",
+    "pregunta": "¿Cómo se convierte de km/h a m/s?",
+    "respuesta": "Dividiendo por 3,6.",
+    "respuestaJopara": "Odividiendo 3,6-re.",
+    "claves": [
+      "36",
+      "divide",
+      "dividiendo"
+    ],
+    "explicacion": "Por ejemplo: 72 km/h dividido por 3,6 da 20 m/s."
+  },
+  {
+    "id": "q-cin-04",
+    "tema": "Cinemática",
+    "tipo": "abierta",
+    "pregunta": "¿Qué es la aceleración?",
+    "respuesta": "El cambio de velocidad por unidad de tiempo: cuánto aumenta o disminuye la velocidad cada segundo.",
+    "respuestaJopara": "Pe cambio de velocidad cada segundo-pe.",
+    "claves": [
+      "cambio",
+      "velocidad",
+      "tiempo",
+      "aumenta",
+      "disminuye"
+    ],
+    "explicacion": "La aceleración mide cuánto cambia la velocidad por segundo: puede ser positiva (aumenta) o negativa (disminuye, como el frenado de la gravedad)."
+  },
+  {
+    "id": "q-cin-05",
+    "tema": "Cinemática",
+    "tipo": "abierta",
+    "pregunta": "¿Qué diferencia hay entre distancia recorrida y desplazamiento?",
+    "respuesta": "La distancia es el camino total recorrido; el desplazamiento es la distancia en línea recta entre el punto inicial y el final.",
+    "respuestaJopara": "Pe distancia ha'e camino completo; pe desplazamiento ha'e línea recta inicio guite final peve.",
+    "claves": [
+      "camino",
+      "recta",
+      "inicial",
+      "final",
+      "total"
+    ],
+    "explicacion": "Si el dron va y vuelve al mismo punto, la distancia es grande pero el desplazamiento es cero."
+  },
+  {
+    "id": "q-cin-06",
+    "tema": "Cinemática",
+    "tipo": "vf",
+    "enunciado": "La velocidad media se calcula dividiendo la distancia recorrida entre el tiempo empleado.",
+    "esVerdadero": true,
+    "explicacion": "v = d / t: es la definición de la velocidad media.",
+    "explicacionJopara": "v = d / t: pe definición de velocidad media."
+  },
+  {
+    "id": "q-cin-07",
+    "tema": "Cinemática",
+    "tipo": "vf",
+    "enunciado": "72 km/h equivalen a 20 m/s.",
+    "esVerdadero": true,
+    "explicacion": "Se divide por 3,6: 72 / 3,6 = 20 m/s.",
+    "explicacionJopara": "72 odividiendo 3,6-pe oiko 20 m/s."
+  },
+  {
+    "id": "q-cin-08",
+    "tema": "Cinemática",
+    "tipo": "vf",
+    "enunciado": "Un cuerpo con velocidad constante tiene una aceleración distinta de cero.",
+    "esVerdadero": false,
+    "explicacion": "Si la velocidad no cambia, la aceleración es cero.",
+    "explicacionJopara": "Velocidad nomanba ramo, pe aceleración ha'e cero."
+  },
+  {
+    "id": "q-cin-09",
+    "tema": "Cinemática",
+    "tipo": "vf",
+    "enunciado": "La aceleración de la gravedad en la Tierra es aproximadamente 9,8 m/s por segundo al cuadrado.",
+    "esVerdadero": true,
+    "explicacion": "g = 9,8 m/s²: cada segundo la velocidad vertical aumenta (o disminuye) 9,8 m/s.",
+    "explicacionJopara": "g = 9,8 m/s²: cada segundo pe vy omoambue 9,8."
+  },
+  {
+    "id": "q-cin-10",
+    "tema": "Cinemática",
+    "tipo": "vf",
+    "enunciado": "La distancia recorrida siempre es igual al desplazamiento.",
+    "esVerdadero": false,
+    "explicacion": "Solo si el movimiento es en línea recta sin cambiar de dirección; si el dron vuelve al punto de partida, el desplazamiento es cero.",
+    "explicacionJopara": "Línea recta ramonte; ojere jey ramo, pe desplazamiento oiko cero."
+  },
+  {
+    "id": "q-cin-11",
+    "tema": "Cinemática",
+    "tipo": "vf",
+    "enunciado": "En el movimiento uniforme, la velocidad no cambia con el tiempo.",
+    "esVerdadero": true,
+    "explicacion": "El movimiento uniforme tiene velocidad constante: recorre distancias iguales en tiempos iguales.",
+    "explicacionJopara": "Movimiento uniforme-pe, pe velocidad nomanba."
+  },
+  {
+    "id": "q-cin-12",
+    "tema": "Cinemática",
+    "tipo": "vf",
+    "enunciado": "La velocidad se mide en metros.",
+    "esVerdadero": false,
+    "explicacion": "La velocidad se mide en metros por segundo (m/s); el metro (m) mide distancia.",
+    "explicacionJopara": "Velocidad ha'e m/s; pe metro (m) ha'e distancia."
+  },
+  {
+    "id": "q-vec-01",
+    "tema": "Vectores",
+    "tipo": "abierta",
+    "pregunta": "¿Qué es un vector?",
+    "respuesta": "Una magnitud que tiene módulo (tamaño), dirección y sentido.",
+    "respuestaJopara": "Peteî magnitud oikéva módulo (tamaño), dirección ha sentido rehegua.",
+    "claves": [
+      "modulo",
+      "tamano",
+      "direccion",
+      "sentido"
+    ],
+    "explicacion": "Por ejemplo, la velocidad del dron es un vector: indica cuánto rápido va y hacia dónde."
+  },
+  {
+    "id": "q-vec-02",
+    "tema": "Vectores",
+    "tipo": "abierta",
+    "pregunta": "¿Cómo se calcula la velocidad resultante cuando hay viento?",
+    "respuesta": "Sumando vectorialmente la velocidad del dron y la del viento: V_resultante = V_dron + V_viento.",
+    "respuestaJopara": "V_resultante = V_dron + V_viento: pe suma vectorial rehe.",
+    "claves": [
+      "suma",
+      "dron",
+      "viento",
+      "resultante"
+    ],
+    "explicacion": "La suma vectorial de viento indica hacia dónde se desvía realmente el dron al cruzar el río con viento lateral o en contra."
+  },
+  {
+    "id": "q-vec-03",
+    "tema": "Vectores",
+    "tipo": "abierta",
+    "pregunta": "¿Qué pasa con el dron si cruza el río con viento en contra?",
+    "respuesta": "El viento lo frena: la velocidad resultante disminuye y el dron avanza más lento o se desvía de su rumbo.",
+    "respuestaJopara": "Pe viento omoty chupe: pe resultante oñemombyry ha el dron oho lento.",
+    "claves": [
+      "frena",
+      "disminuye",
+      "desvia",
+      "lento",
+      "viento"
+    ],
+    "explicacion": "Con viento en contra, la componente del viento se resta del avance: el dron tarda más en cruzar o se desvía de su camino recto."
+  },
+  {
+    "id": "q-vec-04",
+    "tema": "Vectores",
+    "tipo": "abierta",
+    "pregunta": "¿Qué diferencia hay entre magnitud escalar y magnitud vectorial?",
+    "respuesta": "La escalar solo tiene valor numérico (como la masa o el tiempo); la vectorial además tiene dirección y sentido (como la velocidad o la fuerza).",
+    "respuestaJopara": "Escalar: número rehe; vectorial: número, dirección ha sentido rehegua.",
+    "claves": [
+      "numerico",
+      "direccion",
+      "sentido",
+      "velocidad",
+      "fuerza"
+    ],
+    "explicacion": "La masa y el tiempo son escalares; la velocidad, la aceleración y la fuerza son vectoriales."
+  },
+  {
+    "id": "q-vec-05",
+    "tema": "Vectores",
+    "tipo": "abierta",
+    "pregunta": "¿Hacia dónde apunta la velocidad vertical al despegar el dron?",
+    "respuesta": "Hacia arriba, con un impulso determinado por el ángulo de lanzamiento: v0y = v0 * sen(ángulo).",
+    "respuestaJopara": "Ape yvate: v0y = v0 * sen(ángulo) rehe.",
+    "claves": [
+      "arriba",
+      "impulso",
+      "angulo",
+      "seno"
+    ],
+    "explicacion": "La descomposición vertical inicial (v0y = v0 * sen(ángulo)) determina el impulso hacia arriba antes de que la gravedad empiece a frenarlo."
+  },
+  {
+    "id": "q-vec-06",
+    "tema": "Vectores",
+    "tipo": "vf",
+    "enunciado": "Un vector tiene módulo, dirección y sentido.",
+    "esVerdadero": true,
+    "explicacion": "Es la definición de vector: tamaño, dirección y sentido.",
+    "explicacionJopara": "Módulo, dirección ha sentido: pe definición de vector."
+  },
+  {
+    "id": "q-vec-07",
+    "tema": "Vectores",
+    "tipo": "vf",
+    "enunciado": "La masa es una magnitud vectorial.",
+    "esVerdadero": false,
+    "explicacion": "La masa es escalar: solo tiene valor numérico, sin dirección ni sentido.",
+    "explicacionJopara": "Pe masa ha'e escalar: número reheguante."
+  },
+  {
+    "id": "q-vec-08",
+    "tema": "Vectores",
+    "tipo": "vf",
+    "enunciado": "Con viento lateral, el dron se desvía de su camino recto.",
+    "esVerdadero": true,
+    "explicacion": "La suma vectorial del viento desvía la velocidad resultante del rumbo original.",
+    "explicacionJopara": "Pe viento omboja'o pe rumbo: pe resultante oho ambue hape."
+  },
+  {
+    "id": "q-vec-09",
+    "tema": "Vectores",
+    "tipo": "vf",
+    "enunciado": "La velocidad es una magnitud vectorial.",
+    "esVerdadero": true,
+    "explicacion": "La velocidad tiene módulo, dirección y sentido: es vectorial.",
+    "explicacionJopara": "Velocidad oikéva módulo, dirección ha sentido: vectorial."
+  },
+  {
+    "id": "q-vec-10",
+    "tema": "Vectores",
+    "tipo": "vf",
+    "enunciado": "Dos vectores de igual módulo y dirección opuesta suman cero.",
+    "esVerdadero": true,
+    "explicacion": "Se cancelan mutuamente: la resultante es cero.",
+    "explicacionJopara": "Oñemboguete: pe resultante oiko cero."
+  },
+  {
+    "id": "q-vec-11",
+    "tema": "Vectores",
+    "tipo": "vf",
+    "enunciado": "Con viento en contra, la velocidad resultante del dron es mayor que sin viento.",
+    "esVerdadero": false,
+    "explicacion": "El viento en contra resta avance: la resultante disminuye y el dron avanza más lento.",
+    "explicacionJopara": "Viento en contra omboguejy: pe resultante oñemombyry."
+  },
+  {
+    "id": "q-vec-12",
+    "tema": "Vectores",
+    "tipo": "vf",
+    "enunciado": "El peso del dron es una fuerza que apunta hacia abajo.",
+    "esVerdadero": true,
+    "explicacion": "El peso es la fuerza de la gravedad: P = m * g, siempre hacia abajo.",
+    "explicacionJopara": "Peso = m * g, ogo'ê ape yvýpe."
+  },
+  {
+    "id": "q-hoo-01",
+    "tema": "Ley de Hooke",
+    "tipo": "abierta",
+    "pregunta": "¿Qué dice la Ley de Hooke?",
+    "respuesta": "La fuerza que ejerce un resorte es proporcional a su deformación: F = k * x, donde k es la dureza del resorte y x la deformación.",
+    "respuestaJopara": "F = k * x: pe fuerza del resorte oho proporcional pe deformación rehe.",
+    "claves": [
+      "proporcional",
+      "resorte",
+      "deformacion",
+      "dureza",
+      "fuerza"
+    ],
+    "explicacion": "F = k * x (o k = F / x): la fuerza del resorte crece en la misma proporción que su deformación."
+  },
+  {
+    "id": "q-hoo-02",
+    "tema": "Ley de Hooke",
+    "tipo": "abierta",
+    "pregunta": "¿Para qué sirve la constante k en la Ley de Hooke?",
+    "respuesta": "Indica la dureza del resorte: se calcula como k = F / x; un k grande significa un resorte más duro.",
+    "respuestaJopara": "Pe dureza del resorte: k = F / x; k guante, resorte mbarete.",
+    "claves": [
+      "dureza",
+      "resorte",
+      "duro",
+      "division"
+    ],
+    "explicacion": "k = F / x: cuanta más fuerza necesita el resorte para deformarse, más duro es."
+  },
+  {
+    "id": "q-hoo-03",
+    "tema": "Ley de Hooke",
+    "tipo": "abierta",
+    "pregunta": "¿Para qué sirve el resorte del tren de aterrizaje del dron?",
+    "respuesta": "Para absorber el peso del dron al aterrizar, sin que rebote ni se estrelle.",
+    "respuestaJopara": "Oabsorbe pe peso del dron, ani orebote ani oho la yvy-pe.",
+    "claves": [
+      "absorber",
+      "peso",
+      "rebotar",
+      "aterrizar"
+    ],
+    "explicacion": "La Ley de Hooke permite calcular la dureza del amortiguador para absorber el peso del dron sin rebotar ni estrellarse."
+  },
+  {
+    "id": "q-hoo-04",
+    "tema": "Ley de Hooke",
+    "tipo": "abierta",
+    "pregunta": "¿Qué pasa si el resorte del aterrizaje es demasiado rígido?",
+    "respuesta": "El dron rebota: la fuerza del impacto no se absorbe bien y puede dañarse al aterrizar.",
+    "respuestaJopara": "El dron orebote: pe impacto ndoabsorbe porãi ha iñepyrũ iñembyai.",
+    "claves": [
+      "rebota",
+      "impacto",
+      "absorbe",
+      "dania"
+    ],
+    "explicacion": "Un resorte demasiado rígido no amortigua: devuelve la energía del impacto y el dron rebota o se estrella."
+  },
+  {
+    "id": "q-hoo-05",
+    "tema": "Ley de Hooke",
+    "tipo": "vf",
+    "enunciado": "Según la Ley de Hooke, la fuerza del resorte es proporcional a la deformación: F = k * x.",
+    "esVerdadero": true,
+    "explicacion": "Es la definición de la Ley de Hooke: F = k * x.",
+    "explicacionJopara": "F = k * x: pe definición de la Ley de Hooke."
+  },
+  {
+    "id": "q-hoo-06",
+    "tema": "Ley de Hooke",
+    "tipo": "vf",
+    "enunciado": "La constante k de la Ley de Hooke se calcula como k = F / x.",
+    "esVerdadero": true,
+    "explicacion": "k = F / x: la dureza del resorte es la fuerza dividida la deformación.",
+    "explicacionJopara": "k = F / x: fuerza odividiendo deformación rehe."
+  },
+  {
+    "id": "q-hoo-07",
+    "tema": "Ley de Hooke",
+    "tipo": "vf",
+    "enunciado": "Un resorte con k grande es más blando que uno con k chico.",
+    "esVerdadero": false,
+    "explicacion": "Es al revés: un k grande indica mayor dureza, el resorte es más rígido.",
+    "explicacionJopara": "Katu'e pe jey: k guante = resorte mbarete (rígido)."
+  },
+  {
+    "id": "q-hoo-08",
+    "tema": "Ley de Hooke",
+    "tipo": "vf",
+    "enunciado": "La Ley de Hooke sirve para diseñar el amortiguador del tren de aterrizaje.",
+    "esVerdadero": true,
+    "explicacion": "Con F = k * x se calcula la dureza necesaria para absorber el aterrizaje del dron.",
+    "explicacionJopara": "F = k * x rehe ojapo pe amortiguador del tren de aterrizaje."
+  },
+  {
+    "id": "q-hoo-09",
+    "tema": "Ley de Hooke",
+    "tipo": "vf",
+    "enunciado": "La deformación del resorte se mide en newtons.",
+    "esVerdadero": false,
+    "explicacion": "La deformación se mide en metros (m); el newton (N) mide fuerza.",
+    "explicacionJopara": "Deformación ha'e metro-pe; pe newton (N) ha'e fuerza."
+  },
+  {
+    "id": "q-hoo-10",
+    "tema": "Ley de Hooke",
+    "tipo": "vf",
+    "enunciado": "Si se duplica la deformación del resorte, la fuerza también se duplica.",
+    "esVerdadero": true,
+    "explicacion": "F = k * x es una relación proporcional directa.",
+    "explicacionJopara": "F = k * x: proporcional directa."
+  },
+  {
+    "id": "q-hoo-11",
+    "tema": "Ley de Hooke",
+    "tipo": "vf",
+    "enunciado": "El resorte del tren de aterrizaje absorbe la energía del impacto.",
+    "esVerdadero": true,
+    "explicacion": "Esa es su función: amortiguar el aterrizaje para que el dron no rebote ni se estrelle.",
+    "explicacionJopara": "Peva pe función: oabsorbe pe impacto ani orebote."
+  },
+  {
+    "id": "q-hoo-12",
+    "tema": "Ley de Hooke",
+    "tipo": "vf",
+    "enunciado": "La Ley de Hooke aplica igual para cualquier deformación, por grande que sea.",
+    "esVerdadero": false,
+    "explicacion": "Solo aplica dentro del límite elástico del material; deformaciones muy grandes lo deforman permanentemente.",
+    "explicacionJopara": "Límite elástico peve; deformación guaitereí ramo, oñembyai pe material."
+  }
+]
