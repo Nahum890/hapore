@@ -14,7 +14,7 @@ function bestKnowledgeMatch(message, records) {
   let best = null;
   for (const record of records) {
     const words = new Set(chatTokens(record.search));
-    const hits = query.filter(word => words.has(word) || [...words].some(candidate => candidate.startsWith(word) || word.startsWith(candidate)));
+    const hits = query.filter(word => words.has(word) || (word.length >= 6 && [...words].some(candidate => candidate.length >= 6 && (candidate.startsWith(word) || word.startsWith(candidate)))));
     const score = hits.reduce((sum, word) => sum + (word.length > 6 ? 1.2 : 1), 0) / query.reduce((sum, word) => sum + (word.length > 6 ? 1.2 : 1), 0);
     if (score >= 0.35 && (!best || score > best.score)) best = { ...record, score };
   }
@@ -82,8 +82,10 @@ export default class RuleTutorProvider {
     // Exercise-specific hints prevent a generic numeric answer being used for a different problem.
     const exercise = context.exercise ?? this.exercises.find(item => item.id === (context.exerciseId ?? context.ejercicio));
     const specific = this.levels?.byExercise?.[exercise?.id]?.[levelKey];
-    let variants = specific ?? this.levels?.byErrorType?.[context.errorType]?.[levelKey]
+    let variants = specific
+      // A worked solution for the selected exercise takes priority over a generic error hint.
       ?? (level === HINT_LEVELS_MAX && exercise?.hints?.length ? exercise.hints.at(-1) : null)
+      ?? this.levels?.byErrorType?.[context.errorType ?? error?.key]?.[levelKey]
       ?? this.levels?.byConcept?.[context.expectedConcept]?.[levelKey]
       ?? entry?.levels?.[levelKey];
     if (!variants && exercise?.hints?.length) {

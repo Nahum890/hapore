@@ -1,0 +1,59 @@
+.tutor-mode-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid var(--borde);
+  border-radius: 14px;
+  background: #f0f3ee;
+}
+
+.tutor-mode-tabs button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--texto-suave);
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.tutor-mode-tabs button.is-active {
+  background: #fff;
+  color: var(--verde-monte);
+  box-shadow: var(--sombra);
+}
+
+.tutor-mode-tabs button:focus-visible {
+  outline: 3px solid var(--azul-itaipu);
+  outline-offset: 2px;
+}
+
+.tutor-mode-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tutor-mode-panel > .card {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+}
+
+.tutor-mode-panel > .quiz-head > div > p {
+  margin: 5px 0 0;
+  color: var(--texto-suave);
+  font-size: 14px;
+}
+
+.tutor-mode-panel .chats-input-area > .quiz-input {
+  width: 100%;
+}
+
+@media (max-width: 520px) {
+  .tutor-mode-tabs button { min-height: 48px; }
+  .tutor-mode-panel .chats-input-area > .btn { width: 100%; }
+}

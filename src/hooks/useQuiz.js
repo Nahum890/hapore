@@ -63,6 +63,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
     providerRef.current = createAIProvider();
   }
   const sessionRef = useRef(null);
+  const freeSessionRef = useRef(null);
   const onMoveRef = useRef(onMoveToChat);
   onMoveRef.current = onMoveToChat;
 
@@ -190,6 +191,19 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
     });
   }, []);
 
+  const persistFreeConversation = useCallback((messages) => {
+    if (!freeSessionRef.current) freeSessionRef.current = `free-chat-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const id = freeSessionRef.current;
+    const now = new Date().toISOString();
+    const entry = { id, fecha: now.slice(0, 10), hora: now, tema: 'Chat libre', mensajes: messages };
+    setHistory(prev => {
+      const exists = prev.some(item => item.id === id);
+      const next = exists ? prev.map(item => item.id === id ? entry : item) : [...prev, entry];
+      writeJSON(STORAGE_KEYS.CHAT_HISTORY, next);
+      return next;
+    });
+  }, []);
+
   const startQuiz = useCallback(() => {
     const filteredBank = quizBank.filter((question) =>
       temaMatchesSubtemas(question.tema, classConfig?.subtemas) && (!studyTopic || question.tema === studyTopic),
@@ -204,8 +218,6 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
     setQuestions(quizQuestions);
     setQuestionIndex(0);
     setChat([]);
-    setCharlaLog([]);
-    setCharlaUsed(0);
     setAnswered(false);
     setAwaitingJustification(false);
     setJustificationText('');
@@ -308,7 +320,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
         setAwaitingJustification(false);
         setJustificationText('');
         onQuizAnswer?.({ questionId: question.id, correct: verdict });
-        persistCurrent(nextChat, charlaLog, questions.map((item) => item.tema).filter((tema, index, all) => all.indexOf(tema) === index).join(', '));
+        persistCurrent(nextChat, [], questions.map((item) => item.tema).filter((tema, index, all) => all.indexOf(tema) === index).join(', '));
       } finally {
         if (generation === generationRef.current) {
           requestLock.current = false;
@@ -317,7 +329,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
         }
       }
     },
-    [questions, questionIndex, chat, charlaLog, onQuizAnswer, persistCurrent],
+    [questions, questionIndex, chat, onQuizAnswer, persistCurrent],
   );
 
   const answerOpen = useCallback(
@@ -351,12 +363,12 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
       const closing = buildClosingMessage(chat);
       const nextChat = [...chat, { closing: true, message: closing }];
       setChat(nextChat);
-      persistCurrent(nextChat, charlaLog, questions.map((item) => item.tema).filter((tema, index, all) => all.indexOf(tema) === index).join(', '));
+      persistCurrent(nextChat, [], questions.map((item) => item.tema).filter((tema, index, all) => all.indexOf(tema) === index).join(', '));
       setStep('charla');
       return;
     }
     setQuestionIndex(next);
-  }, [questionIndex, questions.length, chat, charlaLog, persistCurrent]);
+  }, [questionIndex, questions.length, chat, persistCurrent]);
 
   const askFreeQuestion = useCallback(async () => {
     const text = charlaText.trim();
@@ -366,6 +378,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
     setBusy(true);
     setStreamText('');
     const nextLog = [...charlaLog, { role: 'alumno', text }];
+    if (!freeSessionRef.current) freeSessionRef.current = `free-chat-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     setCharlaLog(nextLog);
     setCharlaText('');
     try {
@@ -377,13 +390,18 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
             if (generation === generationRef.current) setStreamText(token);
           },
         });
+        if (typeof response?.message !== 'string' || !response.message.trim()) throw new Error('Respuesta vacía');
       } catch {
-        response = await createAIProvider('rules').respond({ tipo: 'charla_libre', message: text });
+        try {
+          response = await createAIProvider('rules').respond({ tipo: 'charla_libre', message: text });
+        } catch {
+          response = { message: 'No pude preparar una respuesta ahora. Probá reformular tu pregunta con el tema o la fórmula que estás viendo.' };
+        }
       }
       if (generation !== generationRef.current) return;
       const finalLog = [...nextLog, { role: 'tutor', text: response.message }];
       setCharlaLog(finalLog);
-      persistCurrent(chat, finalLog, 'Charla libre');
+      persistFreeConversation(finalLog);
       setCharlaUsed((prev) => Math.min(prev + 1, FREE_CHAT_EXCHANGES));
     } finally {
       if (generation === generationRef.current) {
@@ -392,7 +410,16 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
         setBusy(false);
       }
     }
-  }, [charlaText, charlaUsed, charlaLog, chat, persistCurrent]);
+  }, [charlaText, charlaUsed, charlaLog, persistFreeConversation]);
+
+  const newFreeConversation = useCallback(() => {
+    if (requestLock.current) return;
+    freeSessionRef.current = null;
+    setCharlaLog([]);
+    setCharlaUsed(0);
+    setCharlaText('');
+    setStreamText('');
+  }, []);
 
   const finish = useCallback(() => {
     setStep('fin');
@@ -410,9 +437,6 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
     setQuestions([]);
     setQuestionIndex(0);
     setChat([]);
-    setCharlaLog([]);
-    setCharlaUsed(0);
-    setCharlaText('');
     setAnswered(false);
     setAwaitingJustification(false);
     setJustificationText('');
@@ -456,6 +480,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
     charlaText,
     setCharlaText,
     askFreeQuestion,
+    newFreeConversation,
     finish,
     history,
     maxAvailable,
