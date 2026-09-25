@@ -44,3 +44,19 @@ test('el tutor usa el catálogo de errores para resolver pistas por tipo de erro
   const response = await local.respond({ type: 'mistake', expectedConcept: 'componente-horizontal', hintLevel: 1 });
   assert.equal(response.message, 'Separá primero los ejes horizontal y vertical.');
 });
+
+
+test('el chat offline interpreta una afirmación corta usando el tema anterior', async () => {
+  const response = await tutor.respond({
+    tipo: 'charla_libre',
+    message: 'Sí, contame más',
+    history: [{ role: 'tutor', text: 'El tiempo de vuelo indica cuánto dura el movimiento parabólico en el aire.' }],
+  });
+  assert.match(response.message, /vuelo|movimiento parabólico/i);
+  assert.match(response.message, /pregunta para seguir/i);
+});
+
+test('el chat offline amplía preguntas cotidianas de Física a temas del material', async () => {
+  const response = await tutor.respond({ tipo: 'charla_libre', message: '¿Cuánto tiempo queda en el aire antes de aterrizar?' });
+  assert.match(response.message, /segundos|aire|vuelo/i);
+});
