@@ -7,15 +7,33 @@ const profileKey = (key) => activeProfileId ? `guarania:profile:${activeProfileI
 
 const safeStorage = {
   getItem(key) {
-    return typeof localStorage !== 'undefined' ? localStorage.getItem(key) : memoryStore.has(key) ? memoryStore.get(key) : null;
+    if (memoryStore.has(key)) return memoryStore.get(key);
+    try {
+      return globalThis.localStorage?.getItem(key) ?? null;
+    } catch {
+      return null;
+    }
   },
   setItem(key, value) {
-    if (typeof localStorage !== 'undefined') localStorage.setItem(key, value);
-    else memoryStore.set(key, String(value));
+    const serialized = String(value);
+    try {
+      globalThis.localStorage?.setItem(key, serialized);
+      if (globalThis.localStorage) {
+        memoryStore.delete(key);
+        return;
+      }
+    } catch {
+      // Si el almacenamiento se bloquea o se llena, conservamos la sesión en memoria.
+    }
+    memoryStore.set(key, serialized);
   },
   removeItem(key) {
-    if (typeof localStorage !== 'undefined') localStorage.removeItem(key);
-    else memoryStore.delete(key);
+    memoryStore.delete(key);
+    try {
+      globalThis.localStorage?.removeItem(key);
+    } catch {
+      // El estado en memoria ya se eliminó.
+    }
   },
 };
 
@@ -45,7 +63,7 @@ export function writeJSON(key, value) {
   try {
     safeStorage.setItem(profileKey(key), JSON.stringify(value));
   } catch {
-    // Almacenamiento no disponible o lleno: el progreso se mantiene solo en memoria.
+    // Los valores no serializables no pueden guardarse.
   }
 }
 

@@ -2,33 +2,48 @@ import { readJSON, writeJSON, STORAGE_KEYS } from '../utils/storage.js';
 import { getConfidence, increaseConfidence, CONFIDENCE_REWARDS } from './confidenceEngine.js';
 import { getXP, getLevel, recordXP, XP_REWARDS } from '../utils/gamification.js';
 
+const storedList = (key) => {
+  const value = readJSON(key, []);
+  return Array.isArray(value) ? value : [];
+};
+
+const storedFlashcards = () => {
+  const value = readJSON(STORAGE_KEYS.FLASHCARD_STATE, {});
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+};
+
+const storedAttempts = () => {
+  const value = Number(readJSON(STORAGE_KEYS.ATTEMPTS, 0));
+  return Number.isFinite(value) && value > 0 ? Math.floor(value) : 0;
+};
+
 export function loadLearningState() {
   const xp = getXP();
   return {
     confidence: getConfidence(),
     currentExercise: readJSON(STORAGE_KEYS.CURRENT_EXERCISE, null),
-    attempts: readJSON(STORAGE_KEYS.ATTEMPTS, 0),
-    attemptLog: readJSON(STORAGE_KEYS.ATTEMPT_LOG, []),
-    flashcardState: readJSON(STORAGE_KEYS.FLASHCARD_STATE, {}),
-    completed: readJSON(STORAGE_KEYS.COMPLETED, []),
+    attempts: storedAttempts(),
+    attemptLog: storedList(STORAGE_KEYS.ATTEMPT_LOG),
+    flashcardState: storedFlashcards(),
+    completed: storedList(STORAGE_KEYS.COMPLETED),
     xp,
     level: getLevel(xp),
   };
 }
 
 export function recordExerciseResult({ correct, hintsUsed = 0, exerciseId = null, durationMs = 0 } = {}) {
-  const completed = readJSON(STORAGE_KEYS.COMPLETED, []);
-  const alreadyCompleted = Boolean(correct && exerciseId && completed.includes(exerciseId));
+  const completed = storedList(STORAGE_KEYS.COMPLETED);
+  const alreadyCompleted = Boolean(exerciseId && completed.includes(exerciseId));
   const reward = alreadyCompleted
     ? CONFIDENCE_REWARDS.mistake
-    : !correct
+    : !correct || !exerciseId
       ? CONFIDENCE_REWARDS.mistake
       : hintsUsed > 0
         ? CONFIDENCE_REWARDS.exerciseWithHints
         : CONFIDENCE_REWARDS.exerciseClean;
   const xpReward = alreadyCompleted
     ? 0
-    : !correct
+    : !correct || !exerciseId
       ? 0
       : hintsUsed > 0
         ? XP_REWARDS.exerciseWithHints
@@ -37,9 +52,9 @@ export function recordExerciseResult({ correct, hintsUsed = 0, exerciseId = null
     recordXP(xpReward);
   }
   increaseConfidence(reward);
-  const attempts = readJSON(STORAGE_KEYS.ATTEMPTS, 0) + 1;
+  const attempts = storedAttempts() + 1;
   writeJSON(STORAGE_KEYS.ATTEMPTS, attempts);
-  const attemptLog = readJSON(STORAGE_KEYS.ATTEMPT_LOG, []);
+  const attemptLog = storedList(STORAGE_KEYS.ATTEMPT_LOG);
   writeJSON(STORAGE_KEYS.ATTEMPT_LOG, [...attemptLog, { exerciseId, correct: Boolean(correct), hintsUsed: Math.max(0, Number(hintsUsed) || 0), durationMs: Math.max(0, Math.round(Number(durationMs) || 0)), at: new Date().toISOString() }].slice(-200));
   if (correct && exerciseId && !alreadyCompleted) {
     writeJSON(STORAGE_KEYS.COMPLETED, [...completed, exerciseId]);
@@ -49,12 +64,18 @@ export function recordExerciseResult({ correct, hintsUsed = 0, exerciseId = null
 
 export function recordFlashcardConsolidated(flashcardId) {
   if (!flashcardId) return loadLearningState();
-  const state = readJSON(STORAGE_KEYS.FLASHCARD_STATE, {});
-  const entry = state[flashcardId] ?? { consolidated: false, reviews: 0 };
+  const state = storedFlashcards();
+  const entry = state[flashcardId] && typeof state[flashcardId] === 'object'
+    ? state[flashcardId]
+    : { consolidated: false, reviews: 0 };
   const firstConsolidation = !entry.consolidated;
+  const previousReviews = Number(entry.reviews);
   writeJSON(STORAGE_KEYS.FLASHCARD_STATE, {
     ...state,
-    [flashcardId]: { consolidated: true, reviews: entry.reviews + 1 },
+    [flashcardId]: {
+      consolidated: true,
+      reviews: (Number.isFinite(previousReviews) ? Math.max(0, Math.floor(previousReviews)) : 0) + 1,
+    },
   });
   if (firstConsolidation) {
     recordXP(XP_REWARDS.flashcardConsolidated);
@@ -64,7 +85,7 @@ export function recordFlashcardConsolidated(flashcardId) {
 }
 
 export function recordQuizAnswer({ questionId = null, correct = false } = {}) {
-  const rewarded = readJSON(STORAGE_KEYS.QUIZ_REWARDED, []);
+  const rewarded = storedList(STORAGE_KEYS.QUIZ_REWARDED);
   const alreadyRewarded = Boolean(correct && questionId && rewarded.includes(questionId));
   if (correct && questionId && !alreadyRewarded) {
     recordXP(XP_REWARDS.quizAnswer);
