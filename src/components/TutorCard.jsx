@@ -11,7 +11,7 @@ export default function TutorCard({ tutor }) {
       previous.current = { message, esHint: tutor?.esHint };
     }
   }, [message, tutor?.esHint, tutor?.streaming]);
-  const source = tutor?.source === 'local-ai' ? 'IA con conexión' : tutor?.source === 'local-model' ? 'Modelo en el dispositivo' : 'Tutor disponible sin conexión';
+  const source = tutor?.source === 'gemini' ? 'Gemini con conexión' : tutor?.source === 'local-model' ? 'Modelo en el dispositivo' : tutor?.source === 'rules' ? 'Tutor local sin conexión' : tutor?.available === false ? 'Tutor no disponible' : 'Tutor listo';
   return (
     <section className="card tutor-card" aria-label="Tutor Jopara">
       <div className="tutor-avatar" aria-hidden="true">P</div>
