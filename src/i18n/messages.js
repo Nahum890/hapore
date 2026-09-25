@@ -1,0 +1,48 @@
+export const DEFAULT_LANGUAGE = 'gn-jopara';
+export const SUPPORTED_LANGUAGES = ['gn-jopara', 'es'];
+
+export const translationReview = {
+  'gn-jopara': { status: 'draft', note: 'Borrador pendiente de revisión por una persona competente en guaraní paraguayo.' },
+  es: { status: 'draft', note: 'Textos de interfaz sujetos a revisión editorial.' },
+};
+
+const messages = {
+  'gn-jopara': {
+    'brand.tagline': 'Jaaprende Física nde ritmo-pe',
+    'header.home': 'Eho ñepyrũme', 'header.online': 'Con conexión', 'header.offline': 'Sin conexión',
+    'header.teacher': 'Mbo’ehára', 'header.student': 'Temimbo’e', 'header.logout': 'Eñesẽ',
+    'language.label': 'Ñe’ẽ / Idioma', 'language.jopara': 'Jopara (borrador)', 'language.spanish': 'Español',
+    'pdf.button': 'Ficha PDF', 'pdf.generating': 'Ojapo hína PDF…', 'pdf.downloaded': '¡Ficha oñemboguejy! Ikatu eipuru internet’ỹre.',
+    'pdf.error': 'Ndoikói PDF. Eñeha’ã jey.', 'pdf.title': 'Ficha de Física', 'pdf.subtitle': 'Eikuaa, eñepractica ha ehecha jey nde cálculo.',
+    'pdf.name': 'Téra', 'pdf.date': 'Ára', 'pdf.before': 'Eñepyrũ mboyve',
+    'pdf.instructions': 'Eipuru umi unidad oĩva ejercicio-pe. Ehechauka fórmula ha cálculo. Pe gravedad ikatu ha’e 9,8 térã 10 m/s², he’iháicha ejercicio.',
+    'pdf.review': 'Ehecha jey hag̃ua', 'pdf.answer': 'Mbohovái', 'pdf.page': 'Pág.',
+    'pdf.assumptionsTitle': 'Umi supuesto de Física', 'pdf.relations': 'Umi fórmula', 'pdf.exercises': 'Ejercicios', 'pdf.references': 'Fuentes científicas',
+    'pdf.draft': 'Ñe’ẽasa Jopara ha’e peteĩ borrador, ndojehechái gueteri peteĩ lingüista reheve.',
+    'pdf.assumptions': 'Supuestos: no se considera resistencia del aire; g es constante; el alcance de 45° supone salida y llegada a la misma altura. En calor se supone que no hay pérdidas ni cambio de estado. Los ángulos ópticos se miden desde la normal.',
+    'pdf.source': 'Fuente consultada', 'pdf.accessed': 'Consulta', 'pdf.license': 'Licencia',
+    'pdf.footer': 'Generado en este dispositivo; disponible sin conexión.',
+  },
+  es: {
+    'brand.tagline': 'Física a tu ritmo',
+    'header.home': 'Ir al inicio', 'header.online': 'Con conexión', 'header.offline': 'Sin conexión',
+    'header.teacher': 'Maestro', 'header.student': 'Alumno', 'header.logout': 'Salir',
+    'language.label': 'Idioma', 'language.jopara': 'Jopara (borrador)', 'language.spanish': 'Español',
+    'pdf.button': 'Ficha PDF', 'pdf.generating': 'Generando PDF…', 'pdf.downloaded': 'Ficha descargada. Está disponible sin conexión.',
+    'pdf.error': 'No se pudo generar el PDF. Probá nuevamente.', 'pdf.title': 'Ficha de Física', 'pdf.subtitle': 'Aprendé, practicá y revisá tus cálculos.',
+    'pdf.name': 'Nombre', 'pdf.date': 'Fecha', 'pdf.before': 'Antes de empezar',
+    'pdf.instructions': 'Usá las unidades indicadas en cada ejercicio. Mostrá la fórmula y el cálculo. La gravedad puede ser 9,8 o 10 m/s², según el ejercicio.',
+    'pdf.review': 'Guía de revisión', 'pdf.answer': 'Resultado', 'pdf.page': 'Pág.',
+    'pdf.assumptionsTitle': 'Supuestos físicos', 'pdf.relations': 'Relaciones útiles', 'pdf.exercises': 'Ejercicios', 'pdf.references': 'Fuentes científicas',
+    'pdf.draft': 'La traducción al Jopara es un borrador y todavía no fue revisada por una persona lingüista.',
+    'pdf.assumptions': 'Supuestos: se desprecia la resistencia del aire; g es constante; el alcance a 45° supone la misma altura de salida y llegada. En calor, no hay pérdidas ni cambio de estado. Los ángulos ópticos se miden desde la normal.',
+    'pdf.source': 'Fuente consultada', 'pdf.accessed': 'Consulta', 'pdf.license': 'Licencia',
+    'pdf.footer': 'Generado en este dispositivo; disponible sin conexión.',
+  },
+};
+
+export function translate(language, key) {
+  return messages[language]?.[key] ?? messages.es[key] ?? key;
+}
+
+export default messages;

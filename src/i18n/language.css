@@ -1,0 +1,4 @@
+.pyfis-language-selector { display:inline-flex; align-items:center; min-width:0; }
+.pyfis-language-selector select { min-height:36px; max-width:142px; padding:6px 27px 6px 10px; border:1px solid rgba(255,255,255,.44); border-radius:10px; background:#fff; color:#17483b; font:inherit; font-size:12px; font-weight:700; cursor:pointer; }
+.pyfis-language-selector select:focus-visible { outline:3px solid #f1b94d; outline-offset:2px; }
+@media (max-width:500px) { .pyfis-language-selector select { max-width:104px; padding-inline:7px; font-size:11px; } }
