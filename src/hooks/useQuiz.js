@@ -4,10 +4,11 @@ import { buildQuiz, buildQuizFeedback, matchAnswer, matchText, shuffle } from '.
 import { readJSON, writeJSON, STORAGE_KEYS } from '../utils/storage.js';
 import { temaMatchesSubtemas } from '../utils/classCode.js';
 import { createAIProvider } from '../ai/AIProvider.js';
+import { getTutorQuota, DAILY_TUTOR_LIMIT } from '../ai/tutorQuota.js';
 
 export const QUIZ_MIN_QUANTITY = 5;
 export const QUIZ_MAX_QUANTITY = 50;
-export const FREE_CHAT_EXCHANGES = 8;
+export const FREE_CHAT_EXCHANGES = DAILY_TUTOR_LIMIT;
 
 const QUIZ_CLOSING = '¿Oime gueteri mba\'e reikuaaséva? Eporandu chéve.';
 
@@ -84,7 +85,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
   const requestLock = useRef(false);
   const generationRef = useRef(0);
   const [charlaLog, setCharlaLog] = useState([]);
-  const [charlaUsed, setCharlaUsed] = useState(0);
+  const [tutorQuota, setTutorQuota] = useState(() => getTutorQuota());
   const [charlaText, setCharlaText] = useState('');
   const [history, setHistory] = useState(() => {
     const stored = readJSON(STORAGE_KEYS.CHAT_HISTORY, []);
@@ -99,6 +100,23 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
     };
     window.addEventListener('storage', syncHistory);
     return () => window.removeEventListener('storage', syncHistory);
+  }, []);
+
+  useEffect(() => {
+    const refreshQuota = () => {
+      const next = getTutorQuota();
+      setTutorQuota((current) => current.used === next.used && current.remaining === next.remaining ? current : next);
+    };
+    window.addEventListener('tutor-quota-change', refreshQuota);
+    window.addEventListener('storage', refreshQuota);
+    window.addEventListener('focus', refreshQuota);
+    const interval = setInterval(refreshQuota, 60000);
+    return () => {
+      window.removeEventListener('tutor-quota-change', refreshQuota);
+      window.removeEventListener('storage', refreshQuota);
+      window.removeEventListener('focus', refreshQuota);
+      clearInterval(interval);
+    };
   }, []);
 
   const repasoAvailable = useMemo(() => {
@@ -195,7 +213,9 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
     if (!freeSessionRef.current) freeSessionRef.current = `free-chat-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const id = freeSessionRef.current;
     const now = new Date().toISOString();
-    const entry = { id, fecha: now.slice(0, 10), hora: now, tema: 'Chat libre', mensajes: messages };
+    const firstQuestion = messages.find(message => message.role === 'alumno')?.text ?? '';
+    const title = firstQuestion.trim().slice(0, 48) || 'Chat libre';
+    const entry = { id, fecha: now.slice(0, 10), hora: now, tema: title, tipo: 'chat-libre', mensajes: messages };
     setHistory(prev => {
       const exists = prev.some(item => item.id === id);
       const next = exists ? prev.map(item => item.id === id ? entry : item) : [...prev, entry];
@@ -372,13 +392,13 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
 
   const askFreeQuestion = useCallback(async () => {
     const text = charlaText.trim();
-    if (!text || requestLock.current || charlaUsed >= FREE_CHAT_EXCHANGES) return;
+    if (!text || requestLock.current || tutorQuota.remaining <= 0) return;
     requestLock.current = true;
     const generation = generationRef.current;
     setBusy(true);
     setStreamText('');
     const nextLog = [...charlaLog, { role: 'alumno', text }];
-    if (!freeSessionRef.current) freeSessionRef.current = `free-chat-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    if (!freeSessionRef.current) freeSessionRef.current = 'free-chat-' + Date.now() + '-' + Math.random().toString(36).slice(2);
     setCharlaLog(nextLog);
     setCharlaText('');
     try {
@@ -386,23 +406,20 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
       try {
         response = await providerRef.current.answerFreeQuestion({
           message: text,
+          history: charlaLog.slice(-8),
           onToken: (token) => {
             if (generation === generationRef.current) setStreamText(token);
           },
         });
         if (typeof response?.message !== 'string' || !response.message.trim()) throw new Error('Respuesta vacía');
       } catch {
-        try {
-          response = await createAIProvider('rules').respond({ tipo: 'charla_libre', message: text });
-        } catch {
-          response = { message: 'No pude preparar una respuesta ahora. Probá reformular tu pregunta con el tema o la fórmula que estás viendo.' };
-        }
+        response = { message: 'No pude completar la consulta. Volvé a intentarlo cuando el tutor esté disponible.', available: false, source: null };
       }
       if (generation !== generationRef.current) return;
-      const finalLog = [...nextLog, { role: 'tutor', text: response.message }];
+      const finalLog = [...nextLog, { role: 'tutor', text: response.message, source: response.source ?? null, available: response.available !== false }];
       setCharlaLog(finalLog);
       persistFreeConversation(finalLog);
-      setCharlaUsed((prev) => Math.min(prev + 1, FREE_CHAT_EXCHANGES));
+      setTutorQuota(getTutorQuota());
     } finally {
       if (generation === generationRef.current) {
         requestLock.current = false;
@@ -410,15 +427,24 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
         setBusy(false);
       }
     }
-  }, [charlaText, charlaUsed, charlaLog, persistFreeConversation]);
+  }, [charlaText, tutorQuota.remaining, charlaLog, persistFreeConversation]);
 
   const newFreeConversation = useCallback(() => {
     if (requestLock.current) return;
     freeSessionRef.current = null;
     setCharlaLog([]);
-    setCharlaUsed(0);
     setCharlaText('');
     setStreamText('');
+  }, []);
+
+  const openFreeConversation = useCallback((session) => {
+    if (!session || requestLock.current) return;
+    generationRef.current += 1;
+    freeSessionRef.current = session.id;
+    setCharlaLog(Array.isArray(session.mensajes) ? session.mensajes : []);
+    setCharlaText('');
+    setStreamText('');
+    setBusy(false);
   }, []);
 
   const finish = useCallback(() => {
@@ -453,7 +479,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
     restart();
   }, [classSignature, restart]);
 
-  const charlaLeft = Math.max(0, FREE_CHAT_EXCHANGES - charlaUsed);
+  const charlaLeft = tutorQuota.remaining;
   const seenAll = deckSize > 0 && seenIds.size >= deckSize;
 
   return {
@@ -475,12 +501,14 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
     busy,
     streamText,
     charlaLog,
-    charlaUsed,
+    charlaUsed: tutorQuota.used,
     charlaLeft,
+    tutorQuota,
     charlaText,
     setCharlaText,
     askFreeQuestion,
     newFreeConversation,
+    openFreeConversation,
     finish,
     history,
     maxAvailable,
