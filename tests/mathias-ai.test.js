@@ -15,13 +15,22 @@ test('la consulta libre y el enunciado llegan dentro del contexto pedagógico', 
   assert.equal(payload.context.ejercicio,'ej-01');
 });
 
-test('una respuesta ignorada por la red cae a reglas dentro del plazo total',async()=>{
-  const provider=new LocalAIProvider({timeoutMs:35,maxRetries:2,fetch:()=>new Promise(()=>{}),fallback:offline});
-  const start=performance.now();
-  const result=await provider.respond({tipo:'evaluacion_cuestionario',pregunta:'¿Qué es una parábola?',esCorrecta:true,respuestaCorrecta:'Una parábola'});
-  assert.ok(performance.now()-start<250);
-  assert.equal(result.correct,true);
-  assert.match(result.message,/correcta/i);
+test('un timeout con conexión no presenta reglas como si fueran Gemini',async()=>{
+  const descriptor=Object.getOwnPropertyDescriptor(globalThis,'navigator');
+  Object.defineProperty(globalThis,'navigator',{configurable:true,value:{onLine:true}});
+  let fallbackCalls=0;
+  const provider=new LocalAIProvider({timeoutMs:35,maxRetries:0,fetch:()=>new Promise(()=>{}),fallback:{respond:async()=>{fallbackCalls++;return offline.respond({tipo:'charla_libre',message:'parábola'});}}});
+  try {
+    const start=performance.now();
+    const result=await provider.respond({tipo:'evaluacion_cuestionario',pregunta:'¿Qué es una parábola?',esCorrecta:true,respuestaCorrecta:'Una parábola'});
+    assert.ok(performance.now()-start<250);
+    assert.equal(result.available,false);
+    assert.equal(result.reason,'online-unavailable');
+    assert.match(result.message,/Gemini/);
+    assert.equal(fallbackCalls,0);
+  } finally {
+    if(descriptor) Object.defineProperty(globalThis,'navigator',descriptor); else delete globalThis.navigator;
+  }
 });
 
 test('reintenta 429 con pausa exponencial y conserva el contexto',async()=>{
