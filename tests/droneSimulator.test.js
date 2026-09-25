@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { planFlight, startingControls } from '../src/simulator/flightPlan.js';
-import { sceneForExercise } from '../src/simulator/exerciseSimulation.js';
+import { sceneForExercise, shouldRevealSimulatorAnswer } from '../src/simulator/exerciseSimulation.js';
 import exercises from '../src/data/exercises.json' with { type: 'json' };
 
 test('el simulador usa los datos del ejercicio y llega al objetivo esperado', () => {
@@ -36,4 +36,10 @@ test('el ángulo escrito cambia el recorrido mostrado para la misión de entrega
   const correct = sceneForExercise(exercise, 45);
   assert.ok(wrong.flight.landingX < wrong.flight.targetX - 4);
   assert.ok(Math.abs(correct.flight.landingX - correct.flight.targetX) < 0.01);
+});
+
+test('el simulador no revela el resultado hasta que termina la comprobación', () => {
+  assert.equal(shouldRevealSimulatorAnswer('idle'), false);
+  assert.equal(shouldRevealSimulatorAnswer('flying'), false);
+  assert.equal(shouldRevealSimulatorAnswer('landed'), true);
 });

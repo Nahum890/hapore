@@ -1,5 +1,7 @@
 import { planFlight, startingControls } from './flightPlan.js';
 
+export const shouldRevealSimulatorAnswer = phase => phase === 'landed';
+
 export function sceneForExercise(exercise, studentAnswer) {
   const values = exercise?.values ?? {};
   const topic = exercise?.topic ?? 'Movimiento Parabólico';

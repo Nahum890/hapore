@@ -17,9 +17,14 @@ const VALUE_LABELS = {
 const formatValue = value => typeof value === 'number' ? new Intl.NumberFormat('es-PY', { maximumFractionDigits: 3 }).format(value) : String(value);
 export default function ExerciseCard({ exercise, onResult, onAskHint, onSimulationCheck, onSimulationClear, hintsUsed = 0, onIncrementHint }) {
   const [answer, setAnswer] = useState(''), [feedback, setFeedback] = useState(null), [waiting, setWaiting] = useState(false), [hintError, setHintError] = useState(''), [hintMessage, setHintMessage] = useState(null);
-  const currentId = useRef(exercise?.id), hintLock = useRef(false), startedAt = useRef(Date.now());
+  const currentId = useRef(exercise?.id), hintLock = useRef(false), hintRequest = useRef(0), startedAt = useRef(Date.now());
   currentId.current = exercise?.id;
-  useEffect(() => { setAnswer(''); setFeedback(null); setHintError(''); setHintMessage(null); startedAt.current = Date.now(); }, [exercise?.id]);
+  useEffect(() => {
+    hintRequest.current += 1;
+    hintLock.current = false;
+    setAnswer(''); setFeedback(null); setHintError(''); setHintMessage(null); setWaiting(false);
+    startedAt.current = Date.now();
+  }, [exercise?.id]);
   const valid = isNumericAnswer(answer);
   const invalid = Boolean(answer.trim()) && !valid;
   const check = event => {
@@ -35,14 +40,18 @@ export default function ExerciseCard({ exercise, onResult, onAskHint, onSimulati
     if (hintLock.current || !hasHintsLeft(exercise, hintsUsed)) return;
     hintLock.current = true; setWaiting(true); setHintError(''); setHintMessage(null);
     const id = exercise.id;
+    const request = ++hintRequest.current;
     try {
       const response = await onAskHint?.({ type: 'hint', topic: exercise.topic, exercise, exerciseId: id, expectedConcept: exercise.expectedConcept, hintLevel: hintsUsed + 1 });
-      if (currentId.current === id) {
-        if (response?.available === false || !response?.message?.trim()) setHintError('No se pudo obtener la pista. Probá otra vez.');
+      if (currentId.current === id && hintRequest.current === request) {
+        if (response?.available === false || typeof response?.message !== 'string' || !response.message.trim()) setHintError('No se pudo obtener la pista. Probá otra vez.');
         else { setHintMessage({ text: response.message, level: hintsUsed + 1, esHint: response.esHint }); onIncrementHint?.(); }
       }
-    } catch { if (currentId.current === id) setHintError('No se pudo obtener la pista. Probá otra vez.'); }
-    finally { hintLock.current = false; setWaiting(false); }
+    } catch {
+      if (currentId.current === id && hintRequest.current === request) setHintError('No se pudo obtener la pista. Probá otra vez.');
+    } finally {
+      if (currentId.current === id && hintRequest.current === request) { hintLock.current = false; setWaiting(false); }
+    }
   };
   return (
     <section className="card exercise-card" aria-label={'Ejercicio ' + exercise.id}>

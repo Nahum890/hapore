@@ -13,8 +13,8 @@ const STEPS = [
   },
   {
     number: '03', label: 'Conversar', title: 'Preguntale al tutor',
-    description: 'En “Conversar” vas a encontrar el cuestionario, las explicaciones de tus respuestas y un espacio para hacer preguntas libres.',
-    tip: 'El tutor también puede ayudarte sin conexión.',
+    description: 'En “Tutor” elegí Cuestionario para repasar fichas y practicar, o Chat libre para preguntar sin completar el repaso.',
+    tip: 'El tutor libre también puede ayudarte sin conexión.',
   },
   {
     number: '04', label: 'Aula', title: 'Compartí una clase',
