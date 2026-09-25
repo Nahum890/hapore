@@ -56,6 +56,26 @@ test('el tutor local corrige el cuestionario y responde temas fuera de la red',a
   assert.ok(!answer.message.includes('fallbackHint'));
 });
 
+test('el chat offline recupera explicaciones del temario por concepto',async()=>{
+  const answer=await offline.respond({tipo:'charla_libre',message:'¿Me explicas la ley de reflexión de la luz?'});
+  assert.equal(answer.knowledgeType,'concept');
+  assert.match(answer.message,/ángulo de incidencia/i);
+  const unknown=await offline.respond({tipo:'charla_libre',message:'¿Cómo se programa una aplicación móvil?'});
+  assert.match(unknown.message,/material offline/i);
+});
+
+test('el tutor ofrece cinco pistas progresivas para un ejercicio',async()=>{
+  const exercise=offline.exercises.find(item=>item.id==='ej-01');
+  const hints=[];
+  for(let hintLevel=1;hintLevel<=5;hintLevel++){
+    const response=await offline.respond({type:'hint',exercise,exerciseId:exercise.id,expectedConcept:exercise.expectedConcept,hintLevel});
+    hints.push(response.message);
+  }
+  assert.equal(hints.length,5);
+  assert.ok(hints.every(message=>message.length>15));
+  assert.match(hints[4],/17,32|17\.32/);
+});
+
 test('matcheo acepta sinónimos, conserva umbrales y rechaza contradicciones',()=>{
   assert.equal(matchText('La rapidez no cambia','La rapidez permanece constante').correct,true);
   assert.equal(matchAnswer(question,question.respuesta).correct,true);
