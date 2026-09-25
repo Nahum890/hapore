@@ -1,5 +1,65 @@
 [
   {
+    "id": "ej-termo-01", "topic": "Termodinámica", "difficulty": "básico", "subtema": "calor_especifico",
+    "question": "Para calentar 0,5 kg de agua para el mate, la temperatura sube de 20 °C a 30 °C. Con c = 4200 J/(kg·°C), ¿cuánto calor recibió el agua?",
+    "questionJopara": "Pe y mate-rã hakuve 20 °C guive 30 °C peve. ¿Mboy J de calor-pa ohupyty?",
+    "values": { "masa": 0.5, "calorEspecifico": 4200, "temperaturaInicial": 20, "temperaturaFinal": 30 },
+    "expectedConcept": "calor-sensible", "correctAnswer": 21000, "unit": "J", "tolerance": 0.02,
+    "hints": ["¿Mboy grado-pa subió? Calculá primero el cambio de temperatura: final menos inicial.", "El calor sensible se calcula con Q = m · c · ΔT. La masa va en kg.", "ΔT = 30 - 20 = 10 °C. Entonces Q = 0,5 · 4200 · 10 = 21000 J."]
+  },
+  {
+    "id": "ej-termo-02", "topic": "Termodinámica", "difficulty": "intermedio", "subtema": "calor_especifico",
+    "question": "Un recipiente contiene 0,2 kg de agua a 25 °C. Recibe 8400 J sin pérdidas. Con c = 4200 J/(kg·°C), ¿cuál es su temperatura final?",
+    "questionJopara": "Pe y oñepyrũ 25 °C-pe ha ohupyty 8400 J. ¿Mboy °C-pe opa?",
+    "values": { "masa": 0.2, "calorEspecifico": 4200, "temperaturaInicial": 25, "calor": 8400 },
+    "expectedConcept": "temperatura-final", "correctAnswer": 35, "unit": "°C", "tolerance": 0.02,
+    "hints": ["Pe temperatura final sube. Primero averiguá cuántos grados aumentó.", "Despejá ΔT = Q / (m · c) y luego sumá la temperatura inicial.", "ΔT = 8400 / (0,2 · 4200) = 10 °C. Temperatura final = 25 + 10 = 35 °C."]
+  },
+  {
+    "id": "ej-termo-03", "topic": "Termodinámica", "difficulty": "intermedio", "subtema": "equilibrio_termico",
+    "question": "Para preparar agua templada se mezclan 0,2 kg de agua a 60 °C con 0,3 kg de agua a 20 °C. Sin pérdidas de calor y con igual calor específico, ¿qué temperatura final alcanza la mezcla?",
+    "questionJopara": "Ñambojehe'a y haku ha y ro'ysã. ¿Mboy °C-pe opyta pe mezcla?",
+    "values": { "masaCaliente": 0.2, "temperaturaCaliente": 60, "masaFria": 0.3, "temperaturaFria": 20 },
+    "expectedConcept": "equilibrio-termico", "correctAnswer": 36, "unit": "°C", "tolerance": 0.02,
+    "hints": ["La temperatura final queda entre 20 °C y 60 °C. ¿Qué porción tiene más masa?", "Como ambas porciones son agua, T = (m₁T₁ + m₂T₂) / (m₁ + m₂).", "T = (0,2 · 60 + 0,3 · 20) / 0,5 = 36 °C."]
+  },
+  {
+    "id": "ej-termo-04", "topic": "Termodinámica", "difficulty": "avanzado", "subtema": "calor_especifico",
+    "question": "Una olla con 0,4 kg de agua pasa de 28 °C a 48 °C. Si no hay pérdidas y c = 4200 J/(kg·°C), ¿qué energía térmica absorbió?",
+    "questionJopara": "Pe y olla-pe hakuve 28 °C guive 48 °C peve. ¿Mboy J-pa ohupyty?",
+    "values": { "masa": 0.4, "calorEspecifico": 4200, "temperaturaInicial": 28, "temperaturaFinal": 48 },
+    "expectedConcept": "calor-sensible", "correctAnswer": 33600, "unit": "J", "tolerance": 0.02,
+    "hints": ["Mirá la diferencia de temperaturas, ani reipurúi solo la temperatura final.", "Usá Q = m · c · (Tf - Ti).", "ΔT = 20 °C; Q = 0,4 · 4200 · 20 = 33600 J."]
+  },
+  {
+    "id": "ej-optica-01", "topic": "Óptica", "difficulty": "básico", "subtema": "reflexion",
+    "question": "Un rayo de sol llega a un espejo con un ángulo de incidencia de 35° medido desde la normal. ¿Cuál es el ángulo de reflexión?",
+    "questionJopara": "Pe luz oguahẽ espejo-pe 35° normal guive. ¿Mboy grado-pa pe reflexión?",
+    "values": { "anguloIncidencia": 35 }, "expectedConcept": "ley-reflexion", "correctAnswer": 35, "unit": "°", "tolerance": 0.02,
+    "hints": ["Mirá la línea normal: ambos ángulos se miden desde ella, no desde el espejo.", "La ley de reflexión dice que el ángulo de incidencia es igual al de reflexión.", "Si el ángulo de incidencia es 35°, el de reflexión también es 35°."]
+  },
+  {
+    "id": "ej-optica-02", "topic": "Óptica", "difficulty": "intermedio", "subtema": "espejo_plano",
+    "question": "Una linterna está a 40 cm frente a un espejo plano. ¿A qué distancia detrás del espejo aparece su imagen?",
+    "questionJopara": "Pe linterna oĩ 40 cm espejo renondépe. ¿Mboy cm-pa ojekuaa pe imagen espejo kupépe?",
+    "values": { "distanciaObjeto": 40 }, "expectedConcept": "espejo-plano", "correctAnswer": 40, "unit": "cm", "tolerance": 0.02,
+    "hints": ["Pensá en la simetría: la imagen parece estar detrás del espejo.", "En un espejo plano, la distancia de la imagen al espejo es igual a la del objeto al espejo.", "La linterna está a 40 cm, así que su imagen aparece a 40 cm detrás del espejo."]
+  },
+  {
+    "id": "ej-optica-03", "topic": "Óptica", "difficulty": "intermedio", "subtema": "refraccion",
+    "question": "La luz viaja en un vidrio a 200000000 m/s. Si en el vacío viaja a 300000000 m/s, ¿cuál es el índice de refracción del vidrio?",
+    "questionJopara": "Pe luz oho vidrio-pe 200000000 m/s, vacío-pe 300000000 m/s. ¿Mboy-pa pe índice de refracción?",
+    "values": { "velocidadVacio": 300000000, "velocidadMedio": 200000000 }, "expectedConcept": "indice-refraccion", "correctAnswer": 1.5, "unit": "sin unidad", "tolerance": 0.02,
+    "hints": ["¿La luz va más rápido o más lento dentro del vidrio?", "El índice se calcula como n = c / v. No lleva unidad porque se dividen dos velocidades.", "n = 300000000 / 200000000 = 1,5, sin unidad."]
+  },
+  {
+    "id": "ej-optica-04", "topic": "Óptica", "difficulty": "avanzado", "subtema": "reflexion",
+    "question": "Un rayo ilumina un espejo del aula y forma 25° con la superficie del espejo. ¿Qué ángulo de reflexión forma con la normal?",
+    "questionJopara": "Pe luz ojapo 25° espejo superficie rehe. ¿Mboy grado-pa pe reflexión normal guive?",
+    "values": { "anguloSuperficie": 25 }, "expectedConcept": "ley-reflexion", "correctAnswer": 65, "unit": "°", "tolerance": 0.02,
+    "hints": ["Atención: el ángulo dado está medido desde la superficie, no desde la normal.", "La normal es perpendicular al espejo: primero calculá 90° - 25°.", "El ángulo de incidencia con la normal es 65°. Por la ley de reflexión, el de reflexión también es 65°."]
+  },
+  {
     "id": "ej-01",
     "topic": "Movimiento Parabólico",
     "difficulty": "básico",

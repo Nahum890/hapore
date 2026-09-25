@@ -1,4 +1,10 @@
 [
+  { "id": "err-termo-01", "key": "olvida_delta_t", "name": "Usar la temperatura final como cambio", "description": "En Q = m · c · ΔT se usa la diferencia entre temperatura final e inicial, no solo la temperatura final.", "example": "Si pasa de 20 °C a 30 °C, ΔT = 10 °C.", "expectedConcept": "calor-sensible" },
+  { "id": "err-termo-02", "key": "olvida_t_inicial", "name": "Olvidar la temperatura inicial", "description": "Q/(m·c) da el aumento de temperatura; para obtener la final se suma la inicial.", "example": "Si Ti = 25 °C y ΔT = 10 °C, Tf = 35 °C.", "expectedConcept": "temperatura-final" },
+  { "id": "err-termo-03", "key": "promedio_sin_masas", "name": "Promediar sin considerar las masas", "description": "Al mezclar agua con masas diferentes, la temperatura final se pondera con cada masa.", "example": "T = (m1·T1 + m2·T2)/(m1+m2), si no hay pérdidas.", "expectedConcept": "equilibrio-termico" },
+  { "id": "err-optica-01", "key": "angulo_desde_superficie", "name": "Medir el ángulo desde el espejo", "description": "La incidencia y la reflexión se miden desde la normal, perpendicular al espejo.", "example": "Si el rayo forma 25° con el espejo, forma 65° con la normal.", "expectedConcept": "ley-reflexion" },
+  { "id": "err-optica-02", "key": "distancia_doble_espejo", "name": "Duplicar la distancia de la imagen", "description": "La distancia de la imagen se mide desde el espejo: coincide con la distancia del objeto.", "example": "Objeto a 40 cm delante: imagen a 40 cm detrás.", "expectedConcept": "espejo-plano" },
+  { "id": "err-optica-03", "key": "invierte_indice", "name": "Invertir la razón de velocidades", "description": "El índice del material es c/v, con la velocidad en vacío arriba y la velocidad en el medio abajo.", "example": "300000000 / 200000000 = 1,5.", "expectedConcept": "indice-refraccion" },
   {
     "id": "err-01",
     "key": "confunde_velocidades",

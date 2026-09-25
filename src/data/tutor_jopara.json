@@ -1,6 +1,6 @@
 {
   "greetings": [
-    "¡Mba'éichapa! Sos bienvenido a GuaranIA. Eju, jahechami ko física kyhyje'ỹme.",
+    "¡Mba'éichapa! Sos bienvenido a PyFis IA. Eju, jahechami ko física kyhyje'ỹme.",
     "¡Mba'éichapa! Ko'ápe ñañepyrũta jaipapa pe dron trayectoria reheve.",
     "¡Maitei! Ani rekyhyje rejavy hag̃ua: jajapóvo ejercicio jaaprende porãve.",
     "¡Mba'éichapa! Eju, jahechami Física juntos.",
@@ -8,6 +8,12 @@
   ],
   "fallbackHint": "Ehecha jey el enunciado, ehpyru peteî paso pequeñito. Ani aflojá: vas a poder.",
   "errors": [
+    { "errorId": "err-termo-01", "joparaHint": "Ani rejavy: primero ehecha cuánto subió la temperatura, no uses solo el valor final.", "esHint": "En Q = m · c · ΔT, ΔT es temperatura final menos inicial.", "followUp": "Calculá esa diferencia y probá otra vez.", "levels": { "nivel_1": "Mirá las dos temperaturas del agua.", "nivel_2": "¿Mboy grado-pa subió realmente?", "nivel_3": "Usá Q = m · c · (Tf - Ti).", "nivel_4": "Restá final menos inicial antes de multiplicar.", "nivel_5": "Reemplazá los valores y revisá que el calor esté en J." } },
+    { "errorId": "err-termo-02", "joparaHint": "Pe aumento de temperatura no es la temperatura final: sumale la inicial.", "esHint": "Primero calculá ΔT = Q/(m·c), después Tf = Ti + ΔT.", "followUp": "¿Cuántos grados aumentó y desde cuánto empezó?", "levels": { "nivel_1": "Buscá la temperatura de partida.", "nivel_2": "El calor te da un aumento, no la lectura final.", "nivel_3": "Tf = Ti + Q/(m·c).", "nivel_4": "Calculá Q/(m·c) y agregá Ti.", "nivel_5": "Comprobá el resultado final en °C." } },
+    { "errorId": "err-termo-03", "joparaHint": "Pe y hetavéva influye más en la mezcla: tené en cuenta las masas.", "esHint": "El promedio de temperaturas debe ponderarse con la masa de cada porción de agua.", "followUp": "Revisá qué porción tiene más masa.", "levels": { "nivel_1": "La respuesta queda entre las dos temperaturas.", "nivel_2": "La porción más grande pesa más en el resultado.", "nivel_3": "T = (m1·T1 + m2·T2)/(m1+m2).", "nivel_4": "Multiplicá cada masa por su temperatura.", "nivel_5": "Sumá los productos y dividí por la masa total." } },
+    { "errorId": "err-optica-01", "joparaHint": "Pe ángulo oñemedi normal guive, no desde la superficie del espejo.", "esHint": "La normal es perpendicular al espejo; el ángulo con la superficie es complementario.", "followUp": "Dibujá la normal y medí desde esa línea.", "levels": { "nivel_1": "Ubicá el espejo y su normal.", "nivel_2": "La normal forma 90° con la superficie.", "nivel_3": "Ángulo con normal = 90° - ángulo con superficie.", "nivel_4": "Calculá el complementario antes de reflejar.", "nivel_5": "El ángulo reflejado coincide con el incidente desde la normal." } },
+    { "errorId": "err-optica-02", "joparaHint": "Pe imagen está espejo kupépe, a la misma distancia del objeto.", "esHint": "Medí ambas distancias desde el espejo, sin duplicarlas.", "followUp": "Compará la distancia delante y detrás.", "levels": { "nivel_1": "Mirá el objeto delante del espejo.", "nivel_2": "La imagen es simétrica respecto al espejo.", "nivel_3": "Distancia de imagen = distancia de objeto.", "nivel_4": "Copiá la distancia al otro lado.", "nivel_5": "Indicá la distancia desde el espejo en cm." } },
+    { "errorId": "err-optica-03", "joparaHint": "Ani reinvertí: velocidad en vacío va arriba en n = c/v.", "esHint": "El índice n es c dividido por la velocidad en el material; no lleva unidad.", "followUp": "¿Cuál de las dos velocidades es mayor?", "levels": { "nivel_1": "Compará la rapidez en vacío y en vidrio.", "nivel_2": "En vidrio la luz viaja más lento.", "nivel_3": "Usá n = c/v.", "nivel_4": "Dividí la rapidez en vacío por la del vidrio.", "nivel_5": "Comprobá que n sea mayor que 1 y no tenga unidad." } },
     {
       "errorId": "err-01",
       "errorKey": "confunde_velocidades",
@@ -488,12 +494,14 @@
     }
   },
   "sectionGreetings": {
-    "simulador": "¡Mba'éichapa! Acá podés experimentar el vuelo del dron en Alto Paraná. Cambiá el ángulo y la velocidad para ver la trayectoria exacta.",
+    "simulador": "¡Mba'éichapa! Leé el ejercicio, escribí tu respuesta y tocá Comprobar con el simulador. Vas a ver una escena que corresponde a ese tema.",
     "tarjetas": "¡Hola! Estas fichas te ayudan a memorizar la teoría clave antes del cuestionario. Dale la vuelta a cada tarjeta para comprobar lo que sabés.",
     "chats": "Bienvenido al espacio de diálogo. Respondé con tus palabras, acá aprendemos sin miedo a equivocarnos.",
     "aula": "Espacio de clase: conectate con el código de tu profesor o proyectá los parámetros en la pizarra."
   },
   "topicSupport": [
+    { "tema": "Termodinámica", "pregunta": "Calor y temperatura del agua para el mate", "respuesta": "Calor es energía transferida. Para agua sin cambio de estado: Q = m · c · (Tf - Ti). Primero calculá la diferencia de temperatura. Pe y más caliente cede calor a la más fría." },
+    { "tema": "Óptica", "pregunta": "Reflexión de luz en espejo y refracción en vaso de agua", "respuesta": "En un espejo, incidencia y reflexión se miden desde la normal y son iguales. En agua, la luz cambia de dirección al pasar al aire: pe pajita parece doblada por refracción." },
     {
       "tema": "Cinemática",
       "pregunta": "Rapidez media",

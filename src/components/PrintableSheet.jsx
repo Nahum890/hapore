@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { jsPDF } from 'jspdf';
-import exercisesData from '../data/exercises.json';
-import conceptsData from '../data/concepts.json';
-import glossaryData from '../data/glossary.json';
+import {
+  concepts as conceptsData,
+  exercises as exercisesData,
+  glossary as glossaryData,
+} from '../data/catalogs.js';
 
 /**
- * Genera el documento PDF A4 de la Ficha de Estudio GuaranIA.
+ * Genera el documento PDF A4 de la Ficha de Estudio PyFis IA.
  * 100% en el cliente sin llamadas a internet (ideal para modo avión).
  */
 export function generateGuaraniaPdf() {
@@ -35,7 +37,7 @@ export function generateGuaraniaPdf() {
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(16);
-  doc.text('GUARANIA • Ficha de Aula e Imprimible', margin + 6, y + 8);
+  doc.text('PyFis IA • Ficha de Aula e Imprimible', margin + 6, y + 8);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
@@ -231,14 +233,14 @@ export function generateGuaraniaPdf() {
   doc.setFont('helvetica', 'italic');
   doc.setFontSize(7);
   doc.text(
-    'Proyecto GuaranIA • Kyre\'y-devs • Hackathon Kyhyje\'ỹ IA 2026 • Documento imprimible 100% offline (sin internet)',
+    'Proyecto PyFis IA • Kyre\'y-devs • Hackathon Kyhyje\'ỹ IA 2026 • Documento imprimible 100% offline (sin internet)',
     margin,
     y + 4,
   );
   doc.text('Página 1 de 1', pageWidth - margin, y + 4, { align: 'right' });
 
   // Guardar archivo directamente
-  doc.save('Ficha_Aula_GuaranIA_Movimiento_Parabolico.pdf');
+  doc.save('Ficha_Aula_PyFis_IA_Movimiento_Parabolico.pdf');
 }
 
 /**

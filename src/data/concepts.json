@@ -1,4 +1,10 @@
 [
+  { "id": "calor-sensible", "name": "Calor sensible", "definition": "Energía transferida que cambia la temperatura sin cambiar el estado de la sustancia. En agua líquida, Q = m · c · (Tf - Ti).", "formula": "Q = m · c · ΔT" },
+  { "id": "temperatura-final", "name": "Temperatura final", "definition": "La temperatura final se obtiene sumando a la inicial el aumento causado por el calor recibido, si no hay pérdidas ni cambio de estado.", "formula": "Tf = Ti + Q / (m · c)" },
+  { "id": "equilibrio-termico", "name": "Equilibrio térmico", "definition": "Dos porciones de agua en contacto intercambian calor hasta alcanzar una misma temperatura. Sin pérdidas y con igual calor específico, la temperatura final es un promedio ponderado por las masas.", "formula": "T = (m1 · T1 + m2 · T2) / (m1 + m2)" },
+  { "id": "ley-reflexion", "name": "Ley de reflexión", "definition": "El ángulo de incidencia es igual al ángulo de reflexión. Ambos se miden desde la normal, perpendicular a la superficie del espejo.", "formula": "ángulo de incidencia = ángulo de reflexión" },
+  { "id": "espejo-plano", "name": "Imagen en espejo plano", "definition": "La imagen virtual aparece detrás del espejo a la misma distancia a la que se encuentra el objeto delante de él.", "formula": "distancia de imagen = distancia de objeto" },
+  { "id": "indice-refraccion", "name": "Índice de refracción", "definition": "Relación entre la rapidez de la luz en el vacío y en un material transparente. El índice es adimensional y mayor o igual que 1.", "formula": "n = c / v" },
   {
     "id": "movimiento-parabolico",
     "name": "Movimiento Parabólico",

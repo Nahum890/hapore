@@ -1,80 +1,95 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Header from './components/Header.jsx';
 import ConfidenceBar from './components/ConfidenceBar.jsx';
 import TutorCard from './components/TutorCard.jsx';
 import ExerciseCard from './components/ExerciseCard.jsx';
 import Flashcard from './components/Flashcard.jsx';
 import TeacherMode from './components/TeacherMode.jsx';
+import StudentClass from './components/StudentClass.jsx';
+import AuthScreen from './components/AuthScreen.jsx';
+import PdfButton from './components/PdfButton.jsx';
+import Onboarding from './components/Onboarding.jsx';
 import CanvasSimulator from './simulator/CanvasSimulator.jsx';
-import exercisesData from './data/exercises.json';
-import flashcardsData from './data/flashcards.json';
-import conceptsData from './data/concepts.json';
-import errorsData from './data/errors.json';
-import glossaryData from './data/glossary.json';
+import {
+  concepts as conceptsData,
+  errors as errorsData,
+  exercises as exercisesData,
+  flashcards as flashcardsData,
+  glossary as glossaryData,
+} from './data/catalogs.js';
 import { useOfflineStorage } from './hooks/useOfflineStorage.js';
 import { useTutor } from './hooks/useTutor.js';
 import { useMission } from './hooks/useMission.js';
 import { useQuiz } from './hooks/useQuiz.js';
-import { readJSON, writeJSON } from './utils/storage.js';
-import { decodeClassConfig, encodeClassConfig, temaMatchesSubtemas } from './utils/classCode.js';
+import { readJSON, writeJSON, setActiveProfile } from './utils/storage.js';
+import { getSession, logout } from './auth/localAccounts.js';
+import { decodeClassConfig, encodeClassConfig, temaMatchesSubtemas, selectClassExercises } from './utils/classCode.js';
+import { recommendExercise, summarizeAttempts } from './pedagogy/progression.js';
+
+const SECTIONS = [
+  { id: 'inicio', label: 'Inicio', icon: '⌂', title: 'Tu espacio para aprender', description: 'Elegí una actividad y avanzá a tu ritmo.' },
+  { id: 'simulador', label: 'Practicar', icon: '↗', title: 'Practicá con una simulación', description: 'Leé el ejercicio, escribí tu respuesta y comprobala con la escena de ese tema.' },
+  { id: 'tarjetas', label: 'Repasar', icon: '▧', title: 'Repasá con tarjetas', description: 'Elegí un mazo, descubrí cada respuesta y seguí con el cuestionario.' },
+  { id: 'chats', label: 'Tutor', icon: '✳', title: 'Conversá con el tutor', description: 'Encontrá el cuestionario y preguntá lo que necesites.' },
+  { id: 'aula', label: 'Aula', icon: '▣', title: 'Tu clase', description: 'Usá un código de clase para aprender los temas que eligió tu docente.' },
+];
+
+function HomeView({ user, learning, classConfig, onNavigate, onGuide }) {
+  const teacher = user.role === 'maestro';
+  const progress = summarizeAttempts(learning.attemptLog);
+  const topicProgress = ['Termodinámica', 'Óptica'].map(topic => {
+    const ids = new Set(exercisesData.filter(item => item.topic === topic).map(item => item.id));
+    return { topic, ...summarizeAttempts(learning.attemptLog.filter(item => ids.has(item.exerciseId))) };
+  });
+  return <div className="home-view">
+    <section className="home-hero"><div><span className="home-kicker">{teacher ? 'ESPACIO DOCENTE' : 'TU ESPACIO DE APRENDIZAJE'}</span><h2>¡Hola, {user.name.split(' ')[0]}!</h2><p>{teacher ? 'Prepará una clase y compartí el código con tus alumnos. También podés explorar las actividades.' : 'Empezá con un ejercicio. Escribí tu respuesta y comprobala con la simulación del mismo tema.'}</p><button className="btn home-main-action" type="button" onClick={() => onNavigate(teacher ? 'aula' : 'simulador')}>{teacher ? 'Preparar una clase' : 'Empezar a practicar'} <span aria-hidden="true">→</span></button></div><div className="hero-art" aria-hidden="true"><span className="hero-art-sun" /><span className="hero-art-flight" /><span className="hero-art-drone">✣</span><span className="hero-art-hill" /></div></section>
+    <div className="home-section-heading"><div><span className="panel-eyebrow">A TU RITMO</span><h2>¿Qué querés hacer hoy?</h2></div><button type="button" onClick={onGuide}>Ver guía rápida</button></div>
+    <div className="home-action-grid">
+      <button className="home-action-card" type="button" onClick={() => onNavigate('simulador')}><span className="home-card-icon practice" aria-hidden="true">↗</span><strong>Practicar</strong><span>Resolvé un ejercicio y mirá cómo funciona.</span><small>Ir a ejercicios →</small></button>
+      <button className="home-action-card" type="button" onClick={() => onNavigate('tarjetas')}><span className="home-card-icon review" aria-hidden="true">▧</span><strong>Repasar</strong><span>Estudiá con tarjetas a tu ritmo.</span><small>Ver tarjetas →</small></button>
+      <button className="home-action-card" type="button" onClick={() => onNavigate('chats')}><span className="home-card-icon tutor" aria-hidden="true">✳</span><strong>Preguntar al tutor</strong><span>Hacé el cuestionario y despejá dudas.</span><small>Abrir tutor →</small></button>
+    </div>
+    <section className="home-class-card"><div><span className="panel-eyebrow">{teacher ? 'PARA TU CLASE' : 'APRENDÉ EN CLASE'}</span><h3>{teacher ? 'Todo listo para enseñar' : classConfig ? 'Tu clase está configurada' : '¿Tenés un código de clase?'}</h3><p>{teacher ? 'Elegí temas, generá un código y usá el proyector desde Aula docente.' : classConfig ? 'Ya podés practicar los temas que eligió tu docente.' : 'Ingresalo para ver los ejercicios y tarjetas de tu docente.'}</p></div><button className="btn btn-secondary" type="button" onClick={() => onNavigate('aula')}>{teacher ? 'Ir a Aula docente' : 'Ir a Mi clase'}</button></section>
+    {progress.attempts > 0 && <section className="card learning-progress" aria-label="Progreso por tema"><div className="learning-progress-head"><div><span className="panel-eyebrow">TU AVANCE</span><h2>Así vas aprendiendo</h2></div><strong>{progress.accuracy}% de aciertos</strong></div><div className="learning-topic-grid">{topicProgress.map(item => <div key={item.topic}><div className="learning-topic-title"><strong>{item.topic}</strong><span>{item.correct}/{item.attempts} aciertos</span></div><div className="learning-topic-track"><span style={{width:`${item.accuracy}%`}} /></div><small>{item.attempts ? `Tiempo promedio: ${item.averageSeconds} s` : 'Todavía sin intentos'}</small></div>)}</div></section>}
+    <p className="home-progress-note">Tu progreso: <strong>{learning.xp} XP</strong> · {progress.correct} respuestas correctas de {progress.attempts} intentos{progress.attempts ? ` · ${progress.accuracy}% de aciertos` : ''}. Guardado en este dispositivo.</p>
+  </div>;
+}
+
+function ResourceGroup({ title, items, getTitle, getDescription }) {
+  return <details className="resource-group">
+    <summary>{title}<span aria-hidden="true">＋</span></summary>
+    <ul className="aula-list">{items.map(item => <li key={item.id} className="aula-item"><h3>{getTitle(item)}</h3><p>{getDescription(item)}</p></li>)}</ul>
+  </details>;
+}
 
 function AulaView({ attempts, xp, classConfig, onJoinClass }) {
   return (
     <>
-      <section className="card" aria-label="Conceptos clave">
-        <h2>Conceptos clave</h2>
-        <ul className="aula-list">
-          {conceptsData.map((concept) => (
-            <li key={concept.id} className="aula-item">
-              <h3>{concept.name}</h3>
-              <p>{concept.definition}</p>
-            </li>
-          ))}
-        </ul>
-      </section>
-      <section className="card" aria-label="Errores frecuentes">
-        <h2>Errores frecuentes</h2>
-        <ul className="aula-list">
-          {errorsData.map((error) => (
-            <li key={error.id} className="aula-item">
-              <h3>{error.name}</h3>
-              <p>{error.description}</p>
-            </li>
-          ))}
-        </ul>
-      </section>
-      <section className="card" aria-label="Glosario">
-        <h2>Glosario</h2>
-        <ul className="aula-list">
-          {glossaryData.map((entry) => (
-            <li key={entry.id} className="aula-item">
-              <h3>{entry.term}</h3>
-              <p>{entry.definition}</p>
-            </li>
-          ))}
-        </ul>
-      </section>
+      <div className="aula-toolbar"><p>Herramientas para preparar y compartir tu clase.</p><PdfButton /></div>
       <TeacherMode
         attempts={attempts}
         confidence={xp}
         classConfig={classConfig}
         onJoinClass={onJoinClass}
       />
+      <section className="resource-section" aria-label="Biblioteca de apoyo">
+        <div className="resource-heading"><h2>Biblioteca de apoyo</h2><p>Abrí solo el material que quieras consultar.</p></div>
+        <ResourceGroup title="Conceptos clave" items={conceptsData} getTitle={item => item.name} getDescription={item => item.definition} />
+        <ResourceGroup title="Errores frecuentes" items={errorsData} getTitle={item => item.name} getDescription={item => item.description} />
+        <ResourceGroup title="Glosario" items={glossaryData} getTitle={item => item.term} getDescription={item => item.definition} />
+      </section>
     </>
   );
 }
 
-function QuizSelector({ quiz }) {
-  const options = [];
-  for (let count = 5; count <= quiz.maxAvailable; count += 5) {
-    options.push(count);
-  }
+function QuizSelector({ quiz, topics, studyTopic, onTopicChange }) {
+  const options = [...new Set([5, 10, 20, quiz.maxAvailable])].filter(count => count <= quiz.maxAvailable).sort((a, b) => a - b);
   return (
     <section className="card" aria-label="Selector de cantidad de tarjetas">
-      <h2>¿Cuántas tarjetas querés repasar?</h2>
+      <h2>Elegí tu repaso</h2>
+      <div className="topic-options" role="group" aria-label="Tema de las tarjetas">{topics.map(topic => <button key={topic} type="button" className={topic === studyTopic ? 'is-active' : ''} aria-pressed={topic === studyTopic} onClick={() => onTopicChange(topic)}>{topic}</button>)}</div>
       <p className="deck-selector-note">
-        Elegí entre 5 (mínimo) y 50 (máximo). Ahora hay {quiz.repasoAvailable} tarjetas teóricas
-        disponibles.
+        Hay {quiz.repasoAvailable} tarjetas disponibles. Empezá con 5 si tenés poco tiempo.
       </p>
       <div className="deck-options">
         {options.map((count) => (
@@ -84,7 +99,7 @@ function QuizSelector({ quiz }) {
             className="btn btn-secondary"
             onClick={() => quiz.chooseQuantity(count)}
           >
-            {count}
+            <strong>{count}</strong><span>{count === 5 ? 'Rápido' : count === 10 ? 'Normal' : count === quiz.maxAvailable ? 'Completo' : 'Más práctica'}</span>
           </button>
         ))}
       </div>
@@ -369,12 +384,15 @@ function ChatsView({ quiz }) {
   );
 }
 
-export default function App() {
-  const [activeTab, setActiveTab] = useState('simulador');
+function LearningApp({ user, onLogout }) {
+  const [activeTab, setActiveTab] = useState('inicio');
+  const [simulationSubmission, setSimulationSubmission] = useState(null);
+  const [showGuide, setShowGuide] = useState(() => !readJSON('guarania:guideSeen:v2', false));
   const [classConfig, setClassConfig] = useState(() => decodeClassConfig(readJSON('guarania:classCode', null)));
-  const visibleExercises = useMemo(() => classConfig
-    ? exercisesData.filter((exercise) => temaMatchesSubtemas(exercise.topic, classConfig.subtemas)).slice(0, classConfig.ejercicios)
-    : exercisesData, [classConfig]);
+  const [selectedStudyTopic, setSelectedStudyTopic] = useState('Termodinámica');
+  const studyTopics = [...new Set(flashcardsData.filter(card => temaMatchesSubtemas(card.topic, classConfig?.subtemas)).map(card => card.topic))];
+  const studyTopic = studyTopics.includes(selectedStudyTopic) ? selectedStudyTopic : studyTopics[0];
+  const visibleExercises = selectClassExercises(exercisesData, classConfig);
   const learning = useOfflineStorage();
   const { tutor, ask } = useTutor();
   const { mission, currentExercise, index, next, prev } = useMission(
@@ -386,21 +404,13 @@ export default function App() {
     onMoveToChat: () => setActiveTab('chats'),
     onQuizAnswer: learning.onQuizAnswer,
     classConfig,
+    studyTopic,
   });
 
   useEffect(() => {
-    ask({ type: 'section', section: activeTab });
-  }, [activeTab, ask]);
-
-  useEffect(() => {
-    const syncClass = (event) => {
-      if (event.key !== null && event.key !== 'guarania:classCode') return;
-      setClassConfig(decodeClassConfig(readJSON('guarania:classCode', null)));
-      learning.resetHints();
-    };
-    window.addEventListener('storage', syncClass);
-    return () => window.removeEventListener('storage', syncClass);
-  }, [learning.resetHints]);
+    if (activeTab === 'inicio') return;
+    ask({ type: 'section', section: activeTab, role: user.role, topic: currentExercise?.topic, exerciseId: currentExercise?.id });
+  }, [activeTab, currentExercise?.id, ask]);
 
   const handleCardConsolidated = (flashcardId) => {
     learning.onFlashcardConsolidated(flashcardId);
@@ -409,35 +419,45 @@ export default function App() {
 
   const handleJoinClass = (config) => {
     writeJSON('guarania:classCode', config ? encodeClassConfig(config) : null);
-    const available = config
-      ? exercisesData.filter((exercise) => temaMatchesSubtemas(exercise.topic, config.subtemas)).slice(0, config.ejercicios)
-      : exercisesData;
-    if (available.length && !available.some((exercise) => exercise.id === learning.currentExercise)) {
-      learning.onSelectExercise(available[0].id);
-    } else {
-      learning.resetHints();
-    }
     setClassConfig(config);
+  };
+  const dismissGuide = () => { writeJSON('guarania:guideSeen:v2', true); setShowGuide(false); };
+  const startPracticing = () => { setActiveTab('simulador'); dismissGuide(); };
+  const section = SECTIONS.find(item => item.id === activeTab) ?? SECTIONS[0];
+  const topics = [...new Set(visibleExercises.map(item => item.topic))];
+  const primaryTopics = topics.filter(topic => ['Termodinámica', 'Óptica'].includes(topic));
+  const extraTopics = topics.filter(topic => !primaryTopics.includes(topic));
+  const recommendation = recommendExercise(visibleExercises, currentExercise?.id, learning.attemptLog);
+  const selectTopic = topic => {
+    const first = visibleExercises.find(item => item.topic === topic);
+    if (first) { learning.onSelectExercise(first.id); setSimulationSubmission(null); }
   };
 
   return (
     <div className="app">
-      <Header activeTab={activeTab} onChange={setActiveTab} />
-      <ConfidenceBar xp={learning.xp} level={learning.level} />
-
-      <main className="app-main">
+      <Header user={user} onHome={() => setActiveTab('inicio')} onLogout={onLogout} />
+      <nav className="primary-nav" aria-label="Secciones principales">
+        {SECTIONS.map(item => <button key={item.id} type="button" className={'primary-nav-item' + (activeTab === item.id ? ' is-active' : '')} aria-current={activeTab === item.id ? 'page' : undefined} onClick={() => setActiveTab(item.id)}><span className="primary-nav-number" aria-hidden="true">{item.icon}</span><span>{item.id === 'aula' ? (user.role === 'maestro' ? 'Aula docente' : 'Mi clase') : item.label}</span></button>)}
+      </nav>
+      {activeTab !== 'inicio' && <section className="section-intro" aria-labelledby="section-title"><div><p className="section-eyebrow">{user.role === 'maestro' ? 'ESPACIO DOCENTE' : 'TU APRENDIZAJE'} / {section.label.toUpperCase()}</p><h2 id="section-title">{activeTab === 'aula' && user.role === 'maestro' ? 'Prepará tu aula' : section.title}</h2><p>{activeTab === 'aula' && user.role === 'maestro' ? 'Creá un código para tus alumnos y consultá los recursos docentes.' : section.description}</p></div><button type="button" className="guide-replay" onClick={() => setShowGuide(true)}>Ver guía de uso</button></section>}
+      <div className="app-layout"><main className="app-main">
+        {activeTab === 'inicio' && <HomeView user={user} learning={learning} classConfig={classConfig} onNavigate={setActiveTab} onGuide={() => setShowGuide(true)} />}
         {activeTab === 'simulador' && (
           <>
-            <CanvasSimulator mission={mission} />
-            {currentExercise && (
+            <section className="topic-picker card" aria-label="Elegir tema de práctica"><div><span className="panel-eyebrow">FÍSICA DE 3.º · PROGRAMA PRINCIPAL</span><h2>Elegí un tema</h2><p>Podés cambiar de tema en cualquier momento.</p></div><div className="topic-options">{primaryTopics.map(topic => <button key={topic} type="button" className={currentExercise?.topic === topic ? 'is-active' : ''} aria-pressed={currentExercise?.topic === topic} onClick={() => selectTopic(topic)}>{topic}</button>)}</div>{extraTopics.length > 0 && <details className="extra-topics"><summary>Práctica complementaria de movimiento y fuerzas</summary><div className="topic-options">{extraTopics.map(topic => <button key={topic} type="button" className={currentExercise?.topic === topic ? 'is-active' : ''} aria-pressed={currentExercise?.topic === topic} onClick={() => selectTopic(topic)}>{topic}</button>)}</div></details>}</section>
+            {currentExercise && <div className="practice-workspace">
               <ExerciseCard
                 exercise={currentExercise}
                 onResult={learning.onExerciseResult}
                 onAskHint={ask}
+                onSimulationCheck={submission => setSimulationSubmission(previous => ({ ...submission, id: (previous?.id ?? 0) + 1 }))}
+                onSimulationClear={() => setSimulationSubmission(null)}
                 hintsUsed={learning.hintsUsed}
                 onIncrementHint={learning.incrementHints}
               />
-            )}
+              <CanvasSimulator mission={mission} submission={simulationSubmission} />
+            </div>}
+            {recommendation && <div className="practice-recommendation" role="status"><div><strong>Tu siguiente paso</strong><p>{recommendation.reason}</p></div>{recommendation.exercise.id !== currentExercise?.id && <button className="btn btn-secondary" type="button" onClick={() => { learning.onSelectExercise(recommendation.exercise.id); setSimulationSubmission(null); }}>Ir al recomendado</button>}</div>}
             <div className="mission-nav">
               <button type="button" className="btn btn-secondary" onClick={prev} disabled={index === 0}>
                 Anterior
@@ -451,7 +471,7 @@ export default function App() {
 
         {activeTab === 'tarjetas' && (
           <>
-            {quiz.step === 'cantidad' && <QuizSelector quiz={quiz} />}
+            {quiz.step === 'cantidad' && <QuizSelector quiz={quiz} topics={studyTopics} studyTopic={studyTopic} onTopicChange={setSelectedStudyTopic} />}
             {quiz.step === 'repaso' && (
               <RepasoView quiz={quiz} onCardConsolidated={handleCardConsolidated} />
             )}
@@ -460,17 +480,22 @@ export default function App() {
 
         {activeTab === 'chats' && <ChatsView quiz={quiz} />}
 
-        {activeTab === 'aula' && (
+        {activeTab === 'aula' && (user.role === 'maestro' ?
           <AulaView
             attempts={learning.attempts}
             xp={learning.xp}
             classConfig={classConfig}
             onJoinClass={handleJoinClass}
-          />
-        )}
-      </main>
-
-      <TutorCard tutor={tutor} />
+          /> : <StudentClass classConfig={classConfig} onJoinClass={handleJoinClass} />)}
+      </main><aside className="app-sidebar" aria-label="Tu progreso y ayuda"><ConfidenceBar xp={learning.xp} level={learning.level} /><TutorCard tutor={tutor} /></aside></div>
+      <Onboarding open={showGuide} onDismiss={dismissGuide} onStart={startPracticing} role={user.role} />
     </div>
   );
+}
+
+export default function App() {
+  const [user, setUser] = useState(getSession);
+  setActiveProfile(user?.id);
+  const handleLogout = () => { logout(); setActiveProfile(null); setUser(null); };
+  return user ? <LearningApp key={user.id} user={user} onLogout={handleLogout} /> : <AuthScreen onAuthenticated={setUser} />;
 }

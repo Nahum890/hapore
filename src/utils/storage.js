@@ -1,7 +1,10 @@
 const memoryStore = new Map();
+let activeProfileId = null;
+export function setActiveProfile(id) {
+  activeProfileId = id || null;
+}
+const profileKey = (key) => activeProfileId ? `guarania:profile:${activeProfileId}:${key}` : key;
 
-// Acceder a localStorage puede lanzar SecurityError incluso antes de llamar
-// getItem (por ejemplo, con almacenamiento bloqueado por el navegador).
 const safeStorage = {
   getItem(key) {
     if (memoryStore.has(key)) return memoryStore.get(key);
@@ -20,7 +23,7 @@ const safeStorage = {
         return;
       }
     } catch {
-      // La cuota puede agotarse durante una sesión: conservamos el último valor.
+      // Si el almacenamiento se bloquea o se llena, conservamos la sesión en memoria.
     }
     memoryStore.set(key, serialized);
   },
@@ -43,11 +46,12 @@ export const STORAGE_KEYS = {
   XP: 'guarania:xp',
   QUIZ_REWARDED: 'guarania:quizRewarded',
   CHAT_HISTORY: 'guarania_chat_history',
+  ATTEMPT_LOG: 'guarania:attemptLog',
 };
 
 export function readJSON(key, fallback) {
   try {
-    const raw = safeStorage.getItem(key);
+    const raw = safeStorage.getItem(profileKey(key));
     if (raw === null || raw === undefined) return fallback;
     return JSON.parse(raw);
   } catch {
@@ -57,15 +61,15 @@ export function readJSON(key, fallback) {
 
 export function writeJSON(key, value) {
   try {
-    safeStorage.setItem(key, JSON.stringify(value));
+    safeStorage.setItem(profileKey(key), JSON.stringify(value));
   } catch {
-    // Valores no serializables no pueden guardarse.
+    // Los valores no serializables no pueden guardarse.
   }
 }
 
 export function removeKey(key) {
   try {
-    safeStorage.removeItem(key);
+    safeStorage.removeItem(profileKey(key));
   } catch {
     // noop
   }

@@ -14,7 +14,7 @@ export default function TutorCard({ tutor }) {
   const source = tutor?.source === 'local-ai' ? 'IA con conexión' : tutor?.source === 'local-model' ? 'Modelo en el dispositivo' : 'Tutor disponible sin conexión';
   return (
     <section className="card tutor-card" aria-label="Tutor Jopara">
-      <div className="tutor-avatar" aria-hidden="true">G</div>
+      <div className="tutor-avatar" aria-hidden="true">P</div>
       <div className="tutor-body">
         <p className="tutor-message" role="status" aria-live="polite">{message}</p>
         {tutor?.esHint && <p className="tutor-es-hint">{tutor.esHint}</p>}

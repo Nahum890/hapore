@@ -8,15 +8,18 @@ import {
 } from '../pedagogy/learningState.js';
 import { STORAGE_KEYS } from '../utils/storage.js';
 
-const LEARNING_KEYS = new Set([
+const LEARNING_KEYS = [
   STORAGE_KEYS.CONFIDENCE,
   STORAGE_KEYS.CURRENT_EXERCISE,
   STORAGE_KEYS.ATTEMPTS,
+  STORAGE_KEYS.ATTEMPT_LOG,
   STORAGE_KEYS.FLASHCARD_STATE,
   STORAGE_KEYS.COMPLETED,
   STORAGE_KEYS.XP,
   STORAGE_KEYS.QUIZ_REWARDED,
-]);
+];
+
+const matchesStorageKey = (eventKey, key) => eventKey === key || eventKey?.endsWith(`:${key}`);
 
 export function useOfflineStorage() {
   const [state, setState] = useState(loadLearningState);
@@ -24,9 +27,9 @@ export function useOfflineStorage() {
 
   useEffect(() => {
     const sync = (event) => {
-      if (event.key !== null && !LEARNING_KEYS.has(event.key)) return;
+      if (event.key !== null && !LEARNING_KEYS.some((key) => matchesStorageKey(event.key, key))) return;
       setState(loadLearningState());
-      if (event.key === null || event.key === STORAGE_KEYS.CURRENT_EXERCISE) setHintsUsed(0);
+      if (event.key === null || matchesStorageKey(event.key, STORAGE_KEYS.CURRENT_EXERCISE)) setHintsUsed(0);
     };
     window.addEventListener('storage', sync);
     return () => window.removeEventListener('storage', sync);
@@ -46,6 +49,7 @@ export function useOfflineStorage() {
     confidence: state.confidence,
     currentExercise: state.currentExercise,
     attempts: state.attempts,
+    attemptLog: state.attemptLog,
     completed: state.completed,
     flashcardState: state.flashcardState,
     xp: state.xp,

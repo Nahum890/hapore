@@ -23,6 +23,7 @@ export function loadLearningState() {
     confidence: getConfidence(),
     currentExercise: readJSON(STORAGE_KEYS.CURRENT_EXERCISE, null),
     attempts: storedAttempts(),
+    attemptLog: storedList(STORAGE_KEYS.ATTEMPT_LOG),
     flashcardState: storedFlashcards(),
     completed: storedList(STORAGE_KEYS.COMPLETED),
     xp,
@@ -30,7 +31,7 @@ export function loadLearningState() {
   };
 }
 
-export function recordExerciseResult({ correct, hintsUsed = 0, exerciseId = null } = {}) {
+export function recordExerciseResult({ correct, hintsUsed = 0, exerciseId = null, durationMs = 0 } = {}) {
   const completed = storedList(STORAGE_KEYS.COMPLETED);
   const alreadyCompleted = Boolean(exerciseId && completed.includes(exerciseId));
   const reward = alreadyCompleted
@@ -53,6 +54,8 @@ export function recordExerciseResult({ correct, hintsUsed = 0, exerciseId = null
   increaseConfidence(reward);
   const attempts = storedAttempts() + 1;
   writeJSON(STORAGE_KEYS.ATTEMPTS, attempts);
+  const attemptLog = storedList(STORAGE_KEYS.ATTEMPT_LOG);
+  writeJSON(STORAGE_KEYS.ATTEMPT_LOG, [...attemptLog, { exerciseId, correct: Boolean(correct), hintsUsed: Math.max(0, Number(hintsUsed) || 0), durationMs: Math.max(0, Math.round(Number(durationMs) || 0)), at: new Date().toISOString() }].slice(-200));
   if (correct && exerciseId && !alreadyCompleted) {
     writeJSON(STORAGE_KEYS.COMPLETED, [...completed, exerciseId]);
   }

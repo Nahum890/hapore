@@ -1,8 +1,7 @@
 import { useRef, useState } from 'react';
-import exercises from '../data/exercises.json';
-import concepts from '../data/concepts.json';
+import { concepts, exercises } from '../data/catalogs.js';
 import { readJSON } from '../utils/storage.js';
-import { decodeClassConfig, temaMatchesSubtemas } from '../utils/classCode.js';
+import { decodeClassConfig, selectClassExercises } from '../utils/classCode.js';
 
 // Standard PDF fonts support Spanish accents; spell out unsupported mathematical glyphs.
 export function printableText(value) {
@@ -13,14 +12,13 @@ export function printableText(value) {
 export async function createStudyPdf(config = null) {
   const { jsPDF } = await import('jspdf');
   const doc = new jsPDF({ unit:'mm', format:'a4' });
-  const available = exercises.filter(item=>temaMatchesSubtemas(item.topic,config?.subtemas));
-  const selected = config ? available.slice(0,config.ejercicios) : [...new Map(available.map(item=>[item.topic,item])).values()];
+  const selected = config ? selectClassExercises(exercises, config) : ['Termodinámica', 'Óptica'].map(topic => exercises.find(item => item.topic === topic)).filter(Boolean);
   const conceptIds = new Set(selected.map(item=>item.expectedConcept));
   const green = [27,77,62], ink = [31,41,55];
   let y = 40;
   const header = () => {
     doc.setFillColor(...green); doc.rect(0,0,210,28,'F');
-    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(19); doc.text('GuaranIA | Ficha de aula',16,13);
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(19); doc.text('PyFis IA | Ficha de aula',16,13);
     doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.text('Física - Aprendé, practicá y revisá tu razonamiento',16,21);
     doc.setTextColor(...ink); y=40;
   };
@@ -62,7 +60,7 @@ export async function createStudyPdf(config = null) {
   for(let page=1;page<=pages;page++){
     doc.setPage(page);doc.setDrawColor(210,220,215);doc.line(16,281,194,281);
     doc.setTextColor(80,90,85);doc.setFont('helvetica','normal');doc.setFontSize(8);
-    doc.text('GuaranIA - Ficha generada en el dispositivo, disponible sin conexión',16,287);
+    doc.text('PyFis IA - Ficha generada en el dispositivo, disponible sin conexión',16,287);
     doc.text(page+' / '+pages,194,287,{align:'right'});
   }
   return doc;
@@ -76,7 +74,7 @@ export default function PdfButton() {
     try{
       const config=decodeClassConfig(readJSON('guarania:classCode',null));
       const doc=await createStudyPdf(config);
-      doc.save('Ficha_Aula_GuaranIA.pdf');setStatus('Ficha descargada. Incluye ejercicios y guía de revisión.');
+      doc.save('Ficha_Aula_PyFis_IA.pdf');setStatus('Ficha descargada. Incluye ejercicios y guía de revisión.');
     }catch{setStatus('No se pudo generar la ficha. Probá nuevamente.');}
     finally{lock.current=false;setGenerating(false);}
   };

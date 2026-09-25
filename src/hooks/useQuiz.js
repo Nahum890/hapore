@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import quizBank from '../ai/quizBank.json';
+import { quizBank } from '../data/catalogs.js';
 import { buildQuiz, buildQuizFeedback, matchAnswer, matchText, shuffle } from '../ai/quizEngine.js';
 import { readJSON, writeJSON, STORAGE_KEYS } from '../utils/storage.js';
 import { temaMatchesSubtemas } from '../utils/classCode.js';
@@ -29,9 +29,11 @@ function buildClosingMessage(entries) {
   const total = entries.length;
   const acertadas = entries.filter((entry) => entry.tutor?.correct).length;
   const balance = [...byTopic.entries()]
-    .map(([tema, stats]) => `${tema}: ${stats.correct}/${stats.total}`)
+    .map(([tema, stats]) => `${tema}: ${stats.correct} de ${stats.total}`)
     .join(' · ');
-  return `¡Ikatu! Mbohovái oĩ porã: ${acertadas}/${total}.${balance ? ` ${balance}.` : ''} ${QUIZ_CLOSING}`;
+  return `¡Ikatu! Terminaste el cuestionario: ${acertadas} de ${total} acertadas.${
+    balance ? ` Temas dominados — ${balance}.` : ''
+  } ${QUIZ_CLOSING}`;
 }
 
 function formatMessages(chatEntries, charlaEntries) {
@@ -55,7 +57,7 @@ function formatMessages(chatEntries, charlaEntries) {
   return mensajes.filter((message) => message.text);
 }
 
-export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } = {}) {
+export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, studyTopic = null } = {}) {
   const providerRef = useRef(null);
   if (!providerRef.current) {
     providerRef.current = createAIProvider();
@@ -90,7 +92,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
 
   useEffect(() => {
     const syncHistory = (event) => {
-      if (event.key !== null && event.key !== STORAGE_KEYS.CHAT_HISTORY) return;
+      if (event.key !== null && event.key !== STORAGE_KEYS.CHAT_HISTORY && !event.key?.endsWith(`:${STORAGE_KEYS.CHAT_HISTORY}`)) return;
       const stored = readJSON(STORAGE_KEYS.CHAT_HISTORY, []);
       setHistory(Array.isArray(stored) ? stored : []);
     };
@@ -102,13 +104,13 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
     const abiertas = quizBank.filter(
       (question) =>
         question.tipo === 'abierta' &&
-        temaMatchesSubtemas(question.tema, classConfig?.subtemas),
+        temaMatchesSubtemas(question.tema, classConfig?.subtemas) && (!studyTopic || question.tema === studyTopic),
     );
     const reales = (flashcards ?? []).filter((card) =>
-      temaMatchesSubtemas(card.topic, classConfig?.subtemas),
+      temaMatchesSubtemas(card.topic, classConfig?.subtemas) && (!studyTopic || card.topic === studyTopic),
     );
     return new Set([...abiertas.map((question) => question.id), ...reales.map((card) => card.id)]).size;
-  }, [flashcards, classConfig]);
+  }, [flashcards, classConfig, studyTopic]);
 
   const maxAvailable = Math.min(
     QUIZ_MAX_QUANTITY,
@@ -119,7 +121,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
   const buildRepasoDeck = useCallback(
     (qty) => {
       const real = (flashcards ?? [])
-        .filter((card) => temaMatchesSubtemas(card.topic, classConfig?.subtemas))
+        .filter((card) => temaMatchesSubtemas(card.topic, classConfig?.subtemas) && (!studyTopic || card.topic === studyTopic))
         .map((card) => ({
           id: card.id,
           tema: card.topic,
@@ -132,7 +134,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
         .filter(
           (question) =>
             question.tipo === 'abierta' &&
-            temaMatchesSubtemas(question.tema, classConfig?.subtemas),
+            temaMatchesSubtemas(question.tema, classConfig?.subtemas) && (!studyTopic || question.tema === studyTopic),
         )
         .map((question) => ({
           id: question.id,
@@ -146,7 +148,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
       const unique = [...new Map([...real, ...teoricas].map((card) => [card.id, card])).values()];
       return shuffle(unique).slice(0, clamped);
     },
-    [flashcards, classConfig, maxAvailable],
+    [flashcards, classConfig, maxAvailable, studyTopic],
   );
 
   const chooseQuantity = useCallback(
@@ -190,7 +192,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
 
   const startQuiz = useCallback(() => {
     const filteredBank = quizBank.filter((question) =>
-      temaMatchesSubtemas(question.tema, classConfig?.subtemas),
+      temaMatchesSubtemas(question.tema, classConfig?.subtemas) && (!studyTopic || question.tema === studyTopic),
     );
     const quizQuestions = buildQuiz(filteredBank, quantity);
     if (!quizQuestions.length) return;
@@ -209,7 +211,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
     setJustificationText('');
     setStep('quiz');
     onMoveRef.current?.();
-  }, [quantity, classConfig]);
+  }, [quantity, classConfig, studyTopic]);
 
   useEffect(() => {
     if (step === 'repaso' && deck.length === 0 && consolidatedIds.size > 0) {

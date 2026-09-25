@@ -6,7 +6,7 @@ import {
   range,
   timeOfFlight,
 } from '../physics/projectileMotion.js';
-import exercisesData from '../data/exercises.json';
+import { exercises as exercisesData } from '../data/catalogs.js';
 import { generateGuaraniaPdf } from './PrintableSheet.jsx';
 
 export default function TeacherProjector({ attempts = 0, xp = 0 }) {

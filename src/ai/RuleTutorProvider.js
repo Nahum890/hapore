@@ -1,8 +1,5 @@
-import tutorData from '../data/tutor_jopara.json' with { type: 'json' };
-import errorsData from '../data/errors.json' with { type: 'json' };
-import exercises from '../data/exercises.json' with { type: 'json' };
-import quizBank from './quizBank.json' with { type: 'json' };
-import { buildQuizFeedback, evaluateQuizContext, findBestMatch } from './quizEngine.js';
+import { errors as errorsData, exercises, quizBank, tutorJopara as tutorData } from '../data/catalogs.js';
+import { buildQuizFeedback, evaluateQuizContext, findBestMatch, normalizeText } from './quizEngine.js';
 import { sanitizeMarkup } from '../utils/validation.js';
 
 export const HINT_LEVELS_MAX = 5;
@@ -38,13 +35,22 @@ export default class RuleTutorProvider {
       return this.result(buildQuizFeedback({ ...context, esCorrecta: verdict.correct }), verdict);
     }
     if (context.tipo === 'charla_libre') {
+      const question = normalizeText(context.message);
+      const offlineTopic = /\b(haku|calor|temperatura|terere|mate)\b/.test(question) ? 'Termodinámica'
+        : /\b(luz|tesape|espejo|pajita|refraccion)\b/.test(question) ? 'Óptica' : null;
+      const offlineAnswer = offlineTopic && this.data.topicSupport?.find(item => item.tema === offlineTopic);
+      if (offlineAnswer) return this.result(offlineAnswer.respuesta);
       const match = findBestMatch(context.message, this.bank);
       if (match) return this.result([match.entry.respuesta || match.entry.explicacion, match.entry.respuestaJopara || match.entry.explicacionJopara].filter(Boolean).join(' '));
       const concept = findBestMatch(context.message, this.data.topicSupport ?? []);
-      return this.result(concept?.entry.respuesta || 'Puedo ayudarte con movimiento parabólico, cinemática, vectores y la ley de Hooke. Probá con una pregunta sobre uno de esos temas.');
+      return this.result(concept?.entry.respuesta || 'Puedo ayudarte con termodinámica y óptica. También hay ejercicios complementarios de movimiento y vectores. Probá con una pregunta sobre calor, temperatura, espejos o luz.');
     }
     if (context.type === 'welcome') return this.result(this.choose('welcome', this.data.greetings));
-    if (context.type === 'section') return this.result(this.choose('section:' + context.section, this.data.sectionGreetings?.[context.section] ?? this.data.greetings));
+    if (context.type === 'section') {
+      if (context.section === 'simulador' && context.exerciseId) return this.result(`Ahora practicamos ${context.topic ?? 'Física'}. Escribí tu respuesta y comprobala con la escena de este ejercicio.`);
+      if (context.section === 'aula') return this.result(context.role === 'maestro' ? 'En Aula docente elegí los temas de Física de 3.º y compartí el código con tus estudiantes.' : 'En Mi clase ingresá el código que te dio tu docente para practicar los mismos temas.');
+      return this.result(this.choose('section:' + context.section, this.data.sectionGreetings?.[context.section] ?? this.data.greetings));
+    }
 
     const error = this.errors.find(item => context.errorId ? item.id === context.errorId : item.expectedConcept === context.expectedConcept);
     const entry = this.data.errors?.find(item => item.errorId === error?.id);
