@@ -1,6 +1,7 @@
 [
   {
     "id": "err-01",
+    "key": "confunde_velocidades",
     "name": "Confundir velocidad inicial con velocidad final",
     "description": "Usar v0 cuando el ejercicio pide la velocidad en otro momento del vuelo (o al revés).",
     "example": "En la altura máxima la velocidad vertical es 0, no la vy del lanzamiento.",
@@ -8,6 +9,7 @@
   },
   {
     "id": "err-02",
+    "key": "confunde_componentes",
     "name": "Confundir componentes horizontal y vertical",
     "description": "Usar seno para vx o coseno para vy (o mezclarlas al interpretar el resultado).",
     "example": "vx = v0 * cos(ángulo) y v0y = v0 * sen(ángulo): el coseno va con la horizontal.",
@@ -15,6 +17,7 @@
   },
   {
     "id": "err-03",
+    "key": "mezcla_unidades",
     "name": "Olvidar convertir unidades",
     "description": "Mezclar km/h con m/s, o metros con kilómetros, antes de calcular.",
     "example": "72 km/h = 20 m/s: primero convertí, después aplicá las fórmulas.",
@@ -22,9 +25,50 @@
   },
   {
     "id": "err-04",
+    "key": "confunde_altura_alcance",
     "name": "Confundir altura máxima con alcance",
     "description": "Calcular la altura (vertical) cuando el ejercicio pide el alcance (horizontal), o al revés.",
     "example": "La altura máxima se mide en metros hacia arriba; el alcance, en metros horizontales.",
     "expectedConcept": "altura-maxima"
+  },
+  {
+    "id": "err-mec-03",
+    "key": "olvida_gravedad",
+    "name": "Omitir el efecto de la gravedad",
+    "description": "Calcular la posición vertical como si fuera velocidad constante sin restar el término -0.5*g*t².",
+    "example": "y(t) = y0 + vy*t - 0.5*g*t². La gravedad siempre tira hacia abajo con g = 9,8 m/s².",
+    "expectedConcept": "tiempo-de-vuelo"
+  },
+  {
+    "id": "err-mec-05",
+    "key": "angulo_desfasado",
+    "name": "Desajuste de ángulo de lanzamiento",
+    "description": "Elegir un ángulo demasiado rasante (<25°) o excesivo (>70°) que acorta drásticamente el alcance.",
+    "example": "Para alcanzar 40 m con 20 m/s, el ángulo óptimo es 45°. A 20° o 70° el dron cae antes.",
+    "expectedConcept": "alcance"
+  },
+  {
+    "id": "err-cinematica",
+    "key": "cinematica-concepto",
+    "name": "Revisar Cinemática",
+    "description": "Confundir la distancia recorrida con el desplazamiento o invertir distancia y tiempo.",
+    "example": "120 / 10 = 12 m/s.",
+    "expectedConcept": "rapidez-media"
+  },
+  {
+    "id": "err-vectores",
+    "key": "vectores-concepto",
+    "name": "Revisar Vectores",
+    "description": "Sumar las magnitudes sin considerar la dirección y el sentido de cada componente.",
+    "example": "8 + 2 = 10 m/s hacia el este.",
+    "expectedConcept": "vector-resultante"
+  },
+  {
+    "id": "err-hooke",
+    "key": "hooke-concepto",
+    "name": "Revisar Ley de Hooke",
+    "description": "Usar centímetros como si fueran metros o aplicar la relación fuera del límite elástico.",
+    "example": "200 * 0,05 = 10 N.",
+    "expectedConcept": "ley-hooke"
   }
 ]

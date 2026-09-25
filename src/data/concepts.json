@@ -2,31 +2,61 @@
   {
     "id": "movimiento-parabolico",
     "name": "Movimiento Parabólico",
-    "definition": "Movimiento que combina velocidad horizontal constante con aceleración vertical (gravedad). Su trayectoria es una parábola."
+    "definition": "Movimiento bidimensional que resulta de componer un avance horizontal uniforme (MRU) con un movimiento vertical bajo aceleración gravitatoria constante (MRUV). Su trayectoria es una parábola simétrica.",
+    "formula": "y(x) = x * tan(ángulo) - (g / (2 * v0² * cos²(ángulo))) * x²"
   },
   {
     "id": "componente-horizontal",
     "name": "Componente horizontal (vx)",
-    "definition": "Parte de la velocidad que apunta en dirección horizontal. No cambia durante el vuelo: vx = v0 * cos(ángulo)."
+    "definition": "Proyección del vector velocidad inicial sobre el eje X. Al no existir aceleración horizontal (despreciando el rozamiento del aire), permanece constante durante todo el recorrido.",
+    "formula": "vx = v0 * cos(ángulo)"
   },
   {
     "id": "componente-vertical",
     "name": "Componente vertical (vy)",
-    "definition": "Parte de la velocidad que apunta hacia arriba o abajo. Disminuye al subir por efecto de la gravedad: vy = v0y - g * t, con v0y = v0 * sen(ángulo)."
-  },
-  {
-    "id": "altura-maxima",
-    "name": "Altura máxima",
-    "definition": "Punto más alto de la trayectoria. Ahí la velocidad vertical vale cero: h = (v0² * sen²(ángulo)) / (2 * g)."
-  },
-  {
-    "id": "alcance",
-    "name": "Alcance",
-    "definition": "Distancia horizontal recorrida desde el lanzamiento hasta la caída: R = (v0² * sen(2 * ángulo)) / g."
+    "definition": "Proyección del vector velocidad sobre el eje Y. Disminuye de forma continua durante la fase de ascenso a razón de 9,8 m/s cada segundo debido a la gravedad terrestre, anulándose en el punto más alto.",
+    "formula": "vy(t) = v0 * sen(ángulo) - g * t"
   },
   {
     "id": "tiempo-de-vuelo",
-    "name": "Tiempo de vuelo",
-    "definition": "Tiempo total que el proyectil pasa en el aire: T = (2 * v0y) / g, con v0y = v0 * sen(ángulo)."
+    "name": "Tiempo de vuelo (T)",
+    "definition": "Duración temporal total desde el instante de despegue hasta que el proyectil regresa al mismo nivel horizontal de lanzamiento.",
+    "formula": "T = (2 * v0 * sen(ángulo)) / g"
+  },
+  {
+    "id": "altura-maxima",
+    "name": "Altura máxima (Hmax)",
+    "definition": "Cota vertical máxima alcanzada por el proyectil sobre el punto de origen, ocurrida en el instante t = T / 2 cuando vy = 0.",
+    "formula": "Hmax = (v0² * sen²(ángulo)) / (2 * g)"
+  },
+  {
+    "id": "alcance",
+    "name": "Alcance horizontal (R)",
+    "definition": "Distancia total recorrida a lo largo del suelo horizontal entre el punto de despegue y el punto de impacto final.",
+    "formula": "R = (v0² * sen(2 * ángulo)) / g"
+  },
+  {
+    "id": "angulo-optimo",
+    "name": "Ángulo de alcance máximo",
+    "definition": "En terreno plano y sin resistencia del aire, el ángulo de 45° maximiza el factor sen(2 * ángulo) = sen(90°) = 1, ofreciendo la mayor distancia posible para una velocidad dada.",
+    "formula": "ángulo_max = 45°"
+  },
+  {
+    "id": "rapidez-media",
+    "name": "Rapidez media",
+    "definition": "La rapidez media relaciona la distancia recorrida con el tiempo empleado. Se expresa en m/s cuando la distancia está en metros y el tiempo en segundos.",
+    "formula": "rapidez media = distancia / tiempo"
+  },
+  {
+    "id": "vector-resultante",
+    "name": "Vector resultante",
+    "definition": "Un vector tiene magnitud, dirección y sentido. La resultante se obtiene sumando sus componentes en cada eje; los sentidos opuestos llevan signos distintos.",
+    "formula": "Vx resultante = Vx1 + Vx2"
+  },
+  {
+    "id": "ley-hooke",
+    "name": "Ley de Hooke",
+    "definition": "Dentro del límite elástico, la magnitud de la fuerza de un resorte es proporcional a su deformación. La fuerza restauradora apunta en sentido opuesto a esa deformación.",
+    "formula": "magnitud de la fuerza = rigidez * deformación"
   }
 ]

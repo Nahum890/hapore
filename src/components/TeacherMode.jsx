@@ -1,161 +1,49 @@
-import { useState } from 'react';
-import { encodeClassConfig, decodeClassConfig } from '../utils/classCode.js';
-
-const SUBTEMAS = [
-  { id: 'parabolico', label: 'Parabólico' },
-  { id: 'cinematica', label: 'Cinemática' },
-  { id: 'vectores', label: 'Vectores' },
-  { id: 'hooke', label: 'Hooke' },
-];
-
-export default function TeacherMode({ attempts, confidence, classConfig, onJoinClass }) {
-  const joined = Boolean(classConfig);
-
-  return (
-    <section className="card teacher-mode" aria-label="Modo docente y clase">
-      <h2>Modo Aula / Docente</h2>
-      <p className="teacher-note">
-        {joined
-          ? 'Clase activa en este dispositivo: la configuración sincronizó sin conexión.'
-          : 'Generá un código de clase para configurar la sesión, o unite al aula de tu profesor. Todo funciona en modo avión.'}
-      </p>
-
-      <ul className="teacher-stats">
-        <li>Intentos registrados: {attempts}</li>
-        <li>XP acumulada: {Number(confidence) || 0}</li>
-      </ul>
-
-      {joined ? (
-        <div className="teacher-block">
-          <p className="quiz-justification-label">Clase activa</p>
-          <ul className="teacher-stats">
-            <li>Flashcards por repaso: {classConfig.flashcards}</li>
-            <li>Subtemas habilitados: {classConfig.subtemas.join(', ')}</li>
-            <li>Ejercicios prácticos: {classConfig.ejercicios}</li>
-          </ul>
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => onJoinClass?.(null)}
-          >
-            Salir de la clase
-          </button>
-        </div>
-      ) : (
-        <TeacherControls onJoinClass={onJoinClass} />
-      )}
-    </section>
-  );
+import { lazy, Suspense, useMemo, useState } from 'react';
+const TeacherProjector = lazy(() => import('./TeacherProjector.jsx'));
+import { encodeClassConfig, decodeClassConfig, temaMatchesSubtemas } from '../utils/classCode.js';
+import exercises from '../data/exercises.json';
+import flashcardsData from '../data/flashcards.json';
+import quizBank from '../ai/quizBank.json';
+const SUBTEMAS = [{id:'parabolico',label:'Movimiento parabólico'},{id:'cinematica',label:'Cinemática'},{id:'vectores',label:'Vectores'},{id:'hooke',label:'Ley de Hooke'}];
+export function validClassCode(text) {
+  const code = String(text ?? '').trim().toUpperCase();
+  const config = decodeClassConfig(code);
+  return config && encodeClassConfig(config) === code ? config : null;
 }
-
-function TeacherControls({ onJoinClass }) {
-  const [flashcards, setFlashcards] = useState(10);
-  const [subtemas, setSubtemas] = useState(SUBTEMAS.map((subtema) => subtema.id));
-  const [ejercicios, setEjercicios] = useState(3);
-  const [classCode, setClassCode] = useState('');
-  const [joinCode, setJoinCode] = useState('');
-  const [error, setError] = useState('');
-
-  const toggleSubtema = (id) => {
-    setSubtemas((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
-    );
-  };
-
-  const handleGenerate = () => {
-    const code = encodeClassConfig({
-      flashcards,
-      subtemas,
-      ejercicios,
-    });
-    setClassCode(code);
-    setError('');
-  };
-
-  const handleJoin = () => {
-    const config = decodeClassConfig(joinCode.trim());
-    if (!config) {
-      setError('Código inválido: revisá el formato (ejemplo: GP08F12).');
-      return;
-    }
-    setError('');
-    onJoinClass?.(config);
-  };
-
-  return (
-    <>
-      <div className="teacher-block">
-        <p className="quiz-justification-label">Configuración del docente</p>
-        <label className="teacher-field">
-          <span>Flashcards por repaso (5 a 20):</span>
-          <input
-            className="quiz-input"
-            type="number"
-            min={5}
-            max={20}
-            value={flashcards}
-            onChange={(event) =>
-              setFlashcards(Math.min(20, Math.max(5, Number(event.target.value) || 5)))
-            }
-          />
-        </label>
-        <div className="teacher-subtemas">
-          {SUBTEMAS.map((subtema) => (
-            <label key={subtema.id} className="teacher-subtema">
-              <input
-                type="checkbox"
-                checked={subtemas.includes(subtema.id)}
-                onChange={() => toggleSubtema(subtema.id)}
-              />
-              {subtema.label}
-            </label>
-          ))}
-        </div>
-        <label className="teacher-field">
-          <span>Cantidad de ejercicios prácticos (1 a 10):</span>
-          <input
-            className="quiz-input"
-            type="number"
-            min={1}
-            max={10}
-            value={ejercicios}
-            onChange={(event) =>
-              setEjercicios(Math.min(10, Math.max(1, Number(event.target.value) || 1)))
-            }
-          />
-        </label>
-        <button type="button" className="btn btn-primary" onClick={handleGenerate}>
-          Generar Código de Clase
-        </button>
-        {classCode && (
-          <p className="class-code-display">
-            Código para compartir con tus estudiantes: <strong>{classCode}</strong>
-          </p>
-        )}
-      </div>
-
-      <div className="teacher-block">
-        <p className="quiz-justification-label">Unirse con Código</p>
-        <div className="quiz-actions">
-          <input
-            className="quiz-input"
-            type="text"
-            autoComplete="off"
-            placeholder="Ej: GP08F12"
-            value={joinCode}
-            onChange={(event) => setJoinCode(event.target.value.toUpperCase())}
-          />
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={handleJoin}
-            disabled={!joinCode.trim()}
-          >
-            Unirse
-          </button>
-        </div>
-        {error && <p className="teacher-error">{error}</p>}
-      </div>
-    </>
-  );
+function ConfigSummary({ config, applied = false }) {
+  const cards = flashcardsData.filter(item => temaMatchesSubtemas(item.topic, config.subtemas)).length + quizBank.filter(item => item.tipo === 'abierta' && temaMatchesSubtemas(item.tema, config.subtemas)).length;
+  const available = exercises.filter(item => temaMatchesSubtemas(item.topic, config.subtemas)).length;
+  return <div className="class-summary" role="status" aria-live="polite"><h3>{applied ? 'Configuración aplicada' : 'Vista previa de la clase'}</h3><p>{SUBTEMAS.filter(item=>config.subtemas.includes(item.id)).map(item=>item.label).join(' · ') || 'Elegí al menos un tema.'}</p><dl><div><dt>Tarjetas de repaso</dt><dd>{Math.min(config.flashcards || 0,cards)} de {cards} disponibles</dd></div><div><dt>Ejercicios prácticos</dt><dd>{Math.min(config.ejercicios || 0,available)} de {available} disponibles</dd></div></dl>{(config.flashcards > cards || config.ejercicios > available) && <p className="field-help">Se usará el contenido disponible de los temas elegidos.</p>}</div>;
+}
+export default function TeacherMode({ attempts = 0, confidence = 0, classConfig, onJoinClass }) {
+  const [projectorOpen, setProjectorOpen] = useState(false);
+  return <>
+    <section className="card teacher-mode" aria-label="Modo docente y clase"><h2>Tu aula, también sin conexión</h2><p className="teacher-note">Compartí un código para que cada estudiante aplique la misma configuración en su dispositivo.</p><div className="teacher-metrics"><span><strong>{attempts}</strong> intentos</span><span><strong>{Number(confidence)||0}</strong> XP</span></div>
+      {classConfig ? <div className="teacher-block"><ConfigSummary config={classConfig} applied /><p className="class-code-display">Código de clase: <strong>{encodeClassConfig(classConfig)}</strong></p><button type="button" className="btn btn-secondary" onClick={()=>onJoinClass?.(null)}>Salir de la clase</button></div> : <TeacherControls onJoinClass={onJoinClass} />}
+    </section>
+    <details className="projector-details" onToggle={event => setProjectorOpen(event.currentTarget.open)}><summary>Proyector y comparación de trayectorias</summary>{projectorOpen && <Suspense fallback={<p className="teacher-note">Cargando proyector…</p>}><TeacherProjector attempts={attempts} xp={confidence} /></Suspense>}</details>
+  </>;
+}
+function TeacherControls({onJoinClass}) {
+  const [flashcards,setFlashcards]=useState(10), [ejercicios,setEjercicios]=useState(3), [subtemas,setSubtemas]=useState(SUBTEMAS.map(item=>item.id));
+  const [generated,setGenerated]=useState(false), [joinCode,setJoinCode]=useState(''), [error,setError]=useState(''), [copied,setCopied]=useState(false);
+  const config=useMemo(()=>({flashcards:Number(flashcards),ejercicios:Number(ejercicios),subtemas}),[flashcards,ejercicios,subtemas]);
+  const valid=Number.isInteger(config.flashcards)&&config.flashcards>=5&&config.flashcards<=20&&Number.isInteger(config.ejercicios)&&config.ejercicios>=1&&config.ejercicios<=10&&subtemas.length>0;
+  const code=valid?encodeClassConfig(config):'';
+  const toggle=id=>{setCopied(false);setSubtemas(previous=>previous.includes(id)?previous.filter(item=>item!==id):[...previous,id]);};
+  const join=event=>{event.preventDefault();const decoded=validClassCode(joinCode);if(!decoded){setError('Revisá el código: por ejemplo GP10P03.');return;}setError('');onJoinClass?.(decoded);};
+  const copy=async()=>{try{await navigator.clipboard.writeText(code);setCopied(true);}catch{setError('No se pudo copiar. Podés seleccionar el código y copiarlo.');}};
+  return <div className="teacher-stack">
+    <form className="teacher-block" onSubmit={event=>{event.preventDefault();if(valid){setGenerated(true);setCopied(false);}}}>
+      <h3>Preparar una clase</h3>
+      <label className="teacher-field">Tarjetas por repaso (5 a 20)<input className="quiz-input" type="number" min="5" max="20" step="1" required value={flashcards} onChange={event=>{setFlashcards(event.target.value);setCopied(false);}} /></label>
+      <fieldset className="teacher-subtemas"><legend>Temas para practicar</legend>{SUBTEMAS.map(item=><label key={item.id} className="teacher-subtema"><input type="checkbox" checked={subtemas.includes(item.id)} onChange={()=>toggle(item.id)} />{item.label}</label>)}</fieldset>
+      <label className="teacher-field">Ejercicios prácticos (1 a 10)<input className="quiz-input" type="number" min="1" max="10" step="1" required value={ejercicios} onChange={event=>{setEjercicios(event.target.value);setCopied(false);}} /></label>
+      <ConfigSummary config={config} />
+      {!subtemas.length && <p className="field-error">Seleccioná al menos un tema.</p>}
+      <button type="submit" className="btn btn-primary" disabled={!valid}>Generar código de clase</button>
+      {generated&&valid&&<><p className="class-code-display">Código para compartir: <strong>{code}</strong></p><div className="class-actions"><button type="button" className="btn btn-secondary" onClick={copy}>{copied?'Copiado':'Copiar código'}</button><button type="button" className="btn btn-primary" onClick={()=>onJoinClass?.(config)}>Aplicar en este dispositivo</button></div></>}
+    </form>
+    <form className="teacher-block" onSubmit={join}><h3>Unirse a una clase</h3><label className="teacher-field" htmlFor="join-class-code">Código de tu docente</label><input id="join-class-code" className="quiz-input" type="text" autoComplete="off" autoCapitalize="characters" spellCheck={false} maxLength={7} placeholder="Ej: GP10P03" value={joinCode} onChange={event=>{setJoinCode(event.target.value.toUpperCase());setError('');}} /><button type="submit" className="btn btn-primary" disabled={!joinCode.trim()}>Unirse</button>{error&&<p className="teacher-error" role="alert">{error}</p>}</form>
+  </div>;
 }

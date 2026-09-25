@@ -5,7 +5,9 @@
     "frente_es": "¿Qué es el Movimiento Parabólico?",
     "frente_jopara": "¿Mba'épa pe Movimiento Parabólico?",
     "dorso_concepto": "La combinación de un movimiento horizontal (velocidad constante) y uno vertical (acelerado por la gravedad). Su trayectoria es una parábola.",
-    "formula": "x = v0x * t ; y = v0y * t - 0,5 * g * t²"
+    "formula": "x = v0x * t ; y = v0y * t - 0,5 * g * t²",
+    "front": "¿Qué es el Movimiento Parabólico?\n¿Mba'épa pe Movimiento Parabólico?",
+    "back": "La combinación de un movimiento horizontal (velocidad constante) y uno vertical (acelerado por la gravedad). Su trayectoria es una parábola."
   },
   {
     "id": "fc-02",
@@ -13,7 +15,9 @@
     "frente_es": "¿La componente horizontal (vx) cambia durante el vuelo?",
     "frente_jopara": "¿Oho pa'e la velocidad horizontal (vx) pe vuelo pukukuepe?",
     "dorso_concepto": "No. Si ignoramos el aire, vx permanece constante; solo cambia la velocidad vertical por efecto de la gravedad.",
-    "formula": "vx = v0 * cos(ángulo)"
+    "formula": "vx = v0 * cos(ángulo)",
+    "front": "¿La componente horizontal (vx) cambia durante el vuelo?\n¿Oho pa'e la velocidad horizontal (vx) pe vuelo pukukuepe?",
+    "back": "No. Si ignoramos el aire, vx permanece constante; solo cambia la velocidad vertical por efecto de la gravedad."
   },
   {
     "id": "fc-03",
@@ -21,7 +25,9 @@
     "frente_es": "¿En qué punto la velocidad vertical vale cero?",
     "frente_jopara": "¿Moõ pe velocidad vertical opytu'pa cero?",
     "dorso_concepto": "En la altura máxima. Ahí la velocidad vertical vale cero, pero la horizontal sigue igual: el proyectil sigue avanzando.",
-    "formula": "v0y = v0 * sen(ángulo) ; en la altura máxima, la velocidad vertical = 0"
+    "formula": "v0y = v0 * sen(ángulo) ; en la altura máxima, la velocidad vertical = 0",
+    "front": "¿En qué punto la velocidad vertical vale cero?\n¿Moõ pe velocidad vertical opytu'pa cero?",
+    "back": "En la altura máxima. Ahí la velocidad vertical vale cero, pero la horizontal sigue igual: el proyectil sigue avanzando."
   },
   {
     "id": "fc-04",
@@ -29,6 +35,230 @@
     "frente_es": "¿Qué fórmula da la altura máxima?",
     "frente_jopara": "¿Mba'e fórmula ome pe altura máxima?",
     "dorso_concepto": "La altura máxima depende de la componente vertical y de la gravedad. Con v0 = 19,6 m/s y ángulo = 45°, la altura máxima es 9,8 m.",
-    "formula": "h = (v0² * sen²(ángulo)) / (2 * g)"
+    "formula": "h = (v0² * sen²(ángulo)) / (2 * g)",
+    "front": "¿Qué fórmula da la altura máxima?\n¿Mba'e fórmula ome pe altura máxima?",
+    "back": "La altura máxima depende de la componente vertical y de la gravedad. Con v0 = 19,6 m/s y ángulo = 45°, la altura máxima es 9,8 m."
+  },
+  {
+    "id": "fc-mec-01",
+    "subtema": "movimiento_parabolico",
+    "topic": "Movimiento Parabólico",
+    "front": "¿Qué representa la componente horizontal (vx)?\n¿Mba'épa he'ise pe componente horizontal?",
+    "back": "Es la parte de la velocidad que empuja el dron hacia adelante. Permanece constante durante todo el vuelo porque no hay aceleración en X.\nFórmula: vx = v0 * cos(ángulo)",
+    "formula": "vx = v0 * cos(ángulo)",
+    "frente_es": "¿Qué representa la componente horizontal (vx)?",
+    "frente_jopara": "¿Mba'épa he'ise pe componente horizontal?",
+    "dorso_concepto": "Es la parte de la velocidad que empuja el dron hacia adelante. Permanece constante en todo el vuelo.",
+    "subtopic": "Componente Horizontal"
+  },
+  {
+    "id": "fc-mec-02",
+    "subtema": "movimiento_parabolico",
+    "topic": "Movimiento Parabólico",
+    "front": "¿Qué representa la componente vertical (vy)?\n¿Mba'épa ojapo pe componente vertical?",
+    "back": "Es la parte de la velocidad que eleva el dron. Disminuye segundo a segundo por acción de la gravedad hasta hacerse cero en la cúspide.\nFórmula: vy(t) = v0 * sen(ángulo) - g * t",
+    "formula": "vy = v0 * sen(ángulo)",
+    "frente_es": "¿Qué representa la componente vertical (vy)?",
+    "frente_jopara": "¿Mba'épa ojapo pe componente vertical?",
+    "dorso_concepto": "Es la velocidad que eleva el dron contra la gravedad.",
+    "subtopic": "Componente Vertical"
+  },
+  {
+    "id": "fc-mec-03",
+    "subtema": "movimiento_parabolico",
+    "topic": "Movimiento Parabólico",
+    "front": "¿Por qué el dron cae inexorablemente al suelo?\n¿Mba'érepa pe dron ho'a jey yvýpe?",
+    "back": "La aceleración gravitatoria (g ≈ 9,8 m/s²) tira continuamente hacia abajo, curvando la trayectoria en forma de parábola.\nFórmula horaria: y(t) = y0 + vy*t - ½*g*t²",
+    "formula": "y(t) = y0 + vy*t - 0.5*g*t²",
+    "frente_es": "¿Por qué el dron cae al suelo?",
+    "frente_jopara": "¿Mba'érepa pe dron ho'a jey yvýpe?",
+    "dorso_concepto": "La gravedad tira hacia abajo constantemente con aceleración g.",
+    "subtopic": "Efecto de la Gravedad"
+  },
+  {
+    "id": "fc-mec-04",
+    "subtema": "movimiento_parabolico",
+    "topic": "Movimiento Parabólico",
+    "front": "¿Qué ocurre si variamos el ángulo de lanzamiento (ángulo)?\n¿Mba'épa oiko ñamoambuévo pe ángulo?",
+    "back": "Cambia cómo se reparte la velocidad inicial entre avanzar (vx) y subir (vy). A 45° se logra el alcance máximo en suelo horizontal.\nRegla: 45° = Alcance Máximo",
+    "formula": "R = (v0² * sen(2 * ángulo)) / g",
+    "frente_es": "¿Qué ocurre si variamos el ángulo ángulo?",
+    "frente_jopara": "¿Mba'épa oiko ñamoambuévo pe ángulo?",
+    "dorso_concepto": "Cambia la proporción entre avance y elevación. 45° da el alcance máximo.",
+    "subtopic": "Variación del Ángulo"
+  },
+  {
+    "id": "fc-mec-05",
+    "subtema": "movimiento_parabolico",
+    "topic": "Movimiento Parabólico",
+    "front": "¿Por qué los lanzamientos a 30° y 60° alcanzan la misma distancia?\n¿Mba'érepa 30° ha 60° og̃uahẽ peteĩcha mombyry?",
+    "back": "Porque son complementarios (suman 90°) y el alcance depende de sen(2 * ángulo). Como sen(2*30°) = sen(60°) y sen(2*60°) = sen(120°), ambos valores valen √3/2 ≈ 0,866.\nIdentidad: sen(2*30°) = sen(2*60°)",
+    "formula": "sen(60°) = sen(120°)",
+    "frente_es": "¿Por qué 30° y 60° tienen igual alcance?",
+    "frente_jopara": "¿Mba'érepa 30° ha 60° og̃uahẽ peteĩcha mombyry?",
+    "dorso_concepto": "Son ángulos complementarios con el mismo valor de sen(2 * ángulo).",
+    "subtopic": "Ángulos Complementarios"
+  },
+  {
+    "id": "fc-mec-06",
+    "subtema": "movimiento_parabolico",
+    "topic": "Movimiento Parabólico",
+    "front": "¿Qué condición física define la altura máxima (Hmax)?\n¿Mba'épa oiko pe dron yvate og̃uahẽvo?",
+    "back": "En el punto más alto, la velocidad vertical se anula por un instante (vy = 0). El dron sigue en movimiento únicamente gracias a su velocidad horizontal vx.\nFórmula: Hmax = (v0² * sen²(ángulo)) / (2 * g)",
+    "formula": "Hmax = (v0² * sen²(ángulo)) / (2 * g)",
+    "frente_es": "¿Qué define la altura máxima?",
+    "frente_jopara": "¿Mba'épa oiko pe dron yvate og̃uahẽvo?",
+    "dorso_concepto": "En la cúspide vy = 0 m/s, pero vx sigue empujando hacia adelante.",
+    "subtopic": "Altura Máxima"
+  },
+  {
+    "id": "fc-cinematica-1",
+    "topic": "Cinemática",
+    "front": "¿Cómo se calcula la rapidez media?",
+    "back": "Dividí la distancia total por el tiempo total.",
+    "formula": "rapidez media = distancia / tiempo",
+    "frente_es": "¿Cómo se calcula la rapidez media?",
+    "frente_jopara": "",
+    "dorso_concepto": "Dividí la distancia total por el tiempo total."
+  },
+  {
+    "id": "fc-cinematica-2",
+    "topic": "Cinemática",
+    "front": "¿Qué caracteriza al movimiento rectilíneo uniforme?",
+    "back": "La trayectoria es recta y la velocidad permanece constante.",
+    "formula": "distancia = rapidez * tiempo",
+    "frente_es": "¿Qué caracteriza al movimiento rectilíneo uniforme?",
+    "frente_jopara": "",
+    "dorso_concepto": "La trayectoria es recta y la velocidad permanece constante."
+  },
+  {
+    "id": "fc-cinematica-3",
+    "topic": "Cinemática",
+    "front": "¿Cómo se calcula el tiempo en un movimiento uniforme?",
+    "back": "Dividí la distancia recorrida por la rapidez constante.",
+    "formula": "tiempo = distancia / rapidez",
+    "frente_es": "¿Cómo se calcula el tiempo en un movimiento uniforme?",
+    "frente_jopara": "",
+    "dorso_concepto": "Dividí la distancia recorrida por la rapidez constante."
+  },
+  {
+    "id": "fc-cinematica-4",
+    "topic": "Cinemática",
+    "front": "¿Son iguales distancia y desplazamiento?",
+    "back": "La distancia mide el camino recorrido. El desplazamiento une el punto inicial con el final y tiene dirección.",
+    "formula": "velocidad media = desplazamiento / tiempo",
+    "frente_es": "¿Son iguales distancia y desplazamiento?",
+    "frente_jopara": "",
+    "dorso_concepto": "La distancia mide el camino recorrido. El desplazamiento une el punto inicial con el final y tiene dirección."
+  },
+  {
+    "id": "fc-cinematica-5",
+    "topic": "Cinemática",
+    "front": "¿Qué mide la aceleración media?",
+    "back": "El cambio de velocidad por cada unidad de tiempo. Su unidad es m/s².",
+    "formula": "aceleración media = (velocidad final - velocidad inicial) / tiempo",
+    "frente_es": "¿Qué mide la aceleración media?",
+    "frente_jopara": "",
+    "dorso_concepto": "El cambio de velocidad por cada unidad de tiempo. Su unidad es m/s²."
+  },
+  {
+    "id": "fc-vectores-1",
+    "topic": "Vectores",
+    "front": "¿Qué caracteriza a un vector?",
+    "back": "Tiene magnitud, dirección y sentido.",
+    "formula": "vector = (componente X, componente Y)",
+    "frente_es": "¿Qué caracteriza a un vector?",
+    "frente_jopara": "",
+    "dorso_concepto": "Tiene magnitud, dirección y sentido."
+  },
+  {
+    "id": "fc-vectores-2",
+    "topic": "Vectores",
+    "front": "¿Cómo se suman vectores del mismo eje?",
+    "back": "Se suman sus componentes con signo, según el sentido elegido como positivo.",
+    "formula": "Rx = Ax + Bx",
+    "frente_es": "¿Cómo se suman vectores del mismo eje?",
+    "frente_jopara": "",
+    "dorso_concepto": "Se suman sus componentes con signo, según el sentido elegido como positivo."
+  },
+  {
+    "id": "fc-vectores-3",
+    "topic": "Vectores",
+    "front": "¿Cómo influye un viento a favor?",
+    "back": "Su componente se suma a la del dron para obtener la velocidad respecto del suelo.",
+    "formula": "Vsuelo = Vdron + Vviento",
+    "frente_es": "¿Cómo influye un viento a favor?",
+    "frente_jopara": "",
+    "dorso_concepto": "Su componente se suma a la del dron para obtener la velocidad respecto del suelo."
+  },
+  {
+    "id": "fc-vectores-4",
+    "topic": "Vectores",
+    "front": "¿Cómo se calcula la magnitud de dos componentes perpendiculares?",
+    "back": "Aplicá el teorema de Pitágoras a las componentes.",
+    "formula": "magnitud = raíz de (x² + y²)",
+    "frente_es": "¿Cómo se calcula la magnitud de dos componentes perpendiculares?",
+    "frente_jopara": "",
+    "dorso_concepto": "Aplicá el teorema de Pitágoras a las componentes."
+  },
+  {
+    "id": "fc-vectores-5",
+    "topic": "Vectores",
+    "front": "¿Una magnitud vectorial puede representarse con un solo número?",
+    "back": "En un eje se usa un número con signo; en dos dimensiones hacen falta las componentes o magnitud y dirección.",
+    "formula": "V = (Vx, Vy)",
+    "frente_es": "¿Una magnitud vectorial puede representarse con un solo número?",
+    "frente_jopara": "",
+    "dorso_concepto": "En un eje se usa un número con signo; en dos dimensiones hacen falta las componentes o magnitud y dirección."
+  },
+  {
+    "id": "fc-hooke-1",
+    "topic": "Ley de Hooke",
+    "front": "¿Qué relaciona la ley de Hooke?",
+    "back": "Relaciona la fuerza elástica con la deformación, dentro del límite elástico.",
+    "formula": "magnitud F = k * x",
+    "frente_es": "¿Qué relaciona la ley de Hooke?",
+    "frente_jopara": "",
+    "dorso_concepto": "Relaciona la fuerza elástica con la deformación, dentro del límite elástico."
+  },
+  {
+    "id": "fc-hooke-2",
+    "topic": "Ley de Hooke",
+    "front": "¿Qué representa la constante k?",
+    "back": "La rigidez del resorte. Cuanto mayor es k, más fuerza se necesita para una misma deformación.",
+    "formula": "k = F / x, en N/m",
+    "frente_es": "¿Qué representa la constante k?",
+    "frente_jopara": "",
+    "dorso_concepto": "La rigidez del resorte. Cuanto mayor es k, más fuerza se necesita para una misma deformación."
+  },
+  {
+    "id": "fc-hooke-3",
+    "topic": "Ley de Hooke",
+    "front": "¿En qué unidad se usa la deformación x?",
+    "back": "En metros, si la fuerza se expresa en newtons y k en N/m.",
+    "formula": "1 cm = 0,01 m",
+    "frente_es": "¿En qué unidad se usa la deformación x?",
+    "frente_jopara": "",
+    "dorso_concepto": "En metros, si la fuerza se expresa en newtons y k en N/m."
+  },
+  {
+    "id": "fc-hooke-4",
+    "topic": "Ley de Hooke",
+    "front": "¿Hacia dónde apunta la fuerza restauradora?",
+    "back": "En sentido opuesto a la deformación: intenta devolver el resorte a su posición de equilibrio.",
+    "formula": "F = -k * x",
+    "frente_es": "¿Hacia dónde apunta la fuerza restauradora?",
+    "frente_jopara": "",
+    "dorso_concepto": "En sentido opuesto a la deformación: intenta devolver el resorte a su posición de equilibrio."
+  },
+  {
+    "id": "fc-hooke-5",
+    "topic": "Ley de Hooke",
+    "front": "¿Se cumple la ley de Hooke para cualquier estiramiento?",
+    "back": "No. Solo describe el comportamiento proporcional dentro del límite elástico del resorte.",
+    "formula": "F / x = k, en la región elástica",
+    "frente_es": "¿Se cumple la ley de Hooke para cualquier estiramiento?",
+    "frente_jopara": "",
+    "dorso_concepto": "No. Solo describe el comportamiento proporcional dentro del límite elástico del resorte."
   }
 ]

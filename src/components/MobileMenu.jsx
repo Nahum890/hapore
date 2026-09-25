@@ -1,78 +1,43 @@
-import { useEffect, useRef, useState } from 'react';
-
+import { useEffect, useId, useRef, useState } from 'react';
 const MENU_ITEMS = [
   { id: 'simulador', label: 'Misión / Simulador 2D' },
-  { id: 'tarjetas', label: 'Fichas de Repaso (Flashcards)' },
-  { id: 'chats', label: 'Chats e Historial' },
-  { id: 'aula', label: 'Vista del Docente / Modo Aula' },
+  { id: 'tarjetas', label: 'Fichas de repaso' },
+  { id: 'chats', label: 'Chats e historial' },
+  { id: 'aula', label: 'Aula y docente' },
 ];
-
 export default function MobileMenu({ activeTab, onChange }) {
   const [open, setOpen] = useState(false);
-  const menuRef = useRef(null);
-  const buttonRef = useRef(null);
-
+  const dialogRef = useRef(null), buttonRef = useRef(null);
+  const id = useId();
   useEffect(() => {
     if (!open) return undefined;
-    const handlePointerDown = (event) => {
-      if (menuRef.current?.contains(event.target) || buttonRef.current?.contains(event.target)) {
-        return;
-      }
-      setOpen(false);
-    };
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') setOpen(false);
-    };
-    document.addEventListener('pointerdown', handlePointerDown);
-    document.addEventListener('keydown', handleKeyDown);
+    const dialog = dialogRef.current;
+    const previousOverflow = document.body.style.overflow;
+    dialog.showModal();
+    document.body.style.overflow = 'hidden';
     return () => {
-      document.removeEventListener('pointerdown', handlePointerDown);
-      document.removeEventListener('keydown', handleKeyDown);
+      dialog.close();
+      document.body.style.overflow = previousOverflow;
+      buttonRef.current?.focus();
     };
   }, [open]);
-
-  const handleSelect = (id) => {
-    setOpen(false);
-    onChange?.(id);
-  };
-
+  const close = () => setOpen(false);
   return (
     <>
-      <button
-        ref={buttonRef}
-        type="button"
-        className="hamburger-btn"
-        aria-label="Abrir menú de módulos"
-        aria-expanded={open}
-        onClick={() => setOpen((prev) => !prev)}
-      >
-        <span className="hamburger-bar" aria-hidden="true" />
-        <span className="hamburger-bar" aria-hidden="true" />
-        <span className="hamburger-bar" aria-hidden="true" />
+      <button ref={buttonRef} type="button" className="hamburger-btn" aria-label="Abrir menú de módulos" aria-expanded={open} aria-controls={id} onClick={() => setOpen(true)}>
+        <span className="hamburger-bar" aria-hidden="true" /><span className="hamburger-bar" aria-hidden="true" /><span className="hamburger-bar" aria-hidden="true" />
       </button>
-      <div
-        className={`menu-backdrop ${open ? 'is-open' : ''}`}
-        aria-hidden="true"
-        onClick={() => setOpen(false)}
-      />
-      <nav
-        ref={menuRef}
-        className={`menu-drawer ${open ? 'is-open' : ''}`}
-        aria-label="Módulos de GuaranIA"
-      >
-        {MENU_ITEMS.map((item, index) => (
-          <button
-            key={item.id}
-            type="button"
-            className={`menu-item ${activeTab === item.id ? 'is-active' : ''}`}
-            aria-current={activeTab === item.id ? 'page' : undefined}
-            onClick={() => handleSelect(item.id)}
-          >
-            <span className="menu-item-index" aria-hidden="true">{index + 1}</span>
-            {item.label}
-          </button>
-        ))}
-      </nav>
+      <dialog ref={dialogRef} id={id} className="navigation-dialog" aria-labelledby={id + '-title'} onCancel={event => { event.preventDefault(); close(); }} onClose={close} onClick={event => { if (event.target === event.currentTarget) close(); }}>
+        <nav aria-label="Módulos de GuaranIA" className="navigation-panel">
+          <div className="navigation-heading"><h2 id={id + '-title'}>Explorá GuaranIA</h2><button type="button" className="icon-button" onClick={close} aria-label="Cerrar menú">×</button></div>
+          <p className="muted">Aprendé a tu ritmo, con o sin conexión.</p>
+          {MENU_ITEMS.map((item, index) => (
+            <button key={item.id} type="button" className={'menu-item ' + (activeTab === item.id ? 'is-active' : '')} aria-current={activeTab === item.id ? 'page' : undefined} onClick={() => { close(); onChange?.(item.id); }}>
+              <span className="menu-item-index" aria-hidden="true">{index + 1}</span>{item.label}
+            </button>
+          ))}
+        </nav>
+      </dialog>
     </>
   );
 }

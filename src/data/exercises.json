@@ -3,45 +3,333 @@
     "id": "ej-01",
     "topic": "Movimiento Parabólico",
     "difficulty": "básico",
-    "question": "Un dron despega con velocidad inicial de 20 m/s y ángulo de 30° sobre la horizontal. ¿Cuánto vale la componente horizontal de la velocidad?",
-    "values": { "v0": 20, "angle": 30, "gravity": 9.8 },
+    "question": "Un dron despega con v0 = 20 m/s y ángulo de 30° sobre la horizontal. ¿Cuánto vale la componente horizontal (vx) de la velocidad?",
+    "values": {
+      "v0": 20,
+      "angle": 30,
+      "gravity": 9.8
+    },
     "expectedConcept": "componente-horizontal",
     "correctAnswer": 17.32,
     "unit": "m/s",
     "hints": [
-      "La componente horizontal no depende de la gravedad y no cambia durante el vuelo.",
-      "La componente horizontal se calcula con el coseno: vx = v0 * cos(ángulo).",
-      "vx = 20 * cos(30°) = 20 * 0,866. Hacé la cuenta y redondeá a 2 decimales."
-    ]
+      "¿Qué dos direcciones hay? Pe dron oho yvate ha tenonde.",
+      "La componente horizontal no cambia con la gravedad: vx = v0 * cos(ángulo).",
+      "Sustitución directa: vx = 20 * cos(30°) ≈ 20 * 0,866 = 17,32 m/s."
+    ],
+    "subtema": "movimiento_parabolico",
+    "targetX": 34.64,
+    "targetY": 0,
+    "tolerance": 0.05
   },
   {
     "id": "ej-02",
     "topic": "Movimiento Parabólico",
     "difficulty": "básico",
-    "question": "El mismo dron se lanza con 20 m/s y 30° sobre la horizontal. ¿Cuánto vale la componente vertical de la velocidad inicial?",
-    "values": { "v0": 20, "angle": 30, "gravity": 9.8 },
+    "question": "El mismo dron despega con v0 = 20 m/s y 30° sobre la horizontal. ¿Cuánto vale la componente vertical inicial (vy)?",
+    "values": {
+      "v0": 20,
+      "angle": 30,
+      "gravity": 9.8
+    },
     "expectedConcept": "componente-vertical",
     "correctAnswer": 10,
     "unit": "m/s",
     "hints": [
-      "En el instante inicial la componente vertical solo depende del ángulo de lanzamiento.",
-      "La componente vertical se calcula con el seno: v0y = v0 * sen(ángulo).",
-      "v0y = 20 * sen(30°) = 20 * 0,5."
-    ]
+      "La velocidad vertical determina cuánto sube el dron antes de que la gravedad lo frene.",
+      "La componente vertical inicial se calcula con el seno: vy = v0 * sen(ángulo).",
+      "Sustitución directa: vy = 20 * sen(30°) = 20 * 0,5 = 10 m/s."
+    ],
+    "subtema": "movimiento_parabolico",
+    "targetX": 34.64,
+    "targetY": 0,
+    "tolerance": 0.05
   },
   {
     "id": "ej-03",
     "topic": "Movimiento Parabólico",
     "difficulty": "intermedio",
-    "question": "Se lanza un proyectil con velocidad inicial de 19,6 m/s y ángulo de 45°. ¿Cuál es su altura máxima?",
-    "values": { "v0": 19.6, "angle": 45, "gravity": 9.8 },
+    "question": "Se lanza un dron con v0 = 19,6 m/s y ángulo de 45° con g = 9,8 m/s². ¿Cuál es su altura máxima?",
+    "values": {
+      "v0": 19.6,
+      "angle": 45,
+      "gravity": 9.8
+    },
     "expectedConcept": "altura-maxima",
     "correctAnswer": 9.8,
     "unit": "m",
     "hints": [
-      "En la altura máxima la velocidad vertical vale cero.",
-      "Altura máxima: h = (v0² * sen²(ángulo)) / (2 * g).",
-      "h = (19,6² * 0,5) / 19,6 = (384,16 * 0,5) / 19,6."
+      "En el punto más alto toda la energía cinética vertical se transformó en altura.",
+      "Fórmula de altura máxima: Hmax = v0² * sen²(ángulo) / (2 * g).",
+      "Hmax = (19,6² * sen²(45°)) / (2 * 9,8) = (384,16 * 0,5) / 19,6 = 9,8 metros."
+    ],
+    "subtema": "movimiento_parabolico",
+    "targetX": 39.2,
+    "targetY": 0,
+    "tolerance": 0.05
+  },
+  {
+    "id": "ej-mec-03",
+    "subtema": "movimiento_parabolico",
+    "topic": "Movimiento Parabólico",
+    "difficulty": "intermedio",
+    "question": "Con v0 = 20 m/s, ángulo = 30° y gravedad de aula g = 10 m/s², ¿cuánto dura el tiempo total de vuelo si sale y llega a la misma altura?",
+    "values": {
+      "v0": 20,
+      "angle": 30,
+      "gravity": 10
+    },
+    "expectedConcept": "tiempo-de-vuelo",
+    "correctAnswer": 2,
+    "unit": "s",
+    "targetX": 34.64,
+    "targetY": 0,
+    "tolerance": 0.05,
+    "hints": [
+      "Mirá solo el eje vertical: en la cúspide la velocidad vertical se hace cero.",
+      "Tiempo de vuelo en suelo nivelado: T = 2 * vy / g.",
+      "Como vy = 10 m/s y g = 10 m/s², T = (2 * 10) / 10 = 2 segundos."
+    ]
+  },
+  {
+    "id": "ej-04",
+    "subtema": "movimiento_parabolico",
+    "topic": "Movimiento Parabólico",
+    "difficulty": "intermedio",
+    "question": "El dron avanza horizontalmente a vx ≈ 17,32 m/s durante un vuelo de T = 2 s. ¿Qué distancia horizontal total (alcance R) recorre?",
+    "values": {
+      "vx": 17.32,
+      "t": 2,
+      "gravity": 10
+    },
+    "expectedConcept": "alcance",
+    "correctAnswer": 34.64,
+    "unit": "m",
+    "targetX": 34.64,
+    "targetY": 0,
+    "tolerance": 0.05,
+    "hints": [
+      "En el eje horizontal el movimiento es uniforme (MRU), no hay aceleración.",
+      "Fórmula de alcance horizontal: R = vx * T.",
+      "Multiplicación directa: R = 17,32 m/s * 2 s = 34,64 metros."
+    ]
+  },
+  {
+    "id": "ej-06",
+    "subtema": "movimiento_parabolico",
+    "topic": "Movimiento Parabólico",
+    "difficulty": "avanzado",
+    "question": "Misión Alto Paraná: Un puesto sanitario está a 40 m de distancia a la misma altura. Si v0 = 20 m/s y g = 10 m/s², ¿qué ángulo ángulo (en grados) logra llegar exactamente al objetivo?",
+    "values": {
+      "v0": 20,
+      "targetDistance": 40,
+      "gravity": 10
+    },
+    "expectedConcept": "alcance",
+    "correctAnswer": 45,
+    "unit": "°",
+    "targetX": 40,
+    "targetY": 0,
+    "tolerance": 0.5,
+    "hints": [
+      "El alcance máximo de cualquier proyectil se logra cuando el término sen(2 * ángulo) alcanza su valor máximo.",
+      "R = (v0² * sen(2 * ángulo)) / g. Sustituyendo: 40 = (400 * sen(2 * ángulo)) / 10 -> sen(2 * ángulo) = 1.",
+      "Si sen(2 * ángulo) = 1, entonces 2 * ángulo = 90°, por lo que ángulo = 45°."
+    ]
+  },
+  {
+    "id": "ej-07",
+    "subtema": "movimiento_parabolico",
+    "topic": "Movimiento Parabólico",
+    "difficulty": "avanzado",
+    "question": "Lanzamos dos drones con v0 = 20 m/s y g = 10 m/s²: el dron A a 30° y el dron B a 60°. Si el dron A alcanzó 34,64 m, ¿cuál es el alcance del dron B?",
+    "values": {
+      "v0": 20,
+      "angleA": 30,
+      "angleB": 60,
+      "gravity": 10
+    },
+    "expectedConcept": "alcance",
+    "correctAnswer": 34.64,
+    "unit": "m",
+    "targetX": 34.64,
+    "targetY": 0,
+    "tolerance": 0.05,
+    "hints": [
+      "Compará sen(2 * 30°) con sen(2 * 60°): sen(60°) = sen(120°).",
+      "Los ángulos complementarios (que suman 90°) tienen el mismo alcance horizontal en condiciones ideales.",
+      "Por simetría trigonométrica, el alcance de 60° es idéntico al de 30°: 34,64 metros."
+    ]
+  },
+  {
+    "id": "ej-cinematica-1",
+    "subtema": "cinematica",
+    "topic": "Cinemática",
+    "difficulty": "básico",
+    "question": "Un dron recorre 120 m en 10 s. ¿Cuál es su rapidez media?",
+    "values": {
+      "distancia": 120,
+      "tiempo": 10
+    },
+    "expectedConcept": "rapidez-media",
+    "correctAnswer": 12,
+    "unit": "m/s",
+    "hints": [
+      "Identificá la distancia y el tiempo.",
+      "Rapidez media = distancia / tiempo.",
+      "120 / 10 = 12 m/s."
+    ]
+  },
+  {
+    "id": "ej-cinematica-2",
+    "subtema": "cinematica",
+    "topic": "Cinemática",
+    "difficulty": "intermedio",
+    "question": "Un carrito mantiene una rapidez de 4 m/s durante 15 s. ¿Qué distancia recorre?",
+    "values": {
+      "rapidez": 4,
+      "tiempo": 15
+    },
+    "expectedConcept": "rapidez-media",
+    "correctAnswer": 60,
+    "unit": "m",
+    "hints": [
+      "La rapidez indica cuántos metros avanza cada segundo.",
+      "En movimiento uniforme: distancia = rapidez * tiempo.",
+      "4 * 15 = 60 m."
+    ]
+  },
+  {
+    "id": "ej-cinematica-3",
+    "subtema": "cinematica",
+    "topic": "Cinemática",
+    "difficulty": "intermedio",
+    "question": "Un ciclista avanza a 6 m/s y recorre 180 m. ¿Cuánto tiempo tarda?",
+    "values": {
+      "rapidez": 6,
+      "distancia": 180
+    },
+    "expectedConcept": "rapidez-media",
+    "correctAnswer": 30,
+    "unit": "s",
+    "hints": [
+      "Se busca el tiempo necesario para completar el recorrido.",
+      "tiempo = distancia / rapidez.",
+      "180 / 6 = 30 s."
+    ]
+  },
+  {
+    "id": "ej-vectores-1",
+    "subtema": "vectores",
+    "topic": "Vectores",
+    "difficulty": "básico",
+    "question": "Un dron vuela a 8 m/s al este respecto del aire. El viento sopla a 2 m/s al este. ¿Cuál es la rapidez del dron respecto del suelo?",
+    "values": {
+      "velocidadDron": 8,
+      "velocidadViento": 2
+    },
+    "expectedConcept": "vector-resultante",
+    "correctAnswer": 10,
+    "unit": "m/s",
+    "hints": [
+      "Ambas velocidades apuntan al mismo sentido.",
+      "En el mismo eje se suman las componentes con su signo.",
+      "8 + 2 = 10 m/s hacia el este."
+    ]
+  },
+  {
+    "id": "ej-vectores-2",
+    "subtema": "vectores",
+    "topic": "Vectores",
+    "difficulty": "intermedio",
+    "question": "Un dron vuela a 8 m/s al este respecto del aire. El viento sopla a 3 m/s al oeste. ¿Cuál es su rapidez respecto del suelo?",
+    "values": {
+      "velocidadDron": 8,
+      "velocidadViento": -3
+    },
+    "expectedConcept": "vector-resultante",
+    "correctAnswer": 5,
+    "unit": "m/s",
+    "hints": [
+      "El viento se opone al avance.",
+      "Tomá el este como positivo: la velocidad del viento es negativa.",
+      "8 + (-3) = 5 m/s hacia el este."
+    ]
+  },
+  {
+    "id": "ej-vectores-3",
+    "subtema": "vectores",
+    "topic": "Vectores",
+    "difficulty": "intermedio",
+    "question": "Dos desplazamientos perpendiculares miden 3 m al este y 4 m al norte. ¿Cuánto mide el desplazamiento resultante?",
+    "values": {
+      "componenteX": 3,
+      "componenteY": 4
+    },
+    "expectedConcept": "vector-resultante",
+    "correctAnswer": 5,
+    "unit": "m",
+    "hints": [
+      "Los desplazamientos forman los catetos de un triángulo rectángulo.",
+      "Magnitud de la resultante = raíz de (x² + y²).",
+      "Raíz de (3² + 4²) = raíz de 25 = 5 m."
+    ]
+  },
+  {
+    "id": "ej-hooke-1",
+    "subtema": "hooke",
+    "topic": "Ley de Hooke",
+    "difficulty": "básico",
+    "question": "Un resorte tiene rigidez k = 200 N/m y se estira 0,05 m. ¿Cuál es la magnitud de su fuerza elástica?",
+    "values": {
+      "k": 200,
+      "x": 0.05
+    },
+    "expectedConcept": "ley-hooke",
+    "correctAnswer": 10,
+    "unit": "N",
+    "hints": [
+      "La fuerza depende de la rigidez y del estiramiento.",
+      "Magnitud de la fuerza: F = k * x.",
+      "200 * 0,05 = 10 N."
+    ]
+  },
+  {
+    "id": "ej-hooke-2",
+    "subtema": "hooke",
+    "topic": "Ley de Hooke",
+    "difficulty": "intermedio",
+    "question": "Una fuerza de 12 N estira un resorte 0,04 m. ¿Cuál es su constante elástica k?",
+    "values": {
+      "fuerza": 12,
+      "x": 0.04
+    },
+    "expectedConcept": "ley-hooke",
+    "correctAnswer": 300,
+    "unit": "N/m",
+    "hints": [
+      "La constante indica la rigidez del resorte.",
+      "Despejá la ley de Hooke: k = F / x.",
+      "12 / 0,04 = 300 N/m."
+    ]
+  },
+  {
+    "id": "ej-hooke-3",
+    "subtema": "hooke",
+    "topic": "Ley de Hooke",
+    "difficulty": "intermedio",
+    "question": "Un resorte de k = 150 N/m soporta una fuerza de magnitud 6 N. ¿Cuánto se deforma?",
+    "values": {
+      "k": 150,
+      "fuerza": 6
+    },
+    "expectedConcept": "ley-hooke",
+    "correctAnswer": 0.04,
+    "unit": "m",
+    "hints": [
+      "Se busca la deformación en metros.",
+      "Despejá la ley de Hooke: x = F / k.",
+      "6 / 150 = 0,04 m, equivalentes a 4 cm."
     ]
   }
 ]
