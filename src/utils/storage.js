@@ -46,6 +46,7 @@ export const STORAGE_KEYS = {
   XP: 'guarania:xp',
   QUIZ_REWARDED: 'guarania:quizRewarded',
   CHAT_HISTORY: 'guarania_chat_history',
+  TUTOR_USAGE: 'guarania:tutorUsage',
   ATTEMPT_LOG: 'guarania:attemptLog',
 };
 

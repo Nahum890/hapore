@@ -1,9 +1,10 @@
 import { sanitizeMarkup } from '../utils/validation.js';
 import RuleTutorProvider from './RuleTutorProvider.js';
 import { evaluateQuizContext } from './quizEngine.js';
+import { getTutorQuota, recordTutorQuery, tutorQuotaMessage } from './tutorQuota.js';
 
 const RETRY_STATUS = new Set([408, 429, 500, 502, 503, 504]);
-const MAX_WAIT_MS = 3500;
+const MAX_WAIT_MS = 50000;
 const aborted = () => new DOMException('Tiempo de espera agotado', 'AbortError');
 function wait(ms, signal) {
   return new Promise((resolve, reject) => {
@@ -37,7 +38,7 @@ export function buildChatPayload(context = {}) {
  */
 export default class LocalAIProvider {
   constructor(options = {}) {
-    this.id = 'local-ai';
+    this.id = 'gemini';
     this.options = options;
     this.fallback = options.fallback ?? new RuleTutorProvider(options);
     this.timeoutMs = Math.min(MAX_WAIT_MS, Math.max(1, Number(options.timeoutMs) || MAX_WAIT_MS));
@@ -103,6 +104,7 @@ export default class LocalAIProvider {
         });
         if (!response.ok) {
           const error = new Error('Servicio de IA no disponible');
+          error.status = response.status;
           error.retryable = RETRY_STATUS.has(response.status);
           throw error;
         }
@@ -128,7 +130,38 @@ export default class LocalAIProvider {
   async respond(context = {}) {
     const onToken = context.onToken ?? this.options.onToken;
     const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
-    if (context.type === 'welcome' || context.type === 'section' || (offline && !this.options.loadLocalModel)) return this.fallback.respond(context);
+    if (context.type === 'welcome' || context.type === 'section') return this.fallback.respond(context);
+    const quota = getTutorQuota();
+    if (quota.remaining <= 0) {
+      return { message: tutorQuotaMessage(), source: null, available: false, reason: 'daily-limit', ...quota };
+    }
+    if (offline) {
+      try {
+        const localResult = this.options.loadLocalModel
+          ? await this.local(context, new AbortController().signal, onToken)
+          : await this.fallback.respond(context);
+        const text = typeof localResult === 'string' ? localResult : localResult?.message;
+        if (typeof text !== 'string' || !text.trim()) throw new Error('Respuesta local vacía');
+        const nextQuota = recordTutorQuery();
+        const result = {
+          message: sanitizeMarkup(text),
+          source: this.options.loadLocalModel ? 'local-model' : 'rules',
+          available: true,
+          ...nextQuota,
+          ...(context.tipo === 'evaluacion_cuestionario' ? evaluateQuizContext(context) : {}),
+        };
+        this.notify(onToken, result.message);
+        return result;
+      } catch {
+        return {
+          message: 'No pude preparar una respuesta sin conexión. Revisá el contenido guardado o volvé a intentarlo.',
+          source: null,
+          available: false,
+          reason: 'offline-unavailable',
+          ...getTutorQuota(),
+        };
+      }
+    }
     const controller = new AbortController();
     let timer;
     let active = true;
@@ -137,21 +170,34 @@ export default class LocalAIProvider {
       timer = setTimeout(() => { controller.abort(); reject(aborted()); }, this.timeoutMs);
     });
     try {
-      const operation = this.options.loadLocalModel && (offline || this.options.preferLocal)
-        ? this.local(context, controller.signal, emit) : this.online(context, controller.signal, emit);
-      const text = await Promise.race([operation, deadline]);
+      const text = await Promise.race([this.online(context, controller.signal, emit), deadline]);
       if (typeof text !== 'string' || !text.trim()) throw new Error('Respuesta vacía');
+      const nextQuota = recordTutorQuery();
       return {
-        message: sanitizeMarkup(text), source: this.options.loadLocalModel && (offline || this.options.preferLocal) ? 'local-model' : this.id, available: true,
+        message: sanitizeMarkup(text),
+        source: this.id,
+        available: true,
+        ...nextQuota,
         ...(context.tipo === 'evaluacion_cuestionario' ? evaluateQuizContext(context) : {}),
       };
-    } catch {
+    } catch (error) {
       active = false;
       controller.abort();
       if (this.options.loadLocalModel) this.model = null;
-      const result = await this.fallback.respond(context);
-      this.notify(onToken, result.message);
-      return result;
+      const message = error?.name === 'AbortError'
+        ? 'Gemini está tardando más de lo esperado. Probá de nuevo en un momento.'
+        : error?.status === 404
+          ? 'La app no encuentra el endpoint /api/chat. Este servicio debe publicarse junto con la app para usar Gemini.'
+          : error?.status === 401 || error?.status === 403
+            ? 'Gemini rechazó la credencial configurada en el servidor. Revisá la configuración del servidor y volvé a intentarlo.'
+            : error?.status === 429
+              ? 'Gemini alcanzó su límite temporal de consultas. Esperá un momento y volvé a intentar.'
+              : error?.status === 503
+                ? 'El endpoint online no tiene una credencial configurada en el servidor. Revisá la variable del entorno y reiniciá el servicio.'
+                : 'No pude conectar con Gemini. Revisá la conexión y volvé a intentarlo; el tutor local se usa cuando el dispositivo está sin conexión.';
+      const unavailable = { message, source: null, available: false, reason: 'online-unavailable', ...getTutorQuota() };
+      this.notify(onToken, message);
+      return unavailable;
     } finally {
       active = false;
       clearTimeout(timer);
