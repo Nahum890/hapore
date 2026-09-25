@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import './components/ChatConversation.css';
 import Header from './components/Header.jsx';
 import ConfidenceBar from './components/ConfidenceBar.jsx';
 import TutorCard from './components/TutorCard.jsx';
@@ -25,12 +26,13 @@ import { readJSON, writeJSON, setActiveProfile } from './utils/storage.js';
 import { getSession, logout } from './auth/localAccounts.js';
 import { decodeClassConfig, encodeClassConfig, temaMatchesSubtemas, selectClassExercises } from './utils/classCode.js';
 import { recommendExercise, summarizeAttempts } from './pedagogy/progression.js';
+import './components/TutorModes.css';
 
 const SECTIONS = [
   { id: 'inicio', label: 'Inicio', icon: '⌂', title: 'Tu espacio para aprender', description: 'Elegí una actividad y avanzá a tu ritmo.' },
   { id: 'simulador', label: 'Practicar', icon: '↗', title: 'Practicá con una simulación', description: 'Leé el ejercicio, escribí tu respuesta y comprobala con la escena de ese tema.' },
   { id: 'tarjetas', label: 'Repasar', icon: '▧', title: 'Repasá con tarjetas', description: 'Elegí un mazo, descubrí cada respuesta y seguí con el cuestionario.' },
-  { id: 'chats', label: 'Tutor', icon: '✳', title: 'Conversá con el tutor', description: 'Preguntá sobre Física cuando quieras o empezá un cuestionario.' },
+  { id: 'chats', label: 'Tutor', icon: '✳', title: 'Elegí cómo aprender con el tutor', description: 'Practicá con un cuestionario o abrí el chat libre cuando tengas una duda.' },
   { id: 'aula', label: 'Aula', icon: '▣', title: 'Tu clase', description: 'Usá un código de clase para aprender los temas que eligió tu docente.' },
 ];
 
@@ -47,7 +49,7 @@ function HomeView({ user, learning, classConfig, onNavigate, onGuide }) {
     <div className="home-action-grid">
       <button className="home-action-card" type="button" onClick={() => onNavigate('simulador')}><span className="home-card-icon practice" aria-hidden="true">↗</span><strong>Practicar</strong><span>Resolvé un ejercicio y mirá cómo funciona.</span><small>Ir a ejercicios →</small></button>
       <button className="home-action-card" type="button" onClick={() => onNavigate('tarjetas')}><span className="home-card-icon review" aria-hidden="true">▧</span><strong>Repasar</strong><span>Estudiá con tarjetas a tu ritmo.</span><small>Ver tarjetas →</small></button>
-      <button className="home-action-card" type="button" onClick={() => onNavigate('chats')}><span className="home-card-icon tutor" aria-hidden="true">✳</span><strong>Preguntar al tutor</strong><span>Hablá de Física sin completar las tarjetas.</span><small>Abrir tutor →</small></button>
+      <button className="home-action-card" type="button" onClick={() => onNavigate('chats')}><span className="home-card-icon tutor" aria-hidden="true">✳</span><strong>Preguntar al tutor</strong><span>Hacé el cuestionario y despejá dudas.</span><small>Abrir tutor →</small></button>
     </div>
     <section className="home-class-card"><div><span className="panel-eyebrow">{teacher ? 'PARA TU CLASE' : 'APRENDÉ EN CLASE'}</span><h3>{teacher ? 'Todo listo para enseñar' : classConfig ? 'Tu clase está configurada' : '¿Tenés un código de clase?'}</h3><p>{teacher ? 'Elegí temas, generá un código y usá el proyector desde Aula docente.' : classConfig ? 'Ya podés practicar los temas que eligió tu docente.' : 'Ingresalo para ver los ejercicios y tarjetas de tu docente.'}</p></div><button className="btn btn-secondary" type="button" onClick={() => onNavigate('aula')}>{teacher ? 'Ir a Aula docente' : 'Ir a Mi clase'}</button></section>
     {progress.attempts > 0 && <section className="card learning-progress" aria-label="Progreso por tema"><div className="learning-progress-head"><div><span className="panel-eyebrow">TU AVANCE</span><h2>Así vas aprendiendo</h2></div><strong>{progress.accuracy}% de aciertos</strong></div><div className="learning-topic-grid">{topicProgress.map(item => <div key={item.topic}><div className="learning-topic-title"><strong>{item.topic}</strong><span>{item.correct}/{item.attempts} aciertos</span></div><div className="learning-topic-track"><span style={{width:`${item.accuracy}%`}} /></div><small>{item.attempts ? `Tiempo promedio: ${item.averageSeconds} s` : 'Todavía sin intentos'}</small></div>)}</div></section>}
@@ -148,19 +150,77 @@ function RepasoView({ quiz, onCardConsolidated }) {
   );
 }
 
-function ChatsView({ quiz }) {
+function TutorModeTabs({ mode, onModeChange, disabled = false }) {
+  return <div className="tutor-mode-tabs" role="tablist" aria-label="Modo del tutor">
+    <button type="button" role="tab" id="tutor-tab-quiz" aria-selected={mode === 'cuestionario'} aria-controls="tutor-panel" className={mode === 'cuestionario' ? 'is-active' : ''} onClick={() => onModeChange('cuestionario')} disabled={disabled}>Cuestionario</button>
+    <button type="button" role="tab" id="tutor-tab-free" aria-selected={mode === 'libre'} aria-controls="tutor-panel" className={mode === 'libre' ? 'is-active' : ''} onClick={() => onModeChange('libre')} disabled={disabled}>Chat libre</button>
+  </div>;
+}
+
+function FreeChatView({ quiz }) {
+  const logRef = useRef(null);
+  useEffect(() => {
+    logRef.current?.scrollTo?.({ top: logRef.current.scrollHeight, behavior: 'smooth' });
+  }, [quiz.charlaLog.length, quiz.streamText, quiz.busy]);
+  const freeHistory = quiz.history.filter(session => session.tipo === 'chat-libre' || session.tema === 'Chat libre');
+  return <div className="tutor-mode-panel" id="tutor-panel" role="tabpanel" aria-labelledby="tutor-tab-free">
+    <div className="quiz-head">
+      <div><h2>Chat libre</h2><p>Preguntale al tutor sin completar tarjetas ni cuestionarios.</p></div>
+      <span className="chip">Consultas disponibles hoy: {quiz.charlaLeft}/15</span>
+      <button type="button" className="btn btn-secondary chat-new-button" onClick={quiz.newFreeConversation} disabled={quiz.busy}>Nueva conversación</button>
+    </div>
+    <div className="chats-scroll" ref={logRef} aria-live="polite">
+      {!quiz.charlaLog.length && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble">¡Hola! Estoy acá para ayudarte con Física. Escribí tu pregunta cuando quieras.</div>}
+      {quiz.charlaLog.map((message, position) => <div key={message.id ?? 'free-' + position} className={'chat-bubble ' + (message.role === 'alumno' ? 'chat-alumno-bubble' : 'chat-tutor-bubble')}>
+        {message.text}
+        {message.role !== 'alumno' && message.source && <small className="chat-message-source">{message.source === 'gemini' ? 'Gemini' : message.source === 'rules' ? 'Tutor local · sin conexión' : message.source === 'local-model' ? 'Modelo local' : ''}</small>}
+      </div>)}
+      {quiz.busy && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-typing" role="status" aria-live="polite"><span>Jopara está respondiendo</span><span className="chat-typing-dots" aria-hidden="true"><i /><i /><i /></span></div>}
+      {quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-streaming" aria-live="off">{quiz.streamText}</div>}
+    </div>
+    <form className="chats-input-area" onSubmit={event => { event.preventDefault(); quiz.askFreeQuestion(); }}>
+      <input className="quiz-input" type="text" inputMode="text" autoComplete="off" aria-label="Pregunta para el tutor" placeholder={quiz.charlaLeft > 0 ? 'Escribí tu pregunta…' : 'Llegaste al límite diario de consultas'} value={quiz.charlaText} onChange={event => quiz.setCharlaText(event.target.value)} disabled={quiz.busy || quiz.charlaLeft <= 0} />
+      <button type="submit" className="btn btn-primary" disabled={quiz.busy || quiz.charlaLeft <= 0 || !quiz.charlaText.trim()}>{quiz.busy ? 'El tutor está respondiendo…' : 'Enviar pregunta'}</button>
+    </form>
+    {quiz.charlaLeft <= 0 && <p className="deck-selector-note">Alcanzaste las 15 consultas diarias. Iniciar otra conversación no reinicia el límite.</p>}
+    {freeHistory.length > 0 && <details className="chat-history"><summary>Conversaciones anteriores ({freeHistory.length})</summary><ul className="chat-history-list">{[...freeHistory].reverse().map(session => <li key={session.id} className="chat-history-item"><button type="button" className="chat-history-button" onClick={() => quiz.openFreeConversation(session)} disabled={quiz.busy}><strong>{session.tema}</strong><br />{session.fecha} · {session.mensajes?.length ?? 0} mensajes</button></li>)}</ul></details>}
+  </div>;
+}
+function ChatsView({ quiz, mode, onModeChange, topics, studyTopic, onTopicChange, onCardConsolidated }) {
   const logRef = useRef(null);
 
   useEffect(() => {
     logRef.current?.scrollTo?.({ top: logRef.current.scrollHeight, behavior: 'smooth' });
-  }, [quiz.chat.length, quiz.charlaLog.length, quiz.answered]);
+  }, [quiz.chat.length, quiz.charlaLog.length, quiz.answered, quiz.busy, quiz.streamText]);
 
   const score = quiz.chat.filter((entry) => entry.tutor?.correct).length;
 
+  if (mode === 'libre') return <section className="card chats-view" aria-label="Chat libre con el tutor">
+    <TutorModeTabs mode={mode} onModeChange={onModeChange} disabled={quiz.busy} />
+    <FreeChatView quiz={quiz} />
+  </section>;
+
+  if (quiz.step === 'cantidad') return <section className="card chats-view" aria-label="Modo cuestionario">
+    <TutorModeTabs mode={mode} onModeChange={onModeChange} disabled={quiz.busy} />
+    <div className="tutor-mode-panel" id="tutor-panel" role="tabpanel" aria-labelledby="tutor-tab-quiz">
+      <p className="deck-selector-note">Elegí un tema y una cantidad. Primero vas a repasar las fichas; después, el tutor te hará preguntas.</p>
+      <QuizSelector quiz={quiz} topics={topics} studyTopic={studyTopic} onTopicChange={onTopicChange} />
+    </div>
+  </section>;
+
+  if (quiz.step === 'repaso') return <section className="card chats-view" aria-label="Repaso previo al cuestionario">
+    <TutorModeTabs mode={mode} onModeChange={onModeChange} disabled={quiz.busy} />
+    <div className="tutor-mode-panel" id="tutor-panel" role="tabpanel" aria-labelledby="tutor-tab-quiz">
+      <div className="quiz-head"><div><h2>Repaso para el cuestionario</h2><p>Podés abrir Chat libre cuando quieras; el repaso queda guardado.</p></div></div>
+      <RepasoView quiz={quiz} onCardConsolidated={onCardConsolidated} />
+    </div>
+  </section>;
+
   return (
     <section className="card chats-view" aria-label="Chats con el tutor">
+      <TutorModeTabs mode={mode} onModeChange={onModeChange} disabled={quiz.busy} />
       <div className="quiz-head">
-        <h2>Chats con el tutor</h2>
+        <h2>Cuestionario</h2>
         {quiz.step === 'quiz' && (
           <>
             <span className="chip">
@@ -169,23 +229,9 @@ function ChatsView({ quiz }) {
             <span className="chip chip-consolidated">Acertadas: {score}</span>
           </>
         )}
-        {quiz.step !== 'quiz' && (
-          <span className="chip">Preguntas libres disponibles: {quiz.charlaLeft}/8</span>
-        )}
       </div>
 
       <div className="chats-scroll" ref={logRef}>
-        {quiz.step === 'cantidad' && (
-          <div className="chat-bubble chat-tutor-bubble">
-            ¡Hola! Podés preguntarme de Física ahora mismo. No hace falta completar las tarjetas para conversar.
-          </div>
-        )}
-        {quiz.step === 'repaso' && (
-          <div className="chat-bubble chat-tutor-bubble">
-            Podés seguir repasando las tarjetas o preguntarme algo de Física por este chat.
-          </div>
-        )}
-
         {quiz.chat.map((entry, position) =>
           entry.closing ? (
             <div key={`closing-${position}`} className="chat-bubble chat-tutor-bubble" role="status">
@@ -200,23 +246,14 @@ function ChatsView({ quiz }) {
                 role="status"
               >
                 {entry.tutor?.message}
+                {entry.tutor?.source && <small className="chat-message-source">{entry.tutor.source === 'gemini' ? 'Gemini' : entry.tutor.source === 'rules' ? 'Tutor local · sin conexión' : ''}</small>}
               </div>
             </div>
           ),
         )}
 
+        {quiz.busy && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-typing" role="status" aria-live="polite"><span>Jopara está respondiendo</span><span className="chat-typing-dots" aria-hidden="true"><i /><i /><i /></span></div>}
         {quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-streaming" aria-live="off">{quiz.streamText}</div>}
-
-        {quiz.charlaLog.map((message, position) => (
-          <div
-            key={`charla-${position}`}
-            className={`chat-bubble ${
-              message.role === 'alumno' ? 'chat-alumno-bubble' : 'chat-tutor-bubble'
-            }`}
-          >
-            {message.text}
-          </div>
-        ))}
 
         {quiz.step === 'quiz' && quiz.currentQuestion && (
           <div className="chat-entry">
@@ -320,59 +357,23 @@ function ChatsView({ quiz }) {
         </div>
       )}
 
-      {quiz.step !== 'quiz' && (
-        <div className="chats-input-area">
-          <strong>Chat libre</strong>
-          <form
-            className="quiz-justification"
-            onSubmit={(event) => {
-              event.preventDefault();
-              quiz.askFreeQuestion();
-            }}
-          >
-            <input
-              className="quiz-input"
-              type="text"
-              inputMode="text"
-              autoComplete="off"
-              placeholder={
-                quiz.charlaLeft > 0 ? 'Preguntame algo de Física...' : 'Llegaste al límite de preguntas libres'
-              }
-              value={quiz.charlaText}
-              onChange={(event) => quiz.setCharlaText(event.target.value)}
-              disabled={quiz.busy || quiz.charlaLeft <= 0}
-            />
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={quiz.busy || quiz.charlaLeft <= 0 || !quiz.charlaText.trim()}
-            >
-              Enviar
-            </button>
-          </form>
-          {quiz.step === 'charla' && <button type="button" className="btn btn-secondary quiz-send" onClick={quiz.finish} disabled={quiz.busy}>
-            Terminar y ver resultado
-          </button>}
-        </div>
-      )}
-
-      {quiz.step === 'fin' && (
+      {(quiz.step === 'charla' || quiz.step === 'fin') && (
         <div className="chats-input-area">
           <p className="deck-selector-note">
-            Acertadas: {score} de {quiz.questions.length}. El tutor te guio con explicaciones y
-            alientos en jopara.
+            Cuestionario terminado: {score} de {quiz.questions.length} respuestas correctas. Si querés conversar sobre un tema, cambiá a Chat libre.
           </p>
-          <button type="button" className="btn btn-primary quiz-send" onClick={quiz.restart}>
-            Volver a empezar
-          </button>
+          <div className="quiz-actions">
+            <button type="button" className="btn btn-primary" onClick={() => onModeChange('libre')}>Ir al chat libre</button>
+            <button type="button" className="btn btn-secondary" onClick={quiz.restart}>Hacer otro cuestionario</button>
+          </div>
         </div>
       )}
 
-      {quiz.history.length > 0 && (
+      {quiz.history.some(session => session.tema !== 'Chat libre') && (
         <details className="chat-history">
-          <summary>Historial de conversaciones ({quiz.history.length})</summary>
+          <summary>Historial de cuestionarios ({quiz.history.filter(session => session.tema !== 'Chat libre').length})</summary>
           <ul className="chat-history-list">
-            {[...quiz.history].reverse().map((session) => (
+            {[...quiz.history].filter(session => session.tema !== 'Chat libre').reverse().map((session) => (
               <li key={session.id} className="chat-history-item">
                 <strong>{session.fecha}</strong> · {session.tema} · {session.mensajes?.length ?? 0}{' '}
                 mensajes
@@ -387,6 +388,7 @@ function ChatsView({ quiz }) {
 
 function LearningApp({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('inicio');
+  const [tutorMode, setTutorMode] = useState('cuestionario');
   const [simulationSubmission, setSimulationSubmission] = useState(null);
   const [showGuide, setShowGuide] = useState(() => !readJSON('guarania:guideSeen:v2', false));
   const [classConfig, setClassConfig] = useState(() => decodeClassConfig(readJSON('guarania:classCode', null)));
@@ -402,7 +404,7 @@ function LearningApp({ user, onLogout }) {
     learning.onSelectExercise,
   );
   const quiz = useQuiz(flashcardsData, {
-    onMoveToChat: () => setActiveTab('chats'),
+    onMoveToChat: () => { setTutorMode('cuestionario'); setActiveTab('chats'); },
     onQuizAnswer: learning.onQuizAnswer,
     classConfig,
     studyTopic,
@@ -479,7 +481,7 @@ function LearningApp({ user, onLogout }) {
           </>
         )}
 
-        {activeTab === 'chats' && <ChatsView quiz={quiz} />}
+        {activeTab === 'chats' && <ChatsView quiz={quiz} mode={tutorMode} onModeChange={setTutorMode} topics={studyTopics} studyTopic={studyTopic} onTopicChange={setSelectedStudyTopic} onCardConsolidated={handleCardConsolidated} />}
 
         {activeTab === 'aula' && (user.role === 'maestro' ?
           <AulaView
