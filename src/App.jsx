@@ -30,7 +30,7 @@ const SECTIONS = [
   { id: 'inicio', label: 'Inicio', icon: '⌂', title: 'Tu espacio para aprender', description: 'Elegí una actividad y avanzá a tu ritmo.' },
   { id: 'simulador', label: 'Practicar', icon: '↗', title: 'Practicá con una simulación', description: 'Leé el ejercicio, escribí tu respuesta y comprobala con la escena de ese tema.' },
   { id: 'tarjetas', label: 'Repasar', icon: '▧', title: 'Repasá con tarjetas', description: 'Elegí un mazo, descubrí cada respuesta y seguí con el cuestionario.' },
-  { id: 'chats', label: 'Tutor', icon: '✳', title: 'Conversá con el tutor', description: 'Encontrá el cuestionario y preguntá lo que necesites.' },
+  { id: 'chats', label: 'Tutor', icon: '✳', title: 'Conversá con el tutor', description: 'Preguntá sobre Física cuando quieras o empezá un cuestionario.' },
   { id: 'aula', label: 'Aula', icon: '▣', title: 'Tu clase', description: 'Usá un código de clase para aprender los temas que eligió tu docente.' },
 ];
 
@@ -47,7 +47,7 @@ function HomeView({ user, learning, classConfig, onNavigate, onGuide }) {
     <div className="home-action-grid">
       <button className="home-action-card" type="button" onClick={() => onNavigate('simulador')}><span className="home-card-icon practice" aria-hidden="true">↗</span><strong>Practicar</strong><span>Resolvé un ejercicio y mirá cómo funciona.</span><small>Ir a ejercicios →</small></button>
       <button className="home-action-card" type="button" onClick={() => onNavigate('tarjetas')}><span className="home-card-icon review" aria-hidden="true">▧</span><strong>Repasar</strong><span>Estudiá con tarjetas a tu ritmo.</span><small>Ver tarjetas →</small></button>
-      <button className="home-action-card" type="button" onClick={() => onNavigate('chats')}><span className="home-card-icon tutor" aria-hidden="true">✳</span><strong>Preguntar al tutor</strong><span>Hacé el cuestionario y despejá dudas.</span><small>Abrir tutor →</small></button>
+      <button className="home-action-card" type="button" onClick={() => onNavigate('chats')}><span className="home-card-icon tutor" aria-hidden="true">✳</span><strong>Preguntar al tutor</strong><span>Hablá de Física sin completar las tarjetas.</span><small>Abrir tutor →</small></button>
     </div>
     <section className="home-class-card"><div><span className="panel-eyebrow">{teacher ? 'PARA TU CLASE' : 'APRENDÉ EN CLASE'}</span><h3>{teacher ? 'Todo listo para enseñar' : classConfig ? 'Tu clase está configurada' : '¿Tenés un código de clase?'}</h3><p>{teacher ? 'Elegí temas, generá un código y usá el proyector desde Aula docente.' : classConfig ? 'Ya podés practicar los temas que eligió tu docente.' : 'Ingresalo para ver los ejercicios y tarjetas de tu docente.'}</p></div><button className="btn btn-secondary" type="button" onClick={() => onNavigate('aula')}>{teacher ? 'Ir a Aula docente' : 'Ir a Mi clase'}</button></section>
     {progress.attempts > 0 && <section className="card learning-progress" aria-label="Progreso por tema"><div className="learning-progress-head"><div><span className="panel-eyebrow">TU AVANCE</span><h2>Así vas aprendiendo</h2></div><strong>{progress.accuracy}% de aciertos</strong></div><div className="learning-topic-grid">{topicProgress.map(item => <div key={item.topic}><div className="learning-topic-title"><strong>{item.topic}</strong><span>{item.correct}/{item.attempts} aciertos</span></div><div className="learning-topic-track"><span style={{width:`${item.accuracy}%`}} /></div><small>{item.attempts ? `Tiempo promedio: ${item.averageSeconds} s` : 'Todavía sin intentos'}</small></div>)}</div></section>}
@@ -169,7 +169,7 @@ function ChatsView({ quiz }) {
             <span className="chip chip-consolidated">Acertadas: {score}</span>
           </>
         )}
-        {quiz.step === 'charla' && (
+        {quiz.step !== 'quiz' && (
           <span className="chip">Preguntas libres disponibles: {quiz.charlaLeft}/8</span>
         )}
       </div>
@@ -177,12 +177,12 @@ function ChatsView({ quiz }) {
       <div className="chats-scroll" ref={logRef}>
         {quiz.step === 'cantidad' && (
           <div className="chat-bubble chat-tutor-bubble">
-            ¡Hola! Completá el repaso de las flashcards para empezar el cuestionario acá.
+            ¡Hola! Podés preguntarme de Física ahora mismo. No hace falta completar las tarjetas para conversar.
           </div>
         )}
         {quiz.step === 'repaso' && (
           <div className="chat-bubble chat-tutor-bubble">
-            ¡Hola! Seguí repasando las tarjetas: cuando termines, el cuestionario empieza acá.
+            Podés seguir repasando las tarjetas o preguntarme algo de Física por este chat.
           </div>
         )}
 
@@ -320,8 +320,9 @@ function ChatsView({ quiz }) {
         </div>
       )}
 
-      {quiz.step === 'charla' && (
+      {quiz.step !== 'quiz' && (
         <div className="chats-input-area">
+          <strong>Chat libre</strong>
           <form
             className="quiz-justification"
             onSubmit={(event) => {
@@ -335,7 +336,7 @@ function ChatsView({ quiz }) {
               inputMode="text"
               autoComplete="off"
               placeholder={
-                quiz.charlaLeft > 0 ? 'Preguntame lo que quieras...' : 'Sin preguntas libres disponibles'
+                quiz.charlaLeft > 0 ? 'Preguntame algo de Física...' : 'Llegaste al límite de preguntas libres'
               }
               value={quiz.charlaText}
               onChange={(event) => quiz.setCharlaText(event.target.value)}
@@ -349,9 +350,9 @@ function ChatsView({ quiz }) {
               Enviar
             </button>
           </form>
-          <button type="button" className="btn btn-secondary quiz-send" onClick={quiz.finish} disabled={quiz.busy}>
+          {quiz.step === 'charla' && <button type="button" className="btn btn-secondary quiz-send" onClick={quiz.finish} disabled={quiz.busy}>
             Terminar y ver resultado
-          </button>
+          </button>}
         </div>
       )}
 
