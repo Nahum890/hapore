@@ -16,10 +16,10 @@ const VALUE_LABELS = {
 };
 const formatValue = value => typeof value === 'number' ? new Intl.NumberFormat('es-PY', { maximumFractionDigits: 3 }).format(value) : String(value);
 export default function ExerciseCard({ exercise, onResult, onAskHint, onSimulationCheck, onSimulationClear, hintsUsed = 0, onIncrementHint }) {
-  const [answer, setAnswer] = useState(''), [feedback, setFeedback] = useState(null), [waiting, setWaiting] = useState(false), [hintError, setHintError] = useState('');
+  const [answer, setAnswer] = useState(''), [feedback, setFeedback] = useState(null), [waiting, setWaiting] = useState(false), [hintError, setHintError] = useState(''), [hintMessage, setHintMessage] = useState(null);
   const currentId = useRef(exercise?.id), hintLock = useRef(false), startedAt = useRef(Date.now());
   currentId.current = exercise?.id;
-  useEffect(() => { setAnswer(''); setFeedback(null); setHintError(''); startedAt.current = Date.now(); }, [exercise?.id]);
+  useEffect(() => { setAnswer(''); setFeedback(null); setHintError(''); setHintMessage(null); startedAt.current = Date.now(); }, [exercise?.id]);
   const valid = isNumericAnswer(answer);
   const invalid = Boolean(answer.trim()) && !valid;
   const check = event => {
@@ -33,13 +33,13 @@ export default function ExerciseCard({ exercise, onResult, onAskHint, onSimulati
   };
   const hint = async () => {
     if (hintLock.current || !hasHintsLeft(exercise, hintsUsed)) return;
-    hintLock.current = true; setWaiting(true); setHintError('');
+    hintLock.current = true; setWaiting(true); setHintError(''); setHintMessage(null);
     const id = exercise.id;
     try {
       const response = await onAskHint?.({ type: 'hint', topic: exercise.topic, exercise, exerciseId: id, expectedConcept: exercise.expectedConcept, hintLevel: hintsUsed + 1 });
       if (currentId.current === id) {
-        if (response?.available === false) setHintError('No se pudo obtener la pista. Probá otra vez.');
-        else onIncrementHint?.();
+        if (response?.available === false || !response?.message?.trim()) setHintError('No se pudo obtener la pista. Probá otra vez.');
+        else { setHintMessage({ text: response.message, level: hintsUsed + 1, esHint: response.esHint }); onIncrementHint?.(); }
       }
     } catch { if (currentId.current === id) setHintError('No se pudo obtener la pista. Probá otra vez.'); }
     finally { hintLock.current = false; setWaiting(false); }
@@ -56,6 +56,7 @@ export default function ExerciseCard({ exercise, onResult, onAskHint, onSimulati
         <div className="exercise-actions"><button type="button" className="btn btn-secondary" onClick={hint} disabled={waiting || !hasHintsLeft(exercise, hintsUsed)}>{waiting ? 'Buscando pista…' : !hasHintsLeft(exercise, hintsUsed) ? 'Sin más pistas' : 'Pedir pista'}</button><button type="submit" className="btn btn-primary" disabled={!valid}>Comprobar con el simulador</button></div>
       </form>
       {hintError && <p role="status" className="field-error">{hintError}</p>}
+      {hintMessage && <aside className="exercise-hint" role="status" aria-live="polite"><span className="exercise-hint-label">Pista {hintMessage.level} de 5</span><p>{hintMessage.text}</p>{hintMessage.esHint && <small>{hintMessage.esHint}</small>}</aside>}
       {feedback && <div className={'feedback ' + (feedback.correct ? 'correct' : 'incorrect')} role="status">{feedback.correct ? '¡Bien! Mirá la simulación de este ejercicio abajo.' : <><strong>Buen intento. Probá otra vez sin perder puntos.</strong><span>{diagnoseAttempt(exercise, feedback.student)}</span></>}</div>}
     </section>
   );

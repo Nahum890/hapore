@@ -1,8 +1,25 @@
-import { errors as errorsData, exercises, quizBank, tutorJopara as tutorData } from '../data/catalogs.js';
-import { buildQuizFeedback, evaluateQuizContext, findBestMatch, normalizeText } from './quizEngine.js';
+import { concepts, errors as errorsData, exercises, glossary, quizBank, tutorJopara as tutorData } from '../data/catalogs.js';
+import { buildQuizFeedback, evaluateQuizContext, normalizeText } from './quizEngine.js';
 import { sanitizeMarkup } from '../utils/validation.js';
 
 export const HINT_LEVELS_MAX = 5;
+const CHAT_STOP_WORDS = new Set('que como cual cuales cuando donde porque para pero por una uno unos unas los las del con entre sobre desde hasta este esta esto esa ese son ser sea tiene tienen vale todo toda todos durante solo parte forma muy mas hay cada me te se es al lo la un y o de en mi tu explicar explicame decir decime ayudar ayuda funciona'.split(' '));
+const stemWord = (word) => word.replace(/idades$/u, 'idad').replace(/(aciones|acion|imientos|imiento|amientos|amiento|idad|mente|ando|iendo|ados|adas|idos|idas|es|os|as|s)$/u, '');
+function chatTokens(value) {
+  return [...new Set(normalizeText(value).split(/[^a-z0-9]+/u).map(stemWord).filter(word => word.length > 2 && !CHAT_STOP_WORDS.has(word)))];
+}
+function bestKnowledgeMatch(message, records) {
+  const query = chatTokens(message);
+  if (!query.length) return null;
+  let best = null;
+  for (const record of records) {
+    const words = new Set(chatTokens(record.search));
+    const hits = query.filter(word => words.has(word) || [...words].some(candidate => candidate.startsWith(word) || word.startsWith(candidate)));
+    const score = hits.reduce((sum, word) => sum + (word.length > 6 ? 1.2 : 1), 0) / query.reduce((sum, word) => sum + (word.length > 6 ? 1.2 : 1), 0);
+    if (score >= 0.35 && (!best || score > best.score)) best = { ...record, score };
+  }
+  return best;
+}
 export function obtenerVariantePista(variants, previous) {
   if (!Array.isArray(variants)) return variants ?? null;
   const choices = variants.filter(text => typeof text === 'string' && text.trim());
@@ -18,6 +35,8 @@ export default class RuleTutorProvider {
     this.errors = options.errors ?? errorsData;
     this.exercises = options.exercises ?? exercises;
     this.bank = options.bank ?? quizBank;
+    this.concepts = options.concepts ?? concepts;
+    this.glossary = options.glossary ?? glossary;
     this.levels = options.levels ?? this.data.hintLevels;
     this.previous = new Map();
   }
@@ -36,14 +55,18 @@ export default class RuleTutorProvider {
     }
     if (context.tipo === 'charla_libre') {
       const question = normalizeText(context.message);
-      const offlineTopic = /\b(haku|calor|temperatura|terere|mate)\b/.test(question) ? 'Termodinámica'
-        : /\b(luz|tesape|espejo|pajita|refraccion)\b/.test(question) ? 'Óptica' : null;
-      const offlineAnswer = offlineTopic && this.data.topicSupport?.find(item => item.tema === offlineTopic);
-      if (offlineAnswer) return this.result(offlineAnswer.respuesta);
-      const match = findBestMatch(context.message, this.bank);
-      if (match) return this.result([match.entry.respuesta || match.entry.explicacion, match.entry.respuestaJopara || match.entry.explicacionJopara].filter(Boolean).join(' '));
-      const concept = findBestMatch(context.message, this.data.topicSupport ?? []);
-      return this.result(concept?.entry.respuesta || 'Puedo ayudarte con termodinámica y óptica. También hay ejercicios complementarios de movimiento y vectores. Probá con una pregunta sobre calor, temperatura, espejos o luz.');
+      if (/^(hola|buenas|mba.?eichapa|maitei)\b/.test(question)) return this.result(this.choose('chat:greeting', this.data.greetings));
+      if (/\b(gracias|aguyje)\b/.test(question)) return this.result('¡De nada! Seguí preguntando: podemos repasar un concepto o resolver un ejercicio paso a paso.');
+      const knowledge = [
+        ...this.concepts.map(item => ({ kind: 'concept', search: `${item.id} ${item.name} ${item.definition} ${item.formula}`, answer: `${item.name}: ${item.definition}${item.formula ? ` Fórmula: ${item.formula}.` : ''}` })),
+        ...this.glossary.map(item => ({ kind: 'glossary', search: `${item.term} ${item.joparaTerm} ${item.definition}`, answer: `${item.term}: ${item.definition}` })),
+        ...this.errors.map(item => ({ kind: 'error', search: `${item.name} ${item.description} ${item.example} ${item.expectedConcept}`, answer: `${item.name}: ${item.description} ${item.example}` })),
+        ...this.bank.map(item => ({ kind: 'question', search: `${item.pregunta} ${item.enunciado} ${item.respuesta} ${item.explicacion} ${item.tema}`, answer: [item.respuesta || item.explicacion, item.respuestaJopara || item.explicacionJopara].filter(Boolean).join(' ') })),
+        ...this.exercises.map(item => ({ kind: 'exercise', search: `${item.topic} ${item.subtema} ${item.question} ${item.expectedConcept}`, answer: `${item.question} La idea clave es ${item.expectedConcept?.replaceAll('-', ' ')}. Podés abrir este ejercicio en el simulador para resolverlo paso a paso.` })),
+      ];
+      const match = bestKnowledgeMatch(context.message ?? '', knowledge);
+      if (match) return this.result(match.answer, { knowledgeType: match.kind });
+      return this.result('No encontré una explicación suficientemente cercana en el material offline. Probá preguntar por calor específico, reflexión de la luz, movimiento parabólico, componentes de velocidad, vectores o ley de Hooke.');
     }
     if (context.type === 'welcome') return this.result(this.choose('welcome', this.data.greetings));
     if (context.type === 'section') {
@@ -59,12 +82,23 @@ export default class RuleTutorProvider {
     // Exercise-specific hints prevent a generic numeric answer being used for a different problem.
     const exercise = context.exercise ?? this.exercises.find(item => item.id === (context.exerciseId ?? context.ejercicio));
     const specific = this.levels?.byExercise?.[exercise?.id]?.[levelKey];
-    let variants = specific ?? this.levels?.byErrorType?.[context.errorType]?.[levelKey];
+    let variants = specific ?? this.levels?.byErrorType?.[context.errorType]?.[levelKey]
+      ?? (level === HINT_LEVELS_MAX && exercise?.hints?.length ? exercise.hints.at(-1) : null)
+      ?? this.levels?.byConcept?.[context.expectedConcept]?.[levelKey]
+      ?? entry?.levels?.[levelKey];
     if (!variants && exercise?.hints?.length) {
-      const index = level <= 2 ? 0 : level === 3 ? 1 : 2;
-      variants = exercise.hints[Math.min(index, exercise.hints.length - 1)];
+      const hints = exercise.hints;
+      // Most legacy exercises contain an observation, a formula, and a worked answer.
+      // Keep the worked answer until level five and provide a usable intermediate step.
+      const fallback = hints.length >= HINT_LEVELS_MAX ? hints[level - 1]
+        : level === 1 ? hints[0]
+          : level === 2 ? 'Identificá la magnitud que te piden y anotá los datos con sus unidades antes de calcular.'
+            : level === 3 ? (hints[1] ?? hints[0])
+              : level === 4 ? 'Aplicá la relación indicada y resolvé primero la operación intermedia; todavía no hace falta escribir el resultado final.'
+                : hints.at(-1);
+      variants = fallback;
     }
-    variants ??= this.levels?.byConcept?.[context.expectedConcept]?.[levelKey] ?? entry?.levels?.[levelKey] ?? entry?.joparaHint;
+    variants ??= entry?.joparaHint;
     return this.result(this.choose([exercise?.id, context.errorType, context.expectedConcept, level].join(':'), variants), {
       esHint: entry?.esHint,
       followUp: entry?.followUp,
