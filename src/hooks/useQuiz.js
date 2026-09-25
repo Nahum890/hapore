@@ -363,6 +363,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
     if (!text || requestLock.current || charlaUsed >= FREE_CHAT_EXCHANGES) return;
     requestLock.current = true;
     const generation = generationRef.current;
+    if (!sessionRef.current) sessionRef.current = 'chat-' + Date.now() + '-' + Math.random().toString(36).slice(2);
     setBusy(true);
     setStreamText('');
     const nextLog = [...charlaLog, { role: 'alumno', text }];
@@ -377,8 +378,13 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
             if (generation === generationRef.current) setStreamText(token);
           },
         });
+        if (typeof response?.message !== 'string' || !response.message.trim()) throw new Error('Respuesta vacía');
       } catch {
-        response = await createAIProvider('rules').respond({ tipo: 'charla_libre', message: text });
+        try {
+          response = await createAIProvider('rules').respond({ tipo: 'charla_libre', message: text });
+        } catch {
+          response = { message: 'No pude preparar una respuesta ahora. Probá reformular tu pregunta con el tema o la fórmula que estás viendo.' };
+        }
       }
       if (generation !== generationRef.current) return;
       const finalLog = [...nextLog, { role: 'tutor', text: response.message }];
