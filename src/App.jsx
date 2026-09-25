@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import './components/ChatConversation.css';
 import Header from './components/Header.jsx';
 import ConfidenceBar from './components/ConfidenceBar.jsx';
 import TutorCard from './components/TutorCard.jsx';
@@ -158,29 +159,39 @@ function TutorModeTabs({ mode, onModeChange, disabled = false }) {
 
 function FreeChatView({ quiz }) {
   const logRef = useRef(null);
-  useEffect(() => { logRef.current?.scrollTo?.({ top: logRef.current.scrollHeight, behavior: 'smooth' }); }, [quiz.charlaLog.length, quiz.streamText]);
-  const freeHistory = quiz.history.filter(session => session.tema === 'Chat libre');
+  useEffect(() => {
+    logRef.current?.scrollTo?.({ top: logRef.current.scrollHeight, behavior: 'smooth' });
+  }, [quiz.charlaLog.length, quiz.streamText, quiz.busy]);
+  const freeHistory = quiz.history.filter(session => session.tipo === 'chat-libre' || session.tema === 'Chat libre');
   return <div className="tutor-mode-panel" id="tutor-panel" role="tabpanel" aria-labelledby="tutor-tab-free">
-    <div className="quiz-head"><div><h2>Chat libre</h2><p>Preguntale al tutor sin completar tarjetas ni cuestionarios.</p></div><span className="chip">Preguntas disponibles: {quiz.charlaLeft}/8</span></div>
+    <div className="quiz-head">
+      <div><h2>Chat libre</h2><p>Preguntale al tutor sin completar tarjetas ni cuestionarios.</p></div>
+      <span className="chip">Consultas disponibles hoy: {quiz.charlaLeft}/15</span>
+      <button type="button" className="btn btn-secondary chat-new-button" onClick={quiz.newFreeConversation} disabled={quiz.busy}>Nueva conversación</button>
+    </div>
     <div className="chats-scroll" ref={logRef} aria-live="polite">
       {!quiz.charlaLog.length && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble">¡Hola! Estoy acá para ayudarte con Física. Escribí tu pregunta cuando quieras.</div>}
-      {quiz.charlaLog.map((message, position) => <div key={`free-${position}`} className={`chat-bubble ${message.role === 'alumno' ? 'chat-alumno-bubble' : 'chat-tutor-bubble'}`}>{message.text}</div>)}
-      {quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-streaming">{quiz.streamText}</div>}
+      {quiz.charlaLog.map((message, position) => <div key={message.id ?? 'free-' + position} className={'chat-bubble ' + (message.role === 'alumno' ? 'chat-alumno-bubble' : 'chat-tutor-bubble')}>
+        {message.text}
+        {message.role !== 'alumno' && message.source && <small className="chat-message-source">{message.source === 'gemini' ? 'Gemini' : message.source === 'rules' ? 'Tutor local · sin conexión' : message.source === 'local-model' ? 'Modelo local' : ''}</small>}
+      </div>)}
+      {quiz.busy && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-typing" role="status" aria-live="polite"><span>Jopara está respondiendo</span><span className="chat-typing-dots" aria-hidden="true"><i /><i /><i /></span></div>}
+      {quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-streaming" aria-live="off">{quiz.streamText}</div>}
     </div>
-    {quiz.charlaLeft > 0 ? <form className="chats-input-area" onSubmit={event => { event.preventDefault(); quiz.askFreeQuestion(); }}>
-      <input className="quiz-input" type="text" inputMode="text" autoComplete="off" aria-label="Pregunta para el tutor" placeholder="Escribí tu pregunta…" value={quiz.charlaText} onChange={event => quiz.setCharlaText(event.target.value)} disabled={quiz.busy} />
-      <button type="submit" className="btn btn-primary" disabled={quiz.busy || !quiz.charlaText.trim()}>{quiz.busy ? 'El tutor está respondiendo…' : 'Enviar pregunta'}</button>
-    </form> : <div className="chats-input-area"><p className="deck-selector-note">Llegaste al límite de esta conversación.</p><button type="button" className="btn btn-primary" onClick={quiz.newFreeConversation} disabled={quiz.busy}>Iniciar otra conversación</button></div>}
-    {freeHistory.length > 0 && <details className="chat-history"><summary>Conversaciones libres anteriores ({freeHistory.length})</summary><ul className="chat-history-list">{[...freeHistory].reverse().map(session => <li key={session.id} className="chat-history-item"><strong>{session.fecha}</strong> · {session.mensajes?.length ?? 0} mensajes</li>)}</ul></details>}
+    <form className="chats-input-area" onSubmit={event => { event.preventDefault(); quiz.askFreeQuestion(); }}>
+      <input className="quiz-input" type="text" inputMode="text" autoComplete="off" aria-label="Pregunta para el tutor" placeholder={quiz.charlaLeft > 0 ? 'Escribí tu pregunta…' : 'Llegaste al límite diario de consultas'} value={quiz.charlaText} onChange={event => quiz.setCharlaText(event.target.value)} disabled={quiz.busy || quiz.charlaLeft <= 0} />
+      <button type="submit" className="btn btn-primary" disabled={quiz.busy || quiz.charlaLeft <= 0 || !quiz.charlaText.trim()}>{quiz.busy ? 'El tutor está respondiendo…' : 'Enviar pregunta'}</button>
+    </form>
+    {quiz.charlaLeft <= 0 && <p className="deck-selector-note">Alcanzaste las 15 consultas diarias. Iniciar otra conversación no reinicia el límite.</p>}
+    {freeHistory.length > 0 && <details className="chat-history"><summary>Conversaciones anteriores ({freeHistory.length})</summary><ul className="chat-history-list">{[...freeHistory].reverse().map(session => <li key={session.id} className="chat-history-item"><button type="button" className="chat-history-button" onClick={() => quiz.openFreeConversation(session)} disabled={quiz.busy}><strong>{session.tema}</strong><br />{session.fecha} · {session.mensajes?.length ?? 0} mensajes</button></li>)}</ul></details>}
   </div>;
 }
-
 function ChatsView({ quiz, mode, onModeChange, topics, studyTopic, onTopicChange, onCardConsolidated }) {
   const logRef = useRef(null);
 
   useEffect(() => {
     logRef.current?.scrollTo?.({ top: logRef.current.scrollHeight, behavior: 'smooth' });
-  }, [quiz.chat.length, quiz.charlaLog.length, quiz.answered]);
+  }, [quiz.chat.length, quiz.charlaLog.length, quiz.answered, quiz.busy, quiz.streamText]);
 
   const score = quiz.chat.filter((entry) => entry.tutor?.correct).length;
 
@@ -235,11 +246,13 @@ function ChatsView({ quiz, mode, onModeChange, topics, studyTopic, onTopicChange
                 role="status"
               >
                 {entry.tutor?.message}
+                {entry.tutor?.source && <small className="chat-message-source">{entry.tutor.source === 'gemini' ? 'Gemini' : entry.tutor.source === 'rules' ? 'Tutor local · sin conexión' : ''}</small>}
               </div>
             </div>
           ),
         )}
 
+        {quiz.busy && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-typing" role="status" aria-live="polite"><span>Jopara está respondiendo</span><span className="chat-typing-dots" aria-hidden="true"><i /><i /><i /></span></div>}
         {quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-streaming" aria-live="off">{quiz.streamText}</div>}
 
         {quiz.step === 'quiz' && quiz.currentQuestion && (
