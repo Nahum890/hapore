@@ -64,6 +64,8 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
     providerRef.current = createAIProvider();
   }
   const sessionRef = useRef(null);
+  const onMoveRef = useRef(onMoveToChat);
+  onMoveRef.current = onMoveToChat;
 
   const [step, setStep] = useState('cantidad');
   const [quantity, setQuantity] = useState(0);
@@ -78,6 +80,8 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
   const [awaitingJustification, setAwaitingJustification] = useState(false);
   const [justificationText, setJustificationText] = useState('');
   const [busy, setBusy] = useState(false);
+  const [streamText, setStreamText] = useState('');
+  const requestLock = useRef(false);
   const [charlaLog, setCharlaLog] = useState([]);
   const [charlaUsed, setCharlaUsed] = useState(0);
   const [charlaText, setCharlaText] = useState('');
@@ -147,6 +151,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
       setDeck(newDeck);
       setDeckSize(newDeck.length);
       setSeenIds(new Set());
+      setConsolidatedIds(new Set());
       setStep('repaso');
     },
     [buildRepasoDeck, maxAvailable],
@@ -177,7 +182,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
       temaMatchesSubtemas(question.tema, classConfig?.subtemas),
     );
     const quizQuestions = buildQuiz(filteredBank, quantity);
-    sessionRef.current = `chat-${Date.now()}`;
+    sessionRef.current = `chat-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     setQuestions(quizQuestions);
     setQuestionIndex(0);
     setChat([]);
@@ -187,8 +192,8 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
     setAwaitingJustification(false);
     setJustificationText('');
     setStep('quiz');
-    onMoveToChat?.();
-  }, [quantity, onMoveToChat, classConfig]);
+    onMoveRef.current?.();
+  }, [quantity, classConfig]);
 
   useEffect(() => {
     if (step === 'repaso' && deck.length === 0 && consolidatedIds.size > 0) {
@@ -223,8 +228,10 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
   const evaluate = useCallback(
     async ({ marcadoVerdadero, justificacion }) => {
       const question = questions[questionIndex];
-      if (!question || busy) return;
+      if (!question || requestLock.current) return;
+      requestLock.current = true;
       setBusy(true);
+      setStreamText('');
       try {
         let local = { correct: false, close: false, score: 0, coincidentes: [] };
         if (question.tipo === 'abierta') {
@@ -253,6 +260,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
           respuestaJopara: question.respuestaJopara ?? '',
           explicacion: question.explicacion ?? '',
           explicacionJopara: question.explicacionJopara ?? '',
+          onToken: setStreamText,
         });
         const entry = {
           statement: quizStatement(question),
@@ -264,7 +272,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
               : marcadoVerdadero
                 ? 'Verdadero'
                 : `Falso${justificacion ? ` — ${justificacion}` : ''}`,
-          tutor: response,
+          tutor: { ...response, correct: verdict },
         };
         const nextChat = [...chat, entry];
         setChat(nextChat);
@@ -274,6 +282,8 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
         onQuizAnswer?.({ questionId: question.id, correct: verdict });
         persistCurrent(nextChat, charlaLog, questions.map((item) => item.tema).filter((tema, index, all) => all.indexOf(tema) === index).join(', '));
       } finally {
+        requestLock.current = false;
+        setStreamText('');
         setBusy(false);
       }
     },
@@ -320,17 +330,21 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
 
   const askFreeQuestion = useCallback(async () => {
     const text = charlaText.trim();
-    if (!text || busy || charlaUsed >= FREE_CHAT_EXCHANGES) return;
+    if (!text || requestLock.current || charlaUsed >= FREE_CHAT_EXCHANGES) return;
+    requestLock.current = true;
     setBusy(true);
+    setStreamText('');
     const nextLog = [...charlaLog, { role: 'alumno', text }];
     setCharlaLog(nextLog);
     setCharlaText('');
     try {
-      const response = await providerRef.current.answerFreeQuestion({ message: text });
+      const response = await providerRef.current.answerFreeQuestion({ message: text, onToken: setStreamText });
       const finalLog = [...nextLog, { role: 'tutor', text: response.message }];
       setCharlaLog(finalLog);
       persistCurrent(chat, finalLog, 'Charla libre');
     } finally {
+      requestLock.current = false;
+      setStreamText('');
       setBusy(false);
     }
     setCharlaUsed((prev) => Math.min(prev + 1, FREE_CHAT_EXCHANGES));
@@ -357,7 +371,17 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
     setAnswered(false);
     setAwaitingJustification(false);
     setJustificationText('');
+    setStreamText('');
+    requestLock.current = false;
   }, []);
+
+  const classSignature = JSON.stringify(classConfig ?? null);
+  const previousClass = useRef(classSignature);
+  useEffect(() => {
+    if (previousClass.current === classSignature) return;
+    previousClass.current = classSignature;
+    restart();
+  }, [classSignature, restart]);
 
   const charlaLeft = Math.max(0, FREE_CHAT_EXCHANGES - charlaUsed);
   const seenAll = deckSize > 0 && seenIds.size >= deckSize;
@@ -379,6 +403,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
     justificationText,
     setJustificationText,
     busy,
+    streamText,
     charlaLog,
     charlaUsed,
     charlaLeft,

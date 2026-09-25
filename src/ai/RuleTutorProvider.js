@@ -1,146 +1,67 @@
 import tutorData from '../data/tutor_jopara.json' with { type: 'json' };
 import errorsData from '../data/errors.json' with { type: 'json' };
+import exercises from '../data/exercises.json' with { type: 'json' };
+import quizBank from './quizBank.json' with { type: 'json' };
+import { buildQuizFeedback, evaluateQuizContext, findBestMatch } from './quizEngine.js';
+import { sanitizeMarkup } from '../utils/validation.js';
 
 export const HINT_LEVELS_MAX = 5;
-
-/**
- * Helper: selecciona aleatoriamente una variante sintáctica de la lista de
- * pistas del nivel para evitar respuestas repetitivas en modo offline.
- * Acepta arrays de variantes o textos simples (retrocompatibilidad).
- */
-export function obtenerVariantePista(variants) {
-  if (Array.isArray(variants) && variants.length > 0) {
-    return variants[Math.floor(Math.random() * variants.length)];
-  }
-  return variants ?? null;
+export function obtenerVariantePista(variants, previous) {
+  if (!Array.isArray(variants)) return variants ?? null;
+  const choices = variants.filter(text => typeof text === 'string' && text.trim());
+  const fresh = choices.filter(text => text !== previous);
+  const pool = fresh.length ? fresh : choices;
+  return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
 }
 
-/**
- * Tutor 100% offline basado en reglas.
- * Usa JSON local (saludos, pistas jopara, errores frecuentes, pistas
- * progresivas nivel 1-5) para responder sin conexión y sin ningún modelo de IA.
- *
- * Regla técnica: este módulo NO calcula trayectoria, alcance ni tiempo de
- * vuelo; recibe el diagnóstico cerrado del motor físico y solo interpreta.
- */
 export default class RuleTutorProvider {
   constructor(options = {}) {
     this.id = 'rule-tutor';
     this.data = options.data ?? tutorData;
     this.errors = options.errors ?? errorsData;
-    this.levels = options.levels ?? tutorData.hintLevels;
+    this.exercises = options.exercises ?? exercises;
+    this.bank = options.bank ?? quizBank;
+    this.levels = options.levels ?? this.data.hintLevels;
+    this.previous = new Map();
   }
-
+  choose(key, variants) {
+    const text = obtenerVariantePista(variants, this.previous.get(key));
+    this.previous.set(key, text);
+    return text;
+  }
+  result(message, extra = {}) {
+    return { message: sanitizeMarkup(message || this.data.fallbackHint || 'Revisá el enunciado paso a paso.'), source: this.id, available: true, ...extra };
+  }
   async respond(context = {}) {
-    const { type = 'hint' } = context;
-    if (type === 'welcome') return this.#welcome();
-    if (type === 'section') return this.#sectionGreeting(context);
-    if (type === 'mistake') return this.#mistakeResponse(context);
-    return this.#hintResponse(context);
-  }
-
-  #welcome() {
-    const greeting = this.data.greetings?.[0] ?? '¡Mba\'éichapa!';
-    return {
-      message: greeting,
-      source: this.id,
-      available: true,
-    };
-  }
-
-  #sectionGreeting(context) {
-    const greetings = this.data.sectionGreetings ?? {};
-    const greeting =
-      greetings[context.section] ??
-      this.data.greetings?.[0] ??
-      '¡Mba\'éichapa!';
-    return {
-      message: greeting,
-      source: this.id,
-      available: true,
-    };
-  }
-
-  #findError(context) {
-    const { errorId, expectedConcept } = context;
-    if (errorId) {
-      return this.errors.find((error) => error.id === errorId) ?? null;
+    if (context.tipo === 'evaluacion_cuestionario') {
+      const verdict = evaluateQuizContext(context);
+      return this.result(buildQuizFeedback({ ...context, esCorrecta: verdict.correct }), verdict);
     }
-    if (expectedConcept) {
-      return this.errors.find((error) => error.expectedConcept === expectedConcept) ?? null;
+    if (context.tipo === 'charla_libre') {
+      const match = findBestMatch(context.message, this.bank);
+      if (match) return this.result([match.entry.respuesta || match.entry.explicacion, match.entry.respuestaJopara || match.entry.explicacionJopara].filter(Boolean).join(' '));
+      const concept = findBestMatch(context.message, this.data.topicSupport ?? []);
+      return this.result(concept?.entry.respuesta || 'Puedo ayudarte con movimiento parabólico, cinemática, vectores y la ley de Hooke. Probá con una pregunta sobre uno de esos temas.');
     }
-    return null;
-  }
+    if (context.type === 'welcome') return this.result(this.choose('welcome', this.data.greetings));
+    if (context.type === 'section') return this.result(this.choose('section:' + context.section, this.data.sectionGreetings?.[context.section] ?? this.data.greetings));
 
-  #levelResponse(context) {
-    const clampedLevel = Math.min(Math.max(Number(context.hintLevel) || 1, 1), HINT_LEVELS_MAX);
-    const key = `nivel_${clampedLevel}`;
-    const byErrorType = this.levels?.byErrorType ?? {};
-    const byConcept = this.levels?.byConcept ?? {};
-
-    if (context.errorType && byErrorType[context.errorType]) {
-      return obtenerVariantePista(
-        byErrorType[context.errorType][key] ?? byErrorType[context.errorType].nivel_1,
-      );
+    const error = this.errors.find(item => context.errorId ? item.id === context.errorId : item.expectedConcept === context.expectedConcept);
+    const entry = this.data.errors?.find(item => item.errorId === error?.id);
+    const level = Math.min(HINT_LEVELS_MAX, Math.max(1, Math.floor(Number(context.hintLevel) || 1)));
+    const levelKey = 'nivel_' + level;
+    // Exercise-specific hints prevent a generic numeric answer being used for a different problem.
+    const exercise = context.exercise ?? this.exercises.find(item => item.id === (context.exerciseId ?? context.ejercicio));
+    const specific = this.levels?.byExercise?.[exercise?.id]?.[levelKey];
+    let variants = specific ?? this.levels?.byErrorType?.[context.errorType]?.[levelKey];
+    if (!variants && exercise?.hints?.length) {
+      const index = level <= 2 ? 0 : level === 3 ? 1 : 2;
+      variants = exercise.hints[Math.min(index, exercise.hints.length - 1)];
     }
-    if (context.expectedConcept && byConcept[context.expectedConcept]) {
-      return obtenerVariantePista(
-        byConcept[context.expectedConcept][key] ?? byConcept[context.expectedConcept].nivel_1,
-      );
-    }
-    return null;
-  }
-
-  #mistakeResponse(context) {
-    const levelText = this.#levelResponse(context);
-    if (levelText) {
-      return {
-        message: levelText,
-        esHint: this.data.errors?.find((item) => item.errorId === this.#findError(context)?.id)?.esHint,
-        source: this.id,
-        available: true,
-      };
-    }
-    const error = this.#findError(context);
-    const entry = error
-      ? this.data.errors?.find((item) => item.errorId === error.id)
-      : null;
-    if (!entry) {
-      return {
-        message: this.data.fallbackHint ?? 'Revisá el enunciado y probá paso a paso.',
-        source: this.id,
-        available: true,
-      };
-    }
-    return {
-      message: entry.joparaHint,
-      esHint: entry.esHint,
-      followUp: entry.followUp,
-      source: this.id,
-      available: true,
-    };
-  }
-
-  #hintResponse(context) {
-    const levelText = this.#levelResponse(context);
-    if (levelText) {
-      return {
-        message: levelText,
-        esHint: this.data.errors?.find((item) => item.errorId === this.#findError(context)?.id)?.esHint,
-        source: this.id,
-        available: true,
-      };
-    }
-    const error = this.#findError(context);
-    const entry = error
-      ? this.data.errors?.find((item) => item.errorId === error.id)
-      : null;
-    return {
-      message: entry?.joparaHint ?? this.data.fallbackHint ?? 'Vamos paso a paso: releé el enunciado.',
+    variants ??= this.levels?.byConcept?.[context.expectedConcept]?.[levelKey] ?? entry?.levels?.[levelKey] ?? entry?.joparaHint;
+    return this.result(this.choose([exercise?.id, context.errorType, context.expectedConcept, level].join(':'), variants), {
       esHint: entry?.esHint,
       followUp: entry?.followUp,
-      source: this.id,
-      available: true,
-    };
+    });
   }
 }

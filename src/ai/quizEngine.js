@@ -1,80 +1,87 @@
 import { sanitizeMarkup } from '../utils/validation.js';
 
 export function normalizeText(text) {
-  return String(text ?? '')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[$\\`_]/g, '')
-    .replace(/[^a-z0-9\s]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  return String(text ?? '').toLowerCase().normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ').trim();
 }
 
-const MATCH_CORRECT = 0.8;
-const MATCH_CLOSE = 0.5;
-const TEXT_MATCH_CORRECT = 0.5;
-const TEXT_MATCH_CLOSE = 0.25;
+export const MATCH_DEFAULTS = Object.freeze({ correctThreshold: 0.8, closeThreshold: 0.5 });
+export const SYNONYMS = Object.freeze({
+  'no cambia': ['permanece constante', 'se mantiene constante', 'sigue igual', 'no varia'],
+  disminuye: ['se reduce', 'decrece', 'baja', 'disminuir'],
+  aumenta: ['se incrementa', 'crece', 'aumentar'],
+  gravedad: ['aceleracion gravitatoria', 'atraccion terrestre'],
+  parabola: ['parabolica', 'parabolico'],
+  horizontal: ['eje x'], vertical: ['eje y'],
+  altura: ['elevacion'], 'altura maxima': ['punto mas alto', 'cuspide'],
+  combinacion: ['composicion', 'union', 'suma'],
+  cero: ['nula', 'nulo', '0'], frena: ['desacelera', 'reduce la velocidad'],
+  alargamiento: ['elongacion', 'estiramiento'],
+  resorte: ['muelle'], rigidez: ['constante elastica'],
+  direccion: ['orientacion'], rapidez: ['modulo de la velocidad'],
+});
+const STOP = new Set(('que como cual cuales cuando donde porque para pero por una uno unos unas los las del con entre sobre desde hasta este esta esto esa ese son ser sea tiene tienen vale todo toda todos durante solo siempre parte forma muy mas hay cada').split(' '));
+const NEGATION = new Set(['no', 'nunca', 'sin', 'jamas']);
 
-/**
- * Interpreta la respuesta del alumno de todas las maneras posibles:
- * coincide con la respuesta canónica o con las palabras clave del tema
- * (incluyendo raíces de palabras para tolerar sinónimos y variantes).
- */
-export function matchAnswer(question, userAnswer) {
-  const user = normalizeText(userAnswer);
-  const claves = (question?.claves ?? []).map((clave) => normalizeText(clave)).filter(Boolean);
-  if (!user) {
-    return { correct: false, close: false, score: 0, coincidentes: [] };
+function canonicalize(text, synonyms = {}) {
+  let result = ' ' + normalizeText(text) + ' ';
+  const replacements = Object.entries({ ...SYNONYMS, ...synonyms })
+    .flatMap(([key, variants]) => (Array.isArray(variants) ? variants : []).map(value => [normalizeText(value), normalizeText(key)]))
+    .sort((a, b) => b[0].length - a[0].length);
+  for (const [from, to] of replacements) {
+    if (from) result = result.replaceAll(' ' + from + ' ', ' ' + to + ' ');
   }
-
-  const canonical = normalizeText(question?.respuesta);
-  if (canonical && (user === canonical || user.includes(canonical))) {
-    return { correct: true, close: false, score: 1, coincidentes: claves };
+  return result.trim();
+}
+function threshold(value, fallback) {
+  return Number.isFinite(value) && value >= 0 && value <= 1 ? value : fallback;
+}
+function polarities(text, phrase) {
+  const words = text.split(' '), needle = phrase.split(' '), result = [];
+  for (let i = 0; i <= words.length - needle.length; i += 1) {
+    if (needle.every((word, offset) => words[i + offset] === word)) {
+      result.push(words.slice(Math.max(0, i - 3), i).some(word => NEGATION.has(word)));
+    }
   }
-
-  const coincidentes = claves.filter((clave) => {
-    if (user.includes(clave)) return true;
-    const stem = clave.length >= 6 ? clave.slice(0, 5) : clave;
-    return user.includes(stem);
+  return result;
+}
+function compare(userAnswer, expectedText, keys, options = {}) {
+  const user = canonicalize(userAnswer, options.synonyms);
+  const expected = canonicalize(expectedText, options.synonyms);
+  const empty = { correct: false, close: false, score: 0, coincidentes: [] };
+  if (!user || !expected) return empty;
+  const normalizedKeys = [...new Set(keys.map(key => canonicalize(key, options.synonyms)).filter(Boolean))];
+  const coincidentes = normalizedKeys.filter(key => polarities(user, key).length > 0);
+  const opposite = (expected.includes('no cambia') && /\b(aumenta|disminuye)\b/.test(user))
+    || (expected.includes('disminuye') && user.includes('aumenta'))
+    || (expected.includes('aumenta') && user.includes('disminuye'));
+  const contradiction = opposite || coincidentes.some(key => {
+    const reference = polarities(expected, key), answers = polarities(user, key);
+    return reference.length && answers.some(polarity => !reference.includes(polarity));
   });
-  const score = claves.length ? coincidentes.length / claves.length : 0;
-  return {
-    correct: score >= MATCH_CORRECT,
-    close: score >= MATCH_CLOSE && score < MATCH_CORRECT,
-    score,
-    coincidentes,
-  };
+  if (contradiction) return { ...empty, contradiction: true, coincidentes };
+  const score = user === expected ? 1 : normalizedKeys.length ? coincidentes.length / normalizedKeys.length : 0;
+  const correctAt = threshold(options.correctThreshold, MATCH_DEFAULTS.correctThreshold);
+  const closeAt = Math.min(correctAt, threshold(options.closeThreshold, MATCH_DEFAULTS.closeThreshold));
+  return { correct: score >= correctAt && score > 0, close: score >= closeAt && score < correctAt && score > 0, score, coincidentes };
 }
-
-/**
- * Matcheo tolerante de texto libre (justificaciones y charla libre):
- * compara por palabras clave y raíces, aceptando sinónimos e ideas afines.
- */
-export function matchText(userAnswer, expectedText) {
-  const user = normalizeText(userAnswer);
-  const expected = normalizeText(expectedText);
-  if (!user) {
-    return { correct: false, close: false, score: 0, coincidentes: [] };
-  }
-  const expectedWords = [...new Set(expected.split(' ').filter((word) => word.length > 3))];
-  if (expectedWords.length === 0) {
-    return { correct: false, close: false, score: 0, coincidentes: [] };
-  }
-  const coincidentes = expectedWords.filter((word) => {
-    if (user.includes(word)) return true;
-    const stem = word.length >= 6 ? word.slice(0, 5) : word;
-    return user.includes(stem);
-  });
-  const score = coincidentes.length / expectedWords.length;
-  return {
-    correct: score >= TEXT_MATCH_CORRECT,
-    close: score >= TEXT_MATCH_CLOSE && score < TEXT_MATCH_CORRECT,
-    score,
-    coincidentes,
-  };
+export function matchAnswer(question, answer, options = {}) {
+  return compare(answer, question?.respuesta, question?.claves ?? [], options);
 }
-
+export function matchText(answer, expected, options = {}) {
+  const keys = canonicalize(expected, options.synonyms).split(' ').filter(word => word.length > 3 && !STOP.has(word));
+  return compare(answer, expected, keys, { correctThreshold: 0.5, closeThreshold: 0.25, ...options });
+}
+export function evaluateQuizContext(context = {}) {
+  const local = typeof context.esCorrecta === 'boolean'
+    ? { correct: context.esCorrecta, close: Boolean(context.esCercana), coincidentes: context.coincidentes ?? [] }
+    : matchText(context.respuestaAlumno ?? context.justificacion ?? '', context.respuestaCorrecta || context.explicacion || '');
+  const correct = typeof context.esVerdadero === 'boolean'
+    ? context.marcadoVerdadero === context.esVerdadero && (context.marcadoVerdadero || local.correct)
+    : local.correct;
+  return { ...local, correct: Boolean(correct) };
+}
 export function shuffle(array) {
   const copy = [...array];
   for (let i = copy.length - 1; i > 0; i -= 1) {
@@ -83,124 +90,42 @@ export function shuffle(array) {
   }
   return copy;
 }
-
-/**
- * Arma el cuestionario mezclando preguntas abiertas y de verdadero/falso,
- * acotado a la cantidad pedida y sin desbordes de índice.
- */
 export function buildQuiz(bank, quantity) {
-  const abiertas = shuffle((bank ?? []).filter((question) => question.tipo === 'abierta'));
-  const vf = shuffle((bank ?? []).filter((question) => question.tipo === 'vf'));
+  const unique = [...new Map((bank ?? []).filter(q => q?.id).map(q => [q.id, q])).values()];
+  const abiertas = shuffle(unique.filter(q => q.tipo === 'abierta'));
+  const vf = shuffle(unique.filter(q => q.tipo === 'vf'));
   const mixed = [];
-  const max = Math.max(abiertas.length, vf.length);
-  for (let i = 0; i < max; i += 1) {
+  for (let i = 0; i < Math.max(abiertas.length, vf.length); i += 1) {
     if (abiertas[i]) mixed.push(abiertas[i]);
     if (vf[i]) mixed.push(vf[i]);
   }
-  const clamped = Math.min(Math.max(Number(quantity) || 1, 1), mixed.length);
-  return mixed.slice(0, clamped);
+  const count = Number.isFinite(Number(quantity)) ? Math.max(0, Math.floor(Number(quantity))) : 0;
+  return mixed.slice(0, count);
 }
-
-/**
- * Encuentra la mejor coincidencia conceptual del banco para la pregunta
- * del estudiante (soporte offline de la charla libre): matcheo tolerante
- * por palabras clave y raíces de palabras.
- */
-export function findBestMatch(question, bank) {
-  const userText = normalizeText(question);
-  if (!userText) return null;
-  const userWords = new Set(userText.split(' ').filter((word) => word.length > 3));
+export function findBestMatch(question, bank, options = {}) {
+  const words = [...new Set(canonicalize(question, options.synonyms).split(' ').filter(word => word.length > 3 && !STOP.has(word)))];
+  if (!words.length) return null;
   let best = null;
-  let bestScore = 0;
   for (const entry of bank ?? []) {
-    const haystack = normalizeText(
-      [entry?.pregunta, entry?.enunciado, entry?.respuesta, entry?.explicacion, entry?.tema]
-        .filter(Boolean)
-        .join(' '),
-    );
-    const entryWords = new Set(haystack.split(' ').filter((word) => word.length > 3));
-    let hits = 0;
-    for (const word of userWords) {
-      if (entryWords.has(word)) {
-        hits += 1;
-      } else if (word.length >= 6 && haystack.includes(word.slice(0, 5))) {
-        hits += 1;
-      }
-    }
-    const score = userWords.size ? hits / userWords.size : 0;
-    if (score > bestScore) {
-      bestScore = score;
-      best = entry;
-    }
+    const text = canonicalize([entry.pregunta, entry.enunciado, entry.respuesta, entry.explicacion, entry.tema].filter(Boolean).join(' '), options.synonyms);
+    const hits = words.filter(word => polarities(text, word).length).length;
+    const score = hits / words.length;
+    if (score >= threshold(options.minScore, 0.4) && (!best || score > best.score)) best = { entry, score };
   }
-  if (best && bestScore >= 0.25) {
-    return { entry: best, score: bestScore };
-  }
-  return null;
+  return best;
 }
-
-const QUIZ_ENCOURAGEMENTS = [
-  '¡Ndaipóri problema! Fue un buen intento.',
-  '¡Ani kaneo! Casi lo tenés, seguí así.',
-  '¡Ikatu jey! Fue un buen intento, ahora mirá la respuesta.',
-  '¡Poraha iteréi! Pero vas aprendiendo: ehécha la respuesta.',
-];
-
-function encouragement() {
-  return QUIZ_ENCOURAGEMENTS[Math.floor(Math.random() * QUIZ_ENCOURAGEMENTS.length)];
-}
-
-/**
- * Corrección offline del cuestionario (reglas + JSON local):
- * - Si acierta o se acerca: confirma, muestra la respuesta real y por qué se acercó.
- * - Si se equivoca: palabras de aliento + la respuesta correcta en jopara.
- */
 export function buildQuizFeedback(context = {}) {
-  const {
-    esCorrecta = false,
-    esCercana = false,
-    esVerdadero = false,
-    marcadoVerdadero = false,
-    respuestaCorrecta = '',
-    respuestaJopara = '',
-    explicacion = '',
-    explicacionJopara = '',
-    coincidentes = [],
-  } = context;
-
+  const verdict = evaluateQuizContext(context);
+  const explanation = context.explicacion ?? '';
+  const translation = context.respuestaJopara || context.explicacionJopara || '';
   if (typeof context.esVerdadero === 'boolean') {
-    if (esVerdadero && marcadoVerdadero) {
-      return sanitizeMarkup(
-        `¡Ikatu! Estás en lo correcto. Es verdadero porque: ${explicacion} ${explicacionJopara}`,
-      );
-    }
-    if (esVerdadero && !marcadoVerdadero) {
-      return sanitizeMarkup(
-        `${encouragement()} En realidad la afirmación es verdadera: ${explicacion} ${explicacionJopara}`,
-      );
-    }
-    if (!esVerdadero && marcadoVerdadero) {
-      return sanitizeMarkup(
-        `${encouragement()} En realidad es falsa: ${explicacion} ${explicacionJopara}`,
-      );
-    }
-    return sanitizeMarkup(
-      `${encouragement()} Es falsa porque: ${explicacion} ${explicacionJopara}`,
-    );
+    const truth = context.esVerdadero ? 'verdadera' : 'falsa';
+    const opening = verdict.correct ? '¡Bien! Tu respuesta y la explicación son correctas.'
+      : !context.marcadoVerdadero && !context.esVerdadero ? 'Identificaste que es falsa. Revisemos la justificación.'
+      : 'Buen intento. La afirmación es ' + truth + '.';
+    return sanitizeMarkup([opening, explanation, translation].filter(Boolean).join(' '));
   }
-
-  if (esCorrecta) {
-    return sanitizeMarkup(
-      `¡Ikatu! Respuesta correcta. ${respuestaJopara || explicacion}`,
-    );
-  }
-  if (esCercana) {
-    const cerca = coincidentes.length ? ` Coincidiste en: ${coincidentes.join(', ')}.` : '';
-    return sanitizeMarkup(
-      `¡Iporã! Te acercaste mucho a la respuesta.${cerca} La respuesta real es: ${respuestaCorrecta}. ${explicacion}`,
-    );
-  }
-  return sanitizeMarkup(
-    `${encouragement()} La respuesta real es: ${respuestaCorrecta}. ${respuestaJopara || explicacion}`,
-  );
+  if (verdict.correct) return sanitizeMarkup(['¡Bien! Respuesta correcta.', context.respuestaCorrecta, explanation, translation].filter(Boolean).join(' '));
+  const opening = verdict.close ? 'Te acercaste: algunas ideas coinciden.' : 'Buen intento. Vamos a repasarlo.';
+  return sanitizeMarkup([opening, 'La respuesta es: ' + (context.respuestaCorrecta || explanation), explanation, translation].filter(Boolean).join(' '));
 }
