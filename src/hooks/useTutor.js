@@ -33,7 +33,7 @@ export function useTutor() {
 
   const ask = useCallback(async (context) => {
     const id = ++requestId.current;
-    const onToken = (message) => { if (id === requestId.current) setTutor({ message, source: 'local-ai', available: true, streaming: true }); };
+    const onToken = (message) => { if (id === requestId.current) setTutor({ message, source: 'gemini', available: true, streaming: true }); };
     try {
       const response = await providerRef.current.respond({ ...context, onToken });
       if (id === requestId.current) setTutor(response);
