@@ -88,7 +88,7 @@
     "front": "¿Qué ocurre si variamos el ángulo de lanzamiento (ángulo)?\n¿Mba'épa oiko ñamoambuévo pe ángulo?",
     "back": "Cambia cómo se reparte la velocidad inicial entre avanzar (vx) y subir (vy). A 45° se logra el alcance máximo en suelo horizontal.\nRegla: 45° = Alcance Máximo",
     "formula": "R = (v0² * sen(2 * ángulo)) / g",
-    "frente_es": "¿Qué ocurre si variamos el ángulo ángulo?",
+    "frente_es": "¿Qué ocurre si variamos el ángulo de lanzamiento?",
     "frente_jopara": "¿Mba'épa oiko ñamoambuévo pe ángulo?",
     "dorso_concepto": "Cambia la proporción entre avance y elevación. 45° da el alcance máximo.",
     "subtopic": "Variación del Ángulo"

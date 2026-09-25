@@ -166,7 +166,7 @@
       "Emboguejymi pe velocidad inicial ani hag̃ua ohasa pe pista."
     ]
   },
-  "_reviewNote": "Los textos jopara existentes siguen pendientes de revisión por una persona competente en guaraní paraguayo. Las ampliaciones nuevas se redactaron en castellano; no constituyen traducciones validadas.",
+  "_reviewNote": "Todo texto Jopara de este catálogo, incluidas las ampliaciones recientes, es un borrador pendiente de revisión por una persona competente en guaraní paraguayo. No se declara ninguna traducción como aprobada.",
   "hintLevels": {
     "byErrorType": {
       "angulo_bajo": {
@@ -500,22 +500,25 @@
     "aula": "Espacio de clase: conectate con el código de tu profesor o proyectá los parámetros en la pizarra."
   },
   "topicSupport": [
-    { "tema": "Termodinámica", "pregunta": "Calor y temperatura del agua para el mate", "respuesta": "Calor es energía transferida. Para agua sin cambio de estado: Q = m · c · (Tf - Ti). Primero calculá la diferencia de temperatura. Pe y más caliente cede calor a la más fría." },
-    { "tema": "Óptica", "pregunta": "Reflexión de luz en espejo y refracción en vaso de agua", "respuesta": "En un espejo, incidencia y reflexión se miden desde la normal y son iguales. En agua, la luz cambia de dirección al pasar al aire: pe pajita parece doblada por refracción." },
+    { "tema": "Termodinámica", "pregunta": "Calor y temperatura del agua para el mate", "respuesta": "Calor es energía transferida. Para agua sin cambio de estado: Q = m · c · (Tf - Ti). Primero calculá la diferencia de temperatura. Pe y más caliente cede calor a la más fría.", "respuestaJopara": "Pe calor ha'e energía ova peteĩ mba'e hakuvevagui ro'ysãvevape. Y noñemoambuéiramo estado: Q = m · c · (Tf - Ti). Eipapa pe temperatura diferencia raẽ. Pe y hakuveva ome'ẽ calor pe ro'ysãvape." },
+    { "tema": "Óptica", "pregunta": "Reflexión de luz en espejo y refracción en vaso de agua", "respuesta": "En un espejo, incidencia y reflexión se miden desde la normal y son iguales. En agua, la luz cambia de dirección al pasar al aire: pe pajita parece doblada por refracción.", "respuestaJopara": "Espejo-pe, pe ángulo oñemedi normal guive; incidencia ha reflexión peteĩcha. Ygui osẽvo aire-pe, pe luz okambia dirección ha pe pajita ha'ete oñekarẽva refracción rehe." },
     {
       "tema": "Cinemática",
       "pregunta": "Rapidez media",
-      "respuesta": "La rapidez media relaciona la distancia recorrida con el tiempo empleado. Se expresa en m/s cuando la distancia está en metros y el tiempo en segundos."
+      "respuesta": "La rapidez media relaciona la distancia recorrida con el tiempo empleado. Se expresa en m/s cuando la distancia está en metros y el tiempo en segundos.",
+      "respuestaJopara": "Rapidez media jaipapa distancia ojehóva ha tiempo ojepurúva reheve. Unidad ha'e m/s, distancia metro ha tiempo segundo-pe."
     },
     {
       "tema": "Vectores",
       "pregunta": "Vector resultante",
-      "respuesta": "Un vector tiene magnitud, dirección y sentido. La resultante se obtiene sumando sus componentes en cada eje; los sentidos opuestos llevan signos distintos."
+      "respuesta": "Un vector tiene magnitud, dirección y sentido. La resultante se obtiene sumando sus componentes en cada eje; los sentidos opuestos llevan signos distintos.",
+      "respuestaJopara": "Peteĩ vector oguereko magnitud, dirección ha sentido. Pe resultante jaheka ñambojoajúvo umi componente peteĩteĩ eje-pe; umi sentido ojoavýva oguereko signo diferente."
     },
     {
       "tema": "Ley de Hooke",
       "pregunta": "Ley de Hooke",
-      "respuesta": "Dentro del límite elástico, la magnitud de la fuerza de un resorte es proporcional a su deformación. La fuerza restauradora apunta en sentido opuesto a esa deformación."
+      "respuesta": "Dentro del límite elástico, la magnitud de la fuerza de un resorte es proporcional a su deformación. La fuerza restauradora apunta en sentido opuesto a esa deformación.",
+      "respuestaJopara": "Resorte ndoasáiramo límite elástico, fuerza magnitud okakuaa oñondive deformación ndive. Pe fuerza oguerúva jeýpe oho deformación rovái."
     }
   ]
 }

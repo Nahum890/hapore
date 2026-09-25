@@ -179,7 +179,7 @@
     "subtema": "movimiento_parabolico",
     "topic": "Movimiento Parabólico",
     "difficulty": "avanzado",
-    "question": "Misión Alto Paraná: Un puesto sanitario está a 40 m de distancia a la misma altura. Si v0 = 20 m/s y g = 10 m/s², ¿qué ángulo ángulo (en grados) logra llegar exactamente al objetivo?",
+    "question": "Misión Alto Paraná: Un puesto sanitario está a 40 m de distancia a la misma altura. Si v0 = 20 m/s y g = 10 m/s², ¿qué ángulo (en grados) logra llegar exactamente al objetivo?",
     "values": {
       "v0": 20,
       "targetDistance": 40,
@@ -190,7 +190,7 @@
     "unit": "°",
     "targetX": 40,
     "targetY": 0,
-    "tolerance": 0.5,
+    "tolerance": 0,
     "hints": [
       "El alcance máximo de cualquier proyectil se logra cuando el término sen(2 * ángulo) alcanza su valor máximo.",
       "R = (v0² * sen(2 * ángulo)) / g. Sustituyendo: 40 = (400 * sen(2 * ángulo)) / 10 -> sen(2 * ángulo) = 1.",

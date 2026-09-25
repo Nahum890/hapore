@@ -1,0 +1,62 @@
+[
+  {
+    "id": "openstax-physics-projectile-5-3",
+    "institution": "OpenStax, Rice University",
+    "authors": ["Paul Peter Urone", "Roger Hinrichs"],
+    "title": "Physics",
+    "edition": "OpenStax digital edition",
+    "publicationYear": 2020,
+    "section": "5.3 Projectile Motion",
+    "page": "No aplica: edición web sin paginación estable",
+    "url": "https://openstax.org/books/physics/pages/5-3-projectile-motion",
+    "doi": null,
+    "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+    "supports": ["Movimiento parabólico", "Cinemática", "Vectores", "componentes de velocidad", "tiempo de vuelo", "altura máxima", "alcance"],
+    "assumptions": "Modelo ideal: resistencia del aire despreciable y aceleración gravitatoria constante. El alcance máximo a 45° requiere salida y llegada al mismo nivel."
+  },
+  {
+    "id": "openstax-college-physics-14-2",
+    "institution": "OpenStax, Rice University",
+    "authors": ["Paul Peter Urone", "Roger Hinrichs"],
+    "title": "College Physics 2e",
+    "edition": "2.ª edición",
+    "publicationYear": 2022,
+    "section": "14.2 Temperature Change and Heat Capacity",
+    "page": "No aplica: edición web sin paginación estable",
+    "url": "https://openstax.org/books/college-physics-2e/pages/14-2-temperature-change-and-heat-capacity",
+    "doi": null,
+    "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+    "supports": ["Termodinámica", "calor sensible", "capacidad calorífica", "Q = m · c · ΔT"],
+    "assumptions": "Se usa calor específico constante en el intervalo y no hay cambio de estado; cada ejercicio indica si se desprecian pérdidas."
+  },
+  {
+    "id": "openstax-college-physics-25-2",
+    "institution": "OpenStax, Rice University",
+    "authors": ["Paul Peter Urone", "Roger Hinrichs"],
+    "title": "College Physics 2e",
+    "edition": "2.ª edición",
+    "publicationYear": 2022,
+    "section": "25.2 The Law of Reflection",
+    "page": "No aplica: edición web sin paginación estable",
+    "url": "https://openstax.org/books/college-physics-2e/pages/25-2-the-law-of-reflection",
+    "doi": null,
+    "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+    "supports": ["Óptica", "ley de reflexión", "ángulos desde la normal", "espejo plano"],
+    "assumptions": "Los ángulos de incidencia y reflexión se miden desde la normal a la superficie."
+  },
+  {
+    "id": "openstax-college-physics-16-1",
+    "institution": "OpenStax, Rice University",
+    "authors": ["Paul Peter Urone", "Roger Hinrichs"],
+    "title": "College Physics 2e",
+    "edition": "2.ª edición",
+    "publicationYear": 2022,
+    "section": "16.1 Hooke’s Law: Stress and Strain Revisited",
+    "page": "No aplica: edición web sin paginación estable",
+    "url": "https://openstax.org/books/college-physics-2e/pages/16-1-hookes-law-stress-and-strain-revisited",
+    "doi": null,
+    "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+    "supports": ["Ley de Hooke", "fuerza elástica", "deformación"],
+    "assumptions": "La relación lineal F = kx vale en el intervalo elástico; se distingue la magnitud de la fuerza restauradora de su sentido opuesto al desplazamiento."
+  }
+]

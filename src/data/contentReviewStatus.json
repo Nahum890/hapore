@@ -1,0 +1,17 @@
+{
+  "defaultStatus": "draft",
+  "humanReview": {
+    "status": "pending",
+    "reviewer": null,
+    "note": "Ninguna traducción Jopara se etiqueta como revisada o aprobada sin revisión humana competente."
+  },
+  "collections": {
+    "concepts": { "count": 16, "joparaStatus": "draft" },
+    "errors": { "count": 15, "joparaStatus": "draft" },
+    "exercises": { "count": 24, "joparaStatus": "draft", "joparaQuestionsPresent": 24 },
+    "flashcards": { "count": 31, "joparaStatus": "draft", "joparaFrontsPresent": 31, "joparaBacksPresent": 31 },
+    "glossary": { "count": 15, "joparaTermsPresent": 15, "joparaDefinitionsStatus": "draft" },
+    "quizBank": { "count": 56, "joparaStatus": "draft", "joparaAnswersPresent": 24 },
+    "tutor": { "joparaStatus": "draft" }
+  }
+}
