@@ -8,7 +8,6 @@ const BITMASK_BY_SUBTEMA = {
   hooke: 8,
 };
 
-const BASE36_ALPHABET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const MASK_LETTERS = 'ABCDEFGHIJKLMNOP';
 
 const TEMA_MATCHERS = [
@@ -40,10 +39,10 @@ export function encodeClassConfig({ flashcards = 10, subtemas = [], ejercicios =
 export function decodeClassConfig(code) {
   const match = CODE_PATTERN.exec(String(code ?? '').trim().toUpperCase());
   if (!match) return null;
-  const flashcards = Math.min(20, Math.max(5, parseInt(match[1], 10)));
+  const flashcards = parseInt(match[1], 10);
   const mask = MASK_LETTERS.indexOf(match[2]);
-  const ejercicios = Math.min(10, Math.max(1, parseInt(match[3], 10)));
-  if (mask < 0) return null;
+  const ejercicios = parseInt(match[3], 10);
+  if (flashcards < 5 || flashcards > 20 || ejercicios < 1 || ejercicios > 10 || mask <= 0) return null;
   const subtemas = TEMA_MATCHERS.filter((tema) => (mask & BITMASK_BY_SUBTEMA[tema.id]) !== 0).map(
     (tema) => tema.id,
   );

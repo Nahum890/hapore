@@ -1,19 +1,38 @@
 const memoryStore = new Map();
 
-const safeStorage =
-  typeof localStorage !== 'undefined'
-    ? localStorage
-    : {
-        getItem(key) {
-          return memoryStore.has(key) ? memoryStore.get(key) : null;
-        },
-        setItem(key, value) {
-          memoryStore.set(key, String(value));
-        },
-        removeItem(key) {
-          memoryStore.delete(key);
-        },
-      };
+// Acceder a localStorage puede lanzar SecurityError incluso antes de llamar
+// getItem (por ejemplo, con almacenamiento bloqueado por el navegador).
+const safeStorage = {
+  getItem(key) {
+    if (memoryStore.has(key)) return memoryStore.get(key);
+    try {
+      return globalThis.localStorage?.getItem(key) ?? null;
+    } catch {
+      return null;
+    }
+  },
+  setItem(key, value) {
+    const serialized = String(value);
+    try {
+      globalThis.localStorage?.setItem(key, serialized);
+      if (globalThis.localStorage) {
+        memoryStore.delete(key);
+        return;
+      }
+    } catch {
+      // La cuota puede agotarse durante una sesión: conservamos el último valor.
+    }
+    memoryStore.set(key, serialized);
+  },
+  removeItem(key) {
+    memoryStore.delete(key);
+    try {
+      globalThis.localStorage?.removeItem(key);
+    } catch {
+      // El estado en memoria ya se eliminó.
+    }
+  },
+};
 
 export const STORAGE_KEYS = {
   CONFIDENCE: 'guarania:confidence',
@@ -40,7 +59,7 @@ export function writeJSON(key, value) {
   try {
     safeStorage.setItem(key, JSON.stringify(value));
   } catch {
-    // Almacenamiento no disponible o lleno: el progreso se mantiene solo en memoria.
+    // Valores no serializables no pueden guardarse.
   }
 }
 
