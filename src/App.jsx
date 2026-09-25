@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Header from './components/Header.jsx';
 import ConfidenceBar from './components/ConfidenceBar.jsx';
 import TutorCard from './components/TutorCard.jsx';
@@ -372,9 +372,9 @@ function ChatsView({ quiz }) {
 export default function App() {
   const [activeTab, setActiveTab] = useState('simulador');
   const [classConfig, setClassConfig] = useState(() => decodeClassConfig(readJSON('guarania:classCode', null)));
-  const visibleExercises = classConfig
+  const visibleExercises = useMemo(() => classConfig
     ? exercisesData.filter((exercise) => temaMatchesSubtemas(exercise.topic, classConfig.subtemas)).slice(0, classConfig.ejercicios)
-    : exercisesData;
+    : exercisesData, [classConfig]);
   const learning = useOfflineStorage();
   const { tutor, ask } = useTutor();
   const { mission, currentExercise, index, next, prev } = useMission(
@@ -392,6 +392,16 @@ export default function App() {
     ask({ type: 'section', section: activeTab });
   }, [activeTab, ask]);
 
+  useEffect(() => {
+    const syncClass = (event) => {
+      if (event.key !== null && event.key !== 'guarania:classCode') return;
+      setClassConfig(decodeClassConfig(readJSON('guarania:classCode', null)));
+      learning.resetHints();
+    };
+    window.addEventListener('storage', syncClass);
+    return () => window.removeEventListener('storage', syncClass);
+  }, [learning.resetHints]);
+
   const handleCardConsolidated = (flashcardId) => {
     learning.onFlashcardConsolidated(flashcardId);
     quiz.consolidateCard(flashcardId);
@@ -399,6 +409,14 @@ export default function App() {
 
   const handleJoinClass = (config) => {
     writeJSON('guarania:classCode', config ? encodeClassConfig(config) : null);
+    const available = config
+      ? exercisesData.filter((exercise) => temaMatchesSubtemas(exercise.topic, config.subtemas)).slice(0, config.ejercicios)
+      : exercisesData;
+    if (available.length && !available.some((exercise) => exercise.id === learning.currentExercise)) {
+      learning.onSelectExercise(available[0].id);
+    } else {
+      learning.resetHints();
+    }
     setClassConfig(config);
   };
 
