@@ -1,0 +1,335 @@
+/* ProjectileLab Scoped Styles - Prefixed with .plab- */
+
+.plab-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  background: var(--surface-card, #ffffff);
+  border: 1px solid var(--border-color, #d2ded7);
+  border-radius: 12px;
+  padding: 1.25rem;
+  color: var(--text-main, #1c322b);
+  box-shadow: 0 4px 16px rgba(18, 52, 42, 0.06);
+  font-family: inherit;
+  margin: 1rem 0;
+}
+
+.plab-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.plab-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.plab-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #17483b;
+}
+
+.plab-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: #e1f0e8;
+  color: #17483b;
+  border: 1px solid #9dc8b1;
+}
+
+.plab-subtitle {
+  margin: 0;
+  font-size: 0.925rem;
+  color: #4a675e;
+}
+
+/* Canvas Area */
+.plab-canvas-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 280px;
+  max-height: 520px;
+  background: linear-gradient(180deg, #e4f3f7 0%, #f6f3e5 80%, #ebdcc9 100%);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #bcd1c6;
+}
+
+.plab-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.plab-canvas-overlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(4px);
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #203b39;
+  border: 1px solid #cbded5;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.plab-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.plab-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.plab-dot-current {
+  background: #d66836;
+}
+
+.plab-dot-ghost {
+  background: #318eaa;
+}
+
+/* Controls Grid */
+.plab-controls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.plab-control-card {
+  background: #f7faf8;
+  border: 1px solid #dbe6e0;
+  border-radius: 8px;
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.plab-control-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #17483b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.plab-val-tag {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #d66836;
+  background: #fbf0ea;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+}
+
+.plab-slider {
+  width: 100%;
+  cursor: pointer;
+  accent-color: #d66836;
+}
+
+.plab-select {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #b5ccc0;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: #ffffff;
+  color: #203b39;
+}
+
+.plab-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: 0.25rem;
+}
+
+.plab-checkbox-label {
+  font-size: 0.825rem;
+  color: #234139;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  cursor: pointer;
+}
+
+/* Action Buttons */
+.plab-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.plab-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.15s ease, transform 0.05s ease;
+}
+
+.plab-btn:focus-visible {
+  outline: 3px solid #318eaa;
+  outline-offset: 2px;
+}
+
+.plab-btn:active {
+  transform: translateY(1px);
+}
+
+.plab-btn-primary {
+  background: #17483b;
+  color: #ffffff;
+}
+
+.plab-btn-primary:hover {
+  background: #235c4d;
+}
+
+.plab-btn-secondary {
+  background: #eaf1ed;
+  color: #17483b;
+  border: 1px solid #b5ccbf;
+}
+
+.plab-btn-secondary:hover {
+  background: #dce7e1;
+}
+
+.plab-btn-accent {
+  background: #d66836;
+  color: #ffffff;
+}
+
+.plab-btn-accent:hover {
+  background: #be5524;
+}
+
+/* Metrics Dashboard */
+.plab-metrics-panel {
+  background: #f1f7f4;
+  border: 1px solid #c7ded3;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.plab-metrics-title {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #17483b;
+}
+
+.plab-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+
+.plab-metric-item {
+  background: #ffffff;
+  padding: 0.55rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #d4e2db;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.plab-metric-name {
+  font-size: 0.75rem;
+  color: #557269;
+}
+
+.plab-metric-value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1a3c33;
+}
+
+/* Comparison Notice */
+.plab-comparison-box {
+  background: #eef6f9;
+  border-left: 4px solid #318eaa;
+  border-radius: 0 6px 6px 0;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: #1a4351;
+  line-height: 1.45;
+}
+
+/* Hypotheses Collapsible */
+.plab-hypotheses {
+  background: #fdfbf7;
+  border: 1px solid #ebd9c4;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  font-size: 0.85rem;
+  color: #523b28;
+}
+
+.plab-hypotheses details summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: #8c4c1a;
+  outline: none;
+}
+
+.plab-hypotheses details summary:focus-visible {
+  outline: 2px solid #8c4c1a;
+}
+
+.plab-hypotheses ul {
+  margin: 0.5rem 0 0 1.25rem;
+  padding: 0;
+}
+
+.plab-hypotheses li {
+  margin-bottom: 0.35rem;
+}
+
+@media (max-width: 640px) {
+  .plab-container {
+    padding: 0.85rem;
+    gap: 1rem;
+  }
+  .plab-controls-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plab-canvas {
+    transition: none !important;
+  }
+}

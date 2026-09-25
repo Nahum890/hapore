@@ -1,4 +1,22 @@
 import { planFlight, startingControls } from './flightPlan.js';
+import {
+  hookeDeformation,
+  hookeForce,
+  hookeSpringConstant,
+  kinematicsDistance,
+  kinematicsSpeed,
+  kinematicsTime,
+  opticsAngleFromSurface,
+  opticsPlaneMirrorImageDistance,
+  opticsReflectedAngle,
+  opticsRefractiveIndex,
+  thermalEquilibriumTemperature,
+  thermalFinalTemperature,
+  thermalSensibleHeat,
+  toDegrees,
+  vectorCollinearResultant,
+  vectorMagnitude,
+} from '../physics/formulas.js';
 
 export function sceneForExercise(exercise, studentAnswer) {
   const values = exercise?.values ?? {};
@@ -11,8 +29,8 @@ export function sceneForExercise(exercise, studentAnswer) {
   const gravity = Number(values.gravity) || 9.8;
   if (Number.isFinite(Number(values.vx)) && Number.isFinite(Number(values.t)) && !values.v0) {
     const vy = gravity * Number(values.t) / 2;
-    speed = Math.hypot(Number(values.vx), vy);
-    angle = Math.atan2(vy, Number(values.vx)) * 180 / Math.PI;
+    speed = vectorMagnitude(Number(values.vx), vy);
+    angle = toDegrees(Math.atan2(vy, Number(values.vx)));
   }
   if (exercise?.unit === '°' && Number.isFinite(Number(studentAnswer))) angle = Number(studentAnswer);
   const flight = planFlight({ speed, angle, gravity, targetX: exercise?.targetX ?? values.targetDistance });
@@ -30,28 +48,52 @@ export function measureExercise(exercise, flight) {
     if (exercise.expectedConcept === 'alcance') return flight?.landingX;
   }
   if (exercise?.topic === 'Cinemática') {
-    if (exercise.unit === 'm/s') return Number(values.distancia) / Number(values.tiempo);
-    if (exercise.unit === 'm') return Number(values.rapidez) * Number(values.tiempo);
-    if (exercise.unit === 's') return Number(values.distancia) / Number(values.rapidez);
+    if (exercise.unit === 'm/s') return kinematicsSpeed(values.distancia, values.tiempo);
+    if (exercise.unit === 'm') return kinematicsDistance(values.rapidez, values.tiempo);
+    if (exercise.unit === 's') return kinematicsTime(values.distancia, values.rapidez);
   }
   if (exercise?.topic === 'Vectores') {
-    if ('componenteX' in values) return Math.hypot(Number(values.componenteX), Number(values.componenteY));
-    return Math.abs(Number(values.velocidadDron) + Number(values.velocidadViento));
+    if ('componenteX' in values) return vectorMagnitude(values.componenteX, values.componenteY);
+    return vectorCollinearResultant(values.velocidadDron, values.velocidadViento);
   }
   if (exercise?.topic === 'Ley de Hooke') {
-    if (exercise.unit === 'N') return Number(values.k) * Number(values.x);
-    if (exercise.unit === 'N/m') return Number(values.fuerza) / Number(values.x);
-    if (exercise.unit === 'm') return Number(values.fuerza) / Number(values.k);
+    if (exercise.unit === 'N') return hookeForce(values.k, values.x);
+    if (exercise.unit === 'N/m') return hookeSpringConstant(values.fuerza, values.x);
+    if (exercise.unit === 'm') return hookeDeformation(values.fuerza, values.k);
   }
   if (exercise?.topic === 'Termodinámica') {
-    if (exercise.expectedConcept === 'calor-sensible') return Number(values.masa) * Number(values.calorEspecifico) * (Number(values.temperaturaFinal) - Number(values.temperaturaInicial));
-    if (exercise.expectedConcept === 'temperatura-final') return Number(values.temperaturaInicial) + Number(values.calor) / (Number(values.masa) * Number(values.calorEspecifico));
-    if (exercise.expectedConcept === 'equilibrio-termico') return (Number(values.masaCaliente) * Number(values.temperaturaCaliente) + Number(values.masaFria) * Number(values.temperaturaFria)) / (Number(values.masaCaliente) + Number(values.masaFria));
+    if (exercise.expectedConcept === 'calor-sensible') {
+      return thermalSensibleHeat(
+        values.masa,
+        values.calorEspecifico,
+        Number(values.temperaturaFinal) - Number(values.temperaturaInicial),
+      );
+    }
+    if (exercise.expectedConcept === 'temperatura-final') {
+      return thermalFinalTemperature(
+        values.temperaturaInicial,
+        values.calor,
+        values.masa,
+        values.calorEspecifico,
+      );
+    }
+    if (exercise.expectedConcept === 'equilibrio-termico') {
+      return thermalEquilibriumTemperature(
+        values.masaCaliente,
+        values.temperaturaCaliente,
+        values.masaFria,
+        values.temperaturaFria,
+      );
+    }
   }
   if (exercise?.topic === 'Óptica') {
-    if (exercise.expectedConcept === 'ley-reflexion') return 'anguloSuperficie' in values ? 90 - Number(values.anguloSuperficie) : Number(values.anguloIncidencia);
-    if (exercise.expectedConcept === 'espejo-plano') return Number(values.distanciaObjeto);
-    if (exercise.expectedConcept === 'indice-refraccion') return Number(values.velocidadVacio) / Number(values.velocidadMedio);
+    if (exercise.expectedConcept === 'ley-reflexion') {
+      return 'anguloSuperficie' in values
+        ? opticsAngleFromSurface(values.anguloSuperficie)
+        : opticsReflectedAngle(values.anguloIncidencia);
+    }
+    if (exercise.expectedConcept === 'espejo-plano') return opticsPlaneMirrorImageDistance(values.distanciaObjeto);
+    if (exercise.expectedConcept === 'indice-refraccion') return opticsRefractiveIndex(values.velocidadVacio, values.velocidadMedio);
   }
   return Number(exercise?.correctAnswer);
 }

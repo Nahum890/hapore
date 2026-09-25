@@ -1,0 +1,413 @@
+/* ParabolicGames Scoped Styles - Prefixed with .pgame- */
+
+.pgame-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  background: var(--surface-card, #ffffff);
+  border: 1px solid var(--border-color, #d2ded7);
+  border-radius: 12px;
+  padding: 1.25rem;
+  color: var(--text-main, #1c322b);
+  box-shadow: 0 4px 16px rgba(18, 52, 42, 0.06);
+  font-family: inherit;
+  margin: 1rem 0;
+}
+
+.pgame-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.pgame-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pgame-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #17483b;
+}
+
+.pgame-score-badge {
+  font-size: 0.9rem;
+  font-weight: 700;
+  background: #fbf0ea;
+  color: #d66836;
+  border: 1px solid #ecc9b7;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+}
+
+.pgame-subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #4a675e;
+}
+
+/* Tabs */
+.pgame-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid #e1ebe6;
+  padding-bottom: 0.5rem;
+}
+
+.pgame-tab-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #4a675e;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pgame-tab-btn:hover {
+  background: #eaf2ee;
+  color: #17483b;
+}
+
+.pgame-tab-btn.is-active {
+  background: #17483b;
+  color: #ffffff;
+}
+
+.pgame-tab-btn:focus-visible {
+  outline: 3px solid #318eaa;
+}
+
+/* Challenge View */
+.pgame-challenge {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pgame-challenge-desc {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #2c493f;
+  background: #f6faf8;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #dbe8e1;
+}
+
+/* Canvas Wrapper */
+.pgame-canvas-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 260px;
+  max-height: 480px;
+  background: linear-gradient(180deg, #dcf0f5 0%, #f6f3e7 75%, #edd9c2 100%);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #bcd1c6;
+}
+
+.pgame-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Controls */
+.pgame-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.pgame-control-box {
+  background: #f7faf8;
+  border: 1px solid #dbe6e0;
+  border-radius: 8px;
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.pgame-control-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #17483b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pgame-val-tag {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #d66836;
+  background: #fbf0ea;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+}
+
+.pgame-slider {
+  width: 100%;
+  cursor: pointer;
+  accent-color: #d66836;
+}
+
+/* Problem Card for Exam Mode */
+.pgame-problem-card {
+  background: #f8faf8;
+  border: 1px solid #c9ded3;
+  border-radius: 10px;
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pgame-problem-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pgame-problem-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: #17483b;
+  color: #ffffff;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+
+.pgame-data-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.65rem;
+  background: #ffffff;
+  border: 1px solid #d5e5dc;
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+.pgame-data-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.pgame-data-label {
+  font-size: 0.75rem;
+  color: #557269;
+}
+
+.pgame-data-val {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #17483b;
+}
+
+.pgame-question-box {
+  background: #fdf5ea;
+  border-left: 4px solid #d66836;
+  padding: 0.65rem 0.85rem;
+  border-radius: 0 6px 6px 0;
+  font-size: 0.9rem;
+  color: #7d3f18;
+  font-weight: 600;
+}
+
+/* Precise Input Box */
+.pgame-input-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.pgame-text-input {
+  width: 140px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid #17483b;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #17483b;
+  outline: none;
+}
+
+.pgame-text-input:focus {
+  border-color: #d66836;
+  box-shadow: 0 0 0 3px rgba(214, 104, 54, 0.2);
+}
+
+.pgame-unit-tag {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #17483b;
+}
+
+/* Math Comparison Table */
+.pgame-table-wrapper {
+  overflow-x: auto;
+  margin-top: 0.5rem;
+}
+
+.pgame-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  text-align: left;
+  background: #ffffff;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #d4e2db;
+}
+
+.pgame-table th,
+.pgame-table td {
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid #e1ece6;
+}
+
+.pgame-table th {
+  background: #eef5f1;
+  color: #17483b;
+  font-weight: 700;
+}
+
+.pgame-table td strong {
+  color: #17483b;
+}
+
+/* Buttons */
+.pgame-btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.pgame-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 1.1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.15s ease, transform 0.05s ease;
+}
+
+.pgame-btn:focus-visible {
+  outline: 3px solid #318eaa;
+  outline-offset: 2px;
+}
+
+.pgame-btn:active {
+  transform: translateY(1px);
+}
+
+.pgame-btn-primary {
+  background: #17483b;
+  color: #ffffff;
+}
+
+.pgame-btn-primary:hover {
+  background: #235c4d;
+}
+
+.pgame-btn-accent {
+  background: #d66836;
+  color: #ffffff;
+}
+
+.pgame-btn-accent:hover {
+  background: #be5524;
+}
+
+.pgame-btn-secondary {
+  background: #eaf1ed;
+  color: #17483b;
+  border: 1px solid #b5ccbf;
+}
+
+.pgame-btn-secondary:hover {
+  background: #dce7e1;
+}
+
+/* Feedback Banner */
+.pgame-feedback {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.pgame-feedback.is-perfect,
+.pgame-feedback.is-hit {
+  background: #eaf7ee;
+  border: 1px solid #95d5a6;
+  color: #145929;
+}
+
+.pgame-feedback.is-close {
+  background: #fff8e8;
+  border: 1px solid #f6d186;
+  color: #79500b;
+}
+
+.pgame-feedback.is-miss {
+  background: #fdf0ee;
+  border: 1px solid #f2b8b2;
+  color: #7d261e;
+}
+
+/* Explanation */
+.pgame-explanation {
+  background: #fdfbf7;
+  border: 1px solid #ebd9c4;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  font-size: 0.85rem;
+  color: #523b28;
+}
+
+.pgame-explanation h4 {
+  margin: 0 0 0.35rem 0;
+  font-size: 0.9rem;
+  color: #8c4c1a;
+}
+
+.pgame-explanation p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+@media (max-width: 640px) {
+  .pgame-container {
+    padding: 0.85rem;
+    gap: 1rem;
+  }
+  .pgame-controls {
+    grid-template-columns: 1fr;
+  }
+}

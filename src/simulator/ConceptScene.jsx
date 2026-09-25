@@ -1,3 +1,10 @@
+import {
+  opticsAngleFromSurface,
+  thermalEquilibriumTemperature,
+  thermalFinalTemperature,
+  toRadians,
+} from '../physics/formulas.js';
+
 function CinematicaScene({ phase }) {
   return <svg className="concept-svg" viewBox="0 0 600 230" aria-hidden="true">
     <defs><linearGradient id="trackSky" x2="0" y2="1"><stop stopColor="#d9edf3"/><stop offset="1" stopColor="#f7f3dc"/></linearGradient></defs>
@@ -48,8 +55,16 @@ function ThermoScene({ exercise, phase }) {
   const mixed = exercise.expectedConcept === 'equilibrio-termico';
   const initial = Number(values.temperaturaInicial ?? values.temperaturaFria);
   const final = mixed
-    ? (Number(values.masaCaliente) * Number(values.temperaturaCaliente) + Number(values.masaFria) * Number(values.temperaturaFria)) / (Number(values.masaCaliente) + Number(values.masaFria))
-    : Number(values.temperaturaFinal ?? (initial + Number(values.calor) / (Number(values.masa) * Number(values.calorEspecifico))));
+    ? thermalEquilibriumTemperature(
+        values.masaCaliente,
+        values.temperaturaCaliente,
+        values.masaFria,
+        values.temperaturaFria,
+      )
+    : Number(
+        values.temperaturaFinal ??
+          thermalFinalTemperature(initial, values.calor, values.masa, values.calorEspecifico),
+      );
   return <svg className={'concept-svg thermo-scene ' + (phase !== 'idle' ? 'is-active' : '')} viewBox="0 0 600 230" aria-hidden="true">
     <rect width="600" height="230" fill="#fff4e7" /><rect y="188" width="600" height="42" fill="#d9bd95" />
     <circle cx="487" cy="53" r="29" fill="#f3bb5e" opacity=".65" /><text x="30" y="34" fill="#744927" fontSize="16" fontWeight="700">{mixed ? 'MEZCLA DE AGUA' : 'CALENTAR AGUA'}</text>
@@ -70,9 +85,11 @@ function ThermoScene({ exercise, phase }) {
 function OpticsScene({ exercise, phase }) {
   const values = exercise.values ?? {};
   const kind = exercise.expectedConcept;
-  const angle = Number(values.anguloIncidencia ?? (90 - Number(values.anguloSuperficie)));
-  const dx = Math.cos(angle * Math.PI / 180) * 105;
-  const dy = Math.sin(angle * Math.PI / 180) * 105;
+  const angle = Number(
+    values.anguloIncidencia ?? opticsAngleFromSurface(values.anguloSuperficie),
+  );
+  const dx = Math.cos(toRadians(angle)) * 105;
+  const dy = Math.sin(toRadians(angle)) * 105;
   return <svg className={'concept-svg optics-scene ' + (phase !== 'idle' ? 'is-active' : '')} viewBox="0 0 600 230" aria-hidden="true">
     <rect width="600" height="230" fill="#eaf5fa" /><text x="24" y="30" fill="#215a73" fontSize="16" fontWeight="700">{kind === 'indice-refraccion' ? 'LUZ EN VIDRIO' : kind === 'espejo-plano' ? 'IMAGEN EN ESPEJO PLANO' : 'REFLEXIÓN DE LA LUZ'}</text>
     <rect x="298" y="37" width="10" height="164" rx="4" fill="#8caebd" /><path d="M312 45 l14 10 m-14 7 14 10 m-14 7 14 10 m-14 7 14 10 m-14 7 14 10 m-14 7 14 10 m-14 7 14 10 m-14 7 14 10" stroke="#8caebd" strokeWidth="2" />

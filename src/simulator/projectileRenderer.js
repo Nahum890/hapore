@@ -2,9 +2,33 @@ import { toCanvasPoint, toCanvasPoints } from './trajectory.js';
 
 const C = { forest: '#17483b', grass: '#7fbb79', field: '#c7d89c', earth: '#b9875b', orange: '#d66836', blue: '#318eaa', ink: '#203b39', box: '#c78a4a' };
 
+export function drawRoundedRect(ctx, x, y, width, height, radius) {
+  const r = Math.min(Math.abs(radius || 0), Math.abs(width) / 2, Math.abs(height) / 2);
+  if (typeof ctx.roundRect === 'function') {
+    ctx.roundRect(x, y, width, height, r);
+    return;
+  }
+  if (r <= 0) {
+    ctx.rect(x, y, width, height);
+    return;
+  }
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + width - r, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+  ctx.lineTo(x + width, y + height - r);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+  ctx.lineTo(x + r, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+  ctx.lineTo(x + r, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
 function roundedRect(ctx, x, y, width, height, radius, color) {
   ctx.fillStyle = color;
-  ctx.beginPath(); ctx.roundRect(x, y, width, height, radius); ctx.fill();
+  ctx.beginPath();
+  drawRoundedRect(ctx, x, y, width, height, radius);
+  ctx.fill();
 }
 function cloud(ctx, x, y, size) {
   ctx.fillStyle = 'rgba(255,255,255,.83)';
