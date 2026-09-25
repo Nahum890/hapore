@@ -14,7 +14,7 @@ const FALLBACK_MODEL = 'gemini-flash-latest';
 export function apiChatPlugin(apiKey, primaryModel, options = {}) {
   const fetchModel = options.fetch ?? fetch;
   const models = [...new Set([primaryModel, FALLBACK_MODEL])];
-  const timeoutMs = options.timeoutMs ?? 3500;
+  const timeoutMs = options.timeoutMs ?? 45000;
   const textFrom = data => data?.candidates?.[0]?.content?.parts?.filter(part => !part.thought).map(part => part.text).filter(Boolean).join('') ?? '';
   async function handler(req, res) {
     if (req.method !== 'POST') { res.writeHead(405, { Allow: 'POST' }); res.end(); return; }
@@ -38,7 +38,7 @@ export function apiChatPlugin(apiKey, primaryModel, options = {}) {
       const context = { ...body.context, message: body.context.message ?? body.message };
       const buildPrompt = context.tipo === 'evaluacion_cuestionario' ? buildQuizEvaluationPrompt : context.tipo === 'charla_libre' ? buildFreeChatPrompt : buildDiagnosticPrompt;
       const streaming = body.stream === true;
-      const requestBody = JSON.stringify({ systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] }, contents: [{ role: 'user', parts: [{ text: buildPrompt(context) }] }], generationConfig: { temperature: 0.7, maxOutputTokens: 1024 } });
+      const requestBody = JSON.stringify({ systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] }, contents: [{ role: 'user', parts: [{ text: buildPrompt(context) }] }], generationConfig: { maxOutputTokens: 4096 } });
       let response;
       for (const model of models) {
         response = await fetchModel('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + (streaming ? ':streamGenerateContent?alt=sse' : ':generateContent'), {
