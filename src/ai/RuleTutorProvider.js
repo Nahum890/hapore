@@ -20,6 +20,31 @@ function bestKnowledgeMatch(message, records) {
   }
   return best;
 }
+const CHAT_TOPIC_HINTS = [
+  { pattern: /(?:cuanto|tiempo|tarda).*(?:aire|vuelo|aterriz)|(?:vuelo|aire).*(?:parabol|dron)/, query: 'tiempo de vuelo' },
+  { pattern: /(?:hasta donde|que distancia|cuanto avanza|lejos llega|distancia total)/, query: 'alcance horizontal' },
+  { pattern: /(?:punto mas alto|altura maxima|deja de subir|pico de la trayectoria)/, query: 'altura máxima movimiento parabólico' },
+  { pattern: /(?:eje x|horizontal|avanza hacia adelante)/, query: 'componente horizontal de velocidad' },
+  { pattern: /(?:eje y|vertical|sube o baja)/, query: 'componente vertical de velocidad' },
+  { pattern: /(?:luz rebota|rebote de luz|espejo)/, query: 'reflexión de la luz' },
+  { pattern: /(?:se mezclan|mezcla de agua|temperatura final)/, query: 'mezcla temperatura final masas' },
+];
+function previousTutorText(history = []) {
+  if (!Array.isArray(history)) return '';
+  return [...history].reverse().find((message) => ['tutor', 'assistant'].includes(message?.role))?.text ?? '';
+}
+function isShortContinuation(message) {
+  return /^(si|dale|claro|exacto|eso|ajam|contame mas|decime mas|segui|continua|y eso|por que|como asi)$/u.test(normalizeText(message));
+}
+function relatedQuestion(match) {
+  const search = normalizeText(match?.search ?? '');
+  if (search.includes('alcance')) return '¿Cómo influye el ángulo inicial en el alcance horizontal?';
+  if (search.includes('vuelo')) return '¿Qué pasa con la velocidad vertical en el punto más alto?';
+  if (search.includes('componente')) return '¿Por qué se separa la velocidad en dos componentes?';
+  if (search.includes('reflexion')) return '¿Desde dónde se miden los ángulos al reflejarse la luz?';
+  if (search.includes('calor') || search.includes('temperatura')) return '¿Cómo cambia la temperatura si las masas de las sustancias son distintas?';
+  return '¿Cómo se aplica esta idea en un ejercicio con datos y unidades?';
+}
 export function obtenerVariantePista(variants, previous) {
   if (!Array.isArray(variants)) return variants ?? null;
   const choices = variants.filter(text => typeof text === 'string' && text.trim());
@@ -56,7 +81,7 @@ export default class RuleTutorProvider {
     if (context.tipo === 'charla_libre') {
       const question = normalizeText(context.message);
       if (/^(hola|buenas|mba.?eichapa|maitei)\b/.test(question)) return this.result(this.choose('chat:greeting', this.data.greetings));
-      if (/\b(gracias|aguyje)\b/.test(question)) return this.result('¡De nada! Seguí preguntando: podemos repasar un concepto o resolver un ejercicio paso a paso.');
+      if (/\b(gracias|aguyje)\b/.test(question)) return this.result('¡Aguyje! ¿Oime gueteri mba’e reikuaaséva? Eporandu chéve.');
       const knowledge = [
         ...this.concepts.map(item => ({ kind: 'concept', search: `${item.id} ${item.name} ${item.definition} ${item.formula}`, answer: `${item.name}: ${item.definition}${item.formula ? ` Fórmula: ${item.formula}.` : ''}` })),
         ...this.glossary.map(item => ({ kind: 'glossary', search: `${item.term} ${item.joparaTerm} ${item.definition}`, answer: `${item.term}: ${item.definition}` })),
@@ -64,8 +89,21 @@ export default class RuleTutorProvider {
         ...this.bank.map(item => ({ kind: 'question', search: `${item.pregunta} ${item.enunciado} ${item.respuesta} ${item.explicacion} ${item.tema}`, answer: [item.respuesta || item.explicacion, item.respuestaJopara || item.explicacionJopara].filter(Boolean).join(' ') })),
         ...this.exercises.map(item => ({ kind: 'exercise', search: `${item.topic} ${item.subtema} ${item.question} ${item.expectedConcept}`, answer: `${item.question} La idea clave es ${item.expectedConcept?.replaceAll('-', ' ')}. Podés abrir este ejercicio en el simulador para resolverlo paso a paso.` })),
       ];
-      const match = bestKnowledgeMatch(context.message ?? '', knowledge);
-      if (match) return this.result(match.answer, { knowledgeType: match.kind });
+      const lastTutorText = previousTutorText(context.history);
+      const continuation = isShortContinuation(context.message ?? '') && lastTutorText;
+      const directMatch = bestKnowledgeMatch(context.message ?? '', knowledge);
+      const continuationMatch = continuation ? bestKnowledgeMatch(lastTutorText, knowledge) : null;
+      const topicHint = CHAT_TOPIC_HINTS.find(({ pattern }) => pattern.test(question + ' ' + normalizeText(lastTutorText)));
+      const match = directMatch ?? continuationMatch ?? (topicHint ? bestKnowledgeMatch(topicHint.query, knowledge) : null);
+      if (match) {
+        const detailed = /\b(completo|completa|detallado|detallada|paso a paso|extenso|extensa|profundo|profunda|largo|larga|desde cero|con todo|bien explicado|mas detalle)\b/u.test(question);
+        const answer = continuation ? '¡Iporã! Seguimos con lo que estábamos viendo. ' + match.answer : match.answer;
+        const explanation = detailed
+          ? ' Para aplicarlo paso a paso, identificá los datos y sus unidades, elegí la relación correspondiente y reemplazá cada símbolo con el dato correcto; no inventes los que falten.'
+          : '';
+        const followUp = '\n\n¿Reikuaasépa avei? Ejemplo de pregunta para seguir: ' + relatedQuestion(match);
+        return this.result(answer + explanation + followUp, { knowledgeType: match.kind });
+      }
       return this.result('No encontré una explicación suficientemente cercana en el material offline. Probá preguntar por calor específico, reflexión de la luz, movimiento parabólico, componentes de velocidad, vectores o ley de Hooke.');
     }
     if (context.type === 'welcome') return this.result(this.choose('welcome', this.data.greetings));
@@ -82,8 +120,10 @@ export default class RuleTutorProvider {
     // Exercise-specific hints prevent a generic numeric answer being used for a different problem.
     const exercise = context.exercise ?? this.exercises.find(item => item.id === (context.exerciseId ?? context.ejercicio));
     const specific = this.levels?.byExercise?.[exercise?.id]?.[levelKey];
-    let variants = specific ?? this.levels?.byErrorType?.[context.errorType ?? error?.key]?.[levelKey]
+    let variants = specific
+      // A worked solution for the selected exercise takes priority over a generic error hint.
       ?? (level === HINT_LEVELS_MAX && exercise?.hints?.length ? exercise.hints.at(-1) : null)
+      ?? this.levels?.byErrorType?.[context.errorType ?? error?.key]?.[levelKey]
       ?? this.levels?.byConcept?.[context.expectedConcept]?.[levelKey]
       ?? entry?.levels?.[levelKey];
     if (!variants && exercise?.hints?.length) {
