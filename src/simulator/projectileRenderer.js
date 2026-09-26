@@ -1,5 +1,7 @@
 import { toCanvasPoint, toCanvasPoints } from './trajectory.js';
 
+// Tres escenarios, un solo motor físico: solo cambia el dibujo (canvas 2D),
+// nunca el cálculo de la trayectoria (viene siempre de flightPlan.js).
 const C = { forest: '#17483b', grass: '#7fbb79', field: '#c7d89c', earth: '#b9875b', orange: '#d66836', blue: '#318eaa', ink: '#203b39', box: '#c78a4a' };
 
 function roundedRect(ctx, x, y, width, height, radius, color) {
@@ -12,6 +14,31 @@ function cloud(ctx, x, y, size) {
     ctx.beginPath(); ctx.arc(x + dx * size, y + dy * size, r * size, 0, Math.PI * 2); ctx.fill();
   }
 }
+function skyBackdrop(ctx, width, height, groundY, top, bottom) {
+  const sky = ctx.createLinearGradient(0, 0, 0, groundY);
+  sky.addColorStop(0, top); sky.addColorStop(1, bottom);
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = '#f8d98a'; ctx.beginPath(); ctx.arc(width * .82, height * .18, Math.max(12, width * .032), 0, Math.PI * 2); ctx.fill();
+  cloud(ctx, width * .14, height * .2, Math.max(24, width * .08));
+  cloud(ctx, width * .55, height * .1, Math.max(20, width * .06));
+}
+function trajectory(ctx, points, count, color, preview) {
+  if (points.length < 2) return;
+  ctx.strokeStyle = preview ? 'rgba(214,104,54,.55)' : color;
+  ctx.lineWidth = preview ? 2 : 3; ctx.setLineDash(preview ? [5, 6] : []);
+  ctx.beginPath();
+  points.slice(0, Math.max(2, count)).forEach((point, index) => index ? ctx.lineTo(point.x, point.y) : ctx.moveTo(point.x, point.y));
+  ctx.stroke(); ctx.setLineDash([]);
+}
+function label(ctx, x, y, text, color = C.forest) {
+  ctx.fillStyle = 'rgba(255,255,255,.91)';
+  const width = ctx.measureText(text).width + 16;
+  ctx.fillRect(x, y - 16, width, 22);
+  ctx.fillStyle = color; ctx.font = '700 11px system-ui, sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText(text, x + 8, y);
+}
+
+/* ---------- Escenario "dron": entrega rural ---------- */
 function tree(ctx, x, groundY, size) {
   roundedRect(ctx, x - size * .07, groundY - size * .55, size * .14, size * .55, 2, '#806145');
   ctx.fillStyle = '#5e9d70';
@@ -27,13 +54,13 @@ function barn(ctx, x, groundY, size) {
   ctx.strokeStyle = '#894b43'; ctx.lineWidth = 2;
   ctx.beginPath(); ctx.moveTo(x + size * .37, groundY - size * .4); ctx.lineTo(x + size * .63, groundY); ctx.moveTo(x + size * .63, groundY - size * .4); ctx.lineTo(x + size * .37, groundY); ctx.stroke();
 }
+function crate(ctx, x, y, size) {
+  roundedRect(ctx, x, y, size, size, 2, C.box);
+  ctx.strokeStyle = '#8b633f'; ctx.lineWidth = 1.5; ctx.strokeRect(x + 1, y + 1, size - 2, size - 2);
+  ctx.beginPath(); ctx.moveTo(x + 2, y + 2); ctx.lineTo(x + size - 2, y + size - 2); ctx.moveTo(x + size - 2, y + 2); ctx.lineTo(x + 2, y + size - 2); ctx.stroke();
+}
 function farmBackdrop(ctx, width, height, groundY) {
-  const sky = ctx.createLinearGradient(0, 0, 0, groundY);
-  sky.addColorStop(0, '#d6eef4'); sky.addColorStop(1, '#f8f3dc');
-  ctx.fillStyle = sky; ctx.fillRect(0, 0, width, height);
-  ctx.fillStyle = '#f8d98a'; ctx.beginPath(); ctx.arc(width * .79, height * .2, Math.max(13, width * .035), 0, Math.PI * 2); ctx.fill();
-  cloud(ctx, width * .12, height * .22, Math.max(26, width * .09));
-  cloud(ctx, width * .57, height * .11, Math.max(23, width * .065));
+  skyBackdrop(ctx, width, height, groundY, '#d6eef4', '#f8f3dc');
   ctx.fillStyle = '#a9cfb6'; ctx.beginPath(); ctx.moveTo(0, groundY - 24); ctx.quadraticCurveTo(width * .2, groundY - 70, width * .47, groundY - 28); ctx.quadraticCurveTo(width * .75, groundY - 75, width, groundY - 30); ctx.lineTo(width, groundY); ctx.lineTo(0, groundY); ctx.fill();
   ctx.fillStyle = C.field; ctx.fillRect(0, groundY - 15, width, height - groundY + 15);
   ctx.strokeStyle = 'rgba(91,138,75,.33)'; ctx.lineWidth = 1;
@@ -49,12 +76,7 @@ function farmBackdrop(ctx, width, height, groundY) {
   for (let x = 12; x < width; x += 32) { ctx.beginPath(); ctx.moveTo(x, groundY - 30); ctx.lineTo(x, groundY - 6); ctx.stroke(); }
   for (const y of [groundY - 23, groundY - 13]) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke(); }
 }
-function crate(ctx, x, y, size) {
-  roundedRect(ctx, x, y, size, size, 2, C.box);
-  ctx.strokeStyle = '#8b633f'; ctx.lineWidth = 1.5; ctx.strokeRect(x + 1, y + 1, size - 2, size - 2);
-  ctx.beginPath(); ctx.moveTo(x + 2, y + 2); ctx.lineTo(x + size - 2, y + size - 2); ctx.moveTo(x + size - 2, y + 2); ctx.lineTo(x + 2, y + size - 2); ctx.stroke();
-}
-function target(ctx, x, groundY, hit) {
+function deliveryTarget(ctx, x, groundY, hit) {
   ctx.fillStyle = hit ? '#4a9d65' : C.blue;
   ctx.beginPath(); ctx.ellipse(x, groundY - 3, 19, 7, 0, 0, Math.PI * 2); ctx.fill();
   ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(x, groundY - 3, 12, 4, 0, 0, Math.PI * 2); ctx.stroke();
@@ -82,16 +104,7 @@ function drone(ctx, x, y, size, rotorPhase, flying, carrying) {
   }
   ctx.restore();
 }
-function trajectory(ctx, points, count, preview) {
-  if (points.length < 2) return;
-  ctx.strokeStyle = preview ? 'rgba(214,104,54,.55)' : C.orange;
-  ctx.lineWidth = preview ? 2 : 3; ctx.setLineDash(preview ? [5, 6] : []);
-  ctx.beginPath();
-  points.slice(0, Math.max(2, count)).forEach((point, index) => index ? ctx.lineTo(point.x, point.y) : ctx.moveTo(point.x, point.y));
-  ctx.stroke(); ctx.setLineDash([]);
-}
-export function drawScene(ctx, { width, height, flight, progress = 0, phase = 'idle', now = 0 }) {
-  if (!(width > 0 && height > 0) || !flight) return;
+function drawDrone(ctx, { width, height, flight, progress, phase, now, verdict }) {
   const groundY = height - Math.max(34, height * .13);
   farmBackdrop(ctx, width, height, groundY);
   const originX = Math.max(34, width * .07);
@@ -101,12 +114,139 @@ export function drawScene(ctx, { width, height, flight, progress = 0, phase = 'i
   const points = toCanvasPoints(flight.points, options);
   const targetPoint = toCanvasPoint({ x: flight.targetX, y: 0 }, options);
   const current = toCanvasPoint(flight.positionAt(phase === 'idle' ? 0 : progress), options);
-  target(ctx, targetPoint.x, groundY, phase === 'landed' && flight.hit);
-  if (phase !== 'idle') trajectory(ctx, points, Math.round(progress * (points.length - 1)) + 1, false);
+  // El color de la zona refleja si la respuesta escrita fue correcta, no si
+  // el dibujo geométrico "cayó cerca": ambas cosas pueden diferir cuando la
+  // trayectoria mostrada no depende del número que escribió el estudiante.
+  deliveryTarget(ctx, targetPoint.x, groundY, phase === 'landed' && verdict === true);
+  if (phase !== 'idle') trajectory(ctx, points, Math.round(progress * (points.length - 1)) + 1, C.orange, false);
   ctx.fillStyle = 'rgba(30,65,54,.2)'; ctx.beginPath(); ctx.ellipse(current.x, groundY - 3, 14, 4, 0, 0, Math.PI * 2); ctx.fill();
   drone(ctx, current.x, Math.min(current.y - 29, groundY - 30), Math.max(20, Math.min(26, width * .05)), now * .045, phase === 'flying', phase !== 'landed');
   if (phase === 'landed') crate(ctx, current.x - 8, groundY - 18, 16);
-  ctx.fillStyle = C.ink; ctx.font = '700 10px system-ui, sans-serif'; ctx.textAlign = 'left'; ctx.fillText('INICIO', Math.max(8, originX - 18), groundY - 70);
-  ctx.fillStyle = 'rgba(255,255,255,.91)'; ctx.fillRect(8, 8, Math.min(172, width - 16), 24);
-  ctx.fillStyle = C.forest; ctx.font = '700 11px system-ui, sans-serif'; ctx.fillText('Vuelo ideal · sin motor', 16, 24);
+  label(ctx, Math.max(8, originX - 18), groundY - 70, 'INICIO', C.ink);
+  label(ctx, 8, 24, 'Vuelo ideal · sin motor', C.forest);
+}
+
+/* ---------- Escenario "básquetbol": tiro a la canasta ---------- */
+function court(ctx, width, height, groundY) {
+  skyBackdrop(ctx, width, height, groundY, '#fbe6c8', '#f7ede0');
+  ctx.fillStyle = '#e3a35c'; ctx.fillRect(0, groundY - 6, width, height - groundY + 6);
+  ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(0, groundY + 14); ctx.lineTo(width, groundY + 14); ctx.stroke();
+  for (let x = 10; x < width; x += 40) { ctx.beginPath(); ctx.moveTo(x, groundY + 6); ctx.lineTo(x, groundY + 24); ctx.stroke(); }
+  ctx.fillStyle = 'rgba(255,255,255,.4)'; ctx.fillRect(0, groundY - 6, width, 3);
+}
+function hoopTarget(ctx, x, groundY, hit) {
+  // Aro pintado en el piso: la pelota debe caer dentro del círculo de tiro.
+  ctx.save();
+  ctx.strokeStyle = hit ? '#4a9d65' : '#c0392b'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.ellipse(x, groundY - 2, 22, 8, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.fillStyle = hit ? 'rgba(74,157,101,.28)' : 'rgba(192,57,43,.22)';
+  ctx.beginPath(); ctx.ellipse(x, groundY - 2, 22, 8, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+  ctx.fillStyle = C.ink; ctx.font = '700 10px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('ZONA DE TIRO', x, groundY - 22);
+}
+function basketballPlayer(ctx, x, groundY, size, hasBall) {
+  ctx.save(); ctx.translate(x, groundY);
+  ctx.fillStyle = '#2d4a63';
+  roundedRect(ctx, -size * .18, -size * .95, size * .36, size * .55, size * .14, '#2d4a63');
+  ctx.fillStyle = '#e8b48c'; ctx.beginPath(); ctx.arc(0, -size * 1.05, size * .16, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#1b2a41'; ctx.lineWidth = size * .1; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-size * .16, -size * .4); ctx.lineTo(-size * .3, 0); ctx.moveTo(size * .16, -size * .4); ctx.lineTo(size * .32, 0); ctx.stroke();
+  if (hasBall) {
+    ctx.fillStyle = '#d66836'; ctx.beginPath(); ctx.arc(size * .34, -size * .55, size * .12, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#1b2a41'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(size * .24, -size * .55); ctx.lineTo(size * .44, -size * .55); ctx.moveTo(size * .34, -size * .65); ctx.lineTo(size * .34, -size * .45); ctx.stroke();
+  }
+  ctx.restore();
+}
+function ball(ctx, x, y, radius, spin) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(spin);
+  ctx.fillStyle = '#d66836'; ctx.beginPath(); ctx.arc(0, 0, radius, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#1b2a41'; ctx.lineWidth = 1.2;
+  ctx.beginPath(); ctx.arc(0, 0, radius, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-radius, 0); ctx.lineTo(radius, 0); ctx.moveTo(0, -radius); ctx.lineTo(0, radius); ctx.stroke();
+  ctx.restore();
+}
+function drawBasketball(ctx, { width, height, flight, progress, phase, now, verdict }) {
+  const groundY = height - Math.max(30, height * .12);
+  court(ctx, width, height, groundY);
+  const originX = Math.max(30, width * .08);
+  const worldWidth = Math.max(flight.targetX, flight.landingX, 12) * 1.2;
+  const scale = Math.min((width - originX - 30) / worldWidth, (groundY - 45) / Math.max(flight.peakY, 4));
+  const options = { scale, originX, groundY };
+  const points = toCanvasPoints(flight.points, options);
+  const targetPoint = toCanvasPoint({ x: flight.targetX, y: 0 }, options);
+  const current = toCanvasPoint(flight.positionAt(phase === 'idle' ? 0 : progress), options);
+  hoopTarget(ctx, targetPoint.x, groundY, phase === 'landed' && verdict === true);
+  if (phase !== 'idle') trajectory(ctx, points, Math.round(progress * (points.length - 1)) + 1, '#d66836', false);
+  basketballPlayer(ctx, originX - 6, groundY, Math.max(26, Math.min(34, width * .07)), phase === 'idle');
+  if (phase !== 'idle') {
+    ctx.fillStyle = 'rgba(30,65,54,.18)'; ctx.beginPath(); ctx.ellipse(current.x, groundY - 3, 10, 3, 0, 0, Math.PI * 2); ctx.fill();
+    ball(ctx, current.x, current.y - 8, Math.max(7, Math.min(10, width * .022)), now * .01);
+  }
+  label(ctx, Math.max(8, originX - 20), groundY - 60, 'LANZAMIENTO', C.ink);
+  label(ctx, 8, 24, 'Tiro parabólico · sin resistencia del aire', '#a4501f');
+}
+
+/* ---------- Escenario "pared": pasar la pelota por encima del muro ---------- */
+function yard(ctx, width, height, groundY) {
+  skyBackdrop(ctx, width, height, groundY, '#dcecf7', '#f2f6e9');
+  ctx.fillStyle = '#8fc48a'; ctx.fillRect(0, groundY - 4, width, height - groundY + 4);
+  ctx.strokeStyle = 'rgba(255,255,255,.4)'; ctx.lineWidth = 1;
+  for (let x = 6; x < width; x += 18) { ctx.beginPath(); ctx.moveTo(x, groundY); ctx.lineTo(x + 6, groundY + 10); ctx.stroke(); }
+}
+function wall(ctx, x, groundY, scale, obstacleHeight, cleared) {
+  const wallHeightPx = Math.max(26, obstacleHeight * scale);
+  ctx.fillStyle = cleared === false ? '#c0392b' : '#9a8b74';
+  roundedRect(ctx, x - 7, groundY - wallHeightPx, 14, wallHeightPx, 3, cleared === false ? '#c0392b' : '#9a8b74');
+  ctx.strokeStyle = '#6b5d47'; ctx.lineWidth = 1;
+  for (let row = 0; row < wallHeightPx; row += 8) { ctx.beginPath(); ctx.moveTo(x - 7, groundY - row); ctx.lineTo(x + 7, groundY - row); ctx.stroke(); }
+  ctx.fillStyle = C.ink; ctx.font = '700 10px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('PAREDÓN', x, groundY - wallHeightPx - 8);
+}
+function landingSpot(ctx, x, groundY, hit) {
+  ctx.fillStyle = hit ? '#4a9d65' : C.blue;
+  ctx.beginPath(); ctx.ellipse(x, groundY - 2, 16, 6, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(x, groundY - 2, 9, 3, 0, 0, Math.PI * 2); ctx.stroke();
+}
+function kid(ctx, x, groundY, size, throwing) {
+  ctx.save(); ctx.translate(x, groundY);
+  roundedRect(ctx, -size * .16, -size * .8, size * .32, size * .48, size * .12, '#2f7d5e');
+  ctx.fillStyle = '#e8b48c'; ctx.beginPath(); ctx.arc(0, -size * .9, size * .14, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#1b2a41'; ctx.lineWidth = size * .09; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-size * .14, -size * .34); ctx.lineTo(-size * .26, 0); ctx.moveTo(size * .14, -size * .34); ctx.lineTo(size * .26, 0); ctx.stroke();
+  ctx.beginPath();
+  if (throwing) { ctx.moveTo(size * .12, -size * .55); ctx.lineTo(size * .4, -size * .8); }
+  else { ctx.moveTo(size * .12, -size * .5); ctx.lineTo(size * .3, -size * .32); }
+  ctx.stroke();
+  ctx.restore();
+}
+function drawWall(ctx, { width, height, flight, progress, phase, now, verdict }) {
+  const groundY = height - Math.max(30, height * .12);
+  yard(ctx, width, height, groundY);
+  const originX = Math.max(30, width * .08);
+  const worldWidth = Math.max(flight.targetX, flight.landingX, 14) * 1.15;
+  const scale = Math.min((width - originX - 30) / worldWidth, (groundY - 50) / Math.max(flight.peakY, 5));
+  const options = { scale, originX, groundY };
+  const points = toCanvasPoints(flight.points, options);
+  const targetPoint = toCanvasPoint({ x: flight.targetX, y: 0 }, options);
+  const current = toCanvasPoint(flight.positionAt(phase === 'idle' ? 0 : progress), options);
+  const obstacle = flight.obstacle ?? { x: flight.targetX * 0.45, height: Math.max(2, flight.peakY * 0.4) };
+  const obstacleX = originX + obstacle.x * scale;
+  landingSpot(ctx, targetPoint.x, groundY, phase === 'landed' && verdict === true);
+  wall(ctx, obstacleX, groundY, scale, obstacle.height, phase === 'landed' ? flight.clearsObstacle : null);
+  if (phase !== 'idle') trajectory(ctx, points, Math.round(progress * (points.length - 1)) + 1, '#2f7d5e', false);
+  kid(ctx, originX - 6, groundY, Math.max(28, Math.min(36, width * .075)), phase === 'flying' && progress < 0.15);
+  if (phase !== 'idle') {
+    ctx.fillStyle = 'rgba(30,65,54,.18)'; ctx.beginPath(); ctx.ellipse(current.x, groundY - 3, 9, 3, 0, 0, Math.PI * 2); ctx.fill();
+    ball(ctx, current.x, current.y - 7, Math.max(6, Math.min(9, width * .02)), now * .01);
+  }
+  label(ctx, Math.max(8, originX - 20), groundY - 64, 'LANZAMIENTO', C.ink);
+  label(ctx, 8, 24, flight.clearsObstacle === false && phase === 'landed' ? 'No superó el paredón' : 'Vuelo ideal · sin motor', '#256a4a');
+}
+
+export function drawScene(ctx, { width, height, flight, progress = 0, phase = 'idle', now = 0, scenario = 'dron', verdict = null }) {
+  if (!(width > 0 && height > 0) || !flight) return;
+  const args = { width, height, flight, progress, phase, now, verdict };
+  if (scenario === 'basketball') return drawBasketball(ctx, args);
+  if (scenario === 'wall') return drawWall(ctx, args);
+  return drawDrone(ctx, args);
 }

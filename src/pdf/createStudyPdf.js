@@ -5,6 +5,7 @@ import { DEFAULT_LANGUAGE, translate } from '../i18n/messages.js';
 import { selectClassExercises } from '../utils/classCode.js';
 
 const PAGE = { width: 210, height: 297, margin: 16, bottom: 278 };
+const SCENARIO_LABEL = { dron: 'Entrega en dron', basketball: 'Básquetbol', wall: 'Sobre el paredón' };
 const green = [23, 72, 59], ink = [31, 41, 55], soft = [92, 109, 100];
 const formatNumber = value => String(value).replace('.', ',');
 
@@ -76,7 +77,7 @@ export async function createStudyPdf({ config = null, language = DEFAULT_LANGUAG
 
   addSection(label('pdf.exercises'));
   localized.forEach((exercise, index) => {
-    addText(`${index + 1}. ${exercise.topic} · ${exercise.difficulty}`, { size: 11, color: green, gap: 2 });
+    addText(`${index + 1}. ${exercise.topic}${exercise.scenario ? ' · ' + (SCENARIO_LABEL[exercise.scenario] ?? exercise.scenario) : ''} · ${exercise.difficulty}`, { size: 11, color: green, gap: 2 });
     addText(exercise.question, { size: 9, indent: 3, gap: 4 });
     for (let line = 0; line < 2; line += 1) {
       if (y + 8 > PAGE.bottom) addPage();

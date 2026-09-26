@@ -6,12 +6,13 @@
     "note": "Ninguna traducción Jopara se etiqueta como revisada o aprobada sin revisión humana competente."
   },
   "collections": {
-    "concepts": { "count": 16, "joparaStatus": "draft" },
-    "errors": { "count": 15, "joparaStatus": "draft" },
-    "exercises": { "count": 24, "joparaStatus": "draft", "joparaQuestionsPresent": 24 },
-    "flashcards": { "count": 31, "joparaStatus": "draft", "joparaFrontsPresent": 31, "joparaBacksPresent": 31 },
-    "glossary": { "count": 15, "joparaTermsPresent": 15, "joparaDefinitionsStatus": "draft" },
-    "quizBank": { "count": 56, "joparaStatus": "draft", "joparaAnswersPresent": 24 },
+    "concepts": { "count": 7, "joparaStatus": "draft" },
+    "errors": { "count": 5, "joparaStatus": "draft" },
+    "exercises": { "count": 13, "joparaStatus": "draft", "joparaQuestionsPresent": 13 },
+    "flashcards": { "count": 10, "joparaStatus": "draft", "joparaFrontsPresent": 10, "joparaBacksPresent": 10 },
+    "glossary": { "count": 8, "joparaTermsPresent": 8, "joparaDefinitionsStatus": "draft" },
+    "quizBank": { "count": 14, "joparaStatus": "draft", "joparaAnswersPresent": 6 },
     "tutor": { "joparaStatus": "draft" }
-  }
+  },
+  "scope": "Alcance vigente del MVP: un único tema, Movimiento Parabólico, con tres situaciones (entrega en dron, básquetbol, pelota sobre un paredón) que comparten el mismo motor físico."
 }

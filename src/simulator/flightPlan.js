@@ -1,4 +1,4 @@
-import { createLaunch, evaluateTrajectory, maxHeight, positionAt, range, timeOfFlight } from '../physics/projectileMotion.js';
+import { createLaunch, evaluateTrajectory, heightAtX, maxHeight, positionAt, range, timeOfFlight } from '../physics/projectileMotion.js';
 
 export const SPEED_LIMITS = { min: 8, max: 35 };
 export const ANGLE_LIMITS = { min: 15, max: 75 };
@@ -15,7 +15,12 @@ export function startingControls(exercise) {
   };
 }
 
-export function planFlight({ speed, angle, gravity = 9.8, targetX = 35 }) {
+/**
+ * Calcula un vuelo completo para dibujar en el simulador. La franja de acierto
+ * visual (hit) es solo ilustrativa: la respuesta se califica siempre con
+ * physicsValidator, nunca con esta tolerancia gráfica.
+ */
+export function planFlight({ speed, angle, gravity = 9.8, targetX = 35, obstacle = null }) {
   const safeSpeed = clamp(speed, SPEED_LIMITS.min, SPEED_LIMITS.max, 20);
   const safeAngle = clamp(angle, 1, 89, 45);
   const safeGravity = Number.isFinite(Number(gravity)) && Number(gravity) > 0 ? Number(gravity) : 9.8;
@@ -24,13 +29,23 @@ export function planFlight({ speed, angle, gravity = 9.8, targetX = 35 }) {
   const landingX = range(launch);
   const safeTargetX = Number.isFinite(Number(targetX)) && Number(targetX) > 0 ? Number(targetX) : 35;
   const error = landingX - safeTargetX;
-  const tolerance = Math.max(2, safeTargetX * 0.06);
+  // Franja de acierto visual angosta: un lanzamiento debe caer cerca de la meta
+  // para "verse" acertado, en vez de una zona amplia y poco exigente.
+  const tolerance = Math.max(1, safeTargetX * 0.035);
+  const safeObstacle = obstacle && Number.isFinite(Number(obstacle.x)) && Number.isFinite(Number(obstacle.height))
+    ? { x: Number(obstacle.x), height: Number(obstacle.height) }
+    : null;
+  const obstacleHeight = safeObstacle ? heightAtX(launch, safeObstacle.x) : null;
+  const clearsObstacle = safeObstacle ? obstacleHeight !== null && obstacleHeight >= safeObstacle.height : true;
   return {
     launch, duration, landingX, targetX: safeTargetX,
     peakY: maxHeight(launch),
     points: evaluateTrajectory(launch, { step: duration / 100 }),
     hit: Math.abs(error) <= tolerance,
     error,
+    obstacle: safeObstacle,
+    obstacleHeight,
+    clearsObstacle,
     positionAt: progress => positionAt(launch, duration * clamp(progress, 0, 1, 0)),
   };
 }

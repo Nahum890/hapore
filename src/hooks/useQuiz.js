@@ -2,9 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { quizBank } from '../data/catalogs.js';
 import { buildQuiz, buildQuizFeedback, matchAnswer, matchText, shuffle } from '../ai/quizEngine.js';
 import { readJSON, writeJSON, STORAGE_KEYS } from '../utils/storage.js';
-import { temaMatchesSubtemas } from '../utils/classCode.js';
 import { createAIProvider } from '../ai/AIProvider.js';
 import { getTutorQuota, DAILY_TUTOR_LIMIT } from '../ai/tutorQuota.js';
+import { useTranslation } from '../i18n/LanguageProvider.jsx';
 
 export const QUIZ_MIN_QUANTITY = 5;
 export const QUIZ_MAX_QUANTITY = 50;
@@ -58,11 +58,12 @@ function formatMessages(chatEntries, charlaEntries) {
   return mensajes.filter((message) => message.text);
 }
 
-export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, studyTopic = null } = {}) {
+export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } = {}) {
   const providerRef = useRef(null);
   if (!providerRef.current) {
     providerRef.current = createAIProvider();
   }
+  const { language } = useTranslation();
   const sessionRef = useRef(null);
   const freeSessionRef = useRef(null);
   const onMoveRef = useRef(onMoveToChat);
@@ -120,16 +121,10 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
   }, []);
 
   const repasoAvailable = useMemo(() => {
-    const abiertas = quizBank.filter(
-      (question) =>
-        question.tipo === 'abierta' &&
-        temaMatchesSubtemas(question.tema, classConfig?.subtemas) && (!studyTopic || question.tema === studyTopic),
-    );
-    const reales = (flashcards ?? []).filter((card) =>
-      temaMatchesSubtemas(card.topic, classConfig?.subtemas) && (!studyTopic || card.topic === studyTopic),
-    );
+    const abiertas = quizBank.filter((question) => question.tipo === 'abierta');
+    const reales = flashcards ?? [];
     return new Set([...abiertas.map((question) => question.id), ...reales.map((card) => card.id)]).size;
-  }, [flashcards, classConfig, studyTopic]);
+  }, [flashcards]);
 
   const maxAvailable = Math.min(
     QUIZ_MAX_QUANTITY,
@@ -139,22 +134,16 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
 
   const buildRepasoDeck = useCallback(
     (qty) => {
-      const real = (flashcards ?? [])
-        .filter((card) => temaMatchesSubtemas(card.topic, classConfig?.subtemas) && (!studyTopic || card.topic === studyTopic))
-        .map((card) => ({
-          id: card.id,
-          tema: card.topic,
-          frente: card.frente_es ?? card.front ?? '',
-          jopara: card.frente_jopara ?? '',
-          dorso: card.dorso_concepto ?? card.back ?? '',
-          formula: card.formula ?? '',
-        }));
+      const real = (flashcards ?? []).map((card) => ({
+        id: card.id,
+        tema: card.topic,
+        frente: card.frente_es ?? card.front ?? '',
+        jopara: card.frente_jopara ?? '',
+        dorso: card.dorso_concepto ?? card.back ?? '',
+        formula: card.formula ?? '',
+      }));
       const teoricas = quizBank
-        .filter(
-          (question) =>
-            question.tipo === 'abierta' &&
-            temaMatchesSubtemas(question.tema, classConfig?.subtemas) && (!studyTopic || question.tema === studyTopic),
-        )
+        .filter((question) => question.tipo === 'abierta')
         .map((question) => ({
           id: question.id,
           tema: question.tema,
@@ -167,7 +156,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
       const unique = [...new Map([...real, ...teoricas].map((card) => [card.id, card])).values()];
       return shuffle(unique).slice(0, clamped);
     },
-    [flashcards, classConfig, maxAvailable, studyTopic],
+    [flashcards, maxAvailable],
   );
 
   const chooseQuantity = useCallback(
@@ -225,10 +214,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
   }, []);
 
   const startQuiz = useCallback(() => {
-    const filteredBank = quizBank.filter((question) =>
-      temaMatchesSubtemas(question.tema, classConfig?.subtemas) && (!studyTopic || question.tema === studyTopic),
-    );
-    const quizQuestions = buildQuiz(filteredBank, quantity);
+    const quizQuestions = buildQuiz(quizBank, quantity);
     if (!quizQuestions.length) return;
     generationRef.current += 1;
     requestLock.current = false;
@@ -243,7 +229,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
     setJustificationText('');
     setStep('quiz');
     onMoveRef.current?.();
-  }, [quantity, classConfig, studyTopic]);
+  }, [quantity]);
 
   useEffect(() => {
     if (step === 'repaso' && deck.length === 0 && consolidatedIds.size > 0) {
@@ -311,6 +297,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
           respuestaJopara: question.respuestaJopara ?? '',
           explicacion: question.explicacion ?? '',
           explicacionJopara: question.explicacionJopara ?? '',
+          language,
           onToken: (text) => {
             if (generation === generationRef.current) setStreamText(text);
           },
@@ -349,7 +336,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
         }
       }
     },
-    [questions, questionIndex, chat, onQuizAnswer, persistCurrent],
+    [questions, questionIndex, chat, onQuizAnswer, persistCurrent, language],
   );
 
   const answerOpen = useCallback(
@@ -407,6 +394,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
         response = await providerRef.current.answerFreeQuestion({
           message: text,
           history: charlaLog.slice(-8),
+          language,
           onToken: (token) => {
             if (generation === generationRef.current) setStreamText(token);
           },
@@ -427,7 +415,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, s
         setBusy(false);
       }
     }
-  }, [charlaText, tutorQuota.remaining, charlaLog, persistFreeConversation]);
+  }, [charlaText, tutorQuota.remaining, charlaLog, persistFreeConversation, language]);
 
   const newFreeConversation = useCallback(() => {
     if (requestLock.current) return;

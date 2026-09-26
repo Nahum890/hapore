@@ -1,4 +1,5 @@
-.pyfis-language-selector { display:inline-flex; align-items:center; min-width:0; }
-.pyfis-language-selector select { min-height:36px; max-width:142px; padding:6px 27px 6px 10px; border:1px solid rgba(255,255,255,.44); border-radius:10px; background:#fff; color:#17483b; font:inherit; font-size:12px; font-weight:700; cursor:pointer; }
-.pyfis-language-selector select:focus-visible { outline:3px solid #f1b94d; outline-offset:2px; }
-@media (max-width:500px) { .pyfis-language-selector select { max-width:104px; padding-inline:7px; font-size:11px; } }
+.pyfis-language-selector { position: relative; display: inline-flex; align-items: center; min-width: 0; }
+.pyfis-language-selector select { appearance: none; -webkit-appearance: none; min-height: 38px; max-width: 150px; padding: 6px 30px 6px 12px; border: 1.5px solid var(--c-line-strong, #d6cdb9); border-radius: 12px; background: var(--c-surface, #fff) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231b2a41' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center; color: var(--c-ink, #1b2a41); font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; }
+.pyfis-language-selector select:hover { border-color: var(--c-primary, #0e7c66); }
+.pyfis-language-selector select:focus-visible { outline: 3px solid var(--c-sky, #2f80c1); outline-offset: 2px; }
+@media (max-width: 500px) { .pyfis-language-selector select { max-width: 112px; padding-inline: 9px 26px; font-size: 12px; } }

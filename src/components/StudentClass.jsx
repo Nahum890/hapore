@@ -15,7 +15,7 @@ export default function StudentClass({ classConfig, onJoinClass }) {
     <h2 id="student-class-title">{classConfig ? 'Ya estás en una clase' : 'Unite a la clase de tu docente'}</h2>
     {classConfig ? <>
       <p>Los temas, las tarjetas y los ejercicios de la clase ya se aplicaron a tu cuenta.</p>
-      <div className="student-class-summary"><span>Temas seleccionados</span><strong>{classConfig.subtemas.length}</strong><span>Ejercicios</span><strong>{classConfig.ejercicios}</strong><span>Tarjetas</span><strong>{classConfig.flashcards}</strong></div>
+      <div className="student-class-summary"><span>Situaciones seleccionadas</span><strong>{classConfig.subtemas.length}</strong><span>Ejercicios</span><strong>{classConfig.ejercicios}</strong><span>Tarjetas</span><strong>{classConfig.flashcards}</strong></div>
       <button className="btn btn-secondary" type="button" onClick={() => onJoinClass(null)}>Salir de la clase</button>
     </> : <>
       <p>Escribí el código que te dio tu docente. La práctica y el repaso se ajustarán a esa clase.</p>

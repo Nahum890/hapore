@@ -1,16 +1,10 @@
 [
-  { "id": "err-termo-01", "key": "olvida_delta_t", "name": "Usar la temperatura final como cambio", "description": "En Q = m · c · ΔT se usa la diferencia entre temperatura final e inicial, no solo la temperatura final.", "example": "Si pasa de 20 °C a 30 °C, ΔT = 10 °C.", "expectedConcept": "calor-sensible" },
-  { "id": "err-termo-02", "key": "olvida_t_inicial", "name": "Olvidar la temperatura inicial", "description": "Q/(m·c) da el aumento de temperatura; para obtener la final se suma la inicial.", "example": "Si Ti = 25 °C y ΔT = 10 °C, Tf = 35 °C.", "expectedConcept": "temperatura-final" },
-  { "id": "err-termo-03", "key": "promedio_sin_masas", "name": "Promediar sin considerar las masas", "description": "Al mezclar agua con masas diferentes, la temperatura final se pondera con cada masa.", "example": "T = (m1·T1 + m2·T2)/(m1+m2), si no hay pérdidas.", "expectedConcept": "equilibrio-termico" },
-  { "id": "err-optica-01", "key": "angulo_desde_superficie", "name": "Medir el ángulo desde el espejo", "description": "La incidencia y la reflexión se miden desde la normal, perpendicular al espejo.", "example": "Si el rayo forma 25° con el espejo, forma 65° con la normal.", "expectedConcept": "ley-reflexion" },
-  { "id": "err-optica-02", "key": "distancia_doble_espejo", "name": "Duplicar la distancia de la imagen", "description": "La distancia de la imagen se mide desde el espejo: coincide con la distancia del objeto.", "example": "Objeto a 40 cm delante: imagen a 40 cm detrás.", "expectedConcept": "espejo-plano" },
-  { "id": "err-optica-03", "key": "invierte_indice", "name": "Invertir la razón de velocidades", "description": "El índice del material es c/v, con la velocidad en vacío arriba y la velocidad en el medio abajo.", "example": "300000000 / 200000000 = 1,5.", "expectedConcept": "indice-refraccion" },
   {
     "id": "err-01",
     "key": "confunde_velocidades",
-    "name": "Confundir velocidad inicial con velocidad final",
-    "description": "Usar v0 cuando el ejercicio pide la velocidad en otro momento del vuelo (o al revés).",
-    "example": "En la altura máxima la velocidad vertical es 0, no la vy del lanzamiento.",
+    "name": "Confundir la velocidad inicial con una componente",
+    "description": "Usar v0 completa cuando el ejercicio pide una componente (horizontal o vertical) en otro momento del vuelo.",
+    "example": "La velocidad inicial no es la componente vertical: hay que multiplicarla por sen(ángulo) o cos(ángulo) según el eje.",
     "expectedConcept": "componente-vertical"
   },
   {
@@ -22,59 +16,27 @@
     "expectedConcept": "componente-horizontal"
   },
   {
-    "id": "err-03",
-    "key": "mezcla_unidades",
-    "name": "Olvidar convertir unidades",
-    "description": "Mezclar km/h con m/s, o metros con kilómetros, antes de calcular.",
-    "example": "72 km/h = 20 m/s: primero convertí, después aplicá las fórmulas.",
-    "expectedConcept": "altura-maxima"
-  },
-  {
     "id": "err-04",
     "key": "confunde_altura_alcance",
     "name": "Confundir altura máxima con alcance",
     "description": "Calcular la altura (vertical) cuando el ejercicio pide el alcance (horizontal), o al revés.",
-    "example": "La altura máxima se mide en metros hacia arriba; el alcance, en metros horizontales.",
+    "example": "La altura máxima se mide en metros hacia arriba; el alcance, en metros horizontales. Son fórmulas distintas.",
     "expectedConcept": "altura-maxima"
   },
   {
     "id": "err-mec-03",
     "key": "olvida_gravedad",
-    "name": "Omitir el efecto de la gravedad",
-    "description": "Calcular la posición vertical como si fuera velocidad constante sin restar el término -0.5*g*t².",
-    "example": "y(t) = y0 + vy*t - 0.5*g*t². La gravedad siempre tira hacia abajo con g = 9,8 m/s².",
+    "name": "Omitir el efecto completo de la gravedad",
+    "description": "Quedarse en la velocidad vertical inicial (o en un paso intermedio) sin completar la fórmula que incluye la gravedad.",
+    "example": "El tiempo de vuelo es T = (2 * v0y) / g, no solo v0y. La gravedad siempre entra en la cuenta.",
     "expectedConcept": "tiempo-de-vuelo"
   },
   {
     "id": "err-mec-05",
     "key": "angulo_desfasado",
     "name": "Desajuste de ángulo de lanzamiento",
-    "description": "Elegir un ángulo demasiado rasante (<25°) o excesivo (>70°) que acorta drásticamente el alcance.",
-    "example": "Para alcanzar 40 m con 20 m/s, el ángulo óptimo es 45°. A 20° o 70° el dron cae antes.",
+    "description": "Elegir un ángulo demasiado rasante (menor a 20°) o excesivo (mayor a 70°), que acorta drásticamente el alcance.",
+    "example": "Para alcanzar 40 m con 20 m/s, el ángulo óptimo es 45°. A 20° o 70° el proyectil cae antes.",
     "expectedConcept": "alcance"
-  },
-  {
-    "id": "err-cinematica",
-    "key": "cinematica-concepto",
-    "name": "Revisar Cinemática",
-    "description": "Confundir la distancia recorrida con el desplazamiento o invertir distancia y tiempo.",
-    "example": "120 / 10 = 12 m/s.",
-    "expectedConcept": "rapidez-media"
-  },
-  {
-    "id": "err-vectores",
-    "key": "vectores-concepto",
-    "name": "Revisar Vectores",
-    "description": "Sumar las magnitudes sin considerar la dirección y el sentido de cada componente.",
-    "example": "8 + 2 = 10 m/s hacia el este.",
-    "expectedConcept": "vector-resultante"
-  },
-  {
-    "id": "err-hooke",
-    "key": "hooke-concepto",
-    "name": "Revisar Ley de Hooke",
-    "description": "Usar centímetros como si fueran metros o aplicar la relación fuera del límite elástico.",
-    "example": "200 * 0,05 = 10 N.",
-    "expectedConcept": "ley-hooke"
   }
 ]

@@ -1,39 +1,32 @@
 const CODE_PREFIX = 'GP';
-const LEGACY_CODE_PATTERN = /^GP(\d{2})([A-P])(\d{2})$/;
-const CODE_PATTERN = /^GP(\d{2})(\d{2})(\d{2})$/;
+// El bloque de máscara es una letra (A-P, hasta 4 bits) o dos dígitos: el
+// mismo encodeClassConfig produce una letra siempre que el mask cabe en 15.
+const CODE_PATTERN = /^GP(\d{2})(\d{2}|[A-P])(\d{2})$/;
 
-const BITMASK_BY_SUBTEMA = {
-  parabolico: 1,
-  cinematica: 2,
-  vectores: 4,
-  hooke: 8,
-  termodinamica: 16,
-  optica: 32,
+// Único tema (Movimiento Parabólico); lo que el docente elige es qué
+// situaciones del simulador quedan habilitadas para sus estudiantes.
+const BITMASK_BY_SCENARIO = {
+  dron: 1,
+  basketball: 2,
+  wall: 4,
 };
 
 const MASK_LETTERS = 'ABCDEFGHIJKLMNOP';
 
-const TEMA_MATCHERS = [
-  { id: 'parabolico', match: (tema) => tema.includes('parabolico') },
-  { id: 'cinematica', match: (tema) => tema.includes('cinematica') },
-  { id: 'vectores', match: (tema) => tema.includes('vectores') },
-  { id: 'hooke', match: (tema) => tema.includes('hooke') },
-  { id: 'termodinamica', match: (tema) => tema.includes('termodinamica') },
-  { id: 'optica', match: (tema) => tema.includes('optica') },
-];
+const SCENARIO_IDS = Object.keys(BITMASK_BY_SCENARIO);
 
 /**
  * Compila la configuración del docente en un código alfanumérico compacto
- * (estilo Base64 comprimido: GP + flashcards + máscara de subtemas + ejercicios).
+ * (estilo Base64 comprimido: GP + flashcards + máscara de situaciones + ejercicios).
  * El código se decodifica localmente: 100% modo avión, sin base de datos.
  */
 export function encodeClassConfig({ flashcards = 10, subtemas = [], ejercicios = 3 } = {}) {
   const clampedFlashcards = Math.min(20, Math.max(5, Math.floor(Number(flashcards) || 5)));
   const clampedEjercicios = Math.min(10, Math.max(1, Math.floor(Number(ejercicios) || 1)));
-  const enabled = Array.isArray(subtemas) && subtemas.length ? subtemas : Object.keys(BITMASK_BY_SUBTEMA);
+  const enabled = Array.isArray(subtemas) && subtemas.length ? subtemas : SCENARIO_IDS;
   let mask = 0;
-  for (const subtema of enabled) {
-    mask |= BITMASK_BY_SUBTEMA[subtema] ?? 0;
+  for (const scenario of enabled) {
+    mask |= BITMASK_BY_SCENARIO[scenario] ?? 0;
   }
   const maskChar = mask <= 15 ? MASK_LETTERS[mask] : String(mask).padStart(2, '0');
   const flashcardsPart = String(clampedFlashcards).padStart(2, '0');
@@ -43,35 +36,31 @@ export function encodeClassConfig({ flashcards = 10, subtemas = [], ejercicios =
 
 export function decodeClassConfig(code) {
   const text = String(code ?? '').trim().toUpperCase();
-  const match = CODE_PATTERN.exec(text) ?? LEGACY_CODE_PATTERN.exec(text);
+  const match = CODE_PATTERN.exec(text);
   if (!match) return null;
   const flashcards = parseInt(match[1], 10);
   const mask = /^\d{2}$/.test(match[2]) ? Number(match[2]) : MASK_LETTERS.indexOf(match[2]);
   const ejercicios = parseInt(match[3], 10);
-  if (flashcards < 5 || flashcards > 20 || ejercicios < 1 || ejercicios > 10 || mask <= 0 || mask > 63) return null;
-  const subtemas = TEMA_MATCHERS.filter((tema) => (mask & BITMASK_BY_SUBTEMA[tema.id]) !== 0).map(
-    (tema) => tema.id,
-  );
+  if (flashcards < 5 || flashcards > 20 || ejercicios < 1 || ejercicios > 10 || mask <= 0 || mask > 7) return null;
+  const subtemas = SCENARIO_IDS.filter((scenario) => (mask & BITMASK_BY_SCENARIO[scenario]) !== 0);
   if (!subtemas.length) return null;
   return { flashcards, subtemas, ejercicios };
 }
 
 /**
- * Filtra los temas disponibles según los subtemas habilitados por el docente.
+ * ¿Este ejercicio pertenece a una de las situaciones habilitadas por el
+ * docente? Sin configuración (subtemas vacío), quedan todas habilitadas.
  */
-export function temaMatchesSubtemas(tema, subtemas) {
+export function scenarioMatchesConfig(scenario, subtemas) {
   if (!subtemas?.length) return true;
-  const normalized = String(tema ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  return TEMA_MATCHERS.some(
-    (matcher) => subtemas.includes(matcher.id) && matcher.match(normalized),
-  );
+  return subtemas.includes(scenario);
 }
 
 export function selectClassExercises(exercises, config) {
   if (!config) return exercises;
-  const matching = exercises.filter(item => temaMatchesSubtemas(item.topic, config.subtemas));
-  const topics = [...new Set(matching.map(item => item.topic))];
-  const queues = topics.map(topic => matching.filter(item => item.topic === topic));
+  const matching = exercises.filter(item => scenarioMatchesConfig(item.scenario, config.subtemas));
+  const scenarios = [...new Set(matching.map(item => item.scenario))];
+  const queues = scenarios.map(scenario => matching.filter(item => item.scenario === scenario));
   const selected = [];
   while (selected.length < config.ejercicios && queues.some(queue => queue.length)) {
     for (const queue of queues) {

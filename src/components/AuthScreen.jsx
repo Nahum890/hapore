@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { login, register } from '../auth/localAccounts.js';
+import { BrandMark, LaunchScene } from './Nanduti.jsx';
 
 export default function AuthScreen({ onAuthenticated }) {
   const [mode, setMode] = useState('login');
@@ -28,13 +29,13 @@ export default function AuthScreen({ onAuthenticated }) {
   return <main className="auth-page">
     <div className="auth-layout">
       <section className="auth-welcome" aria-labelledby="auth-welcome-title">
-        <div className="auth-brand"><span className="brand-mark" aria-hidden="true">P</span><span>PyFis IA</span></div>
-        <span className="auth-kicker">FÍSICA DE 3.º CURSO</span>
-        <h1 id="auth-welcome-title">Aprendé física paso a paso.</h1>
-        <p>Practicá con ejercicios y simulaciones, repasá con tarjetas y preguntale al tutor cuando necesites ayuda.</p>
+        <div className="auth-brand"><BrandMark size={44} /><span>PyFis <em>IA</em></span></div>
+        <span className="auth-kicker">Física 3.º curso · Jopara ha castellano</span>
+        <h1 id="auth-welcome-title"><span className="auth-motto" lang="gn">Ani rekyhyje.</span> Aprendé física paso a paso.</h1>
+        <p>Practicá con ejercicios y simulaciones, repasá con tarjetas y preguntale al tutor cuando necesites ayuda. Equivocarse también es aprender.</p>
         <div className="auth-preview" aria-hidden="true">
-          <div className="preview-orbit"><span className="preview-drone">✣</span><span className="preview-path" /></div>
-          <div className="preview-note"><span>01 · EJERCICIO</span><strong>Escribí tu respuesta</strong><small>Después comprobala con la simulación.</small></div>
+          <LaunchScene />
+          <div className="preview-note"><span>Ñaha’ã · Practicá</span><strong>Escribí tu respuesta</strong><small>Después comprobala con la simulación.</small></div>
         </div>
       </section>
       <section className="auth-panel" aria-label="Acceso a la aplicación">

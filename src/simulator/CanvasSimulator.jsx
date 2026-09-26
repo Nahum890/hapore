@@ -1,24 +1,29 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { drawScene } from './projectileRenderer.js';
-import { formatMeasure, sceneForExercise } from './exerciseSimulation.js';
-import ConceptScene from './ConceptScene.jsx';
+import { formatMeasure, sceneForExercise, scenarioOf } from './exerciseSimulation.js';
 
 const SCENE_TEXT = {
-  'Movimiento Parabólico': 'El dron sigue la trayectoria indicada por los datos del ejercicio.',
-  Cinemática: 'El recorrido muestra cómo cambia la posición durante el tiempo del ejercicio.',
-  Vectores: 'Las flechas muestran cómo se combinan dirección y sentido.',
-  'Ley de Hooke': 'El resorte y la caja muestran la relación entre fuerza y deformación.',
-  'Termodinámica': 'La escena muestra el intercambio de calor y el cambio de temperatura de este ejercicio.',
-  'Óptica': 'Los rayos y el espejo cambian según el fenómeno y los datos de este ejercicio.',
+  dron: 'El dron sigue la trayectoria indicada por los datos del ejercicio.',
+  basketball: 'La pelota describe el arco indicado por los datos del lanzamiento.',
+  wall: 'La pelota pasa (o no) por encima del paredón según los datos del lanzamiento.',
+};
+const SCENE_LABEL = { dron: 'Entrega en dron', basketball: 'Básquetbol', wall: 'Sobre el paredón' };
+const SCENE_ARIA = {
+  dron: 'Granja y dron',
+  basketball: 'Cancha de básquetbol',
+  wall: 'Patio con paredón',
 };
 
 export default function CanvasSimulator({ mission, submission }) {
   const exercise = mission?.exercise;
   const currentSubmission = submission?.exerciseId === exercise?.id ? submission : null;
-  const isParabolic = exercise?.topic === 'Movimiento Parabólico';
+  const scenario = scenarioOf(exercise);
   const sectionRef = useRef(null);
   const canvasRef = useRef(null);
   const progressRef = useRef(0);
+  // Leído por el bucle de dibujo (que corre fuera del ciclo de render): si la
+  // respuesta escrita fue correcta, no si la trayectoria geométrica "cayó cerca".
+  const verdictRef = useRef(null);
   const [phase, setPhase] = useState('idle');
   const scene = useMemo(() => sceneForExercise(exercise, currentSubmission?.answer), [exercise, currentSubmission?.answer]);
 
@@ -32,13 +37,7 @@ export default function CanvasSimulator({ mission, submission }) {
   }, [currentSubmission?.id, exercise?.id]);
 
   useEffect(() => {
-    if (isParabolic || phase !== 'flying') return undefined;
-    const timer = setTimeout(() => setPhase('landed'), 1900);
-    return () => clearTimeout(timer);
-  }, [isParabolic, phase, currentSubmission?.id]);
-
-  useEffect(() => {
-    if (!isParabolic || !scene.flight) return undefined;
+    if (!scene.flight) return undefined;
     const canvas = canvasRef.current;
     if (!canvas) return undefined;
     const ctx = canvas.getContext('2d');
@@ -47,7 +46,7 @@ export default function CanvasSimulator({ mission, submission }) {
     const draw = (now = 0) => {
       if (!width || !height) return;
       ctx.clearRect(0, 0, width, height);
-      drawScene(ctx, { width, height, flight: scene.flight, progress: progressRef.current, phase, now });
+      drawScene(ctx, { width, height, flight: scene.flight, progress: progressRef.current, phase, now, scenario, verdict: verdictRef.current });
     };
     const resize = () => {
       width = canvas.clientWidth; height = canvas.clientHeight;
@@ -70,28 +69,43 @@ export default function CanvasSimulator({ mission, submission }) {
       frameId = requestAnimationFrame(tick);
     } else { progressRef.current = phase === 'landed' ? 1 : 0; draw(); }
     return () => { cancelAnimationFrame(frameId); observer.disconnect(); };
-  }, [isParabolic, scene.flight, phase]);
+  }, [scene.flight, phase, scenario]);
 
   const replay = () => { if (currentSubmission && phase !== 'flying') { progressRef.current = 0; setPhase('flying'); } };
-  const measured = formatMeasure(scene.measured);
   const answer = currentSubmission ? formatMeasure(currentSubmission.answer) : '';
   const unit = exercise?.unit ?? '';
+  const isCorrect = Boolean(currentSubmission?.result?.correct);
+  const settled = currentSubmission && phase === 'landed';
+  verdictRef.current = currentSubmission ? isCorrect : null;
+  // El ángulo es el único dato que cambia la trayectoria dibujada: en esos
+  // ejercicios "quedó a X m de la meta" describe algo real. En el resto la
+  // escena siempre muestra el lanzamiento verdadero del ejercicio (para que
+  // se pueda comparar), así que un cálculo mal hecho no mueve el dibujo.
+  const isAngleDriven = exercise?.unit === '°';
+  // La respuesta correcta exacta solo se muestra cuando el intento fue acertado;
+  // si falló, se da una pista de dirección/desfasaje, nunca el valor esperado.
+  const measured = formatMeasure(scene.measured);
+  const offTarget = settled && isAngleDriven && !isCorrect && scene.flight
+    ? Math.abs(scene.flight.error)
+    : null;
 
   return <section ref={sectionRef} className="card simulator-card" aria-label={`Simulación del ejercicio ${exercise?.id ?? ''}`}>
-    <div className="simulator-heading"><div><h2>Así se comprueba tu respuesta</h2><p className="simulator-status">{SCENE_TEXT[exercise?.topic] ?? 'La visualización usa los datos del ejercicio de arriba.'}</p></div><span className="simulator-target">{exercise?.topic}</span></div>
-    {isParabolic
-      ? <canvas ref={canvasRef} className="simulator-canvas" role="img" aria-label={`Granja y dron para el ejercicio ${exercise.id}. ${phase === 'landed' ? `El recorrido termina a ${formatMeasure(scene.flight.landingX)} metros.` : 'La trayectoria aparecerá al comprobar la respuesta.'}`}>Simulación del vuelo del dron.</canvas>
-      : <ConceptScene exercise={exercise} phase={phase} submissionId={currentSubmission?.id} />}
+    <div className="simulator-heading"><div><h2>Así se comprueba tu respuesta</h2><p className="simulator-status">{SCENE_TEXT[scenario]}</p></div><span className="simulator-target">{SCENE_LABEL[scenario]}</span></div>
+    <canvas ref={canvasRef} className="simulator-canvas" role="img" aria-label={`${SCENE_ARIA[scenario]} para el ejercicio ${exercise?.id ?? ''}. ${phase === 'landed' ? `El recorrido termina a ${formatMeasure(scene.flight?.landingX)} metros.` : 'La trayectoria aparecerá al comprobar la respuesta.'}`}>Simulación del lanzamiento.</canvas>
     {!currentSubmission ? <p className="simulator-result">Escribí tu respuesta en el ejercicio de arriba y tocá “Comprobar con el simulador”.</p>
-      : <div className={'simulator-check-result' + (phase === 'landed' ? (currentSubmission.result.correct ? ' is-hit' : ' is-miss') : '')} role="status" aria-live="polite">
+      : <div className={'simulator-check-result' + (phase === 'landed' ? (isCorrect ? ' is-hit' : ' is-miss') : '')} role="status" aria-live="polite">
         {phase === 'flying' ? <p>Comprobando tu respuesta con la simulación…</p> : <>
-          <p className="simulator-verdict">{currentSubmission.result.correct ? '¡Tu respuesta coincide!' : 'Tu respuesta todavía no coincide.'}</p>
-          <div className="simulator-comparison"><span>Escribiste <strong>{answer} {unit}</strong></span><span>El ejercicio muestra <strong>{measured} {unit}</strong></span></div>
-          {isParabolic && exercise.unit === '°' && <p>Con tu ángulo, el paquete llegó a {formatMeasure(scene.flight.landingX)} m; la entrega está a {formatMeasure(scene.flight.targetX)} m.</p>}
-          {!currentSubmission.result.correct && <p>Revisá los datos del ejercicio y pedile una pista al tutor si la necesitás.</p>}
+          <p className="simulator-verdict">{isCorrect ? '¡Tu respuesta coincide!' : 'Tu respuesta todavía no coincide.'}</p>
+          {isCorrect
+            ? <div className="simulator-comparison"><span>Escribiste <strong>{answer} {unit}</strong></span><span>El ejercicio muestra <strong>{measured} {unit}</strong></span></div>
+            : <p className="simulator-miss-note">{isAngleDriven
+                ? <>Escribiste <strong>{answer}{unit}</strong>{offTarget !== null ? `; con ese ángulo el lanzamiento hubiera quedado a ${formatMeasure(offTarget)} m de la meta.` : '.'} No te muestro el ángulo correcto: pedile una pista al tutor o volvé a calcular con los datos de arriba.</>
+                : <>Escribiste <strong>{answer} {unit}</strong>. La escena siempre dibuja el lanzamiento real de este ejercicio para que compares tu cálculo con la trayectoria; no te muestro el valor correcto: pedile una pista al tutor o volvé a calcular con los datos de arriba.</>}</p>}
+          {settled && isAngleDriven && <p>Con tu ángulo, el lanzamiento llegó a {formatMeasure(scene.flight.landingX)} m; la meta está a {formatMeasure(scene.flight.targetX)} m.</p>}
+          {settled && scenario === 'wall' && scene.flight.obstacle && <p>{scene.flight.clearsObstacle ? 'Superó el paredón.' : 'No llegó a superar el paredón: probá con más altura.'}</p>}
         </>}
       </div>}
     {currentSubmission && <button type="button" className="btn btn-secondary simulator-replay" onClick={replay} disabled={phase === 'flying'}>Repetir simulación</button>}
-    <p className="simulator-explainer">{isParabolic ? 'El vuelo se dibuja como movimiento parabólico ideal, sin motor, para comparar la respuesta con la trayectoria.' : 'La escena y el resultado se calculan con los datos del ejercicio seleccionado; el modelo usa las condiciones indicadas en el enunciado.'}</p>
+    <p className="simulator-explainer">El vuelo se dibuja como movimiento parabólico ideal, sin resistencia del aire, para comparar tu respuesta con la trayectoria calculada.</p>
   </section>;
 }

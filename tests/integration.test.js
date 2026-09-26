@@ -31,18 +31,27 @@ test('integridad del banco de datos: ejercicios tienen campos y conceptos válid
 });
 
 test('integridad del tutor en jopara: catálogo de errores y niveles de pista', () => {
-  assert.ok(Array.isArray(tutorData.greetings) && tutorData.greetings.length > 0);
-  assert.ok(typeof tutorData.fallbackHint === 'string');
+  assert.ok(Array.isArray(tutorData.greetings.jopara) && tutorData.greetings.jopara.length > 0);
+  assert.ok(Array.isArray(tutorData.greetings.es) && tutorData.greetings.es.length > 0);
+  assert.ok(typeof tutorData.fallbackHint.jopara === 'string');
+  assert.ok(typeof tutorData.fallbackHint.es === 'string');
   assert.ok(Array.isArray(tutorData.errors) && tutorData.errors.length >= 4);
 
   for (const err of tutorData.errors) {
     assert.ok(err.errorId, 'Debe tener errorId');
-    assert.ok(err.joparaHint, 'Debe tener pista en Jopara');
     assert.ok(err.esHint, 'Debe tener pista en español');
-    assert.ok(err.levels?.nivel_1, 'Debe tener nivel 1 de pista');
-    assert.ok(err.levels?.nivel_2, 'Debe tener nivel 2 de pista');
-    assert.ok(err.levels?.nivel_3, 'Debe tener nivel 3 de pista');
-    assert.ok(err.levels?.nivel_4, 'Debe tener nivel 4 de pista');
+    assert.ok(err.followUp?.jopara, 'Debe tener seguimiento en Jopara');
+    assert.ok(err.followUp?.es, 'Debe tener seguimiento en español');
+  }
+
+  const errorTypes = ['confunde_velocidades', 'confunde_componentes', 'confunde_altura_alcance', 'olvida_gravedad', 'angulo_desfasado'];
+  for (const key of errorTypes) {
+    const byType = tutorData.hintLevels.byErrorType[key];
+    assert.ok(byType, `Debe existir byErrorType.${key}`);
+    for (const nivel of ['nivel_1', 'nivel_2', 'nivel_3', 'nivel_4']) {
+      assert.ok(byType[nivel]?.jopara?.length, `${key}.${nivel}: Jopara`);
+      assert.ok(byType[nivel]?.es?.length, `${key}.${nivel}: español`);
+    }
   }
 });
 

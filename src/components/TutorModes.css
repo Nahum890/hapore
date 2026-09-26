@@ -3,32 +3,31 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
   padding: 6px;
-  border: 1px solid var(--borde);
-  border-radius: 14px;
-  background: #f0f3ee;
+  border-radius: 18px;
+  background: var(--c-sky-soft);
 }
 
 .tutor-mode-tabs button {
-  min-height: 44px;
+  min-height: 46px;
   border: 0;
-  border-radius: 10px;
+  border-radius: 14px;
   background: transparent;
-  color: var(--texto-suave);
+  color: var(--c-sky-deep);
   font: inherit;
-  font-weight: 750;
+  font-weight: 800;
   cursor: pointer;
+  transition: background var(--motion-fast), color var(--motion-fast);
 }
+
+.tutor-mode-tabs button:hover:not(:disabled) { background: rgba(255, 255, 255, .6); }
 
 .tutor-mode-tabs button.is-active {
-  background: #fff;
-  color: var(--verde-monte);
-  box-shadow: var(--sombra);
+  background: var(--c-surface);
+  color: var(--c-ink);
+  box-shadow: var(--shadow-sm);
 }
 
-.tutor-mode-tabs button:focus-visible {
-  outline: 3px solid var(--azul-itaipu);
-  outline-offset: 2px;
-}
+.tutor-mode-tabs button:disabled { cursor: wait; opacity: .6; }
 
 .tutor-mode-panel {
   display: flex;
@@ -44,14 +43,12 @@
 }
 
 .tutor-mode-panel > .quiz-head > div > p {
-  margin: 5px 0 0;
-  color: var(--texto-suave);
+  margin: 4px 0 0;
+  color: var(--c-muted);
   font-size: 14px;
 }
 
-.tutor-mode-panel .chats-input-area > .quiz-input {
-  width: 100%;
-}
+.tutor-mode-panel .chats-input-area > .quiz-input { width: 100%; }
 
 @media (max-width: 520px) {
   .tutor-mode-tabs button { min-height: 48px; }

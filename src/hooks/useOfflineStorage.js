@@ -42,7 +42,7 @@ export function useOfflineStorage() {
     setHintsUsed(0);
     setState(setCurrentExercise(exerciseId));
   }, []);
-  const incrementHints = useCallback(() => setHintsUsed((prev) => Math.min(prev + 1, 5)), []);
+  const incrementHints = useCallback(() => setHintsUsed((prev) => Math.min(prev + 1, 4)), []);
   const resetHints = useCallback(() => setHintsUsed(0), []);
 
   return {

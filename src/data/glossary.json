@@ -1,27 +1,23 @@
 [
-  { "id": "glos-calor", "term": "Calor (Q)", "joparaTerm": "Pe calor", "definition": "Energía que se transfiere por diferencia de temperatura; se mide en joules (J).", "ejemploJopara": "Pe y mate-rã ohupyty calor ha hakuve.", "translationStatus": "pending" },
-  { "id": "glos-temperatura", "term": "Temperatura (T)", "joparaTerm": "Pe temperatura", "definition": "Magnitud que indica el estado térmico; un cambio puede expresarse en °C o K.", "ejemploJopara": "Pe temperatura ojupi pe y haku jave.", "translationStatus": "pending" },
-  { "id": "glos-normal", "term": "Normal óptica", "joparaTerm": "Pe normal", "definition": "Línea perpendicular al espejo desde la que se miden los ángulos de incidencia y reflexión.", "ejemploJopara": "Pe ángulo ñamedi normal guive.", "translationStatus": "pending" },
-  { "id": "glos-refraccion", "term": "Refracción", "joparaTerm": "Pe refracción", "definition": "Cambio de dirección de la luz cuando pasa entre dos medios y cambia su rapidez.", "ejemploJopara": "Pe luz okambia dirección osẽvo y gui aire-pe.", "translationStatus": "pending" },
   {
     "id": "glos-trayectoria",
     "term": "Trayectoria",
     "joparaTerm": "Pe trayectoria",
-    "definition": "Camino geométrico continuo que describe el dron en el aire. En movimiento parabólico forma una curva simétrica.",
-    "ejemploJopara": "Pe dron trayectoria ojapo peteĩ parábola iporãva."
+    "definition": "Camino geométrico continuo que describe el proyectil en el aire. En movimiento parabólico forma una curva simétrica.",
+    "ejemploJopara": "Pe trayectoria ojapo peteĩ parábola iporãva."
   },
   {
     "id": "glos-gravedad",
     "term": "Gravedad (g)",
     "joparaTerm": "Pe gravedad",
     "definition": "Aceleración de atracción hacia el centro de la Tierra (≈ 9,8 m/s² o convención de aula 10 m/s²). Actúa únicamente en el eje vertical Y.",
-    "ejemploJopara": "Pe gravedad omboguejy el dron con -0.5*g*t²."
+    "ejemploJopara": "Pe gravedad omboguejy pe proyectil con -0.5*g*t²."
   },
   {
     "id": "glos-velocidad-inicial",
     "term": "Velocidad inicial (v0)",
     "joparaTerm": "La velocidad inicial",
-    "definition": "Magnitud vectorial de la rapidez con la que el dron abandona el punto de lanzamiento.",
+    "definition": "Magnitud vectorial de la rapidez con la que el proyectil abandona el punto de lanzamiento.",
     "ejemploJopara": "La velocidad inicial imbarete, pero tekotevẽ jaikuaa pe ángulo."
   },
   {
@@ -36,7 +32,7 @@
     "term": "Componente vertical (vy)",
     "joparaTerm": "Pe componente vertical",
     "definition": "Fracción de la velocidad que eleva el proyectil contra el campo gravitatorio.",
-    "ejemploJopara": "Pe componente vertical ogueraha yvate pe dron."
+    "ejemploJopara": "Pe componente vertical ogueraha yvate pe proyectil."
   },
   {
     "id": "glos-componente-horizontal",
@@ -58,26 +54,5 @@
     "joparaTerm": "Kyhyje'ỹ",
     "definition": "Filosofía pedagógica guaraní que significa 'sin miedo'. Aprender mediante experimentación iterativa sin temor a equivocarse.",
     "ejemploJopara": "Ñamba'apo kyhyje'ỹme: cada error ha'e peteĩ oportunidad de aprendizaje."
-  },
-  {
-    "id": "glos-cinematica",
-    "term": "Rapidez media",
-    "joparaTerm": "Rapidez media",
-    "definition": "La rapidez media relaciona la distancia recorrida con el tiempo empleado. Se expresa en m/s cuando la distancia está en metros y el tiempo en segundos.",
-    "translationStatus": "pending"
-  },
-  {
-    "id": "glos-vectores",
-    "term": "Vector resultante",
-    "joparaTerm": "Vector resultante",
-    "definition": "Un vector tiene magnitud, dirección y sentido. La resultante se obtiene sumando sus componentes en cada eje; los sentidos opuestos llevan signos distintos.",
-    "translationStatus": "pending"
-  },
-  {
-    "id": "glos-hooke",
-    "term": "Ley de Hooke",
-    "joparaTerm": "Ley de Hooke",
-    "definition": "Dentro del límite elástico, la magnitud de la fuerza de un resorte es proporcional a su deformación. La fuerza restauradora apunta en sentido opuesto a esa deformación.",
-    "translationStatus": "pending"
   }
 ]

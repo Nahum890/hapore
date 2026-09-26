@@ -1,10 +1,4 @@
 [
-  { "id": "fc-termo-01", "topic": "Termodinámica", "frente_es": "¿Qué diferencia hay entre calor y temperatura?", "frente_jopara": "¿Mba'épa la diferencia entre calor ha temperatura?", "dorso_concepto": "El calor es energía que pasa de un cuerpo más caliente a uno más frío. La temperatura indica su estado térmico; no es energía transferida.", "formula": "Q = energía transferida; T = estado térmico", "front": "¿Qué diferencia hay entre calor y temperatura?", "back": "El calor es energía transferida; la temperatura indica el estado térmico." },
-  { "id": "fc-termo-02", "topic": "Termodinámica", "frente_es": "¿Cómo calculás el calor que recibe el agua para el mate?", "frente_jopara": "Pe y mate-rã ohupyty calor: ¿mba'éichapa jaipapa?", "dorso_concepto": "Multiplicá masa, calor específico y cambio de temperatura. La masa va en kg, el cambio en °C y el calor en J.", "formula": "Q = m · c · (Tf - Ti)", "front": "¿Cómo calculás el calor recibido?", "back": "Q = m · c · (Tf - Ti), en joules." },
-  { "id": "fc-termo-03", "topic": "Termodinámica", "frente_es": "¿Por qué dos porciones de agua terminan a la misma temperatura?", "frente_jopara": "Mokõi y temperaturas diferentes: ¿mba'érepa oñembojoja?", "dorso_concepto": "El calor pasa de la porción más caliente a la más fría hasta llegar al equilibrio térmico. Sin pérdidas, la energía cedida coincide con la recibida.", "formula": "Q cedido = Q recibido", "front": "¿Qué es el equilibrio térmico?", "back": "El calor fluye hasta que ambos cuerpos alcanzan la misma temperatura." },
-  { "id": "fc-optica-01", "topic": "Óptica", "frente_es": "¿Desde dónde se mide el ángulo de reflexión?", "frente_jopara": "Espejo ári: ¿moõ guive ñamedi pe ángulo?", "dorso_concepto": "Desde la normal, una línea perpendicular al espejo. El ángulo de reflexión es igual al de incidencia.", "formula": "ángulo de incidencia = ángulo de reflexión", "front": "¿Desde dónde se mide el ángulo de reflexión?", "back": "Desde la normal; incidencia y reflexión son iguales." },
-  { "id": "fc-optica-02", "topic": "Óptica", "frente_es": "¿Dónde aparece la imagen en un espejo plano?", "frente_jopara": "Espejo plano-pe, ¿moõpa ojekuaa pe imagen?", "dorso_concepto": "La imagen virtual parece estar detrás del espejo, a la misma distancia a la que el objeto está delante.", "formula": "distancia de imagen = distancia de objeto", "front": "¿Dónde aparece la imagen en un espejo plano?", "back": "A igual distancia detrás del espejo." },
-  { "id": "fc-optica-03", "topic": "Óptica", "frente_es": "¿Por qué una pajita parece doblarse dentro de un vaso de agua?", "frente_jopara": "Pe pajita y ryepýpe: ¿mba'érepa ha'ete oñemokarẽ?", "dorso_concepto": "La luz cambia de dirección al pasar entre aire y agua porque su rapidez cambia. Ese fenómeno se llama refracción; la pajita no se dobla.", "formula": "n = c / v", "front": "¿Por qué una pajita parece doblada en agua?", "back": "Por la refracción de la luz al pasar de agua a aire." },
   {
     "id": "fc-01",
     "topic": "Movimiento Parabólico",
@@ -50,11 +44,11 @@
     "subtema": "movimiento_parabolico",
     "topic": "Movimiento Parabólico",
     "front": "¿Qué representa la componente horizontal (vx)?\n¿Mba'épa he'ise pe componente horizontal?",
-    "back": "Es la parte de la velocidad que empuja el dron hacia adelante. Permanece constante durante todo el vuelo porque no hay aceleración en X.\nFórmula: vx = v0 * cos(ángulo)",
+    "back": "Es la parte de la velocidad que empuja el proyectil hacia adelante. Permanece constante durante todo el vuelo porque no hay aceleración en X.\nFórmula: vx = v0 * cos(ángulo)",
     "formula": "vx = v0 * cos(ángulo)",
     "frente_es": "¿Qué representa la componente horizontal (vx)?",
     "frente_jopara": "¿Mba'épa he'ise pe componente horizontal?",
-    "dorso_concepto": "Es la parte de la velocidad que empuja el dron hacia adelante. Permanece constante en todo el vuelo.",
+    "dorso_concepto": "Es la parte de la velocidad que empuja el proyectil hacia adelante. Permanece constante en todo el vuelo.",
     "subtopic": "Componente Horizontal"
   },
   {
@@ -62,22 +56,22 @@
     "subtema": "movimiento_parabolico",
     "topic": "Movimiento Parabólico",
     "front": "¿Qué representa la componente vertical (vy)?\n¿Mba'épa ojapo pe componente vertical?",
-    "back": "Es la parte de la velocidad que eleva el dron. Disminuye segundo a segundo por acción de la gravedad hasta hacerse cero en la cúspide.\nFórmula: vy(t) = v0 * sen(ángulo) - g * t",
+    "back": "Es la parte de la velocidad que eleva el proyectil. Disminuye segundo a segundo por acción de la gravedad hasta hacerse cero en la cúspide.\nFórmula: vy(t) = v0 * sen(ángulo) - g * t",
     "formula": "vy = v0 * sen(ángulo)",
     "frente_es": "¿Qué representa la componente vertical (vy)?",
     "frente_jopara": "¿Mba'épa ojapo pe componente vertical?",
-    "dorso_concepto": "Es la velocidad que eleva el dron contra la gravedad.",
+    "dorso_concepto": "Es la velocidad que eleva el proyectil contra la gravedad.",
     "subtopic": "Componente Vertical"
   },
   {
     "id": "fc-mec-03",
     "subtema": "movimiento_parabolico",
     "topic": "Movimiento Parabólico",
-    "front": "¿Por qué el dron cae inexorablemente al suelo?\n¿Mba'érepa pe dron ho'a jey yvýpe?",
+    "front": "¿Por qué el proyectil cae inexorablemente al suelo?\n¿Mba'érepa pe proyectil ho'a jey yvýpe?",
     "back": "La aceleración gravitatoria (g ≈ 9,8 m/s²) tira continuamente hacia abajo, curvando la trayectoria en forma de parábola.\nFórmula horaria: y(t) = y0 + vy*t - ½*g*t²",
     "formula": "y(t) = y0 + vy*t - 0.5*g*t²",
-    "frente_es": "¿Por qué el dron cae al suelo?",
-    "frente_jopara": "¿Mba'érepa pe dron ho'a jey yvýpe?",
+    "frente_es": "¿Por qué el proyectil cae al suelo?",
+    "frente_jopara": "¿Mba'érepa pe proyectil ho'a jey yvýpe?",
     "dorso_concepto": "La gravedad tira hacia abajo constantemente con aceleración g.",
     "subtopic": "Efecto de la Gravedad"
   },
@@ -109,162 +103,12 @@
     "id": "fc-mec-06",
     "subtema": "movimiento_parabolico",
     "topic": "Movimiento Parabólico",
-    "front": "¿Qué condición física define la altura máxima (Hmax)?\n¿Mba'épa oiko pe dron yvate og̃uahẽvo?",
-    "back": "En el punto más alto, la velocidad vertical se anula por un instante (vy = 0). El dron sigue en movimiento únicamente gracias a su velocidad horizontal vx.\nFórmula: Hmax = (v0² * sen²(ángulo)) / (2 * g)",
+    "front": "¿Qué condición física define la altura máxima (Hmax)?\n¿Mba'épa oiko pe proyectil yvate og̃uahẽvo?",
+    "back": "En el punto más alto, la velocidad vertical se anula por un instante (vy = 0). El proyectil sigue en movimiento únicamente gracias a su velocidad horizontal vx.\nFórmula: Hmax = (v0² * sen²(ángulo)) / (2 * g)",
     "formula": "Hmax = (v0² * sen²(ángulo)) / (2 * g)",
     "frente_es": "¿Qué define la altura máxima?",
-    "frente_jopara": "¿Mba'épa oiko pe dron yvate og̃uahẽvo?",
+    "frente_jopara": "¿Mba'épa oiko pe proyectil yvate og̃uahẽvo?",
     "dorso_concepto": "En la cúspide vy = 0 m/s, pero vx sigue empujando hacia adelante.",
     "subtopic": "Altura Máxima"
-  },
-  {
-    "id": "fc-cinematica-1",
-    "topic": "Cinemática",
-    "front": "¿Cómo se calcula la rapidez media?",
-    "back": "Dividí la distancia total por el tiempo total.",
-    "formula": "rapidez media = distancia / tiempo",
-    "frente_es": "¿Cómo se calcula la rapidez media?",
-    "frente_jopara": "",
-    "dorso_concepto": "Dividí la distancia total por el tiempo total."
-  },
-  {
-    "id": "fc-cinematica-2",
-    "topic": "Cinemática",
-    "front": "¿Qué caracteriza al movimiento rectilíneo uniforme?",
-    "back": "La trayectoria es recta y la velocidad permanece constante.",
-    "formula": "distancia = rapidez * tiempo",
-    "frente_es": "¿Qué caracteriza al movimiento rectilíneo uniforme?",
-    "frente_jopara": "",
-    "dorso_concepto": "La trayectoria es recta y la velocidad permanece constante."
-  },
-  {
-    "id": "fc-cinematica-3",
-    "topic": "Cinemática",
-    "front": "¿Cómo se calcula el tiempo en un movimiento uniforme?",
-    "back": "Dividí la distancia recorrida por la rapidez constante.",
-    "formula": "tiempo = distancia / rapidez",
-    "frente_es": "¿Cómo se calcula el tiempo en un movimiento uniforme?",
-    "frente_jopara": "",
-    "dorso_concepto": "Dividí la distancia recorrida por la rapidez constante."
-  },
-  {
-    "id": "fc-cinematica-4",
-    "topic": "Cinemática",
-    "front": "¿Son iguales distancia y desplazamiento?",
-    "back": "La distancia mide el camino recorrido. El desplazamiento une el punto inicial con el final y tiene dirección.",
-    "formula": "velocidad media = desplazamiento / tiempo",
-    "frente_es": "¿Son iguales distancia y desplazamiento?",
-    "frente_jopara": "",
-    "dorso_concepto": "La distancia mide el camino recorrido. El desplazamiento une el punto inicial con el final y tiene dirección."
-  },
-  {
-    "id": "fc-cinematica-5",
-    "topic": "Cinemática",
-    "front": "¿Qué mide la aceleración media?",
-    "back": "El cambio de velocidad por cada unidad de tiempo. Su unidad es m/s².",
-    "formula": "aceleración media = (velocidad final - velocidad inicial) / tiempo",
-    "frente_es": "¿Qué mide la aceleración media?",
-    "frente_jopara": "",
-    "dorso_concepto": "El cambio de velocidad por cada unidad de tiempo. Su unidad es m/s²."
-  },
-  {
-    "id": "fc-vectores-1",
-    "topic": "Vectores",
-    "front": "¿Qué caracteriza a un vector?",
-    "back": "Tiene magnitud, dirección y sentido.",
-    "formula": "vector = (componente X, componente Y)",
-    "frente_es": "¿Qué caracteriza a un vector?",
-    "frente_jopara": "",
-    "dorso_concepto": "Tiene magnitud, dirección y sentido."
-  },
-  {
-    "id": "fc-vectores-2",
-    "topic": "Vectores",
-    "front": "¿Cómo se suman vectores del mismo eje?",
-    "back": "Se suman sus componentes con signo, según el sentido elegido como positivo.",
-    "formula": "Rx = Ax + Bx",
-    "frente_es": "¿Cómo se suman vectores del mismo eje?",
-    "frente_jopara": "",
-    "dorso_concepto": "Se suman sus componentes con signo, según el sentido elegido como positivo."
-  },
-  {
-    "id": "fc-vectores-3",
-    "topic": "Vectores",
-    "front": "¿Cómo influye un viento a favor?",
-    "back": "Su componente se suma a la del dron para obtener la velocidad respecto del suelo.",
-    "formula": "Vsuelo = Vdron + Vviento",
-    "frente_es": "¿Cómo influye un viento a favor?",
-    "frente_jopara": "",
-    "dorso_concepto": "Su componente se suma a la del dron para obtener la velocidad respecto del suelo."
-  },
-  {
-    "id": "fc-vectores-4",
-    "topic": "Vectores",
-    "front": "¿Cómo se calcula la magnitud de dos componentes perpendiculares?",
-    "back": "Aplicá el teorema de Pitágoras a las componentes.",
-    "formula": "magnitud = raíz de (x² + y²)",
-    "frente_es": "¿Cómo se calcula la magnitud de dos componentes perpendiculares?",
-    "frente_jopara": "",
-    "dorso_concepto": "Aplicá el teorema de Pitágoras a las componentes."
-  },
-  {
-    "id": "fc-vectores-5",
-    "topic": "Vectores",
-    "front": "¿Una magnitud vectorial puede representarse con un solo número?",
-    "back": "En un eje se usa un número con signo; en dos dimensiones hacen falta las componentes o magnitud y dirección.",
-    "formula": "V = (Vx, Vy)",
-    "frente_es": "¿Una magnitud vectorial puede representarse con un solo número?",
-    "frente_jopara": "",
-    "dorso_concepto": "En un eje se usa un número con signo; en dos dimensiones hacen falta las componentes o magnitud y dirección."
-  },
-  {
-    "id": "fc-hooke-1",
-    "topic": "Ley de Hooke",
-    "front": "¿Qué relaciona la ley de Hooke?",
-    "back": "Relaciona la fuerza elástica con la deformación, dentro del límite elástico.",
-    "formula": "magnitud F = k * x",
-    "frente_es": "¿Qué relaciona la ley de Hooke?",
-    "frente_jopara": "",
-    "dorso_concepto": "Relaciona la fuerza elástica con la deformación, dentro del límite elástico."
-  },
-  {
-    "id": "fc-hooke-2",
-    "topic": "Ley de Hooke",
-    "front": "¿Qué representa la constante k?",
-    "back": "La rigidez del resorte. Cuanto mayor es k, más fuerza se necesita para una misma deformación.",
-    "formula": "k = F / x, en N/m",
-    "frente_es": "¿Qué representa la constante k?",
-    "frente_jopara": "",
-    "dorso_concepto": "La rigidez del resorte. Cuanto mayor es k, más fuerza se necesita para una misma deformación."
-  },
-  {
-    "id": "fc-hooke-3",
-    "topic": "Ley de Hooke",
-    "front": "¿En qué unidad se usa la deformación x?",
-    "back": "En metros, si la fuerza se expresa en newtons y k en N/m.",
-    "formula": "1 cm = 0,01 m",
-    "frente_es": "¿En qué unidad se usa la deformación x?",
-    "frente_jopara": "",
-    "dorso_concepto": "En metros, si la fuerza se expresa en newtons y k en N/m."
-  },
-  {
-    "id": "fc-hooke-4",
-    "topic": "Ley de Hooke",
-    "front": "¿Hacia dónde apunta la fuerza restauradora?",
-    "back": "En sentido opuesto a la deformación: intenta devolver el resorte a su posición de equilibrio.",
-    "formula": "F = -k * x",
-    "frente_es": "¿Hacia dónde apunta la fuerza restauradora?",
-    "frente_jopara": "",
-    "dorso_concepto": "En sentido opuesto a la deformación: intenta devolver el resorte a su posición de equilibrio."
-  },
-  {
-    "id": "fc-hooke-5",
-    "topic": "Ley de Hooke",
-    "front": "¿Se cumple la ley de Hooke para cualquier estiramiento?",
-    "back": "No. Solo describe el comportamiento proporcional dentro del límite elástico del resorte.",
-    "formula": "F / x = k, en la región elástica",
-    "frente_es": "¿Se cumple la ley de Hooke para cualquier estiramiento?",
-    "frente_jopara": "",
-    "dorso_concepto": "No. Solo describe el comportamiento proporcional dentro del límite elástico del resorte."
   }
 ]

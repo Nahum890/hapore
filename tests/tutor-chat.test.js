@@ -20,9 +20,15 @@ test('el chat offline recupera material para el tiempo de vuelo', async () => {
 });
 
 test('el chat offline pide precisión cuando el material no permite responder', async () => {
-  const response = await tutor.respond({ tipo: 'charla_libre', message: '¿Me contás algo?' });
+  const response = await tutor.respond({ tipo: 'charla_libre', message: '¿Me contás algo?', language: 'es' });
   assert.equal(response.available, true);
   assert.match(response.message, /No encontré una explicación suficientemente cercana/i);
+});
+
+test('el chat offline responde en jopara por defecto cuando no se pide español', async () => {
+  const response = await tutor.respond({ tipo: 'charla_libre', message: '¿Me contás algo?' });
+  assert.equal(response.available, true);
+  assert.match(response.message, /Ndajuhúi/i);
 });
 
 test('el tutor usa el catálogo de errores para resolver pistas por tipo de error', async () => {
