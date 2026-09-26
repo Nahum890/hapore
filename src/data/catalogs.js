@@ -14,7 +14,8 @@ export { concepts, errors, exercises, flashcards, glossary, quizBank, tutorJopar
 const JOPARA_FIELDS = {
   name: ['nameJopara', 'name_gn'], definition: ['definitionJopara', 'definition_gn'],
   question: ['questionJopara', 'question_gn'], frente_es: ['frente_jopara'],
-  description: ['descriptionJopara'],
+  pregunta: ['preguntaJopara'], enunciado: ['enunciadoJopara'], tema: ['temaJopara'],
+  description: ['descriptionJopara'], example: ['exampleJopara'], ejemplo: ['ejemploJopara'], hints: ['hintsJopara'],
   front: ['frontJopara', 'frente_jopara'], respuesta: ['respuestaJopara'],
   explicacion: ['explicacionJopara', 'explanationJopara'], dorso_concepto: ['dorso_jopara', 'backJopara'],
   topic: ['topicJopara', 'temaJopara'], term: ['joparaTerm'],
@@ -24,8 +25,11 @@ export function localizeCatalogItem(item, language = 'gn-jopara') {
   if (!item || language === 'es') return item;
   const localized = { ...item, ...(catalogTranslations.items[item.id] ?? {}) };
   for (const [field, alternates] of Object.entries(JOPARA_FIELDS)) {
-    if (typeof item[field] !== 'string') continue;
-    const value = alternates.map(key => localized[key]).find(candidate => typeof candidate === 'string' && candidate.trim());
+    if (item[field] == null) continue;
+    const value = alternates.map(key => localized[key]).find(candidate => {
+      if (Array.isArray(item[field])) return Array.isArray(candidate) && candidate.length > 0;
+      return typeof candidate === 'string' && candidate.trim();
+    });
     if (value) localized[field] = value;
   }
   return localized;
