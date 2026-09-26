@@ -15,11 +15,17 @@ import PredictLaunchGame from './simulator/PredictLaunchGame.jsx';
 import {
   concepts as conceptsData,
   errors as errorsData,
-  exercises as exercisesData,
+  exercises as builtInExercisesData,
   flashcards as flashcardsData,
   glossary as glossaryData,
   localizeCatalogItem,
 } from './data/catalogs.js';
+import { getCustomExercises } from './utils/customExercises.js';
+
+// Los ejercicios que crea el docente viven en este dispositivo (ver
+// src/utils/customExercises.js) y se suman a los del banco fijo dondequiera
+// que la app necesite "todos los ejercicios disponibles".
+const getAllExercises = () => [...builtInExercisesData, ...getCustomExercises()];
 import { useOfflineStorage } from './hooks/useOfflineStorage.js';
 import { useTutor } from './hooks/useTutor.js';
 import { useMission } from './hooks/useMission.js';
@@ -63,7 +69,7 @@ function HomeView({ user, learning, classConfig, onNavigate, onGuide }) {
   const teacher = user.role === 'maestro';
   const progress = summarizeAttempts(learning.attemptLog);
   const topicProgress = SCENARIOS.map(scenario => {
-    const ids = new Set(exercisesData.filter(item => item.scenario === scenario.id).map(item => item.id));
+    const ids = new Set(getAllExercises().filter(item => item.scenario === scenario.id).map(item => item.id));
     return { topic: scenario.label, ...summarizeAttempts(learning.attemptLog.filter(item => ids.has(item.exerciseId))) };
   });
   return <div className="home-view">
@@ -428,12 +434,21 @@ function LearningApp({ user, onLogout }) {
   const [simulationSubmission, setSimulationSubmission] = useState(null);
   const [showGuide, setShowGuide] = useState(() => !readJSON('guarania:guideSeen:v2', false));
   const [classConfig, setClassConfig] = useState(() => decodeClassConfig(readJSON('guarania:classCode', null)));
+  // El docente puede crear ejercicios propios mientras la app sigue abierta
+  // (en Aula) y esperar verlos de inmediato en Practicar/el proyector; este
+  // contador fuerza a releer la lista cuando eso pasa, sin recargar la app.
+  const [customExercisesVersion, setCustomExercisesVersion] = useState(0);
+  useEffect(() => {
+    const bump = () => setCustomExercisesVersion(value => value + 1);
+    window.addEventListener('custom-exercises-changed', bump);
+    return () => window.removeEventListener('custom-exercises-changed', bump);
+  }, []);
   // Los ejercicios se localizan acá: enunciado y pistas cambian con el idioma
   // elegido sin tocar scenario/values/correctAnswer (localizeCatalogItem solo
   // reemplaza campos de texto).
   const visibleExercises = useMemo(
-    () => selectClassExercises(exercisesData, classConfig).map(item => localizeCatalogItem(item, language)),
-    [classConfig, language],
+    () => selectClassExercises(getAllExercises(), classConfig).map(item => localizeCatalogItem(item, language)),
+    [classConfig, language, customExercisesVersion],
   );
   const localizedConcepts = useMemo(() => conceptsData.map(item => localizeCatalogItem(item, language)), [language]);
   const localizedErrors = useMemo(() => errorsData.map(item => localizeCatalogItem(item, language)), [language]);

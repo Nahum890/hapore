@@ -6,12 +6,18 @@ import {
   range,
   timeOfFlight,
 } from '../physics/projectileMotion.js';
-import { exercises as exercisesData } from '../data/catalogs.js';
+import { exercises as builtInExercises, concepts } from '../data/catalogs.js';
 import { generateGuaraniaPdf } from './PrintableSheet.jsx';
 
 const SCENARIO_LABELS = { dron: 'Dron', basketball: 'Básquetbol', wall: 'Pelota sobre el paredón' };
 
-export default function TeacherProjector({ attempts = 0, xp = 0 }) {
+export default function TeacherProjector({ attempts = 0, xp = 0, exercises: exercisesProp }) {
+  const exercisesData = exercisesProp ?? builtInExercises;
+  // Qué mostrarle a la clase: un ejercicio con su simulador, o un concepto en
+  // formato grande para proyectar.
+  const [displayMode, setDisplayMode] = useState('ejercicio');
+  const [selectedConceptId, setSelectedConceptId] = useState(concepts[0]?.id ?? '');
+  const selectedConcept = concepts.find((item) => item.id === selectedConceptId) ?? null;
   // Parámetros de simulación en vivo
   const [v0, setV0] = useState(20);
   const [angle, setAngle] = useState(30);
@@ -20,7 +26,7 @@ export default function TeacherProjector({ attempts = 0, xp = 0 }) {
   // ejercicio" aplica sus valores a la simulación que ve la clase.
   const [selectedExerciseId, setSelectedExerciseId] = useState('ej-01');
   const [projectedExerciseId, setProjectedExerciseId] = useState(null);
-  const previewExercise = exercisesData.find((item) => item.id === selectedExerciseId) ?? null;
+  const previewExercise = exercisesData.find((item) => item.id === selectedExerciseId) ?? exercisesData[0] ?? null;
 
   // Trayectoria de referencia A para comparación simultánea (ej. 30° vs 60°)
   const [referenceLaunch, setReferenceLaunch] = useState(null);
@@ -136,6 +142,29 @@ export default function TeacherProjector({ attempts = 0, xp = 0 }) {
         </div>
       </div>
 
+      {/* QUÉ PROYECTAR */}
+      <div className="tutor-mode-tabs" role="tablist" aria-label="Qué proyectar">
+        <button type="button" role="tab" aria-selected={displayMode === 'ejercicio'} className={displayMode === 'ejercicio' ? 'is-active' : ''} onClick={() => setDisplayMode('ejercicio')}>Ejercicio y simulador</button>
+        <button type="button" role="tab" aria-selected={displayMode === 'concepto'} className={displayMode === 'concepto' ? 'is-active' : ''} onClick={() => setDisplayMode('concepto')}>Concepto</button>
+      </div>
+
+      {displayMode === 'concepto' ? (
+        <div className="projector-concept" aria-label="Concepto proyectado">
+          <label className="teacher-field" htmlFor="teacher-concept-select">Elegí un concepto para proyectar
+            <select id="teacher-concept-select" className="quiz-input" value={selectedConceptId} onChange={event => setSelectedConceptId(event.target.value)}>
+              {concepts.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}
+            </select>
+          </label>
+          {selectedConcept && (
+            <div className="projector-concept-slide">
+              <h2>{selectedConcept.name}</h2>
+              <p>{selectedConcept.definition}</p>
+              {selectedConcept.formula && <p className="projector-concept-formula">{selectedConcept.formula}</p>}
+            </div>
+          )}
+        </div>
+      ) : (
+      <>
       {/* SELECTOR DE EJERCICIO DE REFERENCIA */}
       <div style={{ backgroundColor: '#F3F4F6', padding: '10px 14px', borderRadius: '8px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
         <label htmlFor="teacher-exercise-select" style={{ fontWeight: 600, fontSize: '0.85rem', color: '#1F2937' }}>
@@ -149,7 +178,7 @@ export default function TeacherProjector({ attempts = 0, xp = 0 }) {
         >
           {exercisesData.map((ex) => (
             <option key={ex.id} value={ex.id}>
-              [{ex.difficulty.toUpperCase()}] {ex.question.substring(0, 75)}...
+              [{ex.difficulty.toUpperCase()}] {ex.custom ? '⭐ ' : ''}{ex.question.substring(0, 75)}...
             </option>
           ))}
         </select>
@@ -389,6 +418,8 @@ export default function TeacherProjector({ attempts = 0, xp = 0 }) {
           <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#7F1D1D' }}>{currentR.toFixed(2)} m</div>
         </div>
       </div>
+      </>
+      )}
 
       {/* ESTADÍSTICAS DEL AULA */}
       <div style={{ borderTop: '1px solid #E5E7EB', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', fontSize: '0.82rem', color: '#6B7280' }}>
