@@ -143,7 +143,11 @@ export default class LocalAIProvider {
         const text = typeof localResult === 'string' ? localResult : localResult?.message;
         if (typeof text !== 'string' || !text.trim()) throw new Error('Respuesta local vacía');
         const nextQuota = recordTutorQuery();
+        const extras = typeof localResult === 'object' && localResult
+          ? { esHint: localResult.esHint, followUp: localResult.followUp, knowledgeType: localResult.knowledgeType }
+          : {};
         const result = {
+          ...extras,
           message: sanitizeMarkup(text),
           source: this.options.loadLocalModel ? 'local-model' : 'rules',
           available: true,
