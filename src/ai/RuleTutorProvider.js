@@ -79,6 +79,31 @@ function workedExample(exercise, language) {
     answer ? `${labels.result}: ${answer}.` : '',
   ].filter(Boolean).join('\n\n');
 }
+// Pregunta socrática para los dos primeros niveles de pista, cuando el
+// estudiante todavía no respondió nada sobre este nivel: en vez de explicar,
+// el tutor pregunta primero (ver prompt.js buildDiagnosticPrompt, la misma
+// idea para el tutor online). Se arma con los datos reales del ejercicio.
+function socraticQuestion(exercise, level, language) {
+  const values = Object.entries(exercise?.values ?? {}).map(([key, value]) => `${key} = ${value}`).join(', ');
+  if (level <= 1) {
+    return language === 'es'
+      ? `Este ejercicio da estos datos: ${values || 'revisá el enunciado'}. ¿Qué datos identificás vos y qué te piden encontrar exactamente?`
+      : `Ko ejercicio ome'ẽ ko'ã dato: ${values || 'ehecha jey enunciado'}. ¿Mba'e dato-pa rehecha nde ha mba'épa ojerure eheka?`;
+  }
+  return language === 'es'
+    ? '¿Qué relación o fórmula usarías para llegar a lo que te piden con esos datos?'
+    : `¿Mba'e fórmula-pa eiporukuaa umi dato reheve eheka hag̃ua mba'e ojerurehára?`;
+}
+
+// Cuando el estudiante ya respondió a la pregunta del nivel (llega
+// `context.history` con la pregunta anterior o `studentReply`), el tutor
+// offline no puede evaluar texto libre con precisión, así que reconoce el
+// esfuerzo y sigue con el contenido de ese nivel en vez de repetir la
+// pregunta — igual que le pide prompt.js al tutor online.
+function acknowledgeReply(language) {
+  return language === 'es' ? 'Vamos a revisarlo juntos: ' : 'Jahecha jey oñondive: ';
+}
+
 export function obtenerVariantePista(variants, previous) {
   if (!Array.isArray(variants)) return variants ?? null;
   const choices = variants.filter(text => typeof text === 'string' && text.trim());
@@ -220,11 +245,24 @@ export default class RuleTutorProvider {
       ? entry?.esHint
       : (JOPARA_ERROR_HINTS[error?.id] ?? this.pickLang(entry?.followUp, 'gn-jopara'));
 
-    return this.result(this.choose([exercise?.id, context.errorType, context.expectedConcept, level, language].join(':'), variantsEntry, language), {
+    // Método socrático offline: en los dos primeros niveles, si el estudiante
+    // todavía no respondió nada sobre este nivel (no llega historial de esta
+    // pista), se pregunta en vez de explicar — igual que el tutor online
+    // (prompt.js buildDiagnosticPrompt). Cuando sí responde, el tutor por
+    // reglas no puede evaluar texto libre con precisión, así que reconoce el
+    // intento y sigue con el contenido de ese nivel.
+    const hasReply = Array.isArray(context.history) && context.history.length > 0;
+    const socratic = level <= 2 && exercise && !hasReply;
+    const message = socratic
+      ? socraticQuestion(exercise, level, language)
+      : (hasReply ? acknowledgeReply(language) : '') + (this.choose([exercise?.id, context.errorType, context.expectedConcept, level, language].join(':'), variantsEntry, language) ?? '');
+
+    return this.result(message, {
       esHint: entry?.esHint,
       joparaHint: JOPARA_ERROR_HINTS[error?.id] ?? this.pickLang(entry?.followUp, 'gn-jopara'),
       subHint,
       followUp: this.pickLang(entry?.followUp, language),
+      socratic,
     });
   }
 }

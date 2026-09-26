@@ -17,12 +17,19 @@ const formatValue = value => typeof value === 'number' ? new Intl.NumberFormat('
 export default function ExerciseCard({ exercise, onResult, onAskHint, onSimulationCheck, onSimulationClear, hintsUsed = 0, onIncrementHint }) {
   const { language } = useTranslation();
   const [answer, setAnswer] = useState(''), [feedback, setFeedback] = useState(null), [waiting, setWaiting] = useState(false), [hintError, setHintError] = useState(''), [hintMessage, setHintMessage] = useState(null);
+  // Método socrático: en los niveles 1 y 2 el tutor pregunta antes de
+  // explicar (ver ai/prompt.js y ai/RuleTutorProvider.js). `hintExchange`
+  // guarda ese ida y vuelta corto para mostrarlo como una mini conversación.
+  const [hintExchange, setHintExchange] = useState([]);
+  const [hintReply, setHintReply] = useState('');
+  const [sendingReply, setSendingReply] = useState(false);
   const currentId = useRef(exercise?.id), hintLock = useRef(false), hintRequest = useRef(0), startedAt = useRef(Date.now());
   currentId.current = exercise?.id;
   useEffect(() => {
     hintRequest.current += 1;
     hintLock.current = false;
     setAnswer(''); setFeedback(null); setHintError(''); setHintMessage(null); setWaiting(false);
+    setHintExchange([]); setHintReply(''); setSendingReply(false);
     startedAt.current = Date.now();
   }, [exercise?.id]);
 
@@ -46,6 +53,7 @@ export default function ExerciseCard({ exercise, onResult, onAskHint, onSimulati
           joparaHint: response.joparaHint,
           subHint: response.subHint ?? (language === 'es' ? response.esHint : (response.joparaHint ?? response.followUp)),
         });
+        setHintExchange([{ role: 'tutor', text: response.message }]);
       }
     }).catch(() => {});
     return () => { active = false; };
@@ -58,13 +66,13 @@ export default function ExerciseCard({ exercise, onResult, onAskHint, onSimulati
     const result = validateExercise(exercise, answer);
     const diagnosis = result.correct ? null : diagnoseAttempt(exercise, answer, language);
     setFeedback({ ...result, diagnosisMessage: diagnosis?.message });
-    onResult?.({ correct: result.correct, hintsUsed, exerciseId: exercise.id, durationMs: Date.now() - startedAt.current });
+    onResult?.({ correct: result.correct, hintsUsed, exerciseId: exercise.id, durationMs: Date.now() - startedAt.current, errorType: diagnosis?.key ?? null, expectedConcept: exercise.expectedConcept });
     onSimulationCheck?.({ exerciseId: exercise.id, answer: result.student, result });
     if (!result.correct) onAskHint?.({ type: 'mistake', topic: exercise.topic, exercise, exerciseId: exercise.id, expectedConcept: exercise.expectedConcept, errorType: diagnosis?.key, studentAnswer: result.student ?? answer, expectedAnswer: result.expected, hintLevel: hintsUsed + 1 });
   };
   const hint = async () => {
     if (hintLock.current || !hasHintsLeft(exercise, hintsUsed)) return;
-    hintLock.current = true; setWaiting(true); setHintError(''); setHintMessage(null);
+    hintLock.current = true; setWaiting(true); setHintError(''); setHintMessage(null); setHintExchange([]); setHintReply('');
     const id = exercise.id;
     const request = ++hintRequest.current;
     try {
@@ -79,6 +87,7 @@ export default function ExerciseCard({ exercise, onResult, onAskHint, onSimulati
             joparaHint: response.joparaHint,
             subHint: response.subHint ?? (language === 'es' ? response.esHint : (response.joparaHint ?? response.followUp)),
           });
+          setHintExchange([{ role: 'tutor', text: response.message }]);
           onIncrementHint?.();
         }
       }
@@ -86,6 +95,34 @@ export default function ExerciseCard({ exercise, onResult, onAskHint, onSimulati
       if (currentId.current === id && hintRequest.current === request) setHintError('No se pudo obtener la pista. Probá otra vez.');
     } finally {
       if (currentId.current === id && hintRequest.current === request) { hintLock.current = false; setWaiting(false); }
+    }
+  };
+  // Responder la pregunta del tutor (niveles 1 y 2): se manda como una
+  // consulta más, con la mini conversación como historial, para que el
+  // tutor confirme o corrija antes de seguir — en vez de repetir la pregunta.
+  const sendReply = async () => {
+    const text = hintReply.trim();
+    if (!text || hintLock.current || !hintMessage) return;
+    hintLock.current = true; setSendingReply(true); setHintError('');
+    const id = exercise.id;
+    const request = ++hintRequest.current;
+    try {
+      const response = await onAskHint?.({
+        type: 'hint', topic: exercise.topic, exercise, exerciseId: id, expectedConcept: exercise.expectedConcept,
+        hintLevel: hintMessage.level, message: text, history: hintExchange, language,
+      });
+      if (currentId.current === id && hintRequest.current === request) {
+        if (response?.available === false || typeof response?.message !== 'string' || !response.message.trim()) setHintError('No se pudo enviar la respuesta. Probá otra vez.');
+        else {
+          setHintExchange(current => [...current, { role: 'alumno', text }, { role: 'tutor', text: response.message }]);
+          setHintMessage(current => current ? { ...current, text: response.message, subHint: response.subHint ?? current.subHint } : current);
+          setHintReply('');
+        }
+      }
+    } catch {
+      if (currentId.current === id && hintRequest.current === request) setHintError('No se pudo enviar la respuesta. Probá otra vez.');
+    } finally {
+      if (currentId.current === id && hintRequest.current === request) { hintLock.current = false; setSendingReply(false); }
     }
   };
   return (
@@ -110,8 +147,35 @@ export default function ExerciseCard({ exercise, onResult, onAskHint, onSimulati
               ? `Pista ${hintMessage.level} de ${totalHints(exercise)}`
               : `Ñepytyvõ ${hintMessage.level} / ${totalHints(exercise)}`}
           </span>
-          <MathText as="p" text={hintMessage.text} />
+          {hintExchange.length > 1 ? (
+            <ol className="hint-exchange">
+              {hintExchange.map((turn, index) => (
+                <li key={index} className={turn.role === 'alumno' ? 'hint-exchange-alumno' : 'hint-exchange-tutor'}>
+                  <MathText as="p" text={turn.text} />
+                </li>
+              ))}
+            </ol>
+          ) : <MathText as="p" text={hintMessage.text} />}
           {hintMessage.subHint && <MathText as="small" text={hintMessage.subHint} />}
+          {hintMessage.level <= 2 && (
+            <div className="hint-reply">
+              <label htmlFor={'hint-reply-' + exercise.id}>
+                {language === 'es' ? 'Respondé la pregunta del tutor' : 'Emondo ne respuesta tutor-pe'}
+              </label>
+              <div className="hint-reply-row">
+                <input
+                  id={'hint-reply-' + exercise.id} className="quiz-input" type="text" autoComplete="off"
+                  placeholder={language === 'es' ? 'Escribí tu respuesta…' : 'Ehai ne respuesta…'}
+                  value={hintReply} disabled={sendingReply}
+                  onChange={event => setHintReply(event.target.value)}
+                  onKeyDown={event => { if (event.key === 'Enter') { event.preventDefault(); sendReply(); } }}
+                />
+                <button type="button" className="btn btn-secondary" onClick={sendReply} disabled={sendingReply || !hintReply.trim()}>
+                  {sendingReply ? (language === 'es' ? 'Enviando…' : 'Omondo…') : (language === 'es' ? 'Responder' : 'Emondo')}
+                </button>
+              </div>
+            </div>
+          )}
         </aside>
       )}
       {feedback && (
