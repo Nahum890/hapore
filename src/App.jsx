@@ -10,6 +10,8 @@ import StudentClass from './components/StudentClass.jsx';
 import AuthScreen from './components/AuthScreen.jsx';
 import PdfButton from './components/PdfButton.jsx';
 import Onboarding from './components/Onboarding.jsx';
+import CurriculumBadge from './components/CurriculumBadge.jsx';
+import TheorySection from './components/TheorySection.jsx';
 import CanvasSimulator from './simulator/CanvasSimulator.jsx';
 import PredictLaunchGame from './simulator/PredictLaunchGame.jsx';
 import ExplorationLab from './simulator/ExplorationLab.jsx';
@@ -492,6 +494,7 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
   const { t, language } = useTranslation();
   const [activeTab, setActiveTab] = useState('inicio');
   const [practiceMode, setPracticeMode] = useState('ejercicio');
+  const [repasoMode, setRepasoMode] = useState('tarjetas');
   const [tutorMode, setTutorMode] = useState('cuestionario');
   const [simulationSubmission, setSimulationSubmission] = useState(null);
   const [showGuide, setShowGuide] = useState(() => !readJSON('guarania:guideSeen:v2', false));
@@ -675,9 +678,36 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
 
         {activeTab === 'tarjetas' && (
           <>
-            {quiz.step === 'cantidad' && <QuizSelector quiz={quiz} />}
-            {quiz.step === 'repaso' && (
-              <RepasoView quiz={quiz} onCardConsolidated={handleCardConsolidated} />
+            <div className="tutor-mode-tabs" role="tablist" aria-label="Modo de repaso">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={repasoMode === 'tarjetas'}
+                className={repasoMode === 'tarjetas' ? 'is-active' : ''}
+                onClick={() => setRepasoMode('tarjetas')}
+              >
+                Tarjetas de repaso
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={repasoMode === 'teoria'}
+                className={repasoMode === 'teoria' ? 'is-active' : ''}
+                onClick={() => setRepasoMode('teoria')}
+              >
+                Teoría: Movimiento Parabólico
+              </button>
+            </div>
+
+            {repasoMode === 'teoria' ? (
+              <TheorySection />
+            ) : (
+              <>
+                {quiz.step === 'cantidad' && <QuizSelector quiz={quiz} />}
+                {quiz.step === 'repaso' && (
+                  <RepasoView quiz={quiz} onCardConsolidated={handleCardConsolidated} />
+                )}
+              </>
             )}
           </>
         )}
@@ -720,6 +750,7 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
       </main><aside className="app-sidebar" aria-label="Tu progreso y ayuda"><ConfidenceBar xp={learning.xp} level={learning.level} confidence={learning.confidence} /><TutorCard tutor={tutor} /></aside></div>
       <Onboarding open={showGuide} onDismiss={dismissGuide} onStart={startPracticing} role={user.role} />
       <ProfileSettings open={showSettings || missingContact} required={missingContact} user={user} onClose={() => setShowSettings(false)} onSaved={handleProfileSaved} />
+      <CurriculumBadge />
     </div>
   );
 }

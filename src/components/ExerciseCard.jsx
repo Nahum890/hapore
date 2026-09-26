@@ -56,7 +56,11 @@ export default function ExerciseCard({ exercise, onResult, onAskHint, onSimulati
   };
   return (
     <section className="card exercise-card" aria-label={'Ejercicio ' + exercise.id}>
-      <div className="exercise-meta"><span className="chip chip-topic">{exercise.topic}</span><span className="chip chip-difficulty">{exercise.difficulty}</span></div>
+      <div className="exercise-meta">
+        <span className="chip chip-topic">{exercise.topic}</span>
+        <span className="chip chip-difficulty">{exercise.difficulty}</span>
+        <span className="chip chip-mec" title="Contenido contrastado con el Currículum Oficial del MEC (Res. N.º 12506) y OpenStax Physics">MEC Res. 12506</span>
+      </div>
       <p className="exercise-question"><MathText text={exercise.question} />{language !== 'es' && exercise.questionJopara && <small className="bilingual-es" lang="es"> Jopara</small>}</p>
       <div className="values-chips">{Object.entries(exercise.values ?? {}).map(([key, value]) => <span key={key} className="chip chip-data"><small>{VALUE_LABELS[key]?.[0] ?? key}</small><strong>{formatValue(value)} {VALUE_LABELS[key]?.[1] ?? ''}</strong></span>)}</div>
       <form onSubmit={check} noValidate>

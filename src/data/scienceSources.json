@@ -1,5 +1,22 @@
 [
   {
+    "id": "mec-paraguay-ciencias-basicas-12506",
+    "institution": "Ministerio de Educación y Ciencias (MEC), Paraguay",
+    "authors": ["Dirección General de Currículum, Evaluación y Orientación"],
+    "title": "Actualización Curricular del Bachillerato Científico: Plan Común y Plan Específico",
+    "edition": "Resolución MEC N.º 12506",
+    "publicationYear": 2018,
+    "section": "Ciencias Básicas y sus Tecnologías (Física pp. 139-145, 251-253)",
+    "page": "Págs. 139-145 y 251-253",
+    "url": "https://www.mec.gov.py/cms_v2/adjuntos/6838",
+    "doi": null,
+    "license": "Documento Oficial Público - MEC Paraguay",
+    "supports": ["Movimiento parabólico", "Termodinámica", "Óptica", "Cinemática", "Vectores", "Ley de Hooke", "calor sensible", "equilibrio térmico", "ley de reflexión"],
+    "supportsJopara": ["Movimiento parabólico", "Termodinámica", "Óptica", "Cinemática", "Vectores", "Ley de Hooke", "calor sensible", "equilibrio térmico", "ley de reflexión"],
+    "assumptions": "Marco curricular oficial de la Educación Media: competencias y capacidades de Física aprobadas por el MEC de Paraguay.",
+    "assumptionsJopara": "Educación Media mbo'epy curricular oficial: Física capacidades ha competencias MEC Paraguay omboajeva'ekue."
+  },
+  {
     "id": "openstax-physics-projectile-5-3",
     "institution": "OpenStax, Rice University",
     "authors": ["Paul Peter Urone", "Roger Hinrichs"],
