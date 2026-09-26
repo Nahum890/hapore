@@ -15,7 +15,12 @@ test('la consulta libre y el enunciado llegan dentro del contexto pedagógico', 
   assert.equal(payload.context.ejercicio,'ej-01');
 });
 
-test('un timeout con conexión no presenta reglas como si fueran Gemini',async()=>{
+test('un timeout con conexión cae al tutor local en vez de dejar al alumno sin respuesta',async()=>{
+  // Decisión de producto actualizada: antes, un fallo online mostraba un
+  // error de Gemini y nunca probaba el tutor local aunque estuviera
+  // disponible. Ahora el pedido es que cualquier falla online (no solo estar
+  // realmente sin conexión) pase directamente al chatbot local, etiquetado
+  // como tal (source: 'rules'), nunca presentado como si fuera Gemini.
   const descriptor=Object.getOwnPropertyDescriptor(globalThis,'navigator');
   Object.defineProperty(globalThis,'navigator',{configurable:true,value:{onLine:true}});
   let fallbackCalls=0;
@@ -24,10 +29,24 @@ test('un timeout con conexión no presenta reglas como si fueran Gemini',async()
     const start=performance.now();
     const result=await provider.respond({tipo:'evaluacion_cuestionario',pregunta:'¿Qué es una parábola?',esCorrecta:true,respuestaCorrecta:'Una parábola'});
     assert.ok(performance.now()-start<250);
+    assert.equal(result.available,true);
+    assert.equal(result.source,'rules');
+    assert.notEqual(result.source,'gemini');
+    assert.equal(fallbackCalls,1);
+  } finally {
+    if(descriptor) Object.defineProperty(globalThis,'navigator',descriptor); else delete globalThis.navigator;
+  }
+});
+
+test('si el tutor local tampoco puede responder, recién ahí se explica la falla online',async()=>{
+  const descriptor=Object.getOwnPropertyDescriptor(globalThis,'navigator');
+  Object.defineProperty(globalThis,'navigator',{configurable:true,value:{onLine:true}});
+  const provider=new LocalAIProvider({timeoutMs:35,maxRetries:0,fetch:()=>new Promise(()=>{}),fallback:{respond:async()=>({message:''})}});
+  try {
+    const result=await provider.respond({tipo:'charla_libre',message:'algo'});
     assert.equal(result.available,false);
     assert.equal(result.reason,'online-unavailable');
     assert.match(result.message,/Gemini/);
-    assert.equal(fallbackCalls,0);
   } finally {
     if(descriptor) Object.defineProperty(globalThis,'navigator',descriptor); else delete globalThis.navigator;
   }

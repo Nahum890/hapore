@@ -26,7 +26,11 @@ test('el límite diario es 15 y queda aislado por perfil', () => {
   setActiveProfile(null);
 });
 
-test('un error del servicio online no se oculta con una respuesta local', async () => {
+test('un error del servicio online cae al chatbot local, etiquetado como tal', async () => {
+  // Decisión de producto actualizada: si Gemini falla por cualquier motivo
+  // estando "online" (sin servidor, sin credencial, red rota), el alumno
+  // debe seguir recibiendo respuesta del tutor local en vez de un error sin
+  // salida; nunca se presenta esa respuesta como si viniera de Gemini.
   setActiveProfile('quota-test-online-error');
   removeKey(STORAGE_KEYS.TUTOR_USAGE);
   let fallbackCalls = 0;
@@ -36,9 +40,23 @@ test('un error del servicio online no se oculta con una respuesta local', async 
     fetch: async () => { throw new TypeError('Failed to fetch'); },
   });
   const result = await useOnlineState(true, () => provider.respond({ tipo: 'charla_libre', message: '¿Qué es la aceleración?' }));
+  assert.equal(result.available, true);
+  assert.equal(result.source, 'rules');
+  assert.equal(result.message, 'respuesta local');
+  assert.equal(fallbackCalls, 1);
+});
+
+test('si Gemini y el tutor local fallan los dos, recién ahí se muestra el error online', async () => {
+  setActiveProfile('quota-test-online-error-2');
+  removeKey(STORAGE_KEYS.TUTOR_USAGE);
+  const provider = new LocalAIProvider({
+    maxRetries: 0,
+    fallback: { async respond() { return { message: '', available: false }; } },
+    fetch: async () => { throw new TypeError('Failed to fetch'); },
+  });
+  const result = await useOnlineState(true, () => provider.respond({ tipo: 'charla_libre', message: '¿Qué es la aceleración?' }));
   assert.equal(result.available, false);
   assert.match(result.message, /Gemini/);
-  assert.equal(fallbackCalls, 0);
 });
 
 test('el tutor local responde y consume una consulta solo sin conexión', async () => {

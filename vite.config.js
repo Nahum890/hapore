@@ -106,7 +106,10 @@ export default defineConfig(({ mode }) => {
         // El manifest se mantiene como archivo estático en public/manifest.webmanifest.
         manifest: false,
         workbox: {
-          globPatterns: ['**/*.{js,css,html,svg,png,webmanifest,json}'],
+          // Incluye ttf/woff2: sin esto, la fuente NotoSans del PDF (y
+          // cualquier otro recurso de fuente) no quedaba precacheada, y la
+          // ficha PDF podía fallar la primera vez que se generaba sin conexión.
+          globPatterns: ['**/*.{js,css,html,svg,png,webmanifest,json,ttf,woff,woff2}'],
           navigateFallback: '/index.html',
         },
       }),

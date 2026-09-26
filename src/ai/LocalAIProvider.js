@@ -127,6 +127,33 @@ export default class LocalAIProvider {
     const result = await model.respond(context, { signal, onToken });
     return typeof result === 'string' ? result : result?.message;
   }
+  /** Intenta el tutor local (modelo en el dispositivo si está configurado,
+   * si no el tutor por reglas). Se usa tanto cuando el dispositivo está
+   * realmente sin conexión como cuando el intento online falló por
+   * cualquier motivo (sin servidor, sin credencial, error del servicio):
+   * en ambos casos el alumno debe seguir teniendo un tutor que responde,
+   * no un mensaje de error sin salida. */
+  async respondLocally(context, onToken) {
+    const localResult = this.options.loadLocalModel
+      ? await this.local(context, new AbortController().signal, onToken)
+      : await this.fallback.respond(context);
+    const text = typeof localResult === 'string' ? localResult : localResult?.message;
+    if (typeof text !== 'string' || !text.trim()) throw new Error('Respuesta local vacía');
+    const nextQuota = recordTutorQuery();
+    const extras = typeof localResult === 'object' && localResult
+      ? { esHint: localResult.esHint, followUp: localResult.followUp, knowledgeType: localResult.knowledgeType }
+      : {};
+    const result = {
+      ...extras,
+      message: sanitizeMarkup(text),
+      source: this.options.loadLocalModel ? 'local-model' : 'rules',
+      available: true,
+      ...nextQuota,
+      ...(context.tipo === 'evaluacion_cuestionario' ? evaluateQuizContext(context) : {}),
+    };
+    this.notify(onToken, result.message);
+    return result;
+  }
   async respond(context = {}) {
     const onToken = context.onToken ?? this.options.onToken;
     const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
@@ -137,25 +164,7 @@ export default class LocalAIProvider {
     }
     if (offline) {
       try {
-        const localResult = this.options.loadLocalModel
-          ? await this.local(context, new AbortController().signal, onToken)
-          : await this.fallback.respond(context);
-        const text = typeof localResult === 'string' ? localResult : localResult?.message;
-        if (typeof text !== 'string' || !text.trim()) throw new Error('Respuesta local vacía');
-        const nextQuota = recordTutorQuery();
-        const extras = typeof localResult === 'object' && localResult
-          ? { esHint: localResult.esHint, followUp: localResult.followUp, knowledgeType: localResult.knowledgeType }
-          : {};
-        const result = {
-          ...extras,
-          message: sanitizeMarkup(text),
-          source: this.options.loadLocalModel ? 'local-model' : 'rules',
-          available: true,
-          ...nextQuota,
-          ...(context.tipo === 'evaluacion_cuestionario' ? evaluateQuizContext(context) : {}),
-        };
-        this.notify(onToken, result.message);
-        return result;
+        return await this.respondLocally(context, onToken);
       } catch {
         return {
           message: 'No pude preparar una respuesta sin conexión. Revisá el contenido guardado o volvé a intentarlo.',
@@ -188,6 +197,12 @@ export default class LocalAIProvider {
       active = false;
       controller.abort();
       if (this.options.loadLocalModel) this.model = null;
+      try {
+        return await this.respondLocally(context, onToken);
+      } catch {
+        // El tutor local tampoco pudo responder (sin material offline para
+        // esta consulta): recién ahí se muestra el motivo del fallo online.
+      }
       const message = error?.name === 'AbortError'
         ? 'Gemini está tardando más de lo esperado. Probá de nuevo en un momento.'
         : error?.status === 404
