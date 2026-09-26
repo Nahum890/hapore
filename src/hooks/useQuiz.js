@@ -58,7 +58,7 @@ function formatMessages(chatEntries, charlaEntries) {
   return mensajes.filter((message) => message.text);
 }
 
-export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } = {}) {
+export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, includeTheory = true } = {}) {
   const providerRef = useRef(null);
   if (!providerRef.current) {
     providerRef.current = createAIProvider();
@@ -124,10 +124,15 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
     };
   }, []);
 
+  // Si el docente eligió las tarjetas de su clase, el mazo usa solo esas.
+  const theoryCards = useMemo(
+    () => (includeTheory ? quizBank.filter((question) => question.tipo === 'abierta') : []),
+    [includeTheory, quizBank],
+  );
+
   const repasoAvailable = useMemo(() => {
-    const abiertas = quizBank.filter((question) => question.tipo === 'abierta');
-    return new Set([...abiertas.map((question) => question.id), ...localizedFlashcards.map((card) => card.id)]).size;
-  }, [localizedFlashcards, quizBank]);
+    return new Set([...theoryCards.map((question) => question.id), ...localizedFlashcards.map((card) => card.id)]).size;
+  }, [localizedFlashcards, theoryCards]);
 
   const maxAvailable = Math.min(
     QUIZ_MAX_QUANTITY,
@@ -144,8 +149,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
         dorso: card.dorso_concepto ?? card.back ?? '',
         formula: card.formula ?? '',
       }));
-      const teoricas = quizBank
-        .filter((question) => question.tipo === 'abierta')
+      const teoricas = theoryCards
         .map((question) => ({
           id: question.id,
           tema: question.tema,
@@ -157,7 +161,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
       const unique = [...new Map([...real, ...teoricas].map((card) => [card.id, card])).values()];
       return shuffle(unique).slice(0, clamped);
     },
-    [localizedFlashcards, quizBank, maxAvailable],
+    [localizedFlashcards, theoryCards, maxAvailable],
   );
 
   const chooseQuantity = useCallback(

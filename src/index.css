@@ -1227,6 +1227,40 @@ button, input, select, textarea { max-width: 100%; }
 .lesson-stage-dots i { width: 9px; height: 9px; border-radius: 50%; background: #40594b; }
 .lesson-stage-dots i.is-active { background: #ffd166; }
 
+/* ---------- Clases en la nube ---------- */
+.class-setup-step { display: grid; gap: 10px; }
+.class-setup-step h4, .custom-card-form h4 { margin: 0; font-size: 15px; }
+.card-picker { display: grid; gap: 8px; margin: 0; padding: 12px; border: 1px solid var(--c-line); border-radius: 14px; background: var(--c-surface); }
+.card-picker legend { padding: 0 4px; font-size: 13px; font-weight: 800; }
+.card-picker-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.card-picker-actions .btn { min-height: 34px; padding: 4px 12px; font-size: 13px; }
+.card-picker-list { list-style: none; display: grid; gap: 6px; max-height: 340px; margin: 0; padding: 0; overflow: auto; }
+.card-picker-list li { display: flex; align-items: flex-start; gap: 6px; padding: 8px 10px; border: 1px solid var(--c-line); border-radius: 10px; }
+.card-picker-list label { display: flex; flex: 1; align-items: flex-start; gap: 10px; cursor: pointer; }
+.card-picker-list input { flex: none; width: 18px; height: 18px; margin-top: 2px; accent-color: var(--c-primary); }
+.card-picker-list span { display: grid; gap: 2px; }
+.card-picker-list strong { font-size: 14px; }
+.card-picker-list small { color: var(--c-muted); font-size: 12px; }
+.card-picker-list .chip { width: fit-content; font-size: 11px; font-style: normal; }
+.card-picker-delete { flex: none; min-width: 32px; min-height: 30px; border: 1px solid var(--c-line); border-radius: 8px; background: var(--c-surface); color: var(--c-ink); cursor: pointer; }
+.custom-card-form { background: var(--c-surface); }
+.cloud-missing { padding: 10px 12px; border-radius: 10px; background: var(--c-paper); }
+.cloud-class-list-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.cloud-class-list-head h3 { margin: 0; }
+.cloud-class-card { display: grid; gap: 10px; padding: 12px 14px; border: 1px solid var(--c-line); border-radius: 14px; background: var(--c-surface); }
+.cloud-class-card header { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.cloud-class-card header > div { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.cloud-class-card .class-code-display { padding: 4px 10px; font-size: 13px; }
+.cloud-class-card .class-code-display strong { font-size: 16px; }
+.cloud-class-delete { display: flex; gap: 6px; }
+.roster-info h4 { margin: 0; font-size: 15px; }
+.roster-info small { color: var(--c-muted); font-size: 12px; }
+.student-class-actions, .student-class-footer { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+.sync-status { margin: 8px 0; padding: 8px 12px; border-radius: 10px; font-size: 13px; font-weight: 650; }
+.sync-status.is-synced { background: var(--c-primary-soft); color: var(--c-primary-deep); }
+.sync-status.is-pending { background: var(--c-paper); color: var(--c-ink-soft); }
+.sync-status.is-error { background: var(--c-earth-soft, #fdecea); color: var(--c-earth-deep); }
+
 @media (max-width: 860px) {
   .lesson-workspace, .lesson-meta { grid-template-columns: 1fr; }
   .lesson-slide-rail { position: static; }
