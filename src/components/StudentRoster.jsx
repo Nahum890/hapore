@@ -2,7 +2,27 @@ import { getAccountById } from '../auth/localAccounts.js';
 import { getRosterForTeacher } from '../utils/classroom.js';
 import { readJSONForProfile, STORAGE_KEYS } from '../utils/storage.js';
 import { getLevel } from '../utils/gamification.js';
+import { commonDifficulties } from '../pedagogy/progression.js';
 import Avatar from './Avatars.jsx';
+
+// Dificultades más repetidas entre TODOS los alumnos de esta lista, sin decir
+// quién se equivocó: sirve para saber qué reforzar en la próxima clase.
+function CommonDifficulties({ roster }) {
+  const logs = roster.map(({ entry }) => readJSONForProfile(entry.studentId, STORAGE_KEYS.ATTEMPT_LOG, []));
+  const difficulties = commonDifficulties(logs);
+  if (!difficulties.length) return null;
+  return <div className="teacher-block common-difficulties" aria-label="Dificultades frecuentes de la clase">
+    <h3>Dificultades frecuentes en la clase</h3>
+    <p className="teacher-note">Errores que se repitieron entre tus alumnos, sin identificar a quién le pasó. Sirve para elegir qué reforzar.</p>
+    <ul className="common-difficulties-list">
+      {difficulties.map(item => <li key={item.errorType}>
+        <strong>{item.label}</strong>
+        <span className="chip">{item.count} veces</span>
+      </li>)}
+    </ul>
+    <p className="field-help">Actividad sugerida: repasá con el simulador un ejercicio de {difficulties[0].concepts[0]?.replace(/-/g, ' ') ?? 'este tema'} en el proyector o en Mis clases.</p>
+  </div>;
+}
 
 function studentSnapshot(entry) {
   const account = getAccountById(entry.studentId);
@@ -41,6 +61,7 @@ export default function StudentRoster({ teacherId }) {
           ))}
         </ul>
       )}
+      {roster.length > 0 && <CommonDifficulties roster={roster} />}
     </section>
   );
 }

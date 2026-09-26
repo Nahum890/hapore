@@ -1,5 +1,25 @@
 const RANK = { básico: 0, intermedio: 1, avanzado: 2 };
 
+// Nombre para mostrar y concepto relacionado de cada tipo de error que ya
+// diagnostica pedagogy/diagnoseAttempt.js. Sirve tanto para el plan de
+// práctica del alumno como para el resumen de dificultades del docente.
+export const ERROR_TYPE_INFO = {
+  confunde_velocidades: { label: 'Confundir la velocidad inicial completa con una componente', concepts: ['componente-vertical', 'componente-horizontal'] },
+  confunde_componentes: { label: 'Confundir seno y coseno entre horizontal y vertical', concepts: ['componente-horizontal', 'componente-vertical'] },
+  confunde_altura_alcance: { label: 'Confundir la fórmula de altura máxima con la de alcance', concepts: ['altura-maxima', 'alcance'] },
+  olvida_gravedad: { label: 'Olvidar la gravedad en el tiempo de vuelo', concepts: ['tiempo-de-vuelo'] },
+  angulo_desfasado: { label: 'Elegir un ángulo muy rasante o muy vertical para el alcance máximo', concepts: ['alcance', 'angulo-optimo'] },
+};
+
+function errorCounts(log = []) {
+  const counts = new Map();
+  for (const entry of log) {
+    if (!entry?.errorType) continue;
+    counts.set(entry.errorType, (counts.get(entry.errorType) ?? 0) + 1);
+  }
+  return counts;
+}
+
 export function summarizeAttempts(log = []) {
   const valid = log.filter(entry => entry?.exerciseId);
   const correct = valid.filter(entry => entry.correct).length;
@@ -31,4 +51,43 @@ export function recommendExercise(exercises = [], currentId, log = []) {
   return next
     ? { exercise: next, reason: 'Ya resolviste este paso. Probá el siguiente desafío.' }
     : { exercise: current, reason: 'Completaste los ejercicios disponibles. Podés repasar cuando quieras.' };
+}
+
+/** El error más repetido del alumno (mínimo 2 veces para no reaccionar a un
+ * tropiezo aislado), con el nombre para mostrar y los conceptos afectados. */
+export function weakestPattern(log = []) {
+  const counts = errorCounts(log);
+  let best = null;
+  for (const [errorType, count] of counts) {
+    if (count >= 2 && (!best || count > best.count)) best = { errorType, count };
+  }
+  if (!best) return null;
+  return { ...best, ...(ERROR_TYPE_INFO[best.errorType] ?? { label: 'Un tema para repasar', concepts: [] }) };
+}
+
+/** Ejercicio corto para practicar la dificultad más repetida: distinto del
+ * último intentado y, si es posible, más simple que el nivel donde falló. */
+export function practiceRecommendation(exercises = [], log = []) {
+  const pattern = weakestPattern(log);
+  if (!pattern) return null;
+  const lastId = [...log].reverse().find(entry => entry?.exerciseId)?.exerciseId;
+  const candidates = exercises.filter(item => pattern.concepts.includes(item.expectedConcept));
+  const exercise = candidates.find(item => item.id !== lastId && item.difficulty === 'básico')
+    ?? candidates.find(item => item.id !== lastId)
+    ?? candidates[0];
+  if (!exercise) return null;
+  return { exercise, pattern, reason: `Practicá esto: ${pattern.label.toLowerCase()}.` };
+}
+
+/** Dificultades más comunes de un grupo de alumnos, combinadas (sin exponer
+ * quién se equivocó), para que el docente sepa qué reforzar en clase. */
+export function commonDifficulties(attemptLogs = [], limit = 3) {
+  const counts = new Map();
+  for (const log of attemptLogs) {
+    for (const [errorType, count] of errorCounts(log)) counts.set(errorType, (counts.get(errorType) ?? 0) + count);
+  }
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([errorType, count]) => ({ errorType, count, ...(ERROR_TYPE_INFO[errorType] ?? { label: errorType, concepts: [] }) }));
 }
