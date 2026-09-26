@@ -51,6 +51,27 @@ test('el tutor usa el catálogo de errores para resolver pistas por tipo de erro
   assert.equal(response.message, 'Separá primero los ejes horizontal y vertical.');
 });
 
+test('la pista conserva coherencia lingüística: subHint en Jopara para gn-jopara y en español para es', async () => {
+  const local = new RuleTutorProvider();
+  const respJopara = await local.respond({
+    type: 'hint',
+    expectedConcept: 'componente-horizontal',
+    hintLevel: 1,
+    language: 'gn-jopara',
+  });
+  assert.ok(respJopara.message.includes('velocidad') || respJopara.message.includes('proyectil'));
+  assert.match(respJopara.subHint, /Horizontal oipuru coseno|Emyesakã/i);
+
+  const respEs = await local.respond({
+    type: 'hint',
+    expectedConcept: 'componente-horizontal',
+    hintLevel: 1,
+    language: 'es',
+  });
+  assert.match(respEs.message, /Mirá la velocidad|proyectil/i);
+  assert.match(respEs.subHint, /La horizontal usa coseno/i);
+});
+
 
 test('el chat offline interpreta una afirmación corta usando el tema anterior', async () => {
   const response = await tutor.respond({

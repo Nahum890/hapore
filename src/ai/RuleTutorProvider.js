@@ -64,6 +64,14 @@ export function obtenerVariantePista(variants, previous) {
   return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
 }
 
+const JOPARA_ERROR_HINTS = {
+  'err-01': "v0 ha'e la velocidad inicial tuichakue; peteĩ componente ha'e peteĩ parte año. Epensamína: ¿ojerurepa pe velocidad total térã peteĩ parte año?",
+  'err-02': "Horizontal oipuru coseno: vx = v0 * cos(ángulo). Vertical oipuru seno: v0y = v0 * sen(ángulo). Ani embojehe'a.",
+  'err-04': "Altura máxima ha'e pe yvatevéva ohupytýva (vertical); alcance ha'e pe mombyryvéva ho'ahápe (horizontal). Mokõive fórmula opaichagua.",
+  'err-mec-03': "Eje horizontal-pe ndaipóri aceleración (MRU), pero eje vertical-pe gravedad omboguejy pe subida ha ombopya'e pe caída (MRUV).",
+  'err-mec-05': "Ángulo omoambue altura ha distancia proporción. Pe alcance odepende sen(2 * ángulo)-gui.",
+};
+
 export default class RuleTutorProvider {
   constructor(options = {}) {
     this.id = 'rule-tutor';
@@ -176,8 +184,14 @@ export default class RuleTutorProvider {
       const hints = exercise.hints;
       variantsEntry = hints[level - 1] ?? hints.at(-1);
     }
-    return this.result(this.choose([exercise?.id, context.errorType, context.expectedConcept, level].join(':'), variantsEntry, language), {
-      esHint: language !== 'es' ? entry?.esHint : undefined,
+    const subHint = language === 'es'
+      ? entry?.esHint
+      : (JOPARA_ERROR_HINTS[error?.id] ?? this.pickLang(entry?.followUp, 'gn-jopara'));
+
+    return this.result(this.choose([exercise?.id, context.errorType, context.expectedConcept, level, language].join(':'), variantsEntry, language), {
+      esHint: entry?.esHint,
+      joparaHint: JOPARA_ERROR_HINTS[error?.id] ?? this.pickLang(entry?.followUp, 'gn-jopara'),
+      subHint,
       followUp: this.pickLang(entry?.followUp, language),
     });
   }

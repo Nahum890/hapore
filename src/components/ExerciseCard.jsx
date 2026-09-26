@@ -24,6 +24,31 @@ export default function ExerciseCard({ exercise, onResult, onAskHint, onSimulati
     setAnswer(''); setFeedback(null); setHintError(''); setHintMessage(null); setWaiting(false);
     startedAt.current = Date.now();
   }, [exercise?.id]);
+
+  useEffect(() => {
+    if (!hintMessage || !exercise) return;
+    let active = true;
+    onAskHint?.({
+      type: 'hint',
+      topic: exercise.topic,
+      exercise,
+      exerciseId: exercise.id,
+      expectedConcept: exercise.expectedConcept,
+      hintLevel: hintMessage.level,
+      language,
+    }).then(response => {
+      if (active && response?.message) {
+        setHintMessage({
+          text: response.message,
+          level: hintMessage.level,
+          esHint: response.esHint,
+          joparaHint: response.joparaHint,
+          subHint: response.subHint ?? (language === 'es' ? response.esHint : (response.joparaHint ?? response.followUp)),
+        });
+      }
+    }).catch(() => {});
+    return () => { active = false; };
+  }, [language]);
   const valid = isNumericAnswer(answer);
   const invalid = Boolean(answer.trim()) && !valid;
   const check = event => {
@@ -42,10 +67,19 @@ export default function ExerciseCard({ exercise, onResult, onAskHint, onSimulati
     const id = exercise.id;
     const request = ++hintRequest.current;
     try {
-      const response = await onAskHint?.({ type: 'hint', topic: exercise.topic, exercise, exerciseId: id, expectedConcept: exercise.expectedConcept, hintLevel: hintsUsed + 1 });
+      const response = await onAskHint?.({ type: 'hint', topic: exercise.topic, exercise, exerciseId: id, expectedConcept: exercise.expectedConcept, hintLevel: hintsUsed + 1, language });
       if (currentId.current === id && hintRequest.current === request) {
         if (response?.available === false || typeof response?.message !== 'string' || !response.message.trim()) setHintError('No se pudo obtener la pista. Probá otra vez.');
-        else { setHintMessage({ text: response.message, level: hintsUsed + 1, esHint: response.esHint }); onIncrementHint?.(); }
+        else {
+          setHintMessage({
+            text: response.message,
+            level: hintsUsed + 1,
+            esHint: response.esHint,
+            joparaHint: response.joparaHint,
+            subHint: response.subHint ?? (language === 'es' ? response.esHint : (response.joparaHint ?? response.followUp)),
+          });
+          onIncrementHint?.();
+        }
       }
     } catch {
       if (currentId.current === id && hintRequest.current === request) setHintError('No se pudo obtener la pista. Probá otra vez.');
@@ -64,7 +98,17 @@ export default function ExerciseCard({ exercise, onResult, onAskHint, onSimulati
         <div className="exercise-actions"><button type="button" className="btn btn-secondary" onClick={hint} disabled={waiting || !hasHintsLeft(exercise, hintsUsed)}>{waiting ? 'Buscando pista…' : !hasHintsLeft(exercise, hintsUsed) ? 'Sin más pistas' : 'Pedir pista'}</button><button type="submit" className="btn btn-primary" disabled={!valid}>Comprobar con el simulador</button></div>
       </form>
       {hintError && <p role="status" className="field-error">{hintError}</p>}
-      {hintMessage && <aside className="exercise-hint" role="status" aria-live="polite"><span className="exercise-hint-label">Pista {hintMessage.level} de {totalHints(exercise)}</span><p>{hintMessage.text}</p>{hintMessage.esHint && <small>{hintMessage.esHint}</small>}</aside>}
+      {hintMessage && (
+        <aside className="exercise-hint" role="status" aria-live="polite">
+          <span className="exercise-hint-label">
+            {language === 'es'
+              ? `Pista ${hintMessage.level} de ${totalHints(exercise)}`
+              : `Ñepytyvõ ${hintMessage.level} / ${totalHints(exercise)}`}
+          </span>
+          <p>{hintMessage.text}</p>
+          {hintMessage.subHint && <small>{hintMessage.subHint}</small>}
+        </aside>
+      )}
       {feedback && <div className={'feedback ' + (feedback.correct ? 'correct' : 'incorrect')} role="status">{feedback.correct ? <><strong>¡Iporã! Tu respuesta es correcta.</strong><span>Mirá la simulación de este ejercicio abajo.</span></> : <><strong>Eñeha’ã jey · Probá otra vez sin perder puntos.</strong><span>{feedback.diagnosisMessage}</span></>}</div>}
     </section>
   );
