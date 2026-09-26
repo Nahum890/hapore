@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Formula, MathText } from './MathText.jsx';
 import { createLaunch, evaluateTrajectory, maxHeight, range, timeOfFlight } from '../physics/projectileMotion.js';
 import { launchErrors } from '../utils/lessons.js';
 
@@ -87,7 +88,7 @@ function ConceptSlide({ concept }) {
     <span className="projector-kicker">Movimiento parabólico</span>
     <h2>{concept.name}</h2>
     <p>{concept.definition}</p>
-    {concept.formula && <div className="projector-formula">{concept.formula}</div>}
+    {concept.formula && <div className="projector-formula"><Formula text={concept.formula} /></div>}
   </div>;
 }
 
@@ -95,7 +96,7 @@ function ExerciseSlide({ exercise, showAnswer, onToggleAnswer }) {
   if (!exercise) return <p className="projector-empty">Elegí un ejercicio para esta diapositiva (si era un ejercicio propio, pudo haberse eliminado).</p>;
   return <div className="projector-slide projector-exercise-slide">
     <span className="projector-kicker">{exercise.custom ? 'Ejercicio propio' : 'Ejercicio'} · {exercise.difficulty || 'Práctica'}</span>
-    <h2>{exercise.question}</h2>
+    <MathText as="h2" text={exercise.question} />
     <div className="projector-given-values">
       {Object.entries(exercise.values ?? {}).map(([key, value]) => <span key={key}><small>{VALUE_LABELS[key] ?? key}</small><strong>{value}{key.startsWith('angle') ? '°' : VALUE_UNITS[key] ?? ''}</strong></span>)}
     </div>

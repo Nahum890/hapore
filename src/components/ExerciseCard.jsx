@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { MathText } from './MathText.jsx';
 import { hasHintsLeft, totalHints } from '../pedagogy/hintEngine.js';
 import { validateExercise } from '../physics/physicsValidator.js';
 import { diagnoseAttempt } from '../pedagogy/diagnoseAttempt.js';
@@ -56,7 +57,7 @@ export default function ExerciseCard({ exercise, onResult, onAskHint, onSimulati
   return (
     <section className="card exercise-card" aria-label={'Ejercicio ' + exercise.id}>
       <div className="exercise-meta"><span className="chip chip-topic">{exercise.topic}</span><span className="chip chip-difficulty">{exercise.difficulty}</span></div>
-      <p className="exercise-question">{exercise.question}{language !== 'es' && exercise.questionJopara && <small className="bilingual-es" lang="es"> Jopara</small>}</p>
+      <p className="exercise-question"><MathText text={exercise.question} />{language !== 'es' && exercise.questionJopara && <small className="bilingual-es" lang="es"> Jopara</small>}</p>
       <div className="values-chips">{Object.entries(exercise.values ?? {}).map(([key, value]) => <span key={key} className="chip chip-data"><small>{VALUE_LABELS[key]?.[0] ?? key}</small><strong>{formatValue(value)} {VALUE_LABELS[key]?.[1] ?? ''}</strong></span>)}</div>
       <form onSubmit={check} noValidate>
         <div className="answer-row"><label className="answer-label" htmlFor={'answer-' + exercise.id}>Respuesta</label><input id={'answer-' + exercise.id} className="answer-input" type="text" inputMode="decimal" autoComplete="off" placeholder="Escribí tu resultado" value={answer} aria-invalid={invalid} aria-describedby={'answer-help-' + exercise.id} onChange={event => { setAnswer(event.target.value); setFeedback(null); onSimulationClear?.(); }} /><span className="answer-unit">{exercise.unit}</span></div>
@@ -64,8 +65,8 @@ export default function ExerciseCard({ exercise, onResult, onAskHint, onSimulati
         <div className="exercise-actions"><button type="button" className="btn btn-secondary" onClick={hint} disabled={waiting || !hasHintsLeft(exercise, hintsUsed)}>{waiting ? 'Buscando pista…' : !hasHintsLeft(exercise, hintsUsed) ? 'Sin más pistas' : 'Pedir pista'}</button><button type="submit" className="btn btn-primary" disabled={!valid}>Comprobar con el simulador</button></div>
       </form>
       {hintError && <p role="status" className="field-error">{hintError}</p>}
-      {hintMessage && <aside className="exercise-hint" role="status" aria-live="polite"><span className="exercise-hint-label">Pista {hintMessage.level} de {totalHints(exercise)}</span><p>{hintMessage.text}</p>{hintMessage.esHint && <small>{hintMessage.esHint}</small>}</aside>}
-      {feedback && <div className={'feedback ' + (feedback.correct ? 'correct' : 'incorrect')} role="status">{feedback.correct ? <><strong>¡Iporã! Tu respuesta es correcta.</strong><span>Mirá la simulación de este ejercicio abajo.</span></> : <><strong>Eñeha’ã jey · Probá otra vez sin perder puntos.</strong><span>{feedback.diagnosisMessage}</span></>}</div>}
+      {hintMessage && <aside className="exercise-hint" role="status" aria-live="polite"><span className="exercise-hint-label">Pista {hintMessage.level} de {totalHints(exercise)}</span><MathText as="p" text={hintMessage.text} />{hintMessage.esHint && <MathText as="small" text={hintMessage.esHint} />}</aside>}
+      {feedback && <div className={'feedback ' + (feedback.correct ? 'correct' : 'incorrect')} role="status">{feedback.correct ? <><strong>¡Iporã! Tu respuesta es correcta.</strong><span>Mirá la simulación de este ejercicio abajo.</span></> : <><strong>Eñeha’ã jey · Probá otra vez sin perder puntos.</strong><MathText text={feedback.diagnosisMessage} /></>}</div>}
     </section>
   );
 }

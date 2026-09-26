@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { MathText } from './MathText.jsx';
 import { Nanduti } from './Nanduti.jsx';
 export default function TutorCard({ tutor }) {
   const message = tutor?.message ?? '¡Mba’éichapa! Vamos a aprender Física paso a paso.';
@@ -18,11 +19,11 @@ export default function TutorCard({ tutor }) {
       <div className="tutor-avatar" aria-hidden="true"><Nanduti size={34} spokes={12} rings={2} /></div>
       <div className="tutor-body">
         <p className="tutor-name">Tutor <span>· Pytyvõhára</span></p>
-        <p className="tutor-message" role="status" aria-live="polite">{message}</p>
-        {tutor?.esHint && <p className="tutor-es-hint">{tutor.esHint}</p>}
+        <p className="tutor-message" role="status" aria-live="polite"><MathText text={message} /></p>
+        {tutor?.esHint && <MathText as="p" className="tutor-es-hint" text={tutor.esHint} />}
         {tutor?.followUp && <p className="tutor-follow-up">{tutor.followUp}</p>}
         <p className="tutor-source">{source}</p>
-        {history.length > 0 && <details className="tutor-history"><summary>Mensajes anteriores ({history.length})</summary><ol>{history.map((item, index) => <li key={index}><p>{item.message}</p>{item.esHint && <small>{item.esHint}</small>}</li>)}</ol></details>}
+        {history.length > 0 && <details className="tutor-history"><summary>Mensajes anteriores ({history.length})</summary><ol>{history.map((item, index) => <li key={index}><MathText as="p" text={item.message} />{item.esHint && <MathText as="small" text={item.esHint} />}</li>)}</ol></details>}
       </div>
     </section>
   );
