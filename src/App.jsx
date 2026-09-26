@@ -12,6 +12,7 @@ import PdfButton from './components/PdfButton.jsx';
 import Onboarding from './components/Onboarding.jsx';
 import CanvasSimulator from './simulator/CanvasSimulator.jsx';
 import PredictLaunchGame from './simulator/PredictLaunchGame.jsx';
+import TrajectoryDrawingPractice from './components/TrajectoryDrawingPractice.jsx';
 import {
   concepts as conceptsData,
   errors as errorsData,
@@ -609,11 +610,12 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
         {activeTab === 'inicio' && <HomeView user={user} learning={learning} classConfig={classConfig} onNavigate={navigate} onGuide={() => setShowGuide(true)} />}
         {activeTab === 'simulador' && (
           <>
-            <div className="tutor-mode-tabs" role="tablist" aria-label="Modo de práctica">
+            <div className="tutor-mode-tabs practice-mode-tabs" role="tablist" aria-label="Modo de práctica">
               <button type="button" role="tab" aria-selected={practiceMode === 'ejercicio'} className={practiceMode === 'ejercicio' ? 'is-active' : ''} onClick={() => setPracticeMode('ejercicio')}>Ejercicios</button>
+              <button type="button" role="tab" aria-selected={practiceMode === 'dibujo'} className={practiceMode === 'dibujo' ? 'is-active' : ''} onClick={() => setPracticeMode('dibujo')}>Dibujar parábolas</button>
               <button type="button" role="tab" aria-selected={practiceMode === 'minijuego'} className={practiceMode === 'minijuego' ? 'is-active' : ''} onClick={() => setPracticeMode('minijuego')}>Minijuego: Predecí y lanzá</button>
             </div>
-            {practiceMode === 'minijuego' ? <PredictLaunchGame /> : <>
+            {practiceMode === 'dibujo' ? <TrajectoryDrawingPractice /> : practiceMode === 'minijuego' ? <PredictLaunchGame /> : <>
             <section className="topic-picker card" aria-label="Elegir situación de práctica">
               <div><span className="panel-eyebrow">MOVIMIENTO PARABÓLICO</span><h2>Elegí una situación</h2><p>El cálculo es siempre el mismo; cambia el contexto y la escena del simulador.</p></div>
               <div className="scenario-options">{availableScenarios.map(scenario => <button key={scenario.id} type="button" className={'scenario-option' + (currentExercise?.scenario === scenario.id ? ' is-active' : '')} aria-pressed={currentExercise?.scenario === scenario.id} onClick={() => selectScenario(scenario.id)}><Icon name={scenario.icon} size={22} /><span><strong>{scenario.label}</strong><small>{scenario.lead}</small></span></button>)}</div>
