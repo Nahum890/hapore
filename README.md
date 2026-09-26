@@ -41,10 +41,11 @@ Velocidad, gravedad, vectores y ángulo de lanzamiento se explican como apoyo co
 ### Para docentes
 
 - Registro e inicio de sesión local como maestro.
-- Selección de temas, cantidad de tarjetas y cantidad de ejercicios.
-- Generación de un código de clase que se interpreta sin base de datos.
-- Vista de configuración aplicada.
-- Proyector de trayectorias con vista previa del ejercicio antes de mostrarlo a la clase.
+- Preparación de una clase con situaciones y cantidades sugeridas.
+- Generación de un código que aplica la misma selección en el dispositivo del alumno.
+- Creación de ejercicios propios con respuesta calculada automáticamente.
+- Proyector con vista grande para simulaciones, ejercicios y conceptos.
+- Biblioteca con conceptos, ejercicios resueltos, errores frecuentes, glosario y fuentes.
 - Generación de una ficha PDF imprimible y disponible sin conexión.
 
 ### Minijuego

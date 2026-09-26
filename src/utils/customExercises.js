@@ -9,8 +9,8 @@ import storage from './storage.js';
 const CUSTOM_EXERCISES_KEY = 'guarania:customExercises';
 
 export const CONCEPT_OPTIONS = [
-  { value: 'componente-horizontal', label: 'Componente horizontal (vx)', unit: 'm/s', needsAngle: true },
-  { value: 'componente-vertical', label: 'Componente vertical (vy)', unit: 'm/s', needsAngle: true },
+  { value: 'componente-horizontal', label: 'Velocidad horizontal (vx)', unit: 'm/s', needsAngle: true },
+  { value: 'componente-vertical', label: 'Velocidad vertical (vy)', unit: 'm/s', needsAngle: true },
   { value: 'altura-maxima', label: 'Altura máxima', unit: 'm', needsAngle: true },
   { value: 'tiempo-de-vuelo', label: 'Tiempo de vuelo', unit: 's', needsAngle: true },
   { value: 'alcance', label: 'Alcance (distancia)', unit: 'm', needsAngle: true },

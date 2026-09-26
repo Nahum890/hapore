@@ -18,6 +18,7 @@ import {
   exercises as builtInExercisesData,
   flashcards as flashcardsData,
   glossary as glossaryData,
+  scienceSources as scienceSourcesData,
   localizeCatalogItem,
 } from './data/catalogs.js';
 import { getCustomExercises } from './utils/customExercises.js';
@@ -95,36 +96,65 @@ function HomeView({ user, learning, classConfig, onNavigate, onGuide }) {
       <button className="home-action-card is-review" type="button" onClick={() => onNavigate('tarjetas')}><span className="home-card-icon" aria-hidden="true"><Icon name="cards" size={26} /></span><Bilingual k="nav.tarjetas" as="strong" /><span className="home-card-text">{t('home.reviewText')}</span><small aria-hidden="true"><Icon name="arrow" size={18} /></small></button>
       <button className="home-action-card is-tutor" type="button" onClick={() => onNavigate('chats')}><span className="home-card-icon" aria-hidden="true"><Icon name="chat" size={26} /></span><Bilingual k="nav.chats" as="strong" /><span className="home-card-text">{t('home.tutorText')}</span><small aria-hidden="true"><Icon name="arrow" size={18} /></small></button>
     </div>
-    <section className="home-class-card"><Nanduti size={64} spokes={16} rings={3} className="home-class-nanduti" /><div><span className="panel-eyebrow">{teacher ? 'PARA TU CLASE' : 'APRENDÉ EN CLASE'}</span><h3>{teacher ? 'Todo listo para enseñar' : classConfig ? 'Tu clase está configurada' : '¿Tenés un código de clase?'}</h3><p>{teacher ? 'Elegí temas, generá un código y usá el proyector desde Aula docente.' : classConfig ? 'Ya podés practicar los temas que eligió tu docente.' : 'Ingresalo para ver los ejercicios y tarjetas de tu docente.'}</p></div><button className="btn btn-secondary" type="button" onClick={() => onNavigate('aula')}>{teacher ? 'Ir a Aula docente' : 'Ir a Mi clase'}</button></section>
+    <section className="home-class-card"><Nanduti size={64} spokes={16} rings={3} className="home-class-nanduti" /><div><span className="panel-eyebrow">{teacher ? 'PARA TU CLASE' : 'APRENDÉ EN CLASE'}</span><h3>{teacher ? '¿Qué necesitás para tu clase?' : classConfig ? 'Tu clase está configurada' : '¿Tenés un código de clase?'}</h3><p>{teacher ? 'Compartí una clase, creá un ejercicio o abrí el proyector.' : classConfig ? 'Ya podés practicar los materiales que preparó tu docente.' : 'Ingresalo para ver los ejercicios y tarjetas de tu docente.'}</p></div><button className="btn btn-secondary" type="button" onClick={() => onNavigate('aula')}>{teacher ? 'Ir a Aula docente' : 'Ir a Mi clase'}</button></section>
     {progress.attempts > 0 && <section className="card learning-progress" aria-label="Progreso por tema"><div className="learning-progress-head"><div><span className="panel-eyebrow">TU AVANCE</span><h2>Así vas aprendiendo</h2></div><strong>{progress.accuracy}% de aciertos</strong></div><div className="learning-topic-grid">{topicProgress.map(item => <div key={item.topic}><div className="learning-topic-title"><strong>{item.topic}</strong><span>{item.correct}/{item.attempts} aciertos</span></div><div className="learning-topic-track"><span style={{width:`${item.accuracy}%`}} /></div><small>{item.attempts ? `Tiempo promedio: ${item.averageSeconds} s` : 'Todavía sin intentos'}</small></div>)}</div></section>}
     <p className="home-progress-note">Tu progreso: <strong>{learning.xp} XP</strong> · {progress.correct} respuestas correctas de {progress.attempts} intentos{progress.attempts ? ` · ${progress.accuracy}% de aciertos` : ''}. Guardado en este dispositivo.</p>
   </div>;
 }
 
-function ResourceGroup({ title, items, getTitle, getDescription }) {
-  return <details className="resource-group">
-    <summary>{title}<span aria-hidden="true">＋</span></summary>
-    <ul className="aula-list">{items.map(item => <li key={item.id} className="aula-item"><h3>{getTitle(item)}</h3><p>{getDescription(item)}</p></li>)}</ul>
-  </details>;
+const RESOURCE_VALUE_LABELS = {
+  v0: 'Velocidad inicial', angle: 'Ángulo', angleA: 'Primer ángulo', angleB: 'Segundo ángulo',
+  gravity: 'Gravedad', vx: 'Velocidad horizontal', t: 'Tiempo', targetDistance: 'Distancia objetivo',
+};
+const RESOURCE_VALUE_UNITS = { v0: 'm/s', vx: 'm/s', angle: '°', angleA: '°', angleB: '°', gravity: 'm/s²', t: 's', targetDistance: 'm' };
+
+function ResourceLibrary({ concepts, errors, examples, glossary, sources }) {
+  const { language } = useTranslation();
+  const [category, setCategory] = useState('conceptos');
+  const [query, setQuery] = useState('');
+  const categories = [
+    { id: 'conceptos', label: 'Conceptos', items: concepts },
+    { id: 'ejemplos', label: 'Ejercicios resueltos', items: examples },
+    { id: 'errores', label: 'Errores frecuentes', items: errors },
+    { id: 'glosario', label: 'Glosario', items: glossary },
+    { id: 'fuentes', label: 'Fuentes', items: sources },
+  ];
+  const selected = categories.find(item => item.id === category) ?? categories[0];
+  const normalizedQuery = query.trim().toLocaleLowerCase();
+  const visibleItems = selected.items.filter(item => JSON.stringify(item).toLocaleLowerCase().includes(normalizedQuery));
+
+  return <section className="resource-section" aria-label="Biblioteca de apoyo">
+    <div className="resource-heading"><div><span className="panel-eyebrow">MATERIAL PARA EXPLICAR Y REPASAR</span><h2>Biblioteca de apoyo</h2><p>Conceptos, ejemplos, errores habituales y fuentes para preparar la clase.</p></div>
+      <div className="resource-summary"><strong>{concepts.length}</strong> conceptos <strong>{examples.length}</strong> ejemplos <strong>{errors.length}</strong> errores <strong>{glossary.length}</strong> términos <strong>{sources.length}</strong> fuentes</div>
+    </div>
+    <div className="resource-filters" role="group" aria-label="Tipo de material">
+      {categories.map(item => <button key={item.id} type="button" aria-pressed={category === item.id} className={category === item.id ? 'is-active' : ''} onClick={() => { setCategory(item.id); setQuery(''); }}>{item.label}<span>{item.items.length}</span></button>)}
+    </div>
+    <label className="resource-search">Buscar en {selected.label.toLocaleLowerCase()}<input type="search" className="quiz-input" value={query} onChange={event => setQuery(event.target.value)} placeholder="Escribí una palabra o fórmula" /></label>
+    {visibleItems.length ? <div className="resource-card-grid">
+      {visibleItems.map(item => category === 'conceptos' ? <article className="resource-card" key={item.id}>
+        <span className="resource-card-label">IDEA CLAVE</span><h3>{item.name}</h3><p>{item.definition}</p>{item.formula && <code className="resource-formula">{item.formula}</code>}
+      </article> : category === 'errores' ? <article className="resource-card" key={item.id}>
+        <span className="resource-card-label">PARA REVISAR</span><h3>{item.name}</h3><p>{item.description}</p>{item.example && <div className="resource-example"><strong>Cómo corregirlo</strong><p>{item.example}</p></div>}
+      </article> : category === 'ejemplos' ? <article className="resource-card resource-worked-example" key={item.id}>
+        <span className="resource-card-label">{item.topic} · {item.difficulty}</span><h3>{item.question}</h3>
+        <div className="resource-given-values">{Object.entries(item.values ?? {}).map(([key, value]) => <span key={key}><small>{RESOURCE_VALUE_LABELS[key] ?? key}</small><strong>{value}{RESOURCE_VALUE_UNITS[key] ? ` ${RESOURCE_VALUE_UNITS[key]}` : ''}</strong></span>)}</div>
+        <details><summary>Ver resolución y respuesta</summary><p className="resource-answer">{item.correctAnswer} {item.unit}</p><ol>{(item.hints ?? []).map((hint, index) => <li key={`${item.id}-${index}`}>{hint}</li>)}</ol></details>
+      </article> : category === 'glosario' ? <article className="resource-card" key={item.id}>
+        <span className="resource-card-label">TÉRMINO</span><h3>{item.term}</h3>{language === 'es' && item.joparaTerm && <p className="resource-translation"><strong>Jopara:</strong> {item.joparaTerm}</p>}<p>{item.definition}</p>{language !== 'es' && item.ejemploJopara && <div className="resource-example"><strong>Ejemplo</strong><p>{item.ejemploJopara}</p></div>}
+      </article> : <article className="resource-card resource-source-card" key={item.id}>
+        <span className="resource-card-label">{item.institution}</span><h3>{item.title}</h3><p>{(language === 'es' ? item.supports : item.supportsJopara)?.join(' · ')}</p><p className="resource-source-note">{language === 'es' ? item.assumptions : (item.assumptionsJopara ?? item.assumptions)}</p><small>{item.publicationYear}{item.authors?.length ? ` · ${item.authors.join(', ')}` : ''}{item.license ? ` · ${item.license}` : ''}</small><a href={item.url} target="_blank" rel="noreferrer">Abrir fuente <Icon name="arrow" size={16} /></a>
+      </article>)}
+    </div> : <p className="resource-empty">No hay resultados. Probá con otra palabra.</p>}
+  </section>;
 }
 
-function AulaView({ attempts, xp, classConfig, onJoinClass, concepts, errors, glossary, teacherId }) {
+function AulaView({ classConfig, onJoinClass, concepts, errors, examples, glossary, sources, teacherId }) {
   return (
     <>
-      <div className="aula-toolbar"><p>Herramientas para preparar y compartir tu clase.</p><PdfButton /></div>
-      <TeacherMode
-        attempts={attempts}
-        xp={xp}
-        classConfig={classConfig}
-        onJoinClass={onJoinClass}
-        teacherId={teacherId}
-      />
-      <section className="resource-section" aria-label="Biblioteca de apoyo">
-        <div className="resource-heading"><h2>Biblioteca de apoyo</h2><p>Abrí solo el material que quieras consultar.</p></div>
-        <ResourceGroup title="Conceptos clave" items={concepts} getTitle={item => item.name} getDescription={item => item.definition} />
-        <ResourceGroup title="Errores frecuentes" items={errors} getTitle={item => item.name} getDescription={item => item.description} />
-        <ResourceGroup title="Glosario" items={glossary} getTitle={item => item.term} getDescription={item => item.definition} />
-      </section>
+      <div className="aula-toolbar"><p>Prepará materiales para usar con tu grupo.</p><PdfButton /></div>
+      <TeacherMode classConfig={classConfig} onJoinClass={onJoinClass} teacherId={teacherId} />
+      <ResourceLibrary concepts={concepts} errors={errors} examples={examples} glossary={glossary} sources={sources} />
     </>
   );
 }
@@ -454,6 +484,10 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
     () => selectClassExercises(getAllExercises(), classConfig).map(item => localizeCatalogItem(item, language)),
     [classConfig, language, customExercisesVersion],
   );
+  const supportExercises = useMemo(
+    () => getAllExercises().map(item => localizeCatalogItem(item, language)),
+    [language, customExercisesVersion],
+  );
   const localizedConcepts = useMemo(() => conceptsData.map(item => localizeCatalogItem(item, language)), [language]);
   const localizedErrors = useMemo(() => errorsData.map(item => localizeCatalogItem(item, language)), [language]);
   const localizedGlossary = useMemo(() => glossaryData.map(item => localizeCatalogItem(item, language)), [language]);
@@ -563,13 +597,13 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
 
         {activeTab === 'aula' && (user.role === 'maestro' ?
           <AulaView
-            attempts={learning.attempts}
-            xp={learning.xp}
             classConfig={classConfig}
             onJoinClass={handleJoinClass}
             concepts={localizedConcepts}
             errors={localizedErrors}
+            examples={supportExercises}
             glossary={localizedGlossary}
+            sources={scienceSourcesData}
             teacherId={user.id}
           /> : <StudentClass classConfig={classConfig} onJoinClass={handleJoinClass} studentId={user.id} />)}
       </main><aside className="app-sidebar" aria-label="Tu progreso y ayuda"><ConfidenceBar xp={learning.xp} level={learning.level} confidence={learning.confidence} /><TutorCard tutor={tutor} /></aside></div>

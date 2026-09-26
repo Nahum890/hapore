@@ -69,48 +69,46 @@ export default function CustomExerciseForm({ exercises, onChange }) {
   return (
     <div className="custom-exercise-stack">
       <form className="teacher-block custom-exercise-form" onSubmit={submit}>
-        <h3>Crear tu propio ejercicio</h3>
-        <p className="teacher-note">La respuesta correcta se calcula sola con el motor físico de la app: cargá los datos y elegí qué le pedís al alumno.</p>
-        <label className="teacher-field">Situación
-          <select value={form.scenario} onChange={update('scenario')}>
-            {SCENARIOS.map(item => <option key={item.value} value={item.value}>{item.label}</option>)}
-          </select>
-        </label>
-        <label className="teacher-field">Dificultad
-          <select value={form.difficulty} onChange={update('difficulty')}>
-            {DIFFICULTIES.map(item => <option key={item.value} value={item.value}>{item.label}</option>)}
-          </select>
-        </label>
-        <label className="teacher-field">Enunciado
-          <textarea className="quiz-input" rows={2} value={form.question} onChange={update('question')} placeholder="Ej: Un dron despega con v0 = 18 m/s y ángulo de 35°. ¿Cuánto vale...?" required />
-        </label>
-        <label className="teacher-field">¿Qué le pedís al alumno?
+        <div className="custom-exercise-step"><span>1</span><label className="teacher-field">Escribí el enunciado
+          <textarea className="quiz-input" rows={3} value={form.question} onChange={update('question')} placeholder="Ej.: Un dron lanza una pelota a 20 m/s con un ángulo de 30°. ¿Cuál es su velocidad horizontal?" required />
+        </label></div>
+        <div className="custom-exercise-step"><span>2</span><label className="teacher-field">¿Qué resultado debe calcular?
           <select value={form.conceptValue} onChange={update('conceptValue')}>
             {CONCEPT_OPTIONS.map(item => <option key={item.value} value={item.value}>{item.label}</option>)}
           </select>
-        </label>
-        <div className="custom-exercise-values">
-          <label className="teacher-field">Velocidad inicial (v0, m/s)
+        </label></div>
+        <div className="custom-exercise-step"><span>3</span><div className="custom-exercise-data"><h4>Cargá los datos del problema</h4><p className="field-help">Usá aquí los mismos números que escribiste en el enunciado.</p><div className="custom-exercise-values">
+          <label className="teacher-field">Velocidad inicial · m/s
             <input className="quiz-input" type="number" step="0.1" min="1" value={form.v0} onChange={update('v0')} required />
           </label>
           {option?.needsAngle ? (
-            <label className="teacher-field">Ángulo (°)
+            <label className="teacher-field">Ángulo · grados
               <input className="quiz-input" type="number" step="1" min="1" max="89" value={form.angle} onChange={update('angle')} required />
             </label>
           ) : (
-            <label className="teacher-field">Distancia objetivo (m)
+            <label className="teacher-field">Distancia objetivo · metros
               <input className="quiz-input" type="number" step="0.1" min="1" value={form.targetDistance} onChange={update('targetDistance')} required />
             </label>
           )}
-          <label className="teacher-field">Gravedad (m/s²)
+          <label className="teacher-field">Gravedad · m/s²
             <input className="quiz-input" type="number" step="0.1" min="1" value={form.gravity} onChange={update('gravity')} required />
           </label>
-        </div>
-        <p className="custom-exercise-preview" aria-live="polite">
-          Respuesta correcta calculada: <strong>{Number.isFinite(previewAnswer) ? previewAnswer : '—'} {option?.unit}</strong>
-        </p>
+        </div></div></div>
+        <p className="custom-exercise-preview" aria-live="polite">Respuesta para corregir: <strong>{Number.isFinite(previewAnswer) ? previewAnswer : '—'} {option?.unit}</strong><small>Solo la ve el docente.</small></p>
+        <details className="custom-exercise-context"><summary>Opciones adicionales: situación y dificultad</summary>
+          <label className="teacher-field">Situación
+            <select value={form.scenario} onChange={update('scenario')}>
+              {SCENARIOS.map(item => <option key={item.value} value={item.value}>{item.label}</option>)}
+            </select>
+          </label>
+          <label className="teacher-field">Dificultad
+            <select value={form.difficulty} onChange={update('difficulty')}>
+              {DIFFICULTIES.map(item => <option key={item.value} value={item.value}>{item.label}</option>)}
+            </select>
+          </label>
+        </details>
         <details className="custom-exercise-hints">
-          <summary>Pistas (opcional: si las dejás vacías, se generan solas)</summary>
+          <summary>Pistas opcionales (se generan automáticamente si las dejás vacías)</summary>
           {hints.map((text, index) => (
             <label key={index} className="teacher-field">Pista {index + 1}
               <textarea className="quiz-input" rows={1} value={text} onChange={updateHint(index)} placeholder={defaultHints[index]} />
@@ -118,8 +116,8 @@ export default function CustomExerciseForm({ exercises, onChange }) {
           ))}
         </details>
         {error && <p className="field-error" role="alert">{error}</p>}
-        {created && <p className="field-help" role="status">Ejercicio creado. Ya aparece en la lista de abajo y en el proyector.</p>}
-        <button type="submit" className="btn btn-primary">Crear ejercicio</button>
+        {created && <p className="field-help" role="status">Ejercicio guardado. Ya está disponible para practicar y proyectar.</p>}
+        <button type="submit" className="btn btn-primary">Guardar ejercicio</button>
       </form>
       {exercises.length > 0 && (
         <div className="teacher-block">
@@ -129,7 +127,7 @@ export default function CustomExerciseForm({ exercises, onChange }) {
               <li key={item.id} className="aula-item custom-exercise-item">
                 <div><span className="chip chip-topic">{SCENARIOS.find(s => s.value === item.scenario)?.label ?? item.scenario}</span> <span className="chip chip-difficulty">{item.difficulty}</span></div>
                 <p>{item.question}</p>
-                <small>Respuesta: {item.correctAnswer} {item.unit}</small>
+                <small>Resultado para corregir: {item.correctAnswer} {item.unit}</small>
                 <button type="button" className="btn btn-secondary" onClick={() => remove(item.id)}>Eliminar</button>
               </li>
             ))}

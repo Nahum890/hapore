@@ -81,7 +81,7 @@ export async function createStudyPdf({ config = null, language = DEFAULT_LANGUAG
   addText(`${label('pdf.name')}: ____________________________________     ${label('pdf.date')}: ${now.toLocaleDateString('es-PY')}`, { size: 9 });
   addSection(label('pdf.before'));
   addText(label('pdf.instructions'));
-  if (isJopara) addText(label('pdf.draft'), { size: 8, color: soft });
+  if (isJopara) addText(label('pdf.joparaNote'), { size: 8, color: soft });
   addSection(label('pdf.assumptionsTitle'));
   addText(label('pdf.assumptions'), { size: 9 });
 

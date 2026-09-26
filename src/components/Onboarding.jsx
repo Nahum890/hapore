@@ -40,9 +40,9 @@ export default function Onboarding({ open, onDismiss, onStart, role = 'alumno' }
   }, [open]);
 
   const current = step === 3 && role === 'alumno'
-    ? { number: '04', label: 'Mi clase', title: 'Unite con un código', description: 'Si tu docente te dio un código, ingresalo en “Mi clase”. Los temas y ejercicios se ajustarán automáticamente.', tip: 'Podés practicar por tu cuenta aunque no tengas un código.' }
+    ? { number: '04', label: 'Mi clase', title: 'Usá el código de tu docente', description: 'Ingresalo en “Mi clase” para ver los materiales que preparó. Tu progreso se guarda en este dispositivo.', tip: 'También podés practicar por tu cuenta sin código.' }
     : step === 3
-      ? { number: '04', label: 'Aula', title: 'Prepará y compartí una clase', description: 'En “Aula docente” elegí temas y ejercicios, generá un código y compartilo con tus alumnos. Allí también tenés el proyector y la ficha PDF.', tip: 'Cada alumno ingresa el código desde su propia cuenta.' }
+      ? { number: '04', label: 'Aula', title: 'Elegí una herramienta', description: 'En “Aula” podés compartir una clase con un código, crear un ejercicio o proyectar un simulador, ejercicio o concepto.', tip: 'El código ajusta los materiales en el dispositivo del alumno; su progreso no se envía a esta pantalla.' }
       : STEPS[step];
   return (
     <dialog ref={dialogRef} className="onboarding-dialog" aria-labelledby="onboarding-title" onCancel={event => { event.preventDefault(); onDismiss(); }} onClick={event => { if (event.target === event.currentTarget) onDismiss(); }}>
