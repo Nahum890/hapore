@@ -57,9 +57,40 @@ export function planFlight({
   const obstacleHeight = safeObstacle ? heightAtX(launch, safeObstacle.x) : null;
   const clearsObstacle = safeObstacle ? obstacleHeight !== null && obstacleHeight >= safeObstacle.height : true;
 
-  // Evaluación en el objetivo (targetX, targetY) — para canasta elevada a 3.05 m o arco a 2.44 m
-  const timeToTarget = launch.vx > 0 ? (safeTargetX - launch.x0) / launch.vx : null;
-  const heightAtTarget = timeToTarget !== null && timeToTarget <= duration ? heightAtX(launch, safeTargetX) : null;
+  // Aerodinámica ambiental: viento y temperatura (densidad del aire respecto a 21 °C)
+  const isEnvActive = safeWind !== 0 || safeTemp !== 21;
+  const densityFactor = isEnvActive ? 294.15 / (273.15 + safeTemp) : 1;
+  const windAcc = safeWind * 0.35 * densityFactor;
+  const tempDragX = isEnvActive ? (densityFactor - 1) * 0.15 : 0;
+  const tempDragY = isEnvActive ? (densityFactor - 1) * 0.10 : 0;
+
+  const posWithEnv = (t) => {
+    const base = positionAt(launch, t);
+    if (!isEnvActive) return base;
+    const xEnv = base.x + 0.5 * windAcc * (t * t) - tempDragX * launch.vx * t;
+    const yEnv = base.y - tempDragY * t;
+    return {
+      t,
+      x: Math.max(0, xEnv),
+      y: Math.max(0, yEnv),
+    };
+  };
+
+  // Evaluación en el objetivo (targetX, targetY) — calculando el cruce real con viento/temperatura
+  let timeToTarget = null;
+  if (launch.vx > 0) {
+    let tIter = (safeTargetX - launch.x0) / launch.vx;
+    for (let iter = 0; iter < 4; iter += 1) {
+      const p = posWithEnv(tIter);
+      const vxEff = launch.vx + windAcc * tIter - tempDragX * launch.vx;
+      if (vxEff > 0) {
+        tIter += (safeTargetX - p.x) / vxEff;
+      }
+    }
+    timeToTarget = tIter >= 0 && tIter <= duration * 1.5 ? tIter : null;
+  }
+
+  const heightAtTarget = timeToTarget !== null ? posWithEnv(timeToTarget).y : null;
   const vyAtTarget = timeToTarget !== null ? launch.vy - safeGravity * timeToTarget : null;
   const isDescending = vyAtTarget !== null && vyAtTarget < 0;
 
@@ -67,13 +98,9 @@ export function planFlight({
   const hoopMargin = 0.35;
   const basketSwish = safeTargetY > 0 && heightAtTarget !== null && isDescending && Math.abs(heightAtTarget - safeTargetY) <= hoopMargin;
 
-  // Puntos de trayectoria (con leve deriva por viento si se activa en simulación ambiental)
+  // Puntos de trayectoria (con deriva física de viento y temperatura si se activa en exterior)
   const basePoints = evaluateTrajectory(launch, { step: duration / 100 });
-  const points = safeWind === 0 ? basePoints : basePoints.map((pt) => {
-    // Deriva aerodinámica según velocidad del viento (0.04 m/s² por cada m/s de viento)
-    const driftX = 0.5 * (safeWind * 0.04) * (pt.t * pt.t);
-    return { ...pt, x: Math.max(0, pt.x + driftX) };
-  });
+  const points = !isEnvActive ? basePoints : basePoints.map((pt) => posWithEnv(pt.t));
 
   const hit = safeTargetY > 0 ? basketSwish : Math.abs(error) <= tolerance;
 
@@ -97,15 +124,11 @@ export function planFlight({
     environment: {
       wind: safeWind,
       temperature: safeTemp,
-      isIndoor: safeWind === 0,
+      isIndoor: safeWind === 0 && safeTemp === 21,
     },
     positionAt: (progress) => {
       const t = duration * clamp(progress, 0, 1, 0);
-      const pos = positionAt(launch, t);
-      if (safeWind !== 0) {
-        pos.x = Math.max(0, pos.x + 0.5 * (safeWind * 0.04) * (t * t));
-      }
-      return pos;
+      return posWithEnv(t);
     },
   };
 }

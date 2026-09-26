@@ -128,6 +128,7 @@ export default function BasketballChallenge({ langKey = 'gn-jopara', onProgress 
       releaseHeight: level.releaseHeight,
       gravity: level.gravity,
       wind: effectiveWind,
+      temperature: isIndoor ? 21 : temperature,
     });
     setEvalResult(evaluation);
     progressRef.current = 0;
@@ -301,6 +302,9 @@ export default function BasketballChallenge({ langKey = 'gn-jopara', onProgress 
               .replace('{ballY}', evalResult.heightAtHoop)}
             {evalResult.result === 'rim-in' && t.bballRimHit}
             {evalResult.result === 'ascending' && t.bballAscending}
+            {evalResult.result === 'wind-long' && (t.bballWindLong || '¡Tiro largo por viento a favor (+{wind} m/s)! El balón superó el aro.').replace('{wind}', evalResult.environment.wind)}
+            {evalResult.result === 'wind-short' && (t.bballWindShort || '¡Tiro frenado por viento en contra ({wind} m/s)! El balón cayó antes del aro.').replace('{wind}', evalResult.environment.wind)}
+            {evalResult.result === 'cold-short' && (t.bballColdShort || '¡Tiro frenado por aire frío y denso ({temp}°C)! Mayor resistencia al avance.').replace('{temp}', evalResult.environment.temperature)}
             {evalResult.result === 'short' && t.bballShort.replace('{ballY}', evalResult.heightAtHoop)}
             {evalResult.result === 'high' && t.bballHigh.replace('{ballY}', evalResult.heightAtHoop)}
           </strong>
@@ -308,14 +312,21 @@ export default function BasketballChallenge({ langKey = 'gn-jopara', onProgress 
           <div className="pgame-calc-breakdown">
             <p><strong>Cálculo en x = {level.distance} m:</strong></p>
             <ul>
-              <li>Tiempo de llegada al aro: <code>t = x / vx = {evalResult.timeToHoop?.toFixed(2)} s</code></li>
-              <li>Altura del balón al llegar: <code>y(t) = {evalResult.heightAtHoop} m</code> (Aro reglamentario: <code>3.05 m</code>, margen ±0.32 m)</li>
+              <li>Tiempo de llegada al aro: <code>t = x / vx_eff = {evalResult.timeToHoop?.toFixed(2)} s</code></li>
+              <li>Altura del balón al llegar: <code>y(t) = {evalResult.heightAtHoop} m</code> (Aro reglamentario: <code>3.05 m</code>, margen ±0.28 m)</li>
               <li>Sentido vertical: <code>{evalResult.isDescending ? '⬇️ Descendente (requisito de enceste cumplido)' : '⬆️ Ascendente (imposible encestar desde abajo)'}</code></li>
+              {!isIndoor && (
+                <li>Condiciones ambientales: <code>Viento: {effectiveWind > 0 ? `+${effectiveWind}` : effectiveWind} m/s | Temp: {temperature} °C (densidad del aire: {(1.20 * (294.15 / (273.15 + temperature))).toFixed(3)} kg/m³)</code></li>
+              )}
             </ul>
           </div>
 
-          {isIndoor && (
+          {isIndoor ? (
             <p className="pgame-physics-explainer">{t.bballPhysicsNote}</p>
+          ) : (
+            <p className="pgame-physics-explainer">
+              {effectiveWind !== 0 ? `El viento de ${effectiveWind > 0 ? `+${effectiveWind}` : effectiveWind} m/s altera el punto de cruce en x. ¡Podés compensar ajustando la rapidez o el ángulo de tiro!` : 'En exterior sin viento, la variación térmica de densidad modifica ligeramente la resistencia del aire.'}
+            </p>
           )}
         </div>
       )}

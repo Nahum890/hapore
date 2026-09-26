@@ -143,6 +143,9 @@ export const GAMES_I18N = {
     bballAscending: 'Tiro fallado: Pe balón og̃uahẽ aro-pe ojupi jave gueteri (subiendo). Ndaikatúi oike guype guive.',
     bballShort: 'Tiro corto: Pe balón noñembo\'y porãi térã opyta yvýpe aro mboyve ({ballY} m).',
     bballHigh: 'Tiro pasado: Pe balón ohasa yvateiterei aro ári ({ballY} m).',
+    bballWindLong: 'Pe yvytu ombotya\'e pe tiro (+{wind} m/s): pe balón ohasa mombyryve aro ári.',
+    bballWindShort: 'Pe yvytu omboguejy pe tiro ({wind} m/s): pe balón ho\'a aro mboyve.',
+    bballColdShort: 'Pe ara ro\'ysã ({temp}°C) omombegueve pe balón: oikotevẽve pya\'ekue.',
     bballPhysicsNote: 'Física en Cancha Techada: Ndoguerekóigui yvytu ha temperatura templada rupive, pe básquetbol oiko movimiento parabólico ideal reheve exacto.',
     // Tiro Libre
     fkTitle: 'Reto: Tiro Libre sobre la Barrera (Estilo Roberto Carlos)',
@@ -213,6 +216,9 @@ export const GAMES_I18N = {
     bballAscending: 'Tiro rechazado: El balón llegó a la altura del aro en trayectoria ascendente (subiendo). Físicamente no puede encestar desde abajo.',
     bballShort: 'Tiro corto: El balón no alcanzó la altura requerida al llegar al aro ({ballY} m vs 3.05 m).',
     bballHigh: 'Tiro largo: El balón superó por mucho el tablero y aro ({ballY} m vs 3.05 m).',
+    bballWindLong: '¡Tiro largo por viento a favor (+{wind} m/s)! El balón superó el aro y pegó en el tablero.',
+    bballWindShort: '¡Tiro frenado por viento en contra ({wind} m/s)! El balón cayó antes del aro.',
+    bballColdShort: '¡Tiro frenado por aire frío y denso ({temp}°C)! La resistencia aerodinámica restó alcance al lanzamiento.',
     bballPhysicsNote: 'Física en Cancha Techada: Al ser un espacio cerrado sin ráfagas de viento y con temperatura templada, el básquetbol reproduce fielmente el modelo parabólico ideal sin resistencia del aire.',
     // Tiro Libre
     fkTitle: 'Reto: Tiro Libre sobre la Barrera (Estilo Roberto Carlos)',
@@ -269,10 +275,12 @@ export function evaluateBasketballShot({
   releaseHeight = 1.80,
   gravity = GRAVITY,
   wind = 0,
+  temperature = 21,
 }) {
   const numSpeed = Number(typeof speed === 'string' ? speed.trim().replace(',', '.') : speed);
   const numAngle = Number(angleDeg);
   const numWind = Number(wind) || 0;
+  const numTemp = Number(temperature) || 21;
 
   if (!Number.isFinite(numSpeed) || numSpeed <= 0 || !Number.isFinite(numAngle) || numAngle <= 0 || numAngle >= 90) {
     return {
@@ -289,21 +297,49 @@ export function evaluateBasketballShot({
 
   const launch = createLaunch(numSpeed, numAngle, { x0: 0, y0: releaseHeight, gravity });
   const duration = timeOfFlight(launch);
-  const timeToHoop = distance / (launch.vx + numWind * 0.04);
-  const velAtHoop = velocityAt(launch, Math.min(timeToHoop, duration));
+
+  // Aerodinámica ambiental: factor de densidad del aire relativo a 21 °C (294.15 K)
+  const isEnvActive = numWind !== 0 || numTemp !== 21;
+  const densityFactor = isEnvActive ? 294.15 / (273.15 + numTemp) : 1;
+  // Aceleración por viento (m/s²)
+  const windAcc = numWind * 0.35 * densityFactor;
+  // Resistencia adicional según densidad térmica
+  const tempDragX = isEnvActive ? (densityFactor - 1) * 0.15 : 0;
+  const tempDragY = isEnvActive ? (densityFactor - 1) * 0.10 : 0;
+
+  const posAtTime = (t) => {
+    const base = positionAt(launch, t);
+    if (!isEnvActive) return base;
+    const xEnv = base.x + 0.5 * windAcc * (t * t) - tempDragX * launch.vx * t;
+    const yEnv = base.y - tempDragY * t;
+    return { t, x: Math.max(0, xEnv), y: Math.max(0, yEnv) };
+  };
+
+  // Cruce por x = distance teniendo en cuenta viento y temperatura
+  let tHoop = distance / launch.vx;
+  if (isEnvActive) {
+    for (let iter = 0; iter < 4; iter += 1) {
+      const p = posAtTime(tHoop);
+      const vxEff = launch.vx + windAcc * tHoop - tempDragX * launch.vx;
+      if (vxEff > 0) {
+        tHoop += (distance - p.x) / vxEff;
+      }
+    }
+  }
+
+  const velAtHoop = velocityAt(launch, Math.min(tHoop, duration));
   const isDescending = velAtHoop.vy < 0;
 
-  // Altura en el aro (con deriva de viento si existe)
-  const posAtHoop = positionAt(launch, Math.min(timeToHoop, duration));
-  const heightAtHoop = timeToHoop <= duration ? posAtHoop.y : 0;
+  const posAtHoop = posAtTime(Math.min(tHoop, duration));
+  const heightAtHoop = tHoop <= duration ? posAtHoop.y : 0;
   const diffY = heightAtHoop - hoopHeight;
 
   let result = 'miss';
   let score = 0;
 
   // Condiciones de enceste
-  if (timeToHoop > duration) {
-    result = 'short';
+  if (tHoop > duration) {
+    result = numWind <= -2 ? 'wind-short' : 'short';
     score = 0;
   } else if (!isDescending) {
     result = 'ascending';
@@ -312,23 +348,24 @@ export function evaluateBasketballShot({
     // Enceste limpio (swish)
     result = 'swish';
     score = 100;
-  } else if (Math.abs(diffY) <= 0.32) {
+  } else if (Math.abs(diffY) <= 0.28) {
     // Enceste con aro
     result = 'rim-in';
     score = 75;
-  } else if (diffY < -0.32) {
-    result = 'short';
+  } else if (diffY < -0.28) {
+    result = numWind <= -2 ? 'wind-short' : (numTemp < 15 ? 'cold-short' : 'short');
     score = 25;
   } else {
-    result = 'high';
+    result = numWind >= 2 ? 'wind-long' : 'high';
     score = 25;
   }
 
-  const basePoints = evaluateTrajectory(launch, { step: duration / 75 });
-  const points = numWind === 0 ? basePoints : basePoints.map((pt) => ({
-    ...pt,
-    x: Math.max(0, pt.x + 0.5 * (numWind * 0.04) * (pt.t * pt.t)),
-  }));
+  const steps = 75;
+  const points = [];
+  for (let i = 0; i <= steps; i += 1) {
+    const t = Math.min((i * duration) / steps, duration);
+    points.push(posAtTime(t));
+  }
 
   return {
     launch,
@@ -338,14 +375,18 @@ export function evaluateBasketballShot({
     hoopHeight,
     releaseHeight,
     duration,
-    timeToHoop,
+    timeToHoop: Math.round(tHoop * 100) / 100,
     heightAtHoop: Math.round(heightAtHoop * 100) / 100,
     diffY: Math.round(diffY * 100) / 100,
     isDescending,
     result,
     score,
     points,
-    environment: { wind: numWind, isIndoor: numWind === 0 },
+    environment: {
+      wind: numWind,
+      temperature: numTemp,
+      isIndoor: numWind === 0 && numTemp === 21,
+    },
   };
 }
 

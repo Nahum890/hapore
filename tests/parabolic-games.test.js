@@ -74,6 +74,7 @@ test('Básquetbol: proporciones oficiales aro (45 cm) vs balón (24 cm) y entorn
     targetX: 4.60,
     targetY: 3.05,
     wind: 0,
+    temperature: 21,
   });
   assert.equal(indoorFlight.environment.isIndoor, true);
   assert.equal(indoorFlight.environment.wind, 0);
@@ -86,10 +87,39 @@ test('Básquetbol: proporciones oficiales aro (45 cm) vs balón (24 cm) y entorn
     targetX: 4.60,
     targetY: 3.05,
     wind: 3.0,
+    temperature: 21,
   });
   assert.equal(outdoorFlight.environment.isIndoor, false);
   assert.equal(outdoorFlight.environment.wind, 3.0);
   assert.ok(outdoorFlight.points[outdoorFlight.points.length - 1].x > indoorFlight.points[indoorFlight.points.length - 1].x);
+
+  // Viento a favor de +5 m/s hace que el tiro de 7.68 m/s se pase del aro
+  const tailwindShot = evaluateBasketballShot({
+    speed: 7.68,
+    angleDeg: 52,
+    distance: 4.60,
+    hoopHeight: 3.05,
+    releaseHeight: 1.80,
+    gravity: 9.8,
+    wind: 5.0,
+    temperature: 21,
+  });
+  assert.notEqual(tailwindShot.result, 'swish', 'Con +5 m/s de viento a favor el tiro no debe encestar igual');
+  assert.equal(tailwindShot.result, 'wind-long');
+
+  // Viento en contra de -5 m/s hace que el tiro de 7.68 m/s caiga corto
+  const headwindShot = evaluateBasketballShot({
+    speed: 7.68,
+    angleDeg: 52,
+    distance: 4.60,
+    hoopHeight: 3.05,
+    releaseHeight: 1.80,
+    gravity: 9.8,
+    wind: -5.0,
+    temperature: 21,
+  });
+  assert.notEqual(headwindShot.result, 'swish', 'Con -5 m/s de viento en contra el tiro no debe encestar igual');
+  assert.equal(headwindShot.result, 'wind-short');
 });
 
 test('Tiro Libre (Roberto Carlos): barrera FIFA a 9.15 m y arco a 2.44 m de travesaño', () => {
