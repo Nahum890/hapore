@@ -1165,6 +1165,74 @@ button, input, select, textarea { max-width: 100%; }
 .projector-stage-content .projector-metrics { width: min(100%, 900px); margin-top: 12px; }
 .projector-exercise-slide { margin: 0 auto; }
 
+/* ---------- Mis clases (presentaciones del docente) ---------- */
+.lesson-create { display: flex; align-items: end; gap: 10px; flex-wrap: wrap; }
+.lesson-create .teacher-field { flex: 1 1 280px; }
+.lesson-list { list-style: none; display: grid; gap: 10px; margin: 0; padding: 0; }
+.lesson-item { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding: 14px 16px; border: 1px solid var(--c-line); border-radius: var(--radius); background: var(--c-surface); }
+.lesson-item-info h3 { margin: 0 0 3px; font-size: 16px; }
+.lesson-item-info p { margin: 0; color: var(--c-muted); font-size: 13px; }
+.lesson-item-info .lesson-item-description { margin-top: 4px; color: var(--c-ink-soft); }
+.lesson-item-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn-danger { background: var(--c-earth-deep); border-color: var(--c-earth-deep); color: #fff; }
+.lesson-editor-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.lesson-editor-head .field-help { margin: 0; }
+.lesson-meta { display: grid; grid-template-columns: 1fr 1.4fr; gap: 12px; }
+.lesson-workspace { display: grid; grid-template-columns: minmax(220px, 290px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.lesson-slide-rail { display: grid; gap: 12px; position: sticky; top: 12px; }
+.lesson-slide-list { list-style: none; display: grid; gap: 6px; margin: 0; padding: 0; max-height: 60vh; overflow: auto; }
+.lesson-slide-list li { display: grid; gap: 4px; padding: 6px; border: 1px solid var(--c-line); border-radius: 12px; background: var(--c-surface); }
+.lesson-slide-list li.is-selected { border-color: var(--c-primary); background: var(--c-primary-soft); box-shadow: inset 0 0 0 1px var(--c-primary); }
+.lesson-slide-thumb { display: flex; align-items: center; gap: 10px; width: 100%; padding: 4px; border: 0; background: none; color: var(--c-ink); font: inherit; text-align: left; cursor: pointer; }
+.lesson-slide-number { display: grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 8px; background: #192923; color: #fff; font-size: 12px; font-weight: 850; }
+.lesson-slide-text { display: grid; min-width: 0; }
+.lesson-slide-text strong { font-size: 13px; }
+.lesson-slide-text small { overflow: hidden; color: var(--c-muted); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.lesson-slide-tools { display: flex; justify-content: flex-end; gap: 4px; }
+.lesson-slide-tools button { min-width: 32px; min-height: 30px; border: 1px solid var(--c-line); border-radius: 8px; background: var(--c-surface); color: var(--c-ink); font: inherit; cursor: pointer; }
+.lesson-slide-tools button:disabled { opacity: .35; cursor: default; }
+.lesson-add-slide { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px; border: 1px dashed var(--c-line); border-radius: 12px; }
+.lesson-add-slide span { width: 100%; color: var(--c-muted); font-size: 12px; font-weight: 800; }
+.lesson-add-slide button { min-height: 34px; padding: 5px 10px; border: 1px solid var(--c-primary); border-radius: 999px; background: var(--c-surface); color: var(--c-primary-deep); font: inherit; font-size: 13px; font-weight: 750; cursor: pointer; }
+.lesson-add-slide button:hover { background: var(--c-primary-soft); }
+.lesson-slide-editor { display: grid; gap: 14px; min-width: 0; }
+.lesson-slide-editor-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.lesson-slide-editor-head h3 { margin: 0; font-size: 17px; }
+.lesson-slide-form { display: grid; gap: 12px; }
+.lesson-slide-form .field-help { margin: 0; }
+.lesson-values-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.lesson-number-field .field-error { margin: 0; font-weight: 600; }
+.lesson-gravity-presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.lesson-gravity-presets button { min-height: 34px; padding: 5px 12px; border: 1px solid var(--c-line); border-radius: 999px; background: var(--c-surface); color: var(--c-ink); font: inherit; font-size: 13px; cursor: pointer; }
+.lesson-gravity-presets button.is-active { border-color: var(--c-primary); background: var(--c-primary-soft); color: var(--c-primary-deep); font-weight: 750; }
+.lesson-compare-toggle { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 650; }
+.lesson-compare-toggle input { width: 18px; height: 18px; accent-color: var(--c-primary); }
+.trajectory-path-compare { stroke: #7cc6ee; stroke-dasharray: 10 8; stroke-width: 4; }
+.trajectory-legend { display: flex; justify-content: center; flex-wrap: wrap; gap: 16px; margin: 8px 0 12px; font-size: 14px; }
+.trajectory-legend .legend-main::before, .trajectory-legend .legend-compare::before { content: ''; display: inline-block; width: 22px; height: 0; margin-right: 6px; vertical-align: middle; border-top: 4px solid #ffd166; }
+.trajectory-legend .legend-compare::before { border-top: 4px dashed #7cc6ee; }
+.lesson-title-slide h2 { font-size: clamp(30px, 5vw, 60px); }
+.lesson-text-slide ul { display: grid; gap: 12px; width: fit-content; max-width: 64ch; margin: 0 auto; padding-left: 1.2em; text-align: left; font-size: clamp(17px, 2.2vw, 26px); line-height: 1.4; }
+.lesson-sim-slide { width: min(100%, 1100px); }
+.lesson-sim-slide h2 { font-size: clamp(22px, 3vw, 36px); }
+.lesson-sim-values { margin: 12px auto 0 !important; color: #c2d7cb !important; font-size: 13px !important; }
+.projector-preview h2, .projector-stage h2 { color: #fff; }
+.lesson-stage { overflow: hidden; }
+.lesson-stage .projector-stage-content { min-height: 0; overflow: auto; }
+.lesson-stage .projector-trajectory.is-large svg { max-height: 44vh; }
+.lesson-stage .lesson-sim-slide { margin: 1vh auto; }
+.lesson-stage-actions { display: flex; gap: 8px; }
+.lesson-stage-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: min(100%, 1400px); margin: 12px auto 0; }
+.lesson-stage-dots { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.lesson-stage-dots i { width: 9px; height: 9px; border-radius: 50%; background: #40594b; }
+.lesson-stage-dots i.is-active { background: #ffd166; }
+
+@media (max-width: 860px) {
+  .lesson-workspace, .lesson-meta { grid-template-columns: 1fr; }
+  .lesson-slide-rail { position: static; }
+  .lesson-slide-list { max-height: none; }
+}
+
 /* ---------- Biblioteca de apoyo ---------- */
 .resource-section { margin-top: 28px; }
 .resource-heading { display: flex; align-items: end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }

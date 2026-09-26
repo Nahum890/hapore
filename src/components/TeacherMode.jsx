@@ -1,5 +1,5 @@
 import { lazy, Suspense, useMemo, useState } from 'react';
-const TeacherProjector = lazy(() => import('./TeacherProjector.jsx'));
+const LessonStudio = lazy(() => import('./LessonStudio.jsx'));
 import { encodeClassConfig, decodeClassConfig } from '../utils/classCode.js';
 import { exercises, flashcards as flashcardsData, quizBank } from '../data/catalogs.js';
 import { getCustomExercises } from '../utils/customExercises.js';
@@ -16,7 +16,7 @@ const SUBTEMAS = [
 const TOOLS = [
   { id: 'clase', label: 'Compartir clase', description: 'Elegí situaciones y creá un código.' },
   { id: 'ejercicios', label: 'Crear ejercicio', description: 'Prepará un problema propio.' },
-  { id: 'proyector', label: 'Proyectar', description: 'Mostrá una simulación, ejercicio o concepto.' },
+  { id: 'clases', label: 'Mis clases', description: 'Prepará diapositivas y proyectalas.' },
 ];
 
 export function validClassCode(text) {
@@ -61,8 +61,8 @@ export default function TeacherMode({ classConfig, onJoinClass, teacherId }) {
       <p className="teacher-note">Completá el enunciado y los datos. La respuesta se calcula sola.</p>
       <CustomExerciseForm exercises={customExercises} onChange={refreshCustomExercises} />
     </section>
-    <div hidden={tool !== 'proyector'}><Suspense fallback={<p className="teacher-note">Cargando proyector…</p>}>
-      <TeacherProjector exercises={allExercises} />
+    <div hidden={tool !== 'clases'}><Suspense fallback={<p className="teacher-note">Cargando tus clases…</p>}>
+      <LessonStudio exercises={allExercises} />
     </Suspense></div>
   </section>;
 }
