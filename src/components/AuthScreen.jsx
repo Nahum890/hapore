@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { login, register } from '../auth/localAccounts.js';
 import { BrandMark, LaunchScene } from './Nanduti.jsx';
+import { isCloudConfigured } from '../cloud/cloudClient.js';
 
 export default function AuthScreen({ onAuthenticated }) {
   const [mode, setMode] = useState('login');
@@ -59,7 +60,9 @@ export default function AuthScreen({ onAuthenticated }) {
             {error && <p className="auth-error" role="alert">{error}</p>}
             <button className="btn btn-primary auth-submit" type="submit" disabled={busy}>{busy ? 'Un momento…' : mode === 'register' ? 'Crear mi cuenta' : 'Entrar a PyFis IA'} <span aria-hidden="true">→</span></button>
           </form>
-          <p className="auth-local-note">Las cuentas y el progreso se guardan únicamente en este dispositivo. Sincronización entre dispositivos no disponible.</p>
+          <p className="auth-local-note">{isCloudConfigured()
+            ? 'La cuenta y el progreso se guardan en este dispositivo. Si te unís a una clase, tu avance se envía a tu docente cuando hay internet.'
+            : 'Las cuentas y el progreso se guardan únicamente en este dispositivo. Sincronización entre dispositivos no disponible.'}</p>
         </div>
       </section>
     </div>

@@ -92,6 +92,28 @@ test('una sesión vencida se renueva en vez de crear otra identidad', async () =
   setActiveProfile(null);
 });
 
+test('si la nube rechaza la sesión guardada (401), se crea una nueva y se reintenta una vez', async () => {
+  setActiveProfile('cloud-401'); removeKey('guarania:cloudSession');
+  writeJSON('guarania:cloudSession', { accessToken: 'revocado', refreshToken: 'x', expiresAt: 9999999999, userId: 'viejo' });
+  const seen = [];
+  configureCloud({
+    fetch: async (url, options) => {
+      const path = url.replace('https://demo.supabase.co', '');
+      seen.push({ path, auth: options.headers.Authorization });
+      if (path === '/auth/v1/signup') return new Response(JSON.stringify({ access_token: 'nuevo', refresh_token: 'r', expires_in: 3600, user: { id: 'nuevo-uid' } }), { status: 200 });
+      if (options.headers.Authorization === 'Bearer revocado') return new Response(JSON.stringify({ message: 'JWT inválido' }), { status: 401 });
+      return new Response('[]', { status: 200 });
+    },
+  });
+  const { listTeacherClasses } = await import('../src/cloud/classCloud.js');
+  const rows = await useOnline(true, () => listTeacherClasses());
+  assert.deepEqual(rows, []);
+  const lastList = seen.filter(call => call.path.startsWith('/rest/v1/classes')).at(-1);
+  assert.equal(lastList.auth, 'Bearer nuevo');
+  assert.match(lastList.path, /teacher_id=eq\.nuevo-uid/, 'la ruta se reconstruye con la sesión nueva');
+  setActiveProfile(null);
+});
+
 test('salir de la clase borra el paquete y el avance pendiente de este dispositivo', async () => {
   setActiveProfile('cloud-student');
   configureCloud({ fetch: fakeSupabase().fetch });

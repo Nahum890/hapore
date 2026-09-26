@@ -1,4 +1,4 @@
-import { rpc, rest, getCloudSession, isCloudConfigured } from './cloudClient.js';
+import { rpc, rest, isCloudConfigured } from './cloudClient.js';
 import { readJSON, writeJSON, removeKey } from '../utils/storage.js';
 
 // Paquete de clase que descarga el alumno: queda en su perfil local para
@@ -35,9 +35,8 @@ export async function createCloudClass({ title, teacherName, teacherAvatar, cont
 }
 
 export async function listTeacherClasses() {
-  const session = await getCloudSession();
   const select = 'id,code,title,created_at,class_members(student_id,display_name,avatar,xp,level,attempts,correct,confidence,cards_consolidated,last_sync,joined_at)';
-  return rest(`classes?select=${select}&teacher_id=eq.${session.userId}&order=created_at.desc`);
+  return rest(session => `classes?select=${select}&teacher_id=eq.${session.userId}&order=created_at.desc`);
 }
 
 export async function deleteCloudClass(id) {
@@ -69,8 +68,7 @@ export async function leaveCloudClass() {
   removeKey(PENDING_KEY);
   if (!pkg || !isCloudConfigured()) return;
   try {
-    const session = await getCloudSession();
-    await rest(`class_members?class_id=eq.${pkg.classId}&student_id=eq.${session.userId}`, { method: 'DELETE' });
+    await rest(session => `class_members?class_id=eq.${pkg.classId}&student_id=eq.${session.userId}`, { method: 'DELETE' });
   } catch {
     // Sin conexión: la clase ya se quitó de este dispositivo; el docente la verá hasta que vuelva a sincronizar.
   }
@@ -106,8 +104,7 @@ export async function flushProgress() {
   const pending = getPendingProgress();
   if (!pending || !isCloudConfigured()) return { status: pending ? 'pending' : 'idle' };
   try {
-    const session = await getCloudSession();
-    await rest(`class_members?class_id=eq.${pending.classId}&student_id=eq.${session.userId}`, {
+    await rest(session => `class_members?class_id=eq.${pending.classId}&student_id=eq.${session.userId}`, {
       method: 'PATCH',
       body: { ...pending.stats, last_sync: new Date().toISOString() },
       headers: { Prefer: 'return=minimal' },

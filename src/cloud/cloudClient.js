@@ -90,14 +90,26 @@ export async function getCloudSession() {
   return storeSession(await http('/auth/v1/signup', { method: 'POST', body: {} }));
 }
 
-export async function rpc(name, args) {
-  const session = await getCloudSession();
-  return http(`/rest/v1/rpc/${name}`, { method: 'POST', body: args, token: session.accessToken });
+// Si la sesión guardada ya no es válida (401: proyecto reiniciado, sesión
+// revocada), se descarta y se reintenta una vez con una sesión nueva.
+async function withSession(call) {
+  try {
+    return await call(await getCloudSession());
+  } catch (error) {
+    if (error.status !== 401) throw error;
+    removeKey(SESSION_KEY);
+    return call(await getCloudSession());
+  }
 }
 
-export async function rest(path, options = {}) {
-  const session = await getCloudSession();
-  return http(`/rest/v1/${path}`, { ...options, token: session.accessToken });
+export function rpc(name, args) {
+  return withSession(session => http(`/rest/v1/rpc/${name}`, { method: 'POST', body: args, token: session.accessToken }));
+}
+
+/** `path` puede ser una función de la sesión, para rutas que usan el id del
+ * usuario y deben reconstruirse si la sesión se renueva. */
+export function rest(path, options = {}) {
+  return withSession(session => http(`/rest/v1/${typeof path === 'function' ? path(session) : path}`, { ...options, token: session.accessToken }));
 }
 
 export function forgetCloudSession() {
