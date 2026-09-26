@@ -225,6 +225,34 @@ function saveAccounts(list) {
   storage().setItem(ACCOUNTS_KEY, JSON.stringify(list));
 }
 
+/** Teléfono y correo son obligatorios: se usan para que docente y alumnos de
+ * una misma clase puedan contactarse. */
+export function validateContact({ phone, email }) {
+  const cleanPhone = String(phone ?? '').trim();
+  const cleanEmail = String(email ?? '').trim().toLowerCase();
+  if (!/^\+?[\d\s().-]{7,24}$/.test(cleanPhone) || cleanPhone.replace(/\D/g, '').length < 7) {
+    throw new Error('Escribí un número de teléfono válido (al menos 7 dígitos).');
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(cleanEmail) || cleanEmail.length > 120) {
+    throw new Error('Escribí un correo válido, por ejemplo nombre@ejemplo.com.');
+  }
+  return { phone: cleanPhone, email: cleanEmail };
+}
+
+const PRESET_AVATARS = ['sol', 'rio', 'selva', 'tierra', 'cielo'];
+const MAX_PHOTO_CHARS = 200_000;
+
+function validAvatar(avatar) {
+  if (!avatar) return null;
+  if (PRESET_AVATARS.includes(avatar)) return avatar;
+  if (/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(avatar) && avatar.length <= MAX_PHOTO_CHARS) return avatar;
+  throw new Error('La foto no es válida o es demasiado grande.');
+}
+
+export function hasContactInfo(account) {
+  try { validateContact(account ?? {}); return true; } catch { return false; }
+}
+
 /** Datos de contacto y foto de perfil: quedan en este dispositivo, igual que
  * el resto de la cuenta. No hay verificación de teléfono/correo: son solo
  * datos que el alumno o el docente eligen mostrar (por ejemplo, para que su
@@ -234,9 +262,10 @@ export function updateProfile(accountId, { phone, email, avatar } = {}) {
   const index = saved.findIndex(item => item.id === accountId);
   if (index === -1) throw new Error('No se encontró la cuenta en este dispositivo.');
   const next = { ...saved[index] };
-  if (phone !== undefined) next.phone = String(phone || '').trim().slice(0, 30);
-  if (email !== undefined) next.email = String(email || '').trim().slice(0, 120);
-  if (avatar !== undefined) next.avatar = avatar || null;
+  if (phone !== undefined || email !== undefined) {
+    Object.assign(next, validateContact({ phone: phone ?? next.phone, email: email ?? next.email }));
+  }
+  if (avatar !== undefined) next.avatar = validAvatar(avatar);
   const list = [...saved];
   list[index] = next;
   saveAccounts(list);
@@ -265,17 +294,18 @@ export function getSession() {
   }
 }
 
-export async function register({ name, username, password, role }) {
+export async function register({ name, username, password, role, phone, email }) {
   const cleanName = String(name || '').trim();
   const cleanUsername = String(username || '').trim().toLowerCase();
   if (cleanName.length < 2) throw new Error('Escribí tu nombre.');
   if (!/^[a-z0-9._-]{3,24}$/.test(cleanUsername)) throw new Error('El usuario debe tener entre 3 y 24 letras, números, puntos, guiones o guiones bajos.');
   if (String(password || '').length < 8) throw new Error('La contraseña debe tener al menos 8 caracteres.');
   if (!['alumno', 'maestro'].includes(role)) throw new Error('Elegí Alumno o Maestro.');
+  const contact = validateContact({ phone, email });
   const saved = accounts();
   if (saved.some(item => item.username === cleanUsername)) throw new Error('Ese nombre de usuario ya existe en este dispositivo.');
   const salt = bytesToHex(getRandomBytes(16));
-  const account = { id: generateUUID(), name: cleanName, username: cleanUsername, role, salt, passwordHash: await hashPassword(password, salt) };
+  const account = { id: generateUUID(), name: cleanName, username: cleanUsername, role, ...contact, salt, passwordHash: await hashPassword(password, salt) };
   try {
     storage().setItem(ACCOUNTS_KEY, JSON.stringify([...saved, account]));
     storage().setItem(SESSION_KEY, account.id);
