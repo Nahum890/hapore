@@ -52,7 +52,7 @@ function TeacherControls({onJoinClass, allExercises = exercises, teacherId}) {
     <form className="teacher-block" onSubmit={event=>{event.preventDefault();if(valid){setGenerated(true);setCopied(false);}}}>
       <h3>Preparar una clase</h3>
       <label className="teacher-field">Tarjetas por repaso (5 a 20)<input className="quiz-input" type="number" min="5" max="20" step="1" required value={flashcards} onChange={event=>{setFlashcards(event.target.value);setCopied(false);}} /></label>
-      <fieldset className="teacher-subtemas"><legend>Situaciones para practicar</legend>{SUBTEMAS.map(item=><label key={item.id} className="teacher-subtema"><input type="checkbox" checked={subtemas.includes(item.id)} onChange={()=>toggle(item.id)} />{item.label}</label>)}</fieldset>
+      <fieldset className="teacher-subtemas"><legend>Situaciones para practicar</legend>{SUBTEMAS.map(item=><label key={item.id} className={`teacher-subtema ${subtemas.includes(item.id) ? 'is-selected' : ''}`}><input type="checkbox" checked={subtemas.includes(item.id)} onChange={()=>toggle(item.id)} />{item.label}</label>)}</fieldset>
       <label className="teacher-field">Ejercicios prácticos (1 a 10)<input className="quiz-input" type="number" min="1" max="10" step="1" required value={ejercicios} onChange={event=>{setEjercicios(event.target.value);setCopied(false);}} /></label>
       <ConfigSummary config={config} allExercises={allExercises} />
       {!subtemas.length && <p className="field-error">Seleccioná al menos una situación.</p>}

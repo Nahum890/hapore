@@ -118,24 +118,27 @@ export default function TeacherProjector({ attempts = 0, xp = 0, exercises: exer
   const handleManualAngle = (value) => { setAngle(value); setProjectedExerciseId(null); };
   const handleManualGravity = (value) => { setGravity(value); setProjectedExerciseId(null); };
 
+  const isPresetActive = (pV0, pAngle) => Number(v0) === pV0 && Number(angle) === pAngle;
+
   return (
     <section className="card teacher-mode-pro" aria-label="Modo Docente y Proyector de Aula">
       {/* CABECERA DEL MODO AULA */}
-      <div className="teacher-header-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '16px' }}>
-        <div>
-          <h2 style={{ margin: 0, color: '#1B4D3E', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span>👨‍🏫</span> Modo Docente: Proyector de Aula
-          </h2>
-          <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#4B5563' }}>
-            Simulación libre en tiempo real, demostración de hipótesis y generación de fichas para el aula.
-          </p>
+      <div className="projector-header-bar">
+        <div className="projector-header-title">
+          <div>
+            <h2>
+              <span aria-hidden="true">👨‍🏫</span> Modo Docente: Proyector de Aula
+            </h2>
+            <p>
+              Simulación libre en tiempo real, demostración de hipótesis frente al aula y descarga de fichas.
+            </p>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div className="projector-action-bar">
           <button
             type="button"
             className="btn btn-primary"
             onClick={generateGuaraniaPdf}
-            style={{ backgroundColor: '#1B4D3E', border: 'none', padding: '8px 14px', borderRadius: '6px', cursor: 'pointer', color: '#fff', fontSize: '0.85rem', fontWeight: 600 }}
           >
             📄 Descargar Ficha PDF
           </button>
@@ -144,37 +147,63 @@ export default function TeacherProjector({ attempts = 0, xp = 0, exercises: exer
 
       {/* QUÉ PROYECTAR */}
       <div className="tutor-mode-tabs" role="tablist" aria-label="Qué proyectar">
-        <button type="button" role="tab" aria-selected={displayMode === 'ejercicio'} className={displayMode === 'ejercicio' ? 'is-active' : ''} onClick={() => setDisplayMode('ejercicio')}>Ejercicio y simulador</button>
-        <button type="button" role="tab" aria-selected={displayMode === 'concepto'} className={displayMode === 'concepto' ? 'is-active' : ''} onClick={() => setDisplayMode('concepto')}>Concepto</button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={displayMode === 'ejercicio'}
+          className={displayMode === 'ejercicio' ? 'is-active' : ''}
+          onClick={() => setDisplayMode('ejercicio')}
+        >
+          Ejercicio y simulador
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={displayMode === 'concepto'}
+          className={displayMode === 'concepto' ? 'is-active' : ''}
+          onClick={() => setDisplayMode('concepto')}
+        >
+          Concepto
+        </button>
       </div>
 
       {displayMode === 'concepto' ? (
         <div className="projector-concept" aria-label="Concepto proyectado">
-          <label className="teacher-field" htmlFor="teacher-concept-select">Elegí un concepto para proyectar
-            <select id="teacher-concept-select" className="quiz-input" value={selectedConceptId} onChange={event => setSelectedConceptId(event.target.value)}>
-              {concepts.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}
+          <label className="teacher-field" htmlFor="teacher-concept-select">
+            Elegí un concepto para proyectar
+            <select
+              id="teacher-concept-select"
+              className="quiz-input"
+              value={selectedConceptId}
+              onChange={(event) => setSelectedConceptId(event.target.value)}
+            >
+              {concepts.map((item) => (
+                <option key={item.id} value={item.id}>{item.name}</option>
+              ))}
             </select>
           </label>
           {selectedConcept && (
             <div className="projector-concept-slide">
               <h2>{selectedConcept.name}</h2>
               <p>{selectedConcept.definition}</p>
-              {selectedConcept.formula && <p className="projector-concept-formula">{selectedConcept.formula}</p>}
+              {selectedConcept.formula && (
+                <p className="projector-concept-formula">{selectedConcept.formula}</p>
+              )}
             </div>
           )}
         </div>
       ) : (
       <>
       {/* SELECTOR DE EJERCICIO DE REFERENCIA */}
-      <div style={{ backgroundColor: '#F3F4F6', padding: '10px 14px', borderRadius: '8px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-        <label htmlFor="teacher-exercise-select" style={{ fontWeight: 600, fontSize: '0.85rem', color: '#1F2937' }}>
+      <div className="projector-select-wrap">
+        <label htmlFor="teacher-exercise-select">
           🎯 Proyectar Ejercicio del Banco:
         </label>
         <select
           id="teacher-exercise-select"
+          className="quiz-input"
           value={selectedExerciseId}
           onChange={handleSelectExercise}
-          style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #D1D5DB', fontSize: '0.85rem', flex: 1, minWidth: '220px' }}
         >
           {exercisesData.map((ex) => (
             <option key={ex.id} value={ex.id}>
@@ -186,18 +215,20 @@ export default function TeacherProjector({ attempts = 0, xp = 0, exercises: exer
 
       {/* VISTA PREVIA: el docente ve el enunciado completo antes de proyectar */}
       {previewExercise && (
-        <div style={{ backgroundColor: '#FFFFFF', border: '2px solid ' + (projectedExerciseId === previewExercise.id ? '#10B981' : '#D1D5DB'), borderRadius: '8px', padding: '12px 14px', marginBottom: '16px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: '220px' }}>
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#1B4D3E', backgroundColor: '#ECFDF5', padding: '2px 8px', borderRadius: '999px' }}>{SCENARIO_LABELS[previewExercise.scenario] ?? previewExercise.scenario}</span>
-                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#92400E', backgroundColor: '#FEF3C7', padding: '2px 8px', borderRadius: '999px' }}>{previewExercise.difficulty}</span>
-                {projectedExerciseId === previewExercise.id && <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#065F46' }}>✓ Proyectado</span>}
+        <div className={`projector-preview-card ${projectedExerciseId === previewExercise.id ? 'is-projected' : ''}`}>
+          <div className="projector-preview-head">
+            <div className="projector-preview-body">
+              <div className="projector-preview-tags">
+                <span className="chip chip-topic">{SCENARIO_LABELS[previewExercise.scenario] ?? previewExercise.scenario}</span>
+                <span className="chip chip-difficulty">{previewExercise.difficulty}</span>
+                {projectedExerciseId === previewExercise.id && (
+                  <span className="chip chip-consolidated">✓ Proyectado en clase</span>
+                )}
               </div>
-              <p style={{ margin: 0, fontSize: '0.88rem', color: '#1F2937' }}>{previewExercise.question}</p>
-              <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
+              <p className="projector-preview-question">{previewExercise.question}</p>
+              <div className="projector-preview-values">
                 {Object.entries(previewExercise.values ?? {}).map(([key, value]) => (
-                  <span key={key} style={{ fontSize: '0.72rem', color: '#4B5563', backgroundColor: '#F3F4F6', padding: '2px 8px', borderRadius: '6px' }}>{key} = {value}</span>
+                  <span key={key} className="chip">{key} = {value}</span>
                 ))}
               </div>
             </div>
@@ -206,7 +237,6 @@ export default function TeacherProjector({ attempts = 0, xp = 0, exercises: exer
               className="btn btn-primary"
               onClick={handleProjectExercise}
               disabled={projectedExerciseId === previewExercise.id}
-              style={{ padding: '8px 14px', borderRadius: '6px', border: 'none', backgroundColor: projectedExerciseId === previewExercise.id ? '#9CA3AF' : '#1B4D3E', color: '#fff', fontSize: '0.82rem', fontWeight: 600, cursor: projectedExerciseId === previewExercise.id ? 'default' : 'pointer' }}
             >
               {projectedExerciseId === previewExercise.id ? 'Ya proyectado' : 'Proyectar este ejercicio'}
             </button>
@@ -215,64 +245,64 @@ export default function TeacherProjector({ attempts = 0, xp = 0, exercises: exer
       )}
 
       {/* LIENZO DE TRAYECTORIAS PARA PROYECCIÓN */}
-      <div style={{ backgroundColor: '#1F2937', borderRadius: '10px', padding: '12px', marginBottom: '16px', boxShadow: 'inset 0 2px 6px rgba(0,0,0,0.4)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#E5E7EB', fontSize: '0.78rem', marginBottom: '6px' }}>
-          <span>Visualización 2D • Proyección en Vivo</span>
-          <div style={{ display: 'flex', gap: '14px' }}>
-            <span style={{ color: '#C04A26', fontWeight: 600 }}>● Trayectoria Actual ({v0} m/s @ {angle}°)</span>
+      <div className="projector-canvas-wrapper">
+        <div className="projector-canvas-legend">
+          <strong>Visualización 2D • Proyección en Vivo</strong>
+          <div className="projector-legend-items">
+            <span className="legend-current">● Trayectoria Actual ({v0} m/s @ {angle}°)</span>
             {referenceLaunch && (
-              <span style={{ color: '#0284C7', fontWeight: 600 }}>● Referencia A ({referenceLaunch.v0} m/s @ {referenceLaunch.angleDeg}°)</span>
+              <span className="legend-reference">● Referencia A ({referenceLaunch.v0} m/s @ {referenceLaunch.angleDeg}°)</span>
             )}
           </div>
         </div>
 
         <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} style={{ width: '100%', height: 'auto', display: 'block' }}>
           {/* Suelo */}
-          <line x1="0" y1={svgHeight - padY} x2={svgWidth} y2={svgHeight - padY} stroke="#4B5563" strokeWidth="2" />
-          <line x1="0" y1={svgHeight - padY + 1} x2={svgWidth} y2={svgHeight - padY + 1} stroke="#374151" strokeWidth="6" />
+          <line x1="0" y1={svgHeight - padY} x2={svgWidth} y2={svgHeight - padY} stroke="#475569" strokeWidth="2.5" />
+          <line x1="0" y1={svgHeight - padY + 1} x2={svgWidth} y2={svgHeight - padY + 1} stroke="#1e293b" strokeWidth="6" />
 
           {/* Cuadrícula tenue */}
-          <line x1={toSvgX(maxVisualX * 0.25)} y1={padY} x2={toSvgX(maxVisualX * 0.25)} y2={svgHeight - padY} stroke="#374151" strokeDasharray="3 3" />
-          <line x1={toSvgX(maxVisualX * 0.5)} y1={padY} x2={toSvgX(maxVisualX * 0.5)} y2={svgHeight - padY} stroke="#374151" strokeDasharray="3 3" />
-          <line x1={toSvgX(maxVisualX * 0.75)} y1={padY} x2={toSvgX(maxVisualX * 0.75)} y2={svgHeight - padY} stroke="#374151" strokeDasharray="3 3" />
+          <line x1={toSvgX(maxVisualX * 0.25)} y1={padY} x2={toSvgX(maxVisualX * 0.25)} y2={svgHeight - padY} stroke="#1e293b" strokeDasharray="3 3" />
+          <line x1={toSvgX(maxVisualX * 0.5)} y1={padY} x2={toSvgX(maxVisualX * 0.5)} y2={svgHeight - padY} stroke="#1e293b" strokeDasharray="3 3" />
+          <line x1={toSvgX(maxVisualX * 0.75)} y1={padY} x2={toSvgX(maxVisualX * 0.75)} y2={svgHeight - padY} stroke="#1e293b" strokeDasharray="3 3" />
 
-          {/* Trayectoria de referencia A (Azul Itaipú) */}
+          {/* Trayectoria de referencia A */}
           {refPathData && (
             <>
-              <path d={refPathData} fill="none" stroke="#0284C7" strokeWidth="2.5" strokeDasharray="5 4" opacity="0.85" />
-              <circle cx={toSvgX(refR)} cy={toSvgY(0)} r="4" fill="#0284C7" />
-              <text x={toSvgX(refR)} y={toSvgY(0) + 14} fill="#0284C7" fontSize="9" textAnchor="middle">
+              <path d={refPathData} fill="none" stroke="#38bdf8" strokeWidth="3" strokeDasharray="6 4" opacity="0.9" className="projector-ref-path" />
+              <circle cx={toSvgX(refR)} cy={toSvgY(0)} r="5" fill="#38bdf8" />
+              <text x={toSvgX(refR)} y={toSvgY(0) + 16} fill="#38bdf8" fontSize="12" fontWeight="bold" textAnchor="middle">
                 R_A = {refR.toFixed(1)}m
               </text>
             </>
           )}
 
-          {/* Trayectoria Actual (Tierra Colorada) */}
+          {/* Trayectoria Actual */}
           {currentPathData && (
             <>
-              <path d={currentPathData} fill="none" stroke="#C04A26" strokeWidth="3" />
-              <circle cx={toSvgX(currentR)} cy={toSvgY(0)} r="5" fill="#C04A26" />
-              <text x={toSvgX(currentR)} y={toSvgY(0) + 14} fill="#FCA5A5" fontSize="10" fontWeight="bold" textAnchor="middle">
+              <path d={currentPathData} fill="none" stroke="#fb7185" strokeWidth="3.5" className="projector-current-path" />
+              <circle cx={toSvgX(currentR)} cy={toSvgY(0)} r="6" fill="#f43f5e" />
+              <text x={toSvgX(currentR)} y={toSvgY(0) + 16} fill="#fda4af" fontSize="13" fontWeight="bold" textAnchor="middle">
                 R = {currentR.toFixed(1)}m
               </text>
             </>
           )}
 
           {/* Base de lanzamiento (Dron) */}
-          <circle cx={toSvgX(0)} cy={toSvgY(0)} r="6" fill="#10B981" />
-          <text x={toSvgX(0)} y={toSvgY(0) + 14} fill="#10B981" fontSize="9" textAnchor="middle">
+          <circle cx={toSvgX(0)} cy={toSvgY(0)} r="6" fill="#34d399" />
+          <text x={toSvgX(0)} y={toSvgY(0) + 16} fill="#34d399" fontSize="11" fontWeight="bold" textAnchor="middle">
             0 m
           </text>
         </svg>
       </div>
 
       {/* CONTROLES DESLIZANTES PARA EL DOCENTE */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginBottom: '16px' }}>
+      <div className="projector-controls-grid">
         {/* Slider Velocidad */}
-        <div style={{ backgroundColor: '#F9FAFB', padding: '10px 14px', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-            <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#374151' }}>Velocidad Inicial (v0):</span>
-            <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1B4D3E' }}>{v0} m/s</span>
+        <div className="projector-slider-card">
+          <div className="projector-slider-head">
+            <span className="projector-slider-label">Velocidad Inicial (v₀):</span>
+            <span className="projector-slider-value">{v0} m/s</span>
           </div>
           <input
             type="range"
@@ -280,16 +310,16 @@ export default function TeacherProjector({ attempts = 0, xp = 0, exercises: exer
             max="50"
             step="1"
             value={v0}
+            aria-label="Velocidad Inicial v0 en metros por segundo"
             onChange={(e) => handleManualV0(Number(e.target.value))}
-            style={{ width: '100%', accentColor: '#1B4D3E' }}
           />
         </div>
 
         {/* Slider Ángulo */}
-        <div style={{ backgroundColor: '#F9FAFB', padding: '10px 14px', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-            <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#374151' }}>Ángulo de Lanzamiento (θ):</span>
-            <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#C04A26' }}>{angle}°</span>
+        <div className="projector-slider-card">
+          <div className="projector-slider-head">
+            <span className="projector-slider-label">Ángulo de Tiro (θ):</span>
+            <span className="projector-slider-value is-coral">{angle}°</span>
           </div>
           <input
             type="range"
@@ -297,18 +327,20 @@ export default function TeacherProjector({ attempts = 0, xp = 0, exercises: exer
             max="85"
             step="1"
             value={angle}
+            className="is-coral"
+            aria-label="Ángulo de Tiro en grados"
             onChange={(e) => handleManualAngle(Number(e.target.value))}
-            style={{ width: '100%', accentColor: '#C04A26' }}
           />
         </div>
 
         {/* Gravedad */}
-        <div style={{ backgroundColor: '#F9FAFB', padding: '10px 14px', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
-          <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '6px' }}>
-            Gravedad (g):
-          </span>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <label style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+        <div className="projector-slider-card">
+          <div className="projector-slider-head">
+            <span className="projector-slider-label">Gravedad (g):</span>
+            <span className="projector-slider-value">{gravity} m/s²</span>
+          </div>
+          <div className="projector-gravity-radios">
+            <label className="projector-gravity-radio">
               <input
                 type="radio"
                 name="gravity-select"
@@ -318,7 +350,7 @@ export default function TeacherProjector({ attempts = 0, xp = 0, exercises: exer
               />
               10 m/s² (Aula MEC)
             </label>
-            <label style={{ fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+            <label className="projector-gravity-radio">
               <input
                 type="radio"
                 name="gravity-select"
@@ -333,99 +365,118 @@ export default function TeacherProjector({ attempts = 0, xp = 0, exercises: exer
       </div>
 
       {/* GUION DE DEMO EN 60 SEGUNDOS (PRESETS PEDAGÓGICOS) */}
-      <div style={{ backgroundColor: '#FEF3C7', border: '1px solid #FCD34D', borderRadius: '8px', padding: '10px 14px', marginBottom: '16px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '6px' }}>
-          <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#92400E' }}>
-            ⚡ Demo de 60 Segundos para Proyección:
-          </span>
-          <div style={{ display: 'flex', gap: '6px' }}>
+      <div className="projector-demo-box">
+        <div className="projector-demo-top">
+          <div className="projector-demo-title">
+            <span className="projector-badge-aula">Demostración en 60s</span>
+            <strong>Hipótesis de Movimiento Parabólico para la Clase:</strong>
+          </div>
+          <div className="projector-ref-actions">
             <button
               type="button"
-              className="btn btn-sm"
+              className="btn btn-sm btn-primary"
               onClick={handleFixReference}
-              style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '4px', backgroundColor: '#0284C7', color: '#fff', border: 'none', cursor: 'pointer' }}
             >
-              Fijar como Referencia A
+              {referenceLaunch ? 'Actualizar Referencia A' : 'Fijar como Referencia A'}
             </button>
             {referenceLaunch && (
               <button
                 type="button"
-                className="btn btn-sm"
+                className="btn btn-sm btn-secondary"
                 onClick={handleClearReference}
-                style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: '4px', backgroundColor: '#6B7280', color: '#fff', border: 'none', cursor: 'pointer' }}
               >
                 Limpiar Referencia
               </button>
             )}
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+        <div className="projector-preset-grid">
           <button
             type="button"
-            className="btn btn-light"
+            className={`projector-preset-card ${isPresetActive(20, 30) ? 'is-active' : ''}`}
             onClick={() => handleDemoPreset(20, 30)}
-            style={{ fontSize: '0.78rem', padding: '5px 10px' }}
+            aria-pressed={isPresetActive(20, 30)}
           >
-            1. Probar 30° (v0=20)
+            <span className="preset-angle-badge">30°</span>
+            <span className="preset-card-body">
+              <strong>1. Elevación Base (v₀=20)</strong>
+              <small>Alcance intermedio y altura moderada</small>
+            </span>
+            {isPresetActive(20, 30) && <span className="preset-live-pill">En pantalla</span>}
           </button>
           <button
             type="button"
-            className="btn btn-light"
+            className={`projector-preset-card ${isPresetActive(20, 45) ? 'is-active' : ''}`}
             onClick={() => handleDemoPreset(20, 45)}
-            style={{ fontSize: '0.78rem', padding: '5px 10px' }}
+            aria-pressed={isPresetActive(20, 45)}
           >
-            2. Probar 45° (Alcance Máximo)
+            <span className="preset-angle-badge">45°</span>
+            <span className="preset-card-body">
+              <strong>2. Alcance Máximo (R_max)</strong>
+              <small>Ángulo óptimo para mayor distancia</small>
+            </span>
+            {isPresetActive(20, 45) && <span className="preset-live-pill">En pantalla</span>}
           </button>
           <button
             type="button"
-            className="btn btn-light"
+            className={`projector-preset-card ${isPresetActive(20, 60) ? 'is-active' : ''}`}
             onClick={() => handleDemoPreset(20, 60)}
-            style={{ fontSize: '0.78rem', padding: '5px 10px' }}
+            aria-pressed={isPresetActive(20, 60)}
           >
-            3. Probar 60° (Simetría con 30°)
+            <span className="preset-angle-badge">60°</span>
+            <span className="preset-card-body">
+              <strong>3. Simetría con 30°</strong>
+              <small>Mismo alcance exacto, mayor altura</small>
+            </span>
+            {isPresetActive(20, 60) && <span className="preset-live-pill">En pantalla</span>}
           </button>
           <button
             type="button"
-            className="btn btn-light"
+            className={`projector-preset-card ${isPresetActive(20, 20) ? 'is-active' : ''}`}
             onClick={() => handleDemoPreset(20, 20)}
-            style={{ fontSize: '0.78rem', padding: '5px 10px' }}
+            aria-pressed={isPresetActive(20, 20)}
           >
-            4. Tiro Rasante 20° (Queda Corto)
+            <span className="preset-angle-badge">20°</span>
+            <span className="preset-card-body">
+              <strong>4. Tiro Rasante (20°)</strong>
+              <small>Vuelo bajo y alcance recortado</small>
+            </span>
+            {isPresetActive(20, 20) && <span className="preset-live-pill">En pantalla</span>}
           </button>
         </div>
       </div>
 
       {/* MÉTRICAS FÍSICAS EN TIEMPO REAL */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '8px', marginBottom: '16px' }}>
-        <div style={{ backgroundColor: '#EFF6FF', padding: '8px', borderRadius: '6px', textAlign: 'center' }}>
-          <div style={{ fontSize: '0.7rem', color: '#1E40AF', fontWeight: 600 }}>vx (horizontal)</div>
-          <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#1E3A8A' }}>{currentLaunch.vx.toFixed(2)} m/s</div>
+      <div className="projector-metrics-grid">
+        <div className="projector-metric-box is-velocity">
+          <div className="metric-caption">vx (horizontal)</div>
+          <div className="metric-number">{currentLaunch.vx.toFixed(2)} m/s</div>
         </div>
-        <div style={{ backgroundColor: '#EFF6FF', padding: '8px', borderRadius: '6px', textAlign: 'center' }}>
-          <div style={{ fontSize: '0.7rem', color: '#1E40AF', fontWeight: 600 }}>vy (vertical inicial)</div>
-          <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#1E3A8A' }}>{currentLaunch.vy.toFixed(2)} m/s</div>
+        <div className="projector-metric-box is-velocity">
+          <div className="metric-caption">vy (vertical inicial)</div>
+          <div className="metric-number">{currentLaunch.vy.toFixed(2)} m/s</div>
         </div>
-        <div style={{ backgroundColor: '#ECFDF5', padding: '8px', borderRadius: '6px', textAlign: 'center' }}>
-          <div style={{ fontSize: '0.7rem', color: '#065F46', fontWeight: 600 }}>Tiempo Vuelo (T)</div>
-          <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#064E3B' }}>{currentT.toFixed(2)} s</div>
+        <div className="projector-metric-box is-time-height">
+          <div className="metric-caption">Tiempo Vuelo (T)</div>
+          <div className="metric-number">{currentT.toFixed(2)} s</div>
         </div>
-        <div style={{ backgroundColor: '#ECFDF5', padding: '8px', borderRadius: '6px', textAlign: 'center' }}>
-          <div style={{ fontSize: '0.7rem', color: '#065F46', fontWeight: 600 }}>Altura Máx (Hmax)</div>
-          <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#064E3B' }}>{currentH.toFixed(2)} m</div>
+        <div className="projector-metric-box is-time-height">
+          <div className="metric-caption">Altura Máx (Hmax)</div>
+          <div className="metric-number">{currentH.toFixed(2)} m</div>
         </div>
-        <div style={{ backgroundColor: '#FEF2F2', padding: '8px', borderRadius: '6px', textAlign: 'center' }}>
-          <div style={{ fontSize: '0.7rem', color: '#991B1B', fontWeight: 600 }}>Alcance Total (R)</div>
-          <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#7F1D1D' }}>{currentR.toFixed(2)} m</div>
+        <div className="projector-metric-box is-range">
+          <div className="metric-caption">Alcance Total (R)</div>
+          <div className="metric-number">{currentR.toFixed(2)} m</div>
         </div>
       </div>
       </>
       )}
 
       {/* ESTADÍSTICAS DEL AULA */}
-      <div style={{ borderTop: '1px solid #E5E7EB', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', fontSize: '0.82rem', color: '#6B7280' }}>
+      <div className="projector-footer-stats">
         <span>Intentos registrados en la sesión: <strong>{attempts}</strong></span>
-        <span>XP acumulada: <strong style={{ color: '#1B4D3E' }}>{Math.round(xp)}</strong></span>
-        <span style={{ color: '#0284C7', fontWeight: 500 }}>✓ Modo proyector listo para clase sin internet</span>
+        <span>XP acumulada: <strong style={{ color: 'var(--brand-blue-deep)' }}>{Math.round(xp)}</strong></span>
+        <span style={{ color: 'var(--brand-blue)', fontWeight: 650 }}>✓ Modo proyector listo para clase sin internet</span>
       </div>
     </section>
   );

@@ -1,6 +1,17 @@
-# PyFis IA
+# GuaranIA / PyFis IA
 
 PWA educativa para aprender Física de 3.º curso con ejercicios, simulaciones ligadas a cada problema, tutor en Jopara, práctica sin conexión y herramientas para docentes.
+
+## Sistema Visual y Rebranding (GuaranIA)
+
+La interfaz utiliza un sistema de diseño educativo y tecnológico moderno:
+- **Base Navy (`--navy-base`, `--text-primary`):** Alto contraste, lectura sobria y profesional.
+- **Azul Tecnológico (`--brand-blue`):** Identidad central de la plataforma, botones primarios y enfoque interactivo.
+- **Violeta Innovación (`--brand-violet`):** Acento para el tutor Jopara y capacidades de IA.
+- **Ámbar de Acción (`--action-amber`):** Destacados, progreso Mbarete XP y elementos pedagógicos de atención.
+- **Coral Constructivo (`--danger-coral`):** Retroalimentación de error no punitiva y alertas cálidas.
+- **Proyector de Aula de Alto Impacto:** Tipografía ampliada, métricas físicas nítidas y presets pedagógicos interactivos (30°, 45°, 60°, 20°) legibles a distancia.
+- **Microanimaciones y Rendimiento:** Transiciones suaves (240ms pantallas, 500ms confianza), cero dependencias pesadas de animación y soporte total para `prefers-reduced-motion`.
 
 ## Contenido principal
 

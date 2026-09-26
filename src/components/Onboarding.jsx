@@ -47,7 +47,7 @@ export default function Onboarding({ open, onDismiss, onStart, role = 'alumno' }
   return (
     <dialog ref={dialogRef} className="onboarding-dialog" aria-labelledby="onboarding-title" onCancel={event => { event.preventDefault(); onDismiss(); }} onClick={event => { if (event.target === event.currentTarget) onDismiss(); }}>
       <div className="onboarding-shell">
-        <div className="onboarding-top"><span className="onboarding-brand">PyFis IA · Guía rápida</span><button type="button" className="onboarding-close" aria-label="Cerrar guía" onClick={onDismiss}>×</button></div>
+        <div className="onboarding-top"><span className="onboarding-brand">GuaranIA / PyFis IA · Guía rápida</span><button type="button" className="onboarding-close" aria-label="Cerrar guía" onClick={onDismiss}>×</button></div>
         <p className="onboarding-progress-label">Tarjeta {step + 1} de {STEPS.length}</p>
         <div className="onboarding-progress" aria-hidden="true">{STEPS.map((item, index) => <span key={item.number} className={index <= step ? 'is-active' : ''} />)}</div>
         <article className="onboarding-card" key={current.number}>

@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { getNextLevel } from '../utils/gamification.js';
 import { Nanduti } from './Nanduti.jsx';
 
@@ -12,10 +13,27 @@ export default function ConfidenceBar({ xp, level, confidence }) {
     ? Math.min(100, Math.max(0, Math.round(((safeXP - currentLevel.xp) / span) * 100)))
     : 100;
 
+  const [isLevelUp, setIsLevelUp] = useState(false);
+  const prevLevelRef = useRef(currentLevel.level);
+
+  useEffect(() => {
+    if (currentLevel.level > prevLevelRef.current) {
+      setIsLevelUp(true);
+      const timer = setTimeout(() => setIsLevelUp(false), 550);
+      prevLevelRef.current = currentLevel.level;
+      return () => clearTimeout(timer);
+    }
+    prevLevelRef.current = currentLevel.level;
+    return undefined;
+  }, [currentLevel.level]);
+
   return (
     <section className="card confidence-bar" aria-label="Mbarete XP y Nivel de Cuenta">
       <div className="confidence-row">
-        <span className="confidence-level" aria-hidden="true"><Nanduti size={46} spokes={12} rings={2} /><strong>{currentLevel.level}</strong></span>
+        <span className={`confidence-level ${isLevelUp ? 'is-leveling' : ''}`} aria-hidden="true">
+          <Nanduti size={46} spokes={12} rings={2} />
+          <strong>{currentLevel.level}</strong>
+        </span>
         <div className="confidence-title">
           <h2>Mbarete XP</h2>
           <p>{currentLevel.rank} <small>· {currentLevel.title}</small></p>
@@ -44,7 +62,7 @@ export default function ConfidenceBar({ xp, level, confidence }) {
       <div className="confidence-meter" aria-label="Confianza">
         <div className="confidence-meter-head"><span>Confianza</span><strong>{safeConfidence}/100</strong></div>
         <div className="confidence-track" role="progressbar" aria-label="Confianza sobre 100" aria-valuemin={0} aria-valuemax={100} aria-valuenow={safeConfidence}>
-          <div className="confidence-fill" style={{ width: `${safeConfidence}%` }} />
+          <div className="confidence-fill confidence-fill-metric" style={{ width: `${safeConfidence}%` }} />
         </div>
         <p className="confidence-explainer">Mide qué tan seguido acertás sin pistas. Sube con cada acierto y nunca baja con un error.</p>
       </div>
