@@ -370,7 +370,7 @@ function ChatsView({ quiz, mode, onModeChange, onCardConsolidated }) {
           ),
         )}
 
-        {quiz.busy && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-typing" role="status" aria-live="polite"><span>Jopara está respondiendo</span><span className="chat-typing-dots" aria-hidden="true"><i /><i /><i /></span></div>}
+        {quiz.busy && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-typing" role="status" aria-live="polite"><span>PyFis está escribiendo</span><span className="chat-typing-dots" aria-hidden="true"><i /><i /><i /></span></div>}
         {quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-streaming" aria-live="off"><MathText text={quiz.streamText} /></div>}
 
         {quiz.step === 'quiz' && quiz.currentQuestion && (
