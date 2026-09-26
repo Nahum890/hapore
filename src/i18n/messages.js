@@ -40,6 +40,11 @@ const messages = {
     'home.question': 'Mba’épa rejaposé ko’ãga?', 'home.guide': 'Ehecha guía',
     'home.practiceText': 'Eresolve peteĩ ejercicio ha ehecha mba’éichapa oiko.', 'home.reviewText': 'Estudia tarjeta reheve nde ritmo-pe.', 'home.tutorText': 'Ejapo cuestionario ha eporandu nde duda.',
     'home.p1': 'Ndaipóri castigo', 'home.p2': 'Eñeha’ã jey', 'home.p3': 'Internet’ỹre avei',
+    'game.title': 'Emombo’ẽ mboyve, ere mba’épa oikóta',
+    'game.intro': 'Ere mombyry mboýpa oguahẽta pe lanzamiento omombo mboyve. Upéi ehecha mba’épa oiko.',
+    'game.predictLabel': 'Nde predicción (alcance)', 'game.launch': 'Emombo', 'game.retry': 'Ambue lanzamiento',
+    'game.correct': '¡Iporã! Ne predicción oĩ porã.', 'game.close': 'Eñemboja porãma, ndaha’éi exacto.', 'game.incorrect': 'Ko’ãgagua ndaha’éi. Ehecha mba’épa oiko ha eñeha’ã jey.',
+    'game.result': 'Pe lanzamiento oguahẽ', 'game.yourGuess': 'Ere',
   },
   es: {
     'brand.tagline': 'Física a tu ritmo',
@@ -74,6 +79,11 @@ const messages = {
     'home.question': '¿Qué querés hacer hoy?', 'home.guide': 'Ver guía rápida',
     'home.practiceText': 'Resolvé un ejercicio y mirá cómo funciona.', 'home.reviewText': 'Estudiá con tarjetas a tu ritmo.', 'home.tutorText': 'Hacé el cuestionario y despejá dudas.',
     'home.p1': 'Sin castigos', 'home.p2': 'Reintentá cuando quieras', 'home.p3': 'Funciona sin conexión',
+    'game.title': 'Predecí antes de lanzar',
+    'game.intro': 'Estimá a qué distancia va a caer el lanzamiento antes de verlo. Después comprobá qué pasó.',
+    'game.predictLabel': 'Tu predicción (alcance)', 'game.launch': 'Lanzar', 'game.retry': 'Otro lanzamiento',
+    'game.correct': '¡Bien! Tu predicción estuvo acertada.', 'game.close': 'Te acercaste, pero no fue exacto.', 'game.incorrect': 'Esta vez no. Mirá qué pasó y probá de nuevo.',
+    'game.result': 'El lanzamiento llegó a', 'game.yourGuess': 'Dijiste',
   },
 };
 

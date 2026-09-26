@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { quizBank } from '../data/catalogs.js';
+import { quizBank as quizBankData, localizeCatalogItem } from '../data/catalogs.js';
 import { buildQuiz, buildQuizFeedback, matchAnswer, matchText, shuffle } from '../ai/quizEngine.js';
 import { readJSON, writeJSON, STORAGE_KEYS } from '../utils/storage.js';
 import { createAIProvider } from '../ai/AIProvider.js';
@@ -64,6 +64,10 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
     providerRef.current = createAIProvider();
   }
   const { language } = useTranslation();
+  // Se localiza acá (no en el JSON fuente) para que cambiar de idioma en
+  // pleno cuestionario solo cambie los textos, sin tocar id/tipo/respuesta.
+  const quizBank = useMemo(() => quizBankData.map(item => localizeCatalogItem(item, language)), [language]);
+  const localizedFlashcards = useMemo(() => (flashcards ?? []).map(item => localizeCatalogItem(item, language)), [flashcards, language]);
   const sessionRef = useRef(null);
   const freeSessionRef = useRef(null);
   const onMoveRef = useRef(onMoveToChat);
@@ -122,9 +126,8 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
 
   const repasoAvailable = useMemo(() => {
     const abiertas = quizBank.filter((question) => question.tipo === 'abierta');
-    const reales = flashcards ?? [];
-    return new Set([...abiertas.map((question) => question.id), ...reales.map((card) => card.id)]).size;
-  }, [flashcards]);
+    return new Set([...abiertas.map((question) => question.id), ...localizedFlashcards.map((card) => card.id)]).size;
+  }, [localizedFlashcards, quizBank]);
 
   const maxAvailable = Math.min(
     QUIZ_MAX_QUANTITY,
@@ -134,11 +137,10 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
 
   const buildRepasoDeck = useCallback(
     (qty) => {
-      const real = (flashcards ?? []).map((card) => ({
+      const real = localizedFlashcards.map((card) => ({
         id: card.id,
         tema: card.topic,
         frente: card.frente_es ?? card.front ?? '',
-        jopara: card.frente_jopara ?? '',
         dorso: card.dorso_concepto ?? card.back ?? '',
         formula: card.formula ?? '',
       }));
@@ -148,7 +150,6 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
           id: question.id,
           tema: question.tema,
           frente: question.pregunta,
-          jopara: '',
           dorso: question.respuesta,
           formula: '',
         }));
@@ -156,7 +157,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
       const unique = [...new Map([...real, ...teoricas].map((card) => [card.id, card])).values()];
       return shuffle(unique).slice(0, clamped);
     },
-    [flashcards, maxAvailable],
+    [localizedFlashcards, quizBank, maxAvailable],
   );
 
   const chooseQuantity = useCallback(
@@ -229,7 +230,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig } 
     setJustificationText('');
     setStep('quiz');
     onMoveRef.current?.();
-  }, [quantity]);
+  }, [quantity, quizBank]);
 
   useEffect(() => {
     if (step === 'repaso' && deck.length === 0 && consolidatedIds.size > 0) {

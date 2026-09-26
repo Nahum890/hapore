@@ -1,4 +1,4 @@
-import { concepts, errors as errorsData, exercises, glossary, quizBank, tutorJopara as tutorData } from '../data/catalogs.js';
+import { concepts, errors as errorsData, exercises, glossary, quizBank, tutorJopara as tutorData, localizeCatalogItem } from '../data/catalogs.js';
 import { buildQuizFeedback, evaluateQuizContext, normalizeText } from './quizEngine.js';
 import { sanitizeMarkup } from '../utils/validation.js';
 
@@ -108,12 +108,15 @@ export default class RuleTutorProvider {
           ? '¡De nada! ¿Hay algo más sobre movimiento parabólico que quieras repasar? Preguntame.'
           : '¡Aguyje ndéve! ¿Oimépa gueteri mba\'e reikuaaséva movimiento parabólico rehe? Eporandu chéve.');
       }
+      const loc = (item) => localizeCatalogItem(item, language);
+      const ideaClave = language === 'es' ? 'La idea clave es' : 'Pe idea clave ha\'e';
+      const abrirSimulador = language === 'es' ? 'Podés abrir este ejercicio en el simulador para resolverlo paso a paso.' : 'Ikatu embojuruja ko ejercicio simulador-pe eresolve hag̃ua paso a paso.';
       const knowledge = [
-        ...this.concepts.map(item => ({ kind: 'concept', search: `${item.id} ${item.name} ${item.definition} ${item.formula}`, answer: `${item.name}: ${item.definition}${item.formula ? ` Fórmula: ${item.formula}.` : ''}` })),
-        ...this.glossary.map(item => ({ kind: 'glossary', search: `${item.term} ${item.joparaTerm} ${item.definition}`, answer: `${item.term}: ${item.definition}` })),
-        ...this.errors.map(item => ({ kind: 'error', search: `${item.name} ${item.description} ${item.example} ${item.expectedConcept}`, answer: `${item.name}: ${item.description} ${item.example}` })),
-        ...this.bank.map(item => ({ kind: 'question', search: `${item.pregunta} ${item.enunciado} ${item.respuesta} ${item.explicacion} ${item.tema}`, answer: [item.respuesta || item.explicacion, item.respuestaJopara || item.explicacionJopara].filter(Boolean).join(' ') })),
-        ...this.exercises.map(item => ({ kind: 'exercise', search: `${item.topic} ${item.scenario} ${item.question} ${item.expectedConcept}`, answer: `${item.question} La idea clave es ${item.expectedConcept?.replaceAll('-', ' ')}. Podés abrir este ejercicio en el simulador para resolverlo paso a paso.` })),
+        ...this.concepts.map(loc).map(item => ({ kind: 'concept', search: `${item.id} ${item.name} ${item.definition} ${item.formula}`, answer: `${item.name}: ${item.definition}${item.formula ? ` Fórmula: ${item.formula}.` : ''}` })),
+        ...this.glossary.map(loc).map(item => ({ kind: 'glossary', search: `${item.term} ${item.joparaTerm} ${item.definition}`, answer: `${item.term}: ${item.definition}` })),
+        ...this.errors.map(loc).map(item => ({ kind: 'error', search: `${item.name} ${item.description} ${item.example} ${item.expectedConcept}`, answer: `${item.name}: ${item.description} ${item.example}` })),
+        ...this.bank.map(loc).map(item => ({ kind: 'question', search: `${item.pregunta} ${item.enunciado} ${item.respuesta} ${item.explicacion} ${item.tema}`, answer: item.respuesta || item.explicacion || '' })),
+        ...this.exercises.map(loc).map(item => ({ kind: 'exercise', search: `${item.topic} ${item.scenario} ${item.question} ${item.expectedConcept}`, answer: `${item.question} ${ideaClave} ${item.expectedConcept?.replaceAll('-', ' ')}. ${abrirSimulador}` })),
         ...(this.data.topicSupport ?? []).map(item => ({ kind: 'topic', search: item.search, answer: this.pickLang(item, language) })),
       ];
       const lastTutorText = previousTutorText(context.history);
