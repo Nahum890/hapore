@@ -186,7 +186,7 @@ button, input, select, textarea { max-width: 100%; }
 
 /* ---------- Navegación principal ---------- */
 .primary-nav {
-  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px;
+  display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px;
   padding: 6px; border: 1px solid var(--c-line); border-radius: 20px;
   background: var(--c-surface); box-shadow: var(--shadow-sm);
 }
@@ -1165,6 +1165,116 @@ button, input, select, textarea { max-width: 100%; }
 .projector-stage-content .projector-metrics { width: min(100%, 900px); margin-top: 12px; }
 .projector-exercise-slide { margin: 0 auto; }
 
+/* ---------- Mis clases (presentaciones del docente) ---------- */
+.lesson-create { display: flex; align-items: end; gap: 10px; flex-wrap: wrap; }
+.lesson-create .teacher-field { flex: 1 1 280px; }
+.lesson-list { list-style: none; display: grid; gap: 10px; margin: 0; padding: 0; }
+.lesson-item { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding: 14px 16px; border: 1px solid var(--c-line); border-radius: var(--radius); background: var(--c-surface); }
+.lesson-item-info h3 { margin: 0 0 3px; font-size: 16px; }
+.lesson-item-info p { margin: 0; color: var(--c-muted); font-size: 13px; }
+.lesson-item-info .lesson-item-description { margin-top: 4px; color: var(--c-ink-soft); }
+.lesson-item-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn-danger { background: var(--c-earth-deep); border-color: var(--c-earth-deep); color: #fff; }
+.lesson-editor-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.lesson-editor-head .field-help { margin: 0; }
+.lesson-meta { display: grid; grid-template-columns: 1fr 1.4fr; gap: 12px; }
+.lesson-workspace { display: grid; grid-template-columns: minmax(220px, 290px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.lesson-slide-rail { display: grid; gap: 12px; position: sticky; top: 12px; }
+.lesson-slide-list { list-style: none; display: grid; gap: 6px; margin: 0; padding: 0; max-height: 60vh; overflow: auto; }
+.lesson-slide-list li { display: grid; gap: 4px; padding: 6px; border: 1px solid var(--c-line); border-radius: 12px; background: var(--c-surface); }
+.lesson-slide-list li.is-selected { border-color: var(--c-primary); background: var(--c-primary-soft); box-shadow: inset 0 0 0 1px var(--c-primary); }
+.lesson-slide-thumb { display: flex; align-items: center; gap: 10px; width: 100%; padding: 4px; border: 0; background: none; color: var(--c-ink); font: inherit; text-align: left; cursor: pointer; }
+.lesson-slide-number { display: grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 8px; background: #192923; color: #fff; font-size: 12px; font-weight: 850; }
+.lesson-slide-text { display: grid; min-width: 0; }
+.lesson-slide-text strong { font-size: 13px; }
+.lesson-slide-text small { overflow: hidden; color: var(--c-muted); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.lesson-slide-tools { display: flex; justify-content: flex-end; gap: 4px; }
+.lesson-slide-tools button { min-width: 32px; min-height: 30px; border: 1px solid var(--c-line); border-radius: 8px; background: var(--c-surface); color: var(--c-ink); font: inherit; cursor: pointer; }
+.lesson-slide-tools button:disabled { opacity: .35; cursor: default; }
+.lesson-add-slide { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px; border: 1px dashed var(--c-line); border-radius: 12px; }
+.lesson-add-slide span { width: 100%; color: var(--c-muted); font-size: 12px; font-weight: 800; }
+.lesson-add-slide button { min-height: 34px; padding: 5px 10px; border: 1px solid var(--c-primary); border-radius: 999px; background: var(--c-surface); color: var(--c-primary-deep); font: inherit; font-size: 13px; font-weight: 750; cursor: pointer; }
+.lesson-add-slide button:hover { background: var(--c-primary-soft); }
+.lesson-slide-editor { display: grid; gap: 14px; min-width: 0; }
+.lesson-slide-editor-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.lesson-slide-editor-head h3 { margin: 0; font-size: 17px; }
+.lesson-slide-form { display: grid; gap: 12px; }
+.lesson-slide-form .field-help { margin: 0; }
+.lesson-values-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.lesson-number-field .field-error { margin: 0; font-weight: 600; }
+.lesson-gravity-presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.lesson-gravity-presets button { min-height: 34px; padding: 5px 12px; border: 1px solid var(--c-line); border-radius: 999px; background: var(--c-surface); color: var(--c-ink); font: inherit; font-size: 13px; cursor: pointer; }
+.lesson-gravity-presets button.is-active { border-color: var(--c-primary); background: var(--c-primary-soft); color: var(--c-primary-deep); font-weight: 750; }
+.lesson-compare-toggle { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 650; }
+.lesson-compare-toggle input { width: 18px; height: 18px; accent-color: var(--c-primary); }
+.trajectory-path-compare { stroke: #7cc6ee; stroke-dasharray: 10 8; stroke-width: 4; }
+.trajectory-legend { display: flex; justify-content: center; flex-wrap: wrap; gap: 16px; margin: 8px 0 12px; font-size: 14px; }
+.trajectory-legend .legend-main::before, .trajectory-legend .legend-compare::before { content: ''; display: inline-block; width: 22px; height: 0; margin-right: 6px; vertical-align: middle; border-top: 4px solid #ffd166; }
+.trajectory-legend .legend-compare::before { border-top: 4px dashed #7cc6ee; }
+.lesson-title-slide h2 { font-size: clamp(30px, 5vw, 60px); }
+.lesson-text-slide ul { display: grid; gap: 12px; width: fit-content; max-width: 64ch; margin: 0 auto; padding-left: 1.2em; text-align: left; font-size: clamp(17px, 2.2vw, 26px); line-height: 1.4; }
+.lesson-sim-slide { width: min(100%, 1100px); }
+.lesson-sim-slide h2 { font-size: clamp(22px, 3vw, 36px); }
+.lesson-sim-values { margin: 12px auto 0 !important; color: #c2d7cb !important; font-size: 13px !important; }
+.projector-preview h2, .projector-stage h2 { color: #fff; }
+.lesson-stage { overflow: hidden; }
+.lesson-stage .projector-stage-content { min-height: 0; overflow: auto; }
+.lesson-stage .projector-trajectory.is-large svg { max-height: 44vh; }
+.lesson-stage .lesson-sim-slide { margin: 1vh auto; }
+.lesson-stage-actions { display: flex; gap: 8px; }
+.lesson-stage-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: min(100%, 1400px); margin: 12px auto 0; }
+.lesson-stage-dots { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.lesson-stage-dots i { width: 9px; height: 9px; border-radius: 50%; background: #40594b; }
+.lesson-stage-dots i.is-active { background: #ffd166; }
+
+/* ---------- Notación de libro (fórmulas) ---------- */
+.math-formula { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 0 .15em; font-family: 'Cambria Math', 'STIX Two Math', 'Times New Roman', serif; font-size: 1.08em; letter-spacing: 0; }
+.math-inline { white-space: pre-wrap; }
+.math-fraction { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 .15em; line-height: 1.15; }
+.math-num { padding: 0 .25em .1em; border-bottom: .08em solid currentColor; }
+.math-den { padding: .1em .25em 0; }
+.math-formula sub, .flashcard-text sub, .exercise-question sub, .exercise-hint sub, .tutor-message sub, .chat-bubble sub, .resource-card sub, .projector-slide sub { font-size: .7em; line-height: 0; }
+
+/* ---------- Clases en la nube ---------- */
+.class-setup-step { display: grid; gap: 10px; }
+.class-setup-step h4, .custom-card-form h4 { margin: 0; font-size: 15px; }
+.card-picker { display: grid; gap: 8px; margin: 0; padding: 12px; border: 1px solid var(--c-line); border-radius: 14px; background: var(--c-surface); }
+.card-picker legend { padding: 0 4px; font-size: 13px; font-weight: 800; }
+.card-picker-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.card-picker-actions .btn { min-height: 34px; padding: 4px 12px; font-size: 13px; }
+.card-picker-list { list-style: none; display: grid; gap: 6px; max-height: 340px; margin: 0; padding: 0; overflow: auto; }
+.card-picker-list li { display: flex; align-items: flex-start; gap: 6px; padding: 8px 10px; border: 1px solid var(--c-line); border-radius: 10px; }
+.card-picker-list label { display: flex; flex: 1; align-items: flex-start; gap: 10px; cursor: pointer; }
+.card-picker-list input { flex: none; width: 18px; height: 18px; margin-top: 2px; accent-color: var(--c-primary); }
+.card-picker-list span { display: grid; gap: 2px; }
+.card-picker-list strong { font-size: 14px; }
+.card-picker-list small { color: var(--c-muted); font-size: 12px; }
+.card-picker-list .chip { width: fit-content; font-size: 11px; font-style: normal; }
+.card-picker-delete { flex: none; min-width: 32px; min-height: 30px; border: 1px solid var(--c-line); border-radius: 8px; background: var(--c-surface); color: var(--c-ink); cursor: pointer; }
+.custom-card-form { background: var(--c-surface); }
+.cloud-missing { padding: 10px 12px; border-radius: 10px; background: var(--c-paper); }
+.cloud-class-list-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.cloud-class-list-head h3 { margin: 0; }
+.cloud-class-card { display: grid; gap: 10px; padding: 12px 14px; border: 1px solid var(--c-line); border-radius: 14px; background: var(--c-surface); }
+.cloud-class-card header { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.cloud-class-card header > div { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.cloud-class-card .class-code-display { padding: 4px 10px; font-size: 13px; }
+.cloud-class-card .class-code-display strong { font-size: 16px; }
+.cloud-class-delete { display: flex; gap: 6px; }
+.roster-info h4 { margin: 0; font-size: 15px; }
+.roster-info small { color: var(--c-muted); font-size: 12px; }
+.student-class-actions, .student-class-footer { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+.sync-status { margin: 8px 0; padding: 8px 12px; border-radius: 10px; font-size: 13px; font-weight: 650; }
+.sync-status.is-synced { background: var(--c-primary-soft); color: var(--c-primary-deep); }
+.sync-status.is-pending { background: var(--c-paper); color: var(--c-ink-soft); }
+.sync-status.is-error { background: var(--c-earth-soft, #fdecea); color: var(--c-earth-deep); }
+
+@media (max-width: 860px) {
+  .lesson-workspace, .lesson-meta { grid-template-columns: 1fr; }
+  .lesson-slide-rail { position: static; }
+  .lesson-slide-list { max-height: none; }
+}
+
 /* ---------- Biblioteca de apoyo ---------- */
 .resource-section { margin-top: 28px; }
 .resource-heading { display: flex; align-items: end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
@@ -1248,6 +1358,8 @@ button, input, select, textarea { max-width: 100%; }
 .avatar-option input { position: absolute; opacity: 0; width: 1px; height: 1px; }
 .avatar-option.is-selected { border-color: var(--c-primary); }
 .avatar-option:focus-within { outline: 3px solid var(--c-sky); outline-offset: 2px; }
+.avatar-upload { margin-top: 12px; }
+.auth-field-note { margin: -4px 0 0 !important; font-size: 12px !important; color: var(--c-ink-soft, #5b534b); }
 .teacher-card { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--radius); background: var(--c-surface); border: 1px solid var(--c-line); }
 .teacher-card h3 { margin: 0; font-size: 15px; }
 .teacher-card p { margin: 2px 0 0; font-size: 13px; color: var(--c-ink-soft); }
@@ -1361,7 +1473,7 @@ button, input, select, textarea { max-width: 100%; }
     gap: 2px; padding: 5px; border-radius: 22px; box-shadow: var(--shadow-lg);
     background: rgba(255, 255, 255, .96); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   }
-  .primary-nav-item { min-height: 60px; padding: 5px 2px; border-radius: 16px; font-size: 11.5px; font-weight: 800; }
+  .primary-nav-item { min-height: 60px; padding: 5px 1px; border-radius: 16px; font-size: 10.5px; font-weight: 800; }
   .primary-nav-icon { width: 34px; height: 30px; border-radius: 10px; background: transparent; }
   .primary-nav-item.is-active { background: transparent; }
   .primary-nav-item.is-active .primary-nav-icon { width: 46px; }
@@ -1437,4 +1549,64 @@ button, input, select, textarea { max-width: 100%; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
   .ls-sun, .ls-ball, .confidence-level.is-leveling, .concept-cart.is-moving, .vectors-scene.is-active .vector-line, .hooke-scene.is-moving .spring-body { animation: none !important; }
   .thermo-scene.is-active .thermo-mercury, .thermo-scene.is-active .thermo-flow, .thermo-scene.is-active .thermo-heat, .optics-scene.is-active .optics-ray { animation: none !important; transform: none !important; opacity: 1 !important; stroke-dashoffset: 0 !important; }
+}
+
+/* Mensajes de la clase: lista de conversaciones + hilo. En celular se ve una cosa por vez. */
+.class-chat { display: grid; grid-template-columns: minmax(220px, 300px) 1fr; gap: 0; padding: 0; overflow: hidden; min-height: 520px; }
+.class-chat-empty p { max-width: 60ch; }
+.class-chat-sidebar { padding: 16px; border-right: 1px solid var(--c-line); display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.class-chat-class { margin: 0; display: flex; flex-direction: column; }
+.class-chat-class span { font-size: 13px; color: var(--c-ink-soft, #5b534b); }
+.class-chat-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.class-chat-item { width: 100%; display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 0; border-radius: 12px; background: transparent; text-align: left; cursor: pointer; font: inherit; color: inherit; }
+.class-chat-item:hover { background: var(--c-paper, #F4EFE6); }
+.class-chat-item.is-active { background: var(--c-sky-soft, #D6ECF7); }
+.class-chat-item:focus-visible { outline: 3px solid var(--c-sky); outline-offset: 1px; }
+.class-chat-group-icon { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: var(--c-sky-soft, #D6ECF7); font-size: 18px; flex: none; }
+.class-chat-name { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.class-chat-name strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.class-chat-name small { font-size: 12px; color: var(--c-ink-soft, #5b534b); }
+.class-chat-badge { min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; background: var(--c-earth, #C0522D); color: #fff; font-size: 12px; font-weight: 800; display: grid; place-items: center; }
+.class-chat-thread { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.class-chat-placeholder { margin: auto; padding: 24px; text-align: center; color: var(--c-ink-soft, #5b534b); list-style: none; }
+.class-chat-thread-head { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--c-line); }
+.class-chat-thread-head > div { display: flex; flex-direction: column; min-width: 0; }
+.class-chat-thread-head small { font-size: 12px; color: var(--c-ink-soft, #5b534b); }
+.class-chat-back { display: none; }
+.chat-contact { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 4px; font-size: 13px; }
+.chat-contact a { color: var(--c-sky-deep, #1E6E93); font-weight: 700; overflow-wrap: anywhere; }
+.chat-contact-missing { font-size: 12px; color: var(--c-ink-soft, #5b534b); }
+.class-chat-messages { list-style: none; margin: 0; padding: 16px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex: 1; max-height: 56vh; min-height: 240px; background: var(--c-paper, #F4EFE6); }
+.class-chat-message { display: flex; align-items: flex-end; gap: 8px; max-width: 85%; }
+.class-chat-message.is-mine { align-self: flex-end; flex-direction: row-reverse; }
+.class-chat-bubble { background: var(--c-surface, #fff); border: 1px solid var(--c-line); border-radius: 16px 16px 16px 4px; padding: 8px 12px; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.class-chat-message.is-mine .class-chat-bubble { background: var(--c-primary-soft, #DCEFE3); border-color: transparent; border-radius: 16px 16px 4px 16px; }
+.class-chat-sender { font-size: 12px; font-weight: 800; color: var(--c-primary-deep, #0E5C3A); }
+.class-chat-bubble time { font-size: 11px; color: var(--c-ink-soft, #5b534b); align-self: flex-end; }
+.chat-text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.chat-image { display: block; max-width: min(320px, 100%); max-height: 320px; border-radius: 10px; object-fit: contain; }
+.chat-image-missing { margin: 0; font-style: italic; }
+.chat-attachment { display: flex; flex-direction: column; gap: 4px; padding: 10px; border-radius: 12px; background: var(--c-sun-soft, #FDE9C8); }
+.chat-attachment .btn { align-self: flex-start; margin-top: 4px; }
+.chat-teacher-tools { padding: 10px 16px 0; display: grid; gap: 8px; }
+.chat-teacher-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+.chat-teacher-buttons .btn { min-height: 38px; padding: 6px 12px; font-size: 14px; }
+.chat-teacher-buttons .btn[aria-pressed="true"] { background: var(--c-sky-soft, #D6ECF7); }
+.chat-teacher-picker { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; }
+.chat-teacher-picker .teacher-field { flex: 1 1 240px; margin: 0; }
+.class-chat-composer { display: flex; gap: 8px; padding: 12px 16px 16px; }
+.class-chat-composer .quiz-input { flex: 1; min-width: 0; }
+.class-chat-thread > .field-error { margin: 0 16px 12px; }
+.activity-dialog { width: min(1100px, calc(100vw - 24px)); max-height: calc(100vh - 24px); border: 0; border-radius: 20px; padding: 16px; background: var(--c-bg, #FBF8F3); }
+.activity-dialog::backdrop { background: rgba(20, 16, 12, .55); }
+.activity-dialog-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+.activity-dialog-head h2 { margin: 0; }
+@media (max-width: 760px) {
+  .class-chat { grid-template-columns: 1fr; min-height: 0; }
+  .class-chat-sidebar { border-right: 0; }
+  .class-chat[data-view="thread"] .class-chat-sidebar, .class-chat[data-view="list"] .class-chat-thread { display: none; }
+  .class-chat-back { display: inline-flex; min-height: 36px; padding: 4px 10px; }
+  .class-chat-messages { max-height: calc(100vh - 360px); }
+  .class-chat-message { max-width: 95%; }
+  .activity-dialog { padding: 10px; }
 }

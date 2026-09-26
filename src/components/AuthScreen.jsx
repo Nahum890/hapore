@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { login, register } from '../auth/localAccounts.js';
 import { BrandMark, LaunchScene } from './Nanduti.jsx';
+import { isCloudConfigured } from '../cloud/cloudClient.js';
 
 export default function AuthScreen({ onAuthenticated }) {
   const [mode, setMode] = useState('login');
@@ -8,6 +9,8 @@ export default function AuthScreen({ onAuthenticated }) {
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -18,7 +21,7 @@ export default function AuthScreen({ onAuthenticated }) {
     setBusy(true); setError('');
     try {
       const account = mode === 'register'
-        ? await register({ name, username, password, role })
+        ? await register({ name, username, password, role, phone, email })
         : await login({ username, password });
       onAuthenticated(account);
     } catch (failure) {
@@ -53,13 +56,18 @@ export default function AuthScreen({ onAuthenticated }) {
                 <label className={role === 'maestro' ? 'is-selected' : ''}><input type="radio" name="role" value="maestro" checked={role === 'maestro'} onChange={() => setRole('maestro')} /><span className="role-icon" aria-hidden="true">▤</span><strong>Maestro</strong><small>Preparar clases y usar el proyector</small></label>
               </fieldset>
               <label>Tu nombre<input required autoComplete="name" value={name} onChange={event => setName(event.target.value)} placeholder="Nombre y apellido" /></label>
+              <label>Número de teléfono<input required type="tel" autoComplete="tel" value={phone} onChange={event => setPhone(event.target.value)} placeholder="Ej: 0981 123 456" /></label>
+              <label>Correo electrónico<input required type="email" autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} placeholder="Ej: nombre@ejemplo.com" /></label>
+              <p className="auth-field-note">Solo los ven tu docente y tus compañeros de clase, para poder contactarte.</p>
             </>}
             <label>Nombre de usuario<input required minLength={3} maxLength={24} autoComplete="username" value={username} onChange={event => setUsername(event.target.value)} placeholder="Tu usuario" /></label>
             <label>Contraseña<div className="password-field"><input required minLength={mode === 'register' ? 8 : undefined} type={showPassword ? 'text' : 'password'} autoComplete={mode === 'register' ? 'new-password' : 'current-password'} value={password} onChange={event => setPassword(event.target.value)} placeholder={mode === 'register' ? 'Mínimo 8 caracteres' : 'Tu contraseña'} /><button type="button" onClick={() => setShowPassword(value => !value)} aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}>{showPassword ? 'Ocultar' : 'Mostrar'}</button></div></label>
             {error && <p className="auth-error" role="alert">{error}</p>}
             <button className="btn btn-primary auth-submit" type="submit" disabled={busy}>{busy ? 'Un momento…' : mode === 'register' ? 'Crear mi cuenta' : 'Entrar a PyFis IA'} <span aria-hidden="true">→</span></button>
           </form>
-          <p className="auth-local-note">Las cuentas y el progreso se guardan únicamente en este dispositivo. Sincronización entre dispositivos no disponible.</p>
+          <p className="auth-local-note">{isCloudConfigured()
+            ? 'La cuenta y el progreso se guardan en este dispositivo. Si te unís a una clase, tu avance se envía a tu docente cuando hay internet.'
+            : 'Las cuentas y el progreso se guardan únicamente en este dispositivo. Sincronización entre dispositivos no disponible.'}</p>
         </div>
       </section>
     </div>

@@ -1,4 +1,8 @@
 import { jsPDF } from 'jspdf';
+import { toTextbookPlain } from '../utils/mathText.js';
+
+// NotoSans no trae ≈ ni →: se reemplazan para que el PDF no muestre huecos.
+const pdfMath = text => toTextbookPlain(text).replace(/≈/g, '~').replace(/\s*→\s*/g, '; ');
 import notoSansUrl from './assets/NotoSans-Regular.ttf?url';
 import { concepts, exercises, scienceSources, localizeCatalogItem } from '../data/catalogs.js';
 import { DEFAULT_LANGUAGE, translate } from '../i18n/messages.js';
@@ -89,7 +93,7 @@ export async function createStudyPdf({ config = null, language = DEFAULT_LANGUAG
   const relevantConcepts = localizedConcepts.filter(item => conceptIds.has(item.id));
   if (relevantConcepts.length) {
     addSection(label('pdf.relations'));
-    for (const concept of relevantConcepts) addText(`${concept.name}: ${concept.formula || concept.definition}`, { size: 9 });
+    for (const concept of relevantConcepts) addText(`${concept.name}: ${pdfMath(concept.formula || concept.definition)}`, { size: 9 });
   }
 
   addSection(label('pdf.exercises'));
@@ -97,7 +101,7 @@ export async function createStudyPdf({ config = null, language = DEFAULT_LANGUAG
     const scenario = SCENARIO_MESSAGE[exercise.scenario];
     const difficulty = DIFFICULTY_MESSAGE[exercise.difficulty?.toLocaleLowerCase('es')];
     addText(`${index + 1}. ${exercise.topic}${scenario ? ' · ' + label(scenario) : ''} · ${difficulty ? label(difficulty) : exercise.difficulty}`, { size: 11, color: green, gap: 2 });
-    addText(exercise.question, { size: 9, indent: 3, gap: 4 });
+    addText(pdfMath(exercise.question), { size: 9, indent: 3, gap: 4 });
     for (let line = 0; line < 2; line += 1) {
       if (y + 8 > PAGE.bottom) addPage();
       doc.setDrawColor(205, 218, 209); doc.line(PAGE.margin + 3, y + 4, PAGE.width - PAGE.margin, y + 4); y += 8;
@@ -108,7 +112,7 @@ export async function createStudyPdf({ config = null, language = DEFAULT_LANGUAG
   localized.forEach((exercise, index) => {
     addText(`${index + 1}. ${exercise.topic}`, { size: 10, color: green, gap: 2 });
     addText(`${label('pdf.answer')}: ${formatNumber(exercise.correctAnswer)} ${exercise.unit}`, { size: 9, indent: 3 });
-    if (exercise.hints?.length) addText(exercise.hints.at(-1), { size: 8, indent: 3 });
+    if (exercise.hints?.length) addText(pdfMath(exercise.hints.at(-1)), { size: 8, indent: 3 });
   });
 
   addPage(); addSection(label('pdf.references'));

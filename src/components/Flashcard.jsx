@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Formula, MathText } from './MathText.jsx';
 import { useTranslation } from '../i18n/LanguageProvider.jsx';
 export default function Flashcard({ flashcard, consolidated, onConsolidate, onReviewLater }) {
   const { language } = useTranslation();
@@ -25,11 +26,11 @@ export default function Flashcard({ flashcard, consolidated, onConsolidate, onRe
     <section className={'card flashcard deck-card-enter ' + (leaving ? 'deck-card-leave' : '')} aria-label={'Tarjeta: ' + front} aria-busy={leaving}>
       <div className={'flashcard-inner ' + (flipped ? 'is-flipped' : '')}>
         <div className="flashcard-face flashcard-front" aria-hidden={flipped} inert={flipped ? '' : undefined}>
-          <div><p className="flashcard-topic">{flashcard?.topic || 'Repaso de Física'}</p><h3 className="flashcard-text">{front}{language !== 'es' && <small className="bilingual-es" lang="es"> Jopara</small>}</h3></div>
+          <div><p className="flashcard-topic">{flashcard?.topic || 'Repaso de Física'}</p><h3 className="flashcard-text"><MathText text={front} />{language !== 'es' && <small className="bilingual-es" lang="es"> Jopara</small>}</h3></div>
           <button type="button" className="btn btn-secondary" tabIndex={flipped ? -1 : 0} onClick={() => setFlipped(true)}>Mostrar respuesta</button>
         </div>
         <div className="flashcard-face flashcard-back" aria-hidden={!flipped} inert={!flipped ? '' : undefined}>
-          <div ref={answerRef} tabIndex={-1} className="flashcard-answer"><p className="flashcard-topic">{flashcard?.topic || 'Respuesta'}</p><p className="flashcard-text">{flashcard?.dorso_concepto ?? flashcard?.back ?? ''}</p>{flashcard?.formula && <p className="flashcard-formula">{flashcard.formula}</p>}{consolidated && <span className="chip chip-consolidated">Consolidada</span>}</div>
+          <div ref={answerRef} tabIndex={-1} className="flashcard-answer"><p className="flashcard-topic">{flashcard?.topic || 'Respuesta'}</p><MathText as="p" className="flashcard-text" text={flashcard?.dorso_concepto ?? flashcard?.back ?? ''} />{flashcard?.formula && <p className="flashcard-formula"><Formula text={flashcard.formula} /></p>}{consolidated && <span className="chip chip-consolidated">Consolidada</span>}</div>
           <div className="flashcard-actions">
             <button type="button" className="btn btn-primary" tabIndex={flipped ? 0 : -1} disabled={leaving} onClick={() => advance(onConsolidate)}>¡Aikuaa porãma! (Lo tengo claro)</button>
             <button type="button" className="btn btn-secondary" tabIndex={flipped ? 0 : -1} disabled={leaving} onClick={() => advance(onReviewLater)}>Ahecha jey pota (Repasar luego)</button>

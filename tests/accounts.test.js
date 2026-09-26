@@ -11,7 +11,7 @@ test('registro, roles, sesión y progreso independiente por cuenta', async () =>
     removeItem: key => data.delete(key),
   };
   localStorage.setItem('guarania:xp', '35');
-  const student = await register({ name: 'Ana', username: 'Ana_1', password: 'claveSegura1', role: 'alumno' });
+  const student = await register({ name: 'Ana', username: 'Ana_1', password: 'claveSegura1', role: 'alumno', phone: '0981 123 456', email: 'prueba@ejemplo.com' });
   assert.equal(student.role, 'alumno');
   assert.equal(getSession().id, student.id);
   assert.equal(data.get('guarania:accounts:v1').includes('claveSegura1'), false);
@@ -21,7 +21,7 @@ test('registro, roles, sesión y progreso independiente por cuenta', async () =>
   logout();
   assert.equal(getSession(), null);
   await assert.rejects(login({ username: 'Ana_1', password: 'incorrecta' }));
-  const teacher = await register({ name: 'Luis', username: 'Luis_1', password: 'otraClaveSegura', role: 'maestro' });
+  const teacher = await register({ name: 'Luis', username: 'Luis_1', password: 'otraClaveSegura', role: 'maestro', phone: '0981 123 456', email: 'prueba@ejemplo.com' });
   setActiveProfile(teacher.id);
   assert.equal(readJSON('guarania:xp', 0), 0);
   logout();
@@ -50,6 +50,8 @@ test('registro funciona correctamente cuando crypto.randomUUID no es una funció
       username: 'sin_uuid',
       password: 'passwordSeguro123',
       role: 'alumno',
+      phone: '0981 123 456',
+      email: 'prueba@ejemplo.com',
     });
 
     assert.ok(account.id);
@@ -81,6 +83,8 @@ test('generateUUID y register no causan recursión infinita si crypto.randomUUID
       username: 'no_freeze',
       password: 'claveSinFreeze1',
       role: 'alumno',
+      phone: '0981 123 456',
+      email: 'prueba@ejemplo.com',
     });
     assert.ok(account.id);
     assert.equal(account.username, 'no_freeze');
@@ -109,6 +113,8 @@ test('flujo de registro y login funciona en entornos móviles no seguros sin Web
       username: 'movil_lan',
       password: 'claveMóvil_123',
       role: 'alumno',
+      phone: '0981 123 456',
+      email: 'prueba@ejemplo.com',
     });
 
     assert.ok(user.id);
