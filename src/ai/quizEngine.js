@@ -114,18 +114,36 @@ export function findBestMatch(question, bank, options = {}) {
   }
   return best;
 }
+// Aperturas del feedback en los dos idiomas soportados. El resto del mensaje
+// (explicación, respuesta correcta) ya viene del banco de preguntas, que trae
+// su propio campo *Jopara cuando existe.
+const QUIZ_OPENINGS = {
+  vf_correct: { es: '¡Bien! Tu respuesta y la explicación son correctas.', jopara: '¡Iporã! Nde respuesta ha explicación ha\'e correcta.' },
+  vf_identified_false: { es: 'Identificaste que es falsa. Revisemos la justificación.', jopara: 'Ere ha\'eha falsa. Jahecha jey pe justificación.' },
+  vf_attempt: { es: 'Buen intento. La afirmación es', jopara: 'Eñeha\'ã porã. Pe afirmación ha\'e' },
+  vf_true: { es: 'verdadera', jopara: 'verdadera' },
+  vf_false: { es: 'falsa', jopara: 'falsa' },
+  open_correct: { es: '¡Bien! Respuesta correcta.', jopara: '¡Iporã! Respuesta correcta.' },
+  open_close: { es: 'Te acercaste: algunas ideas coinciden.', jopara: 'Eñemboja porãma: peteĩ heta idea ojoja.' },
+  open_retry: { es: 'Buen intento. Vamos a repasarlo.', jopara: 'Eñeha\'ã porã. Jahecha jey.' },
+  answer_is: { es: 'La respuesta es:', jopara: 'Pe respuesta ha\'e:' },
+};
+function say(key, language) {
+  const entry = QUIZ_OPENINGS[key];
+  return language === 'es' ? entry.es : entry.jopara;
+}
 export function buildQuizFeedback(context = {}) {
+  const language = context.language === 'es' ? 'es' : 'gn-jopara';
   const verdict = evaluateQuizContext(context);
   const explanation = context.explicacion ?? '';
-  const translation = context.respuestaJopara || context.explicacionJopara || '';
+  const translation = language !== 'es' ? (context.respuestaJopara || context.explicacionJopara || '') : '';
   if (typeof context.esVerdadero === 'boolean') {
-    const truth = context.esVerdadero ? 'verdadera' : 'falsa';
-    const opening = verdict.correct ? '¡Bien! Tu respuesta y la explicación son correctas.'
-      : !context.marcadoVerdadero && !context.esVerdadero ? 'Identificaste que es falsa. Revisemos la justificación.'
-      : 'Buen intento. La afirmación es ' + truth + '.';
+    const opening = verdict.correct ? say('vf_correct', language)
+      : !context.marcadoVerdadero && !context.esVerdadero ? say('vf_identified_false', language)
+      : say('vf_attempt', language) + ' ' + say(context.esVerdadero ? 'vf_true' : 'vf_false', language) + '.';
     return sanitizeMarkup([opening, explanation, translation].filter(Boolean).join(' '));
   }
-  if (verdict.correct) return sanitizeMarkup(['¡Bien! Respuesta correcta.', context.respuestaCorrecta, explanation, translation].filter(Boolean).join(' '));
-  const opening = verdict.close ? 'Te acercaste: algunas ideas coinciden.' : 'Buen intento. Vamos a repasarlo.';
-  return sanitizeMarkup([opening, 'La respuesta es: ' + (context.respuestaCorrecta || explanation), explanation, translation].filter(Boolean).join(' '));
+  if (verdict.correct) return sanitizeMarkup([say('open_correct', language), context.respuestaCorrecta, explanation, translation].filter(Boolean).join(' '));
+  const opening = verdict.close ? say('open_close', language) : say('open_retry', language);
+  return sanitizeMarkup([opening, say('answer_is', language) + ' ' + (context.respuestaCorrecta || explanation), explanation, translation].filter(Boolean).join(' '));
 }

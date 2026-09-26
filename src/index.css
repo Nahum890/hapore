@@ -323,6 +323,9 @@ button, input, select, textarea { max-width: 100%; }
 .confidence-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--c-sun), #f7cf6e); transition: width 600ms var(--ease-bounce); position: relative; }
 .confidence-fill::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent); animation: shine 2.8s ease-in-out infinite; }
 .confidence-hint { margin: 0; color: var(--c-muted); font-size: 12.5px; }
+.confidence-explainer { margin: 6px 0 0; color: var(--c-muted); font-size: 12px; }
+.confidence-meter { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--c-line); }
+.confidence-meter-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; font-weight: 700; color: var(--c-ink-soft); }
 .confidence-rules { margin-top: 8px; font-size: 12.5px; color: var(--c-ink-soft); }
 .confidence-rules summary { cursor: pointer; font-weight: 750; color: var(--c-sky-deep); }
 .confidence-rules p { margin: 6px 0 0; }

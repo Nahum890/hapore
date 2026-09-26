@@ -12,7 +12,9 @@
     "doi": null,
     "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
     "supports": ["Movimiento parabólico", "componentes de velocidad", "tiempo de vuelo", "altura máxima", "alcance"],
-    "assumptions": "Modelo ideal: resistencia del aire despreciable y aceleración gravitatoria constante. El alcance máximo a 45° requiere salida y llegada al mismo nivel."
+    "supportsJopara": ["Movimiento parabólico", "componente de velocidad", "tiempo de vuelo", "altura máxima", "alcance"],
+    "assumptions": "Modelo ideal: resistencia del aire despreciable y aceleración gravitatoria constante. El alcance máximo a 45° requiere salida y llegada al mismo nivel.",
+    "assumptionsJopara": "Modelo ideal: ndojehechái resistencia del aire ha aceleración gravitatoria opyta constante. 45° ome'ẽ alcance máximo salida ha llegada peteĩ nivel-pe ramo."
   },
   {
     "id": "nasa-stem-ball-launcher",
@@ -27,6 +29,8 @@
     "doi": null,
     "license": "Dominio público (NASA)",
     "supports": ["Movimiento parabólico", "ángulo de lanzamiento", "condiciones ideales"],
-    "assumptions": "Actividad de referencia para diseñar situaciones de lanzamiento; los valores numéricos de los ejercicios de esta app se calculan con las fórmulas de OpenStax, no con esta fuente."
+    "supportsJopara": ["Movimiento parabólico", "ángulo de lanzamiento", "condiciones ideales"],
+    "assumptions": "Actividad de referencia para diseñar situaciones de lanzamiento; los valores numéricos de los ejercicios de esta app se calculan con las fórmulas de OpenStax, no con esta fuente.",
+    "assumptionsJopara": "Ko actividad oipytyvõ oñemboheko hag̃ua situaciones de lanzamiento. Umi número ejercicio-kuérape oúva oñecalcula fórmula OpenStax reheve; ndaha'éi NASA fuente-gui."
   }
 ]

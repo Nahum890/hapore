@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from '../i18n/LanguageProvider.jsx';
 export default function Flashcard({ flashcard, consolidated, onConsolidate, onReviewLater }) {
+  const { language } = useTranslation();
   const [flipped, setFlipped] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const timer = useRef(null), locked = useRef(false), answerRef = useRef(null);
@@ -23,7 +25,7 @@ export default function Flashcard({ flashcard, consolidated, onConsolidate, onRe
     <section className={'card flashcard deck-card-enter ' + (leaving ? 'deck-card-leave' : '')} aria-label={'Tarjeta: ' + front} aria-busy={leaving}>
       <div className={'flashcard-inner ' + (flipped ? 'is-flipped' : '')}>
         <div className="flashcard-face flashcard-front" aria-hidden={flipped} inert={flipped ? '' : undefined}>
-          <div><p className="flashcard-topic">{flashcard?.topic || 'Repaso de Física'}</p><h3 className="flashcard-text">{front}</h3>{flashcard?.frente_jopara && <p className="flashcard-jopara">{flashcard.frente_jopara}</p>}</div>
+          <div><p className="flashcard-topic">{flashcard?.topic || 'Repaso de Física'}</p><h3 className="flashcard-text">{front}{language !== 'es' && <small className="bilingual-es" lang="es"> Jopara · borrador sin revisión lingüística</small>}</h3></div>
           <button type="button" className="btn btn-secondary" tabIndex={flipped ? -1 : 0} onClick={() => setFlipped(true)}>Mostrar respuesta</button>
         </div>
         <div className="flashcard-face flashcard-back" aria-hidden={!flipped} inert={!flipped ? '' : undefined}>

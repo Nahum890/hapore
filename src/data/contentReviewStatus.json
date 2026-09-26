@@ -5,14 +5,33 @@
     "reviewer": null,
     "note": "Ninguna traducción Jopara se etiqueta como revisada o aprobada sin revisión humana competente."
   },
+  "physicsReview": {
+    "status": "pending",
+    "reviewer": null,
+    "note": "Un docente debe validar fórmulas, supuestos y ejemplos del movimiento parabólico antes de presentarlos como contenido revisado."
+  },
+  "curriculumTraceability": {
+    "status": "pending-source",
+    "source": null,
+    "note": "Se buscó en mec.gov.py (Programas de Estudio Actualizados) un programa oficial de Física de 3.º curso con movimiento parabólico; no se encontró un documento puntual y verificable en línea. Preparar la matriz MEC cuando el equipo aporte la fuente curricular oficial exacta; no se declara alineación curricular sin verificar esa fuente."
+  },
   "collections": {
-    "concepts": { "count": 7, "joparaStatus": "draft" },
-    "errors": { "count": 5, "joparaStatus": "draft" },
-    "exercises": { "count": 13, "joparaStatus": "draft", "joparaQuestionsPresent": 13 },
+    "concepts": { "count": 7, "joparaStatus": "draft", "joparaNamesPresent": 7, "joparaDefinitionsPresent": 7 },
+    "errors": { "count": 5, "joparaStatus": "draft", "joparaNamesPresent": 5, "joparaDescriptionsPresent": 5, "joparaExamplesPresent": 5 },
+    "exercises": { "count": 13, "joparaStatus": "draft", "joparaQuestionsPresent": 13, "joparaHintsPresent": 13, "joparaHintLevelsPresent": 52 },
     "flashcards": { "count": 10, "joparaStatus": "draft", "joparaFrontsPresent": 10, "joparaBacksPresent": 10 },
-    "glossary": { "count": 8, "joparaTermsPresent": 8, "joparaDefinitionsStatus": "draft" },
-    "quizBank": { "count": 14, "joparaStatus": "draft", "joparaAnswersPresent": 6 },
-    "tutor": { "joparaStatus": "draft" }
+    "glossary": { "count": 8, "joparaStatus": "draft", "joparaTermsPresent": 8, "joparaDefinitionsPresent": 8, "joparaExamplesPresent": 8 },
+    "quizBank": { "count": 14, "joparaStatus": "draft", "joparaQuestionsPresent": 14, "joparaAnswersPresent": 6, "joparaExplanationsPresent": 8 },
+    "tutor": {
+      "joparaStatus": "draft",
+      "spanishStatus": "draft",
+      "greetingVariantsPerLanguage": 4,
+      "sectionGreetingSections": 4,
+      "errorFollowUps": 5,
+      "hintErrorCategories": 5,
+      "hintLevelsPerCategory": 4,
+      "topicSupportEntriesPerLanguage": 9
+    }
   },
   "scope": "Alcance vigente del MVP: un único tema, Movimiento Parabólico, con tres situaciones (entrega en dron, básquetbol, pelota sobre un paredón) que comparten el mismo motor físico."
 }

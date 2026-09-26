@@ -2,6 +2,96 @@
   "status": "draft",
   "reviewNote": "Las traducciones añadidas aquí son borradores de trabajo y requieren revisión de una persona competente en guaraní paraguayo. Fórmulas, valores y unidades se conservan sin cambios.",
   "items": {
+    "movimiento-parabolico": {
+      "nameJopara": "Movimiento parabólico",
+      "definitionJopara": "Oñembojoaju mokõi movimiento: horizontal-pe velocidad opyta constante ha vertical-pe gravedad omoambue velocidad. Pe trayectoria ha'e parábola simétrica."
+    },
+    "componente-horizontal": {
+      "nameJopara": "Componente horizontal (vx)",
+      "definitionJopara": "Pe velocidad inicial vector rehegua eje X-pe. Modelo-pe ndojehecháiramo aire rozamiento, ndaipóri aceleración horizontal ha vx opyta constante."
+    },
+    "componente-vertical": {
+      "nameJopara": "Componente vertical (vy)",
+      "definitionJopara": "Pe velocidad vector rehegua eje Y-pe. Subida aja gravedad omboguejy; pe punto yvatevévape vy oiko cero."
+    },
+    "tiempo-de-vuelo": {
+      "nameJopara": "Tiempo de vuelo (T)",
+      "definitionJopara": "Tiempo total oñemombo guive proyectil oguejy jey peve peteĩ nivel de salida-pe."
+    },
+    "altura-maxima": {
+      "nameJopara": "Altura máxima (Hmax)",
+      "definitionJopara": "Pe altura yvatevéva proyectil ohupytyha punto de lanzamiento ári. Oiko vy oiko cero jave."
+    },
+    "alcance": {
+      "nameJopara": "Alcance horizontal (R)",
+      "definitionJopara": "Distancia horizontal entre punto de lanzamiento ha punto de caída, suelo plano-pe."
+    },
+    "angulo-optimo": {
+      "nameJopara": "Ángulo de alcance máximo",
+      "definitionJopara": "Suelo plano ha aire resistencia'ỹme, ángulo 45° ome'ẽ alcance máximo peteĩ velocidad inicial-pe."
+    },
+    "ej-01": { "hintsJopara": ["¿Mokõi dirección-pa oguereko pe movimiento? Dron oho yvate ha tenonde peteĩ tiempo-pe.", "Pe velocidad oñemboja'o mokõi parte-pe: horizontal coseno reheve ha vertical seno reheve. Ko ejercicio ojerure horizontal año.", "vx = v0 * cos(ángulo).", "vx = 20 * cos(30°) ≈ 20 * 0,8660 = 17,32 m/s."] },
+    "ej-02": { "hintsJopara": ["Pe componente vertical omopu'ã dron; gravedad omboguejyve chupe.", "Componente vertical-pe eipuru seno del ángulo; ndaha'éi coseno.", "vy = v0 * sen(ángulo).", "vy = 20 * sen(30°) = 20 * 0,5 = 10 m/s."] },
+    "ej-03": { "hintsJopara": ["Punto yvatevévape velocidad vertical oiko cero peteĩ momento-pe.", "Altura máxima odepende componente vertical cuadrado rehe; ndaha'éi tiempo rehe.", "Hmax = (v0² * sen²(ángulo)) / (2 * g).", "Hmax = (19,6² * sen²(45°)) / (2 * 9,8) = (384,16 * 0,5) / 19,6 = 9,8 m."] },
+    "ej-mec-03": { "hintsJopara": ["Emaña eje vertical añónte: cúspide-pe velocidad vertical oiko cero.", "Tiempo total ha'e mokõi jey tiempo og̃uahẽ hag̃ua altura máxima-pe.", "T = (2 * v0y) / g.", "vy = 20 * sen(30°) = 10 m/s; T = (2 * 10) / 10 = 2 segundos."] },
+    "ej-04": { "hintsJopara": ["Eje horizontal-pe movimiento uniforme: ndaipóri aceleración.", "Alcance ha'e velocidad horizontal multiplicada tiempo total rehe.", "R = vx * T.", "R = 17,32 m/s * 2 s = 34,64 metros."] },
+    "ej-06": { "hintsJopara": ["Peteĩ velocidad inicial-pe, peteĩ ángulo ome'ẽ alcance máximo.", "Alcance odepende sen(2 * ángulo)-gui; pe factor tuichavéva ha'e 1.", "R = (v0² * sen(2 * ángulo)) / g → 40 = (400 * sen(2 * ángulo)) / 10 → sen(2 * ángulo) = 1.", "sen(2 * ángulo) = 1 → 2 * ángulo = 90° → ángulo = 45°."] },
+    "ej-07": { "hintsJopara": ["30° ha 60° oñembojoapy 90°: ha'e ángulos complementarios.", "Alcance odepende sen(2 * ángulo)-gui; embojoja sen(2*30°) ha sen(2*60°).", "sen(60°) ha sen(120°) peteĩcha, upévare mokõive alcance peteĩcha.", "Upéva rehe, dron B alcance avei ha'e 34,64 metros."] },
+    "eb-01": { "hintsJopara": ["Balón oho aro gotyo velocidad peteĩ parte reheve ha ojupi ambue parte reheve.", "Pe parte oho tenonde gotyo oñecalcula coseno del ángulo reheve.", "vx = v0 * cos(ángulo).", "vx = 12 * cos(50°) ≈ 12 * 0,6428 = 7,71 m/s."] },
+    "eb-02": { "hintsJopara": ["Balón ojupi, oñemombyta ha oguejy; subida ha caída tiempo peteĩcha ramo.", "Tiempo total ha'e mokõi jey tiempo og̃uahẽ hag̃ua altura máxima-pe.", "T = (2 * v0 * sen(ángulo)) / g.", "vy = 12 * sen(50°) ≈ 9,19 m/s; T = (2 * 9,19) / 9,8 ≈ 1,88 s."] },
+    "eb-03": { "hintsJopara": ["Peteĩ ángulo año ome'ẽ alcance tuichavéva peteĩ velocidad-pe.", "Alcance odepende sen(2 * ángulo)-gui; pe factor tuichavéva ha'e 1.", "R = (v0² * sen(2 * ángulo)) / g → 10 = (100 * sen(2 * ángulo)) / 10 → sen(2 * ángulo) = 1.", "sen(2 * ángulo) = 1 → 2 * ángulo = 90° → ángulo = 45°."] },
+    "ew-01": { "hintsJopara": ["Pe pelota oikotevẽ ohupi altura ohasa hag̃ua paredón ári.", "Pe impulso yvate gotyo oñecalcula seno del ángulo reheve.", "vy = v0 * sen(ángulo).", "vy = 15 * sen(40°) ≈ 15 * 0,6428 = 9,64 m/s."] },
+    "ew-02": { "hintsJopara": ["Punto yvatevévape velocidad vertical oiko cero peteĩ momento-pe.", "Altura máxima oipuru componente vertical cuadrado, dividido gravedad doble rehe.", "Hmax = (v0² * sen²(ángulo)) / (2 * g).", "Hmax = (15² * sen²(40°)) / (2 * 9,8) ≈ (225 * 0,4132) / 19,6 ≈ 4,74 m."] },
+    "ew-03": { "hintsJopara": ["25° ha 65° oñembojoapy 90°: ha'e ángulos complementarios.", "Alcance odepende sen(2 * ángulo)-gui; embojoja sen(2*25°) ha sen(2*65°).", "sen(50°) ha sen(130°) peteĩcha, upévare mokõive alcance peteĩcha.", "Upéva rehe, lanzamiento 65° alcance avei ha'e 19,61 metros."] },
+    "err-01": {
+      "nameJopara": "Oñembojehe'a velocidad inicial ha componente",
+      "descriptionJopara": "Oipurúvo v0 completo ejercicio ojerurévo peteĩ componente horizontal térã vertical.",
+      "exampleJopara": "Velocidad inicial ndaha'éi componente vertical. Eipuru v0 * sen(ángulo) térã v0 * cos(ángulo), eje ojerurévaicha."
+    },
+    "err-02": {
+      "nameJopara": "Oñembojehe'a componente horizontal ha vertical",
+      "descriptionJopara": "Eipuru seno vx-pe, coseno vy-pe, térã oñembojehe'a hag̃ua umi resultado.",
+      "exampleJopara": "vx = v0 * cos(ángulo) ha v0y = v0 * sen(ángulo). Coseno horizontal-pe, seno vertical-pe."
+    },
+    "err-04": {
+      "nameJopara": "Oñembojehe'a altura máxima ha alcance",
+      "descriptionJopara": "Ecalcula altura ejercicio ojerurévo alcance, térã alcance ojerurévo altura.",
+      "exampleJopara": "Altura máxima oñemedi yvate gotyo; alcance oñemedi horizontal gotyo. Umi fórmula ndojojái."
+    },
+    "err-mec-03": {
+      "nameJopara": "Oñembyesarái gravedad-gui",
+      "descriptionJopara": "Opytávo velocidad vertical inicial-pe ha ndojapái fórmula oguerekóva gravedad.",
+      "exampleJopara": "Tiempo de vuelo-pe T = (2 * v0y) / g. Gravedad oĩ cuenta-pe."
+    },
+    "err-mec-05": {
+      "nameJopara": "Ángulo de lanzamiento ndoikói meta rehe",
+      "descriptionJopara": "Eiporavo peteĩ ángulo michĩeterei térã tuichaeterei, ha upéva omombyky alcance.",
+      "exampleJopara": "Alcance odepende sen(2 * ángulo)-gui. Umi dato ha supuesto oĩramo, 45° ome'ẽ alcance máximo."
+    },
+    "glos-trayectoria": {
+      "definitionJopara": "Tape geometría rehegua proyectil ojapóva oveve aja. Movimiento parabólico-pe ha'e peteĩ curva simétrica."
+    },
+    "glos-gravedad": {
+      "definitionJopara": "Aceleración omboguejýva mba'e yvy gotyo (≈ 9,8 m/s² térã 10 m/s² aula-pe). Oiko eje vertical Y-pe año."
+    },
+    "glos-velocidad-inicial": {
+      "definitionJopara": "Velocidad vector rehegua proyectil oguerekóva osẽvo punto de lanzamiento-gui."
+    },
+    "glos-angulo": {
+      "definitionJopara": "Inclinación velocidad inicial rehegua horizontal rehe. Oñemedi grado-pe, 0° guive 90° peve."
+    },
+    "glos-componente-vertical": {
+      "definitionJopara": "Pe velocidad parte omopu'ãva proyectil eje vertical-pe, gravedad reheve."
+    },
+    "glos-componente-horizontal": {
+      "definitionJopara": "Pe velocidad parte omomýiva proyectil yvýre tenonde gotyo, rapidez constante reheve."
+    },
+    "glos-alcance": {
+      "definitionJopara": "Distancia horizontal proyectil ohóva oñemombo guive ho'a peve."
+    },
+    "glos-kyhyjey": {
+      "definitionJopara": "Kyhyje'ỹ he'ise 'sin miedo'. Jaaprende ñaha'ã ha jajavy hag̃ua kyhyje'ỹme."
+    },
     "fc-01": { "dorso_jopara": "Oñembojoaju movimiento horizontal velocidad constante reheve ha movimiento vertical gravedad reheve. Pe trayectoria ha'e parábola." },
     "fc-02": { "dorso_jopara": "Nahániri. Jajapórõ modelo aire'ỹre, vx opyta constante; gravedad okambia velocidad vertical año." },
     "fc-03": { "dorso_jopara": "Pe altura máxima-pe, velocidad vertical vale cero; horizontal opyta peteĩcha ha proyectil osegi tenonde gotyo." },

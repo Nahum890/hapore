@@ -5,7 +5,8 @@ import { DEFAULT_LANGUAGE, translate } from '../i18n/messages.js';
 import { selectClassExercises } from '../utils/classCode.js';
 
 const PAGE = { width: 210, height: 297, margin: 16, bottom: 278 };
-const SCENARIO_LABEL = { dron: 'Entrega en dron', basketball: 'Básquetbol', wall: 'Sobre el paredón' };
+const SCENARIO_MESSAGE = { dron: 'pdf.scenario.dron', basketball: 'pdf.scenario.basketball', wall: 'pdf.scenario.wall' };
+const DIFFICULTY_MESSAGE = { básico: 'pdf.difficulty.basico', intermedio: 'pdf.difficulty.intermedio', avanzado: 'pdf.difficulty.avanzado' };
 const green = [23, 72, 59], ink = [31, 41, 55], soft = [92, 109, 100];
 const formatNumber = value => String(value).replace('.', ',');
 
@@ -36,6 +37,7 @@ export async function createStudyPdf({ config = null, language = DEFAULT_LANGUAG
   await registerUnicodeFont(doc);
   const displayExercises = config ? selectClassExercises(exercises, config) : exercises;
   const localized = displayExercises.map(item => localizeCatalogItem(item, language));
+  const localizedConcepts = concepts.map(item => localizeCatalogItem(item, language));
   const refs = getRelevantSources(displayExercises);
   const isJopara = language !== 'es';
   const label = key => translate(language, key);
@@ -53,9 +55,24 @@ export async function createStudyPdf({ config = null, language = DEFAULT_LANGUAG
   const addText = (value, { size = 10, indent = 0, color = ink, gap = 3 } = {}) => {
     doc.setFont('NotoSans', 'normal'); doc.setFontSize(size); doc.setTextColor(...color);
     const lines = doc.splitTextToSize(String(value ?? ''), PAGE.width - PAGE.margin * 2 - indent);
-    const height = lines.length * size * 0.42 + gap;
-    if (y + height > PAGE.bottom) addPage();
-    doc.text(lines, PAGE.margin + indent, y); y += height;
+    const lineHeight = size * 0.42;
+    let offset = 0;
+    while (offset < lines.length) {
+      let available = Math.floor((PAGE.bottom - y) / lineHeight);
+      if (available < 1) {
+        addPage();
+        available = Math.floor((PAGE.bottom - y) / lineHeight);
+      }
+      const count = Math.min(available, lines.length - offset);
+      doc.text(lines.slice(offset, offset + count), PAGE.margin + indent, y);
+      y += count * lineHeight;
+      offset += count;
+      if (offset < lines.length) {
+        y += gap;
+        addPage();
+      }
+    }
+    y += gap;
   };
   const addSection = title => {
     y += 3; addText(title, { size: 14, color: green, gap: 4 });
@@ -69,7 +86,7 @@ export async function createStudyPdf({ config = null, language = DEFAULT_LANGUAG
   addText(label('pdf.assumptions'), { size: 9 });
 
   const conceptIds = new Set(displayExercises.map(item => item.expectedConcept));
-  const relevantConcepts = concepts.filter(item => conceptIds.has(item.id));
+  const relevantConcepts = localizedConcepts.filter(item => conceptIds.has(item.id));
   if (relevantConcepts.length) {
     addSection(label('pdf.relations'));
     for (const concept of relevantConcepts) addText(`${concept.name}: ${concept.formula || concept.definition}`, { size: 9 });
@@ -77,7 +94,9 @@ export async function createStudyPdf({ config = null, language = DEFAULT_LANGUAG
 
   addSection(label('pdf.exercises'));
   localized.forEach((exercise, index) => {
-    addText(`${index + 1}. ${exercise.topic}${exercise.scenario ? ' · ' + (SCENARIO_LABEL[exercise.scenario] ?? exercise.scenario) : ''} · ${exercise.difficulty}`, { size: 11, color: green, gap: 2 });
+    const scenario = SCENARIO_MESSAGE[exercise.scenario];
+    const difficulty = DIFFICULTY_MESSAGE[exercise.difficulty?.toLocaleLowerCase('es')];
+    addText(`${index + 1}. ${exercise.topic}${scenario ? ' · ' + label(scenario) : ''} · ${difficulty ? label(difficulty) : exercise.difficulty}`, { size: 11, color: green, gap: 2 });
     addText(exercise.question, { size: 9, indent: 3, gap: 4 });
     for (let line = 0; line < 2; line += 1) {
       if (y + 8 > PAGE.bottom) addPage();
@@ -97,10 +116,12 @@ export async function createStudyPdf({ config = null, language = DEFAULT_LANGUAG
     addText(`${source.authors.join(', ')} (${source.publicationYear}). ${source.title}, ${source.edition}, ${source.section}. ${source.institution}.`, { size: 8 });
     addText(`${source.page}. DOI: ${source.doi ?? 'no asignado'}. ${label('pdf.accessed')}: ${now.toISOString().slice(0, 10)}.`, { size: 8, indent: 2 });
     addText(`${source.url} · ${label('pdf.license')}: ${source.license}.`, { size: 8, indent: 2, color: soft });
-    addText(`Contenido que respalda: ${source.supports.join('; ')}.`, { size: 8, indent: 2 });
-    addText(`Supuestos del modelo: ${source.assumptions}.`, { size: 8, indent: 2 });
+    const supports = language === 'es' ? source.supports : (source.supportsJopara ?? source.supports);
+    const assumptions = language === 'es' ? source.assumptions : (source.assumptionsJopara ?? source.assumptions);
+    addText(`${label('pdf.supports')}: ${supports.join('; ')}.`, { size: 8, indent: 2 });
+    addText(`${label('pdf.modelAssumptions')}: ${assumptions}.`, { size: 8, indent: 2 });
   }
-  addText('Contenido educativo redactado para PyFis IA; las referencias fundamentan las relaciones físicas indicadas. No se reproducen imágenes de las fuentes.', { size: 8, color: soft });
+  addText(label('pdf.attribution'), { size: 8, color: soft });
 
   const pages = doc.getNumberOfPages();
   for (let current = 1; current <= pages; current += 1) {

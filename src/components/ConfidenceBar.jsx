@@ -1,8 +1,9 @@
 import { getNextLevel } from '../utils/gamification.js';
 import { Nanduti } from './Nanduti.jsx';
 
-export default function ConfidenceBar({ xp, level }) {
+export default function ConfidenceBar({ xp, level, confidence }) {
   const safeXP = Math.max(0, Math.floor(Number(xp) || 0));
+  const safeConfidence = Math.max(0, Math.min(100, Math.round(Number(confidence) || 0)));
   const currentLevel =
     level ?? { level: 1, xp: 0, rank: 'Temimbo\'e Pyahu', title: 'Iniciante' };
   const next = getNextLevel(safeXP);
@@ -37,6 +38,16 @@ export default function ConfidenceBar({ xp, level }) {
           ? ` · Faltan ${Math.max(0, next.xp - safeXP)} XP para el nivel ${next.level}`
           : ' · ¡Nivel máximo alcanzado!'}
       </p>
+      <p className="confidence-explainer">
+        XP mide cuánto practicaste; el nivel es un logro por acumular XP. Nunca bajan, aunque te equivoques.
+      </p>
+      <div className="confidence-meter" aria-label="Confianza">
+        <div className="confidence-meter-head"><span>Confianza</span><strong>{safeConfidence}/100</strong></div>
+        <div className="confidence-track" role="progressbar" aria-label="Confianza sobre 100" aria-valuemin={0} aria-valuemax={100} aria-valuenow={safeConfidence}>
+          <div className="confidence-fill" style={{ width: `${safeConfidence}%` }} />
+        </div>
+        <p className="confidence-explainer">Mide qué tan seguido acertás sin pistas. Sube con cada acierto y nunca baja con un error.</p>
+      </div>
       <details className="confidence-rules">
         <summary>¿Cómo gano XP?</summary>
         <p>La XP solo sube, nunca baja. Ejercicio sin pistas +50 · con pistas +25 · tarjeta consolidada +15 · pregunta del cuestionario +30.</p>

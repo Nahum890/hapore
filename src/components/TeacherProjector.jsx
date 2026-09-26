@@ -9,12 +9,18 @@ import {
 import { exercises as exercisesData } from '../data/catalogs.js';
 import { generateGuaraniaPdf } from './PrintableSheet.jsx';
 
+const SCENARIO_LABELS = { dron: 'Dron', basketball: 'Básquetbol', wall: 'Pelota sobre el paredón' };
+
 export default function TeacherProjector({ attempts = 0, xp = 0 }) {
   // Parámetros de simulación en vivo
   const [v0, setV0] = useState(20);
   const [angle, setAngle] = useState(30);
   const [gravity, setGravity] = useState(10);
+  // Elegir un ejercicio solo carga su vista previa; recién "Proyectar este
+  // ejercicio" aplica sus valores a la simulación que ve la clase.
   const [selectedExerciseId, setSelectedExerciseId] = useState('ej-01');
+  const [projectedExerciseId, setProjectedExerciseId] = useState(null);
+  const previewExercise = exercisesData.find((item) => item.id === selectedExerciseId) ?? null;
 
   // Trayectoria de referencia A para comparación simultánea (ej. 30° vs 60°)
   const [referenceLaunch, setReferenceLaunch] = useState(null);
@@ -89,15 +95,22 @@ export default function TeacherProjector({ attempts = 0, xp = 0 }) {
   };
 
   const handleSelectExercise = (e) => {
-    const exId = e.target.value;
-    setSelectedExerciseId(exId);
-    const ex = exercisesData.find((item) => item.id === exId);
-    if (ex && ex.values) {
-      if (ex.values.v0) setV0(ex.values.v0);
-      if (ex.values.angle) setAngle(ex.values.angle);
-      if (ex.values.gravity) setGravity(ex.values.gravity);
-    }
+    setSelectedExerciseId(e.target.value);
   };
+
+  const handleProjectExercise = () => {
+    if (!previewExercise?.values) return;
+    const { v0: exV0, angle: exAngle, gravity: exGravity } = previewExercise.values;
+    if (exV0) setV0(exV0);
+    if (exAngle) setAngle(exAngle);
+    if (exGravity) setGravity(exGravity);
+    setProjectedExerciseId(previewExercise.id);
+  };
+
+  // Mover un control a mano deja de coincidir con el ejercicio proyectado.
+  const handleManualV0 = (value) => { setV0(value); setProjectedExerciseId(null); };
+  const handleManualAngle = (value) => { setAngle(value); setProjectedExerciseId(null); };
+  const handleManualGravity = (value) => { setGravity(value); setProjectedExerciseId(null); };
 
   return (
     <section className="card teacher-mode-pro" aria-label="Modo Docente y Proyector de Aula">
@@ -141,6 +154,36 @@ export default function TeacherProjector({ attempts = 0, xp = 0 }) {
           ))}
         </select>
       </div>
+
+      {/* VISTA PREVIA: el docente ve el enunciado completo antes de proyectar */}
+      {previewExercise && (
+        <div style={{ backgroundColor: '#FFFFFF', border: '2px solid ' + (projectedExerciseId === previewExercise.id ? '#10B981' : '#D1D5DB'), borderRadius: '8px', padding: '12px 14px', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: '220px' }}>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#1B4D3E', backgroundColor: '#ECFDF5', padding: '2px 8px', borderRadius: '999px' }}>{SCENARIO_LABELS[previewExercise.scenario] ?? previewExercise.scenario}</span>
+                <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#92400E', backgroundColor: '#FEF3C7', padding: '2px 8px', borderRadius: '999px' }}>{previewExercise.difficulty}</span>
+                {projectedExerciseId === previewExercise.id && <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#065F46' }}>✓ Proyectado</span>}
+              </div>
+              <p style={{ margin: 0, fontSize: '0.88rem', color: '#1F2937' }}>{previewExercise.question}</p>
+              <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
+                {Object.entries(previewExercise.values ?? {}).map(([key, value]) => (
+                  <span key={key} style={{ fontSize: '0.72rem', color: '#4B5563', backgroundColor: '#F3F4F6', padding: '2px 8px', borderRadius: '6px' }}>{key} = {value}</span>
+                ))}
+              </div>
+            </div>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleProjectExercise}
+              disabled={projectedExerciseId === previewExercise.id}
+              style={{ padding: '8px 14px', borderRadius: '6px', border: 'none', backgroundColor: projectedExerciseId === previewExercise.id ? '#9CA3AF' : '#1B4D3E', color: '#fff', fontSize: '0.82rem', fontWeight: 600, cursor: projectedExerciseId === previewExercise.id ? 'default' : 'pointer' }}
+            >
+              {projectedExerciseId === previewExercise.id ? 'Ya proyectado' : 'Proyectar este ejercicio'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* LIENZO DE TRAYECTORIAS PARA PROYECCIÓN */}
       <div style={{ backgroundColor: '#1F2937', borderRadius: '10px', padding: '12px', marginBottom: '16px', boxShadow: 'inset 0 2px 6px rgba(0,0,0,0.4)' }}>
@@ -208,7 +251,7 @@ export default function TeacherProjector({ attempts = 0, xp = 0 }) {
             max="50"
             step="1"
             value={v0}
-            onChange={(e) => setV0(Number(e.target.value))}
+            onChange={(e) => handleManualV0(Number(e.target.value))}
             style={{ width: '100%', accentColor: '#1B4D3E' }}
           />
         </div>
@@ -225,7 +268,7 @@ export default function TeacherProjector({ attempts = 0, xp = 0 }) {
             max="85"
             step="1"
             value={angle}
-            onChange={(e) => setAngle(Number(e.target.value))}
+            onChange={(e) => handleManualAngle(Number(e.target.value))}
             style={{ width: '100%', accentColor: '#C04A26' }}
           />
         </div>
@@ -242,7 +285,7 @@ export default function TeacherProjector({ attempts = 0, xp = 0 }) {
                 name="gravity-select"
                 value="10"
                 checked={Number(gravity) === 10}
-                onChange={() => setGravity(10)}
+                onChange={() => handleManualGravity(10)}
               />
               10 m/s² (Aula MEC)
             </label>
@@ -252,7 +295,7 @@ export default function TeacherProjector({ attempts = 0, xp = 0 }) {
                 name="gravity-select"
                 value="9.8"
                 checked={Number(gravity) === 9.8}
-                onChange={() => setGravity(9.8)}
+                onChange={() => handleManualGravity(9.8)}
               />
               9,8 m/s² (Exacta)
             </label>

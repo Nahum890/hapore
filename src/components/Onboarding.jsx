@@ -3,8 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 const STEPS = [
   {
     number: '01', label: 'Practicar', title: 'Probá un ejercicio',
-    description: 'Elegí Termodinámica u Óptica, leé el ejercicio, escribí tu respuesta y tocá “Comprobar con el simulador”. La escena de abajo usa los datos de ese ejercicio y muestra el resultado.',
-    tip: 'Cada tema tiene su propia visualización. Si te trabás, pedí una pista al tutor.',
+    description: 'Elegí una situación (dron, básquetbol o paredón), leé el ejercicio, escribí tu respuesta y tocá “Comprobar con el simulador”. La escena de abajo usa los datos de ese ejercicio y muestra el resultado.',
+    tip: 'Cada acierto suma XP (sube tu nivel) y confianza (cuánto acertás sin pistas). Ninguna de las dos baja si te equivocás. Mirá el panel de la derecha.',
   },
   {
     number: '02', label: 'Repasar', title: 'Aprendé con tarjetas',

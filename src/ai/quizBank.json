@@ -4,6 +4,7 @@
     "tema": "Movimiento Parabólico",
     "tipo": "abierta",
     "pregunta": "¿Qué es el Movimiento Parabólico?",
+    "preguntaJopara": "¿Mba'épa pe movimiento parabólico?",
     "respuesta": "La combinación de un movimiento horizontal con velocidad constante y un movimiento vertical acelerado por la gravedad; su trayectoria es una parábola.",
     "respuestaJopara": "Peteî movimiento horizontal (constante) ha peteî vertical (gravedad rehegua) joapy; pe trayectoria ha'e peteî parábola.",
     "claves": ["combinacion", "horizontal", "vertical", "gravedad", "parabola"],
@@ -14,6 +15,7 @@
     "tema": "Movimiento Parabólico",
     "tipo": "abierta",
     "pregunta": "¿Por qué la componente horizontal de la velocidad no cambia durante el vuelo?",
+    "preguntaJopara": "¿Mba'érepa pe componente horizontal velocidad rehegua ndoambuéi vuelo pukukue?",
     "respuesta": "Porque ignorando el aire no hay fuerza horizontal: la única fuerza es la gravedad, que actúa hacia abajo.",
     "respuestaJopara": "Ndairévi aire: pe fuerza oiko gravedad rehe, ogo'êvo ape yvýpe.",
     "claves": ["aire", "fuerza", "horizontal", "gravedad"],
@@ -24,6 +26,7 @@
     "tema": "Movimiento Parabólico",
     "tipo": "abierta",
     "pregunta": "¿Qué le ocurre a la velocidad vertical durante la subida del proyectil?",
+    "preguntaJopara": "¿Mba'épa oiko velocidad vertical rehe proyectil ojupi aja?",
     "respuesta": "Disminuye hasta llegar a cero en la altura máxima, porque la gravedad la frena.",
     "respuestaJopara": "Pe gravedad omboy chupe: vy oguepe'ẽ ha oiko cero-pe pe altura máxima-pe.",
     "claves": ["disminuye", "cero", "altura", "gravedad", "frena"],
@@ -34,6 +37,7 @@
     "tema": "Movimiento Parabólico",
     "tipo": "abierta",
     "pregunta": "¿Qué forma tiene la trayectoria del proyectil?",
+    "preguntaJopara": "¿Mba'e forma-pa oguereko pe trayectoria proyectil rehegua?",
     "respuesta": "Una parábola.",
     "respuestaJopara": "Peteî parábola.",
     "claves": ["parabola"],
@@ -44,6 +48,7 @@
     "tema": "Movimiento Parabólico",
     "tipo": "abierta",
     "pregunta": "¿Qué pasa con la velocidad horizontal en la altura máxima?",
+    "preguntaJopara": "¿Mba'épa oiko velocidad horizontal rehe altura máxima-pe?",
     "respuesta": "Sigue igual: la componente horizontal no cambia, por eso el proyectil sigue avanzando hacia adelante.",
     "respuestaJopara": "Opavave la vx: nomanba, upévo el proyectil oho gueteri lape.",
     "claves": ["horizontal", "cambia", "avanza", "sigue"],
@@ -54,6 +59,7 @@
     "tema": "Movimiento Parabólico",
     "tipo": "abierta",
     "pregunta": "¿De qué depende el alcance horizontal máximo del proyectil?",
+    "preguntaJopara": "¿Mba'e rehepa odepende pe alcance horizontal máximo proyectil rehegua?",
     "respuesta": "De la velocidad inicial al cuadrado y del ángulo de lanzamiento: R = (v0² * sen(2 * ángulo)) / g.",
     "respuestaJopara": "Pe v0² ha pe ángulo rehe: R = (v0² * sen(2 * ángulo)) / g.",
     "claves": ["velocidad", "angulo", "alcance"],
@@ -64,6 +70,7 @@
     "tema": "Movimiento Parabólico",
     "tipo": "vf",
     "enunciado": "En el movimiento parabólico, la componente horizontal de la velocidad permanece constante durante todo el vuelo.",
+    "enunciadoJopara": "Movimiento parabólico-pe, componente horizontal velocidad rehegua opyta constante vuelo pukukue.",
     "esVerdadero": true,
     "explicacion": "Si ignoramos el aire, no hay fuerza horizontal: vx = v0 * cos(ángulo) y no cambia.",
     "explicacionJopara": "Ndairévi aire: pe vx nomanba oikope pe vuelo pukukuepe."
@@ -73,6 +80,7 @@
     "tema": "Movimiento Parabólico",
     "tipo": "vf",
     "enunciado": "En la altura máxima, la velocidad vertical del proyectil vale cero.",
+    "enunciadoJopara": "Pe altura máxima-pe, velocidad vertical proyectil rehegua oiko cero.",
     "esVerdadero": true,
     "explicacion": "Ahí la subida se frena por completo por efecto de la gravedad; luego empieza a caer.",
     "explicacionJopara": "Pe gravedad omboty la subida: vy oiko cero-pe upépe."
@@ -82,6 +90,7 @@
     "tema": "Movimiento Parabólico",
     "tipo": "vf",
     "enunciado": "La gravedad acelera el movimiento horizontal del proyectil.",
+    "enunciadoJopara": "Pe gravedad omboacelera movimiento horizontal proyectil rehegua.",
     "esVerdadero": false,
     "explicacion": "La gravedad actúa solo hacia abajo (vertical); el movimiento horizontal mantiene velocidad constante.",
     "explicacionJopara": "Pe gravedad oiko ape yvýpe; pe horizontal oiko constante."
@@ -91,6 +100,7 @@
     "tema": "Movimiento Parabólico",
     "tipo": "vf",
     "enunciado": "El tiempo de vuelo depende solo de la componente vertical: T = (2 * v0y) / g.",
+    "enunciadoJopara": "Tiempo de vuelo odepende componente vertical-gui año: T = (2 * v0y) / g.",
     "esVerdadero": true,
     "explicacion": "Cuanto mayor es el impulso hacia arriba (v0y = v0 * sen(ángulo)), más segundos permanece en el aire.",
     "explicacionJopara": "Pe v0y ha'e tuicha ramo: T = (2 * v0y) / g ha oho hetave segundo."
@@ -100,6 +110,7 @@
     "tema": "Movimiento Parabólico",
     "tipo": "vf",
     "enunciado": "Cuanto mayor es el ángulo de lanzamiento, mayor es siempre el alcance.",
+    "enunciadoJopara": "Ángulo de lanzamiento tuichavévo, alcance tuichave tapia.",
     "esVerdadero": false,
     "explicacion": "El alcance máximo se logra a 45 grados: ángulos muy altos reducen la componente horizontal y el proyectil cae antes.",
     "explicacionJopara": "45 grado-pe pe alcance oiko máximo: ángulo yvateiteréi-pe, vx oñemombyry ha ho'a mboyve."
@@ -109,6 +120,7 @@
     "tema": "Movimiento Parabólico",
     "tipo": "vf",
     "enunciado": "La trayectoria de un proyectil es una línea recta.",
+    "enunciadoJopara": "Pe trayectoria proyectil rehegua ha'e línea recta.",
     "esVerdadero": false,
     "explicacion": "Es una parábola: la combinación de avance horizontal y caída acelerada curva el camino.",
     "explicacionJopara": "Ndaipóri línea recta: ha'e peteî parábola."
@@ -118,6 +130,7 @@
     "tema": "Movimiento Parabólico",
     "tipo": "vf",
     "enunciado": "En el vuelo, las velocidades se calculan por separado: la horizontal con coseno y la vertical con seno.",
+    "enunciadoJopara": "Vuelo aja, velocidades oñecalcula peteĩteĩ: horizontal coseno ha vertical seno reheve.",
     "esVerdadero": true,
     "explicacion": "vx = v0 * cos(ángulo) y v0y = v0 * sen(ángulo): cada componente usa su función trigonométrica.",
     "explicacionJopara": "vx rehe coseno, v0y rehe seno: ani ene ñemboja'o."
@@ -127,6 +140,7 @@
     "tema": "Movimiento Parabólico",
     "tipo": "vf",
     "enunciado": "Durante la caída, la velocidad vertical del proyectil aumenta.",
+    "enunciadoJopara": "Proyectil ho'a aja, velocidad vertical rehegua tuichave ohóvo.",
     "esVerdadero": true,
     "explicacion": "En la caída la gravedad acelera el movimiento vertical: la velocidad crece hacia abajo hasta tocar el suelo.",
     "explicacionJopara": "Pe gravedad omboguejy pya'e: pe vy otuichave ohóvo ape yvýpe."

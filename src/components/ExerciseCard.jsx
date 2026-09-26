@@ -2,20 +2,19 @@ import { useEffect, useRef, useState } from 'react';
 import { hasHintsLeft, totalHints } from '../pedagogy/hintEngine.js';
 import { validateExercise } from '../physics/physicsValidator.js';
 import { diagnoseAttempt } from '../pedagogy/diagnoseAttempt.js';
+import { useTranslation } from '../i18n/LanguageProvider.jsx';
 export function isNumericAnswer(value) {
   const text = String(value ?? '').trim();
   return /^[+-]?(?:\d+(?:[.,]\d*)?|[.,]\d+)(?:e[+-]?\d+)?$/i.test(text) && Number.isFinite(Number(text.replace(',', '.')));
 }
+// Movimiento Parabólico es el único tema: estas son todas las variables que
+// aparecen en exercises.json (values de dron, básquetbol y paredón).
 const VALUE_LABELS = {
   v0: ['Velocidad inicial', 'm/s'], angle: ['Ángulo', '°'], angleA: ['Primer ángulo', '°'], angleB: ['Segundo ángulo', '°'], gravity: ['Gravedad', 'm/s²'], vx: ['Velocidad horizontal', 'm/s'], t: ['Tiempo', 's'], targetDistance: ['Distancia objetivo', 'm'],
-  masa: ['Masa', 'kg'], calorEspecifico: ['Calor específico', 'J/(kg·°C)'], temperaturaInicial: ['Temperatura inicial', '°C'], temperaturaFinal: ['Temperatura final', '°C'], calor: ['Calor recibido', 'J'],
-  masaCaliente: ['Agua caliente', 'kg'], temperaturaCaliente: ['Temperatura caliente', '°C'], masaFria: ['Agua fría', 'kg'], temperaturaFria: ['Temperatura fría', '°C'],
-  anguloIncidencia: ['Ángulo de incidencia', '°'], anguloSuperficie: ['Ángulo desde la superficie', '°'], distanciaObjeto: ['Distancia del objeto', 'cm'],
-  velocidadVacio: ['Luz en vacío', 'm/s'], velocidadMedio: ['Luz en vidrio', 'm/s'],
-  distancia: ['Distancia', 'm'], tiempo: ['Tiempo', 's'], rapidez: ['Rapidez', 'm/s'], velocidadDron: ['Velocidad del dron', 'm/s'], velocidadViento: ['Velocidad del viento', 'm/s'], componenteX: ['Componente X', 'm'], componenteY: ['Componente Y', 'm'], k: ['Constante elástica', 'N/m'], x: ['Deformación', 'm'], fuerza: ['Fuerza', 'N'],
 };
 const formatValue = value => typeof value === 'number' ? new Intl.NumberFormat('es-PY', { maximumFractionDigits: 3 }).format(value) : String(value);
 export default function ExerciseCard({ exercise, onResult, onAskHint, onSimulationCheck, onSimulationClear, hintsUsed = 0, onIncrementHint }) {
+  const { language } = useTranslation();
   const [answer, setAnswer] = useState(''), [feedback, setFeedback] = useState(null), [waiting, setWaiting] = useState(false), [hintError, setHintError] = useState(''), [hintMessage, setHintMessage] = useState(null);
   const currentId = useRef(exercise?.id), hintLock = useRef(false), hintRequest = useRef(0), startedAt = useRef(Date.now());
   currentId.current = exercise?.id;
@@ -31,7 +30,7 @@ export default function ExerciseCard({ exercise, onResult, onAskHint, onSimulati
     event.preventDefault();
     if (!valid) return;
     const result = validateExercise(exercise, answer);
-    const diagnosis = result.correct ? null : diagnoseAttempt(exercise, answer);
+    const diagnosis = result.correct ? null : diagnoseAttempt(exercise, answer, language);
     setFeedback({ ...result, diagnosisMessage: diagnosis?.message });
     onResult?.({ correct: result.correct, hintsUsed, exerciseId: exercise.id, durationMs: Date.now() - startedAt.current });
     onSimulationCheck?.({ exerciseId: exercise.id, answer: result.student, result });
@@ -57,8 +56,7 @@ export default function ExerciseCard({ exercise, onResult, onAskHint, onSimulati
   return (
     <section className="card exercise-card" aria-label={'Ejercicio ' + exercise.id}>
       <div className="exercise-meta"><span className="chip chip-topic">{exercise.topic}</span><span className="chip chip-difficulty">{exercise.difficulty}</span></div>
-      <p className="exercise-question">{exercise.question}</p>
-      {exercise.questionJopara && <p className="exercise-question-jopara"><span>Jopara</span> {exercise.questionJopara}</p>}
+      <p className="exercise-question">{exercise.question}{language !== 'es' && <small className="bilingual-es" lang="es"> Jopara · borrador sin revisión lingüística</small>}</p>
       <div className="values-chips">{Object.entries(exercise.values ?? {}).map(([key, value]) => <span key={key} className="chip chip-data"><small>{VALUE_LABELS[key]?.[0] ?? key}</small><strong>{formatValue(value)} {VALUE_LABELS[key]?.[1] ?? ''}</strong></span>)}</div>
       <form onSubmit={check} noValidate>
         <div className="answer-row"><label className="answer-label" htmlFor={'answer-' + exercise.id}>Respuesta</label><input id={'answer-' + exercise.id} className="answer-input" type="text" inputMode="decimal" autoComplete="off" placeholder="Escribí tu resultado" value={answer} aria-invalid={invalid} aria-describedby={'answer-help-' + exercise.id} onChange={event => { setAnswer(event.target.value); setFeedback(null); onSimulationClear?.(); }} /><span className="answer-unit">{exercise.unit}</span></div>
