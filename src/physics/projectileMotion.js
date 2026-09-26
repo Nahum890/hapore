@@ -28,10 +28,22 @@ export function createLaunch(v0, angleDeg, options = {}) {
 }
 
 export function positionAt(launch, t) {
+  const safeT = Number.isFinite(Number(t)) ? Math.max(0, Number(t)) : 0;
   return {
-    t,
-    x: positionX(launch.x0, launch.vx, t),
-    y: positionY(launch.y0, launch.vy, t, launch.gravity),
+    t: safeT,
+    x: positionX(launch.x0, launch.vx, safeT),
+    y: positionY(launch.y0, launch.vy, safeT, launch.gravity),
+  };
+}
+
+export function velocityAt(launch, t) {
+  const safeT = Number.isFinite(Number(t)) ? Math.max(0, Number(t)) : 0;
+  const vy = launch.vy - launch.gravity * safeT;
+  return {
+    vx: launch.vx,
+    vy,
+    speed: Math.hypot(launch.vx, vy),
+    angleDeg: (Math.atan2(vy, launch.vx) * 180) / Math.PI,
   };
 }
 
