@@ -1,5 +1,6 @@
 import { rpc, rest, isCloudConfigured } from './cloudClient.js';
 import { readJSON, writeJSON, removeKey } from '../utils/storage.js';
+import { summarizeErrorCounts } from '../pedagogy/errorSummary.js';
 
 // Paquete de clase que descarga el alumno: queda en su perfil local para
 // practicar sin internet. Pendiente de subida: la última foto del avance que
@@ -38,8 +39,13 @@ export async function createCloudClass({ title, teacherName, teacherAvatar, teac
 }
 
 export async function listTeacherClasses() {
-  const select = 'id,code,title,created_at,class_members(student_id,display_name,avatar,xp,level,attempts,correct,confidence,cards_consolidated,last_sync,joined_at,phone,email)';
-  return rest(session => `classes?select=${select}&teacher_id=eq.${session.userId}&order=created_at.desc`);
+  const select = 'id,code,title,created_at,class_members(student_id,display_name,avatar,xp,level,attempts,correct,confidence,cards_consolidated,error_summary,last_sync,joined_at,phone,email)';
+  try { return await rest(session => `classes?select=${select}&teacher_id=eq.${session.userId}&order=created_at.desc`); }
+  catch (error) {
+    if (!/error_summary|column.*exist|schema cache/i.test(error.message ?? '')) throw error;
+    const legacySelect = 'id,code,title,created_at,class_members(student_id,display_name,avatar,xp,level,attempts,correct,confidence,cards_consolidated,last_sync,joined_at,phone,email)';
+    return rest(session => `classes?select=${legacySelect}&teacher_id=eq.${session.userId}&order=created_at.desc`);
+  }
 }
 
 export async function deleteCloudClass(id) {
@@ -98,6 +104,7 @@ export async function leaveCloudClass() {
 export function progressSnapshot(learning) {
   const log = Array.isArray(learning?.attemptLog) ? learning.attemptLog : [];
   const cards = learning?.flashcardState && typeof learning.flashcardState === 'object' ? Object.values(learning.flashcardState) : [];
+  const errorSummary = summarizeErrorCounts(log.slice(-30));
   return {
     xp: Math.max(0, Math.floor(Number(learning?.xp) || 0)),
     level: Math.max(1, Math.floor(Number(learning?.level?.level) || 1)),
@@ -105,6 +112,7 @@ export function progressSnapshot(learning) {
     correct: log.filter(item => item?.correct).length,
     confidence: Math.max(0, Math.min(100, Math.round(Number(learning?.confidence) || 0))),
     cards_consolidated: cards.filter(item => item?.consolidated).length,
+    error_summary: Object.fromEntries(Object.entries(errorSummary).map(([key, count]) => [key, Math.min(2, count)])),
   };
 }
 

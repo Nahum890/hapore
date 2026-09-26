@@ -46,11 +46,15 @@ import { readJSON, writeJSON, setActiveProfile } from './utils/storage.js';
 import { getSession, hasContactInfo, logout } from './auth/localAccounts.js';
 import { decodeClassConfig, encodeClassConfig, selectClassExercises } from './utils/classCode.js';
 import { recommendExercise, summarizeAttempts } from './pedagogy/progression.js';
+import { getRepeatedErrorFocus } from './pedagogy/errorSummary.js';
 import './components/TutorModes.css';
 import Icon from './components/Icon.jsx';
 import { LaunchScene, Nanduti } from './components/Nanduti.jsx';
 import { useTranslation } from './i18n/LanguageProvider.jsx';
 import { translate } from './i18n/messages.js';
+import VoiceChatControls from './components/VoiceChatControls.jsx';
+import ExercisePhotoTutor from './components/ExercisePhotoTutor.jsx';
+import './components/AdaptivePracticePlan.css';
 
 // Cada sección tiene su color: así se reconoce dónde estás sin leer.
 const SECTIONS = [
@@ -81,6 +85,7 @@ function HomeView({ user, learning, classConfig, onNavigate, onGuide }) {
   const { t } = useTranslation();
   const teacher = user.role === 'maestro';
   const progress = summarizeAttempts(learning.attemptLog);
+  const reviewFocus = getRepeatedErrorFocus(learning.attemptLog);
   const topicProgress = SCENARIOS.map(scenario => {
     const ids = new Set(getAllExercises().filter(item => item.scenario === scenario.id).map(item => item.id));
     return { topic: scenario.label, ...summarizeAttempts(learning.attemptLog.filter(item => ids.has(item.exerciseId))) };
@@ -108,6 +113,7 @@ function HomeView({ user, learning, classConfig, onNavigate, onGuide }) {
     </div>
     <section className="home-class-card"><Nanduti size={64} spokes={16} rings={3} className="home-class-nanduti" /><div><span className="panel-eyebrow">{teacher ? 'PARA TU CLASE' : 'APRENDÉ EN CLASE'}</span><h3>{teacher ? '¿Qué necesitás para tu clase?' : classConfig ? 'Tu clase está configurada' : '¿Tenés un código de clase?'}</h3><p>{teacher ? 'Compartí una clase, creá un ejercicio o prepará una presentación para proyectar.' : classConfig ? 'Ya podés practicar los materiales que preparó tu docente.' : 'Ingresalo para ver los ejercicios y tarjetas de tu docente.'}</p></div><button className="btn btn-secondary" type="button" onClick={() => onNavigate('aula')}>{teacher ? 'Ir a Aula docente' : 'Ir a Mi clase'}</button></section>
     {progress.attempts > 0 && <section className="card learning-progress" aria-label="Progreso por tema"><div className="learning-progress-head"><div><span className="panel-eyebrow">TU AVANCE</span><h2>Así vas aprendiendo</h2></div><strong>{progress.accuracy}% de aciertos</strong></div><div className="learning-topic-grid">{topicProgress.map(item => <div key={item.topic}><div className="learning-topic-title"><strong>{item.topic}</strong><span>{item.correct}/{item.attempts} aciertos</span></div><div className="learning-topic-track"><span style={{width:`${item.accuracy}%`}} /></div><small>{item.attempts ? `Tiempo promedio: ${item.averageSeconds} s` : 'Todavía sin intentos'}</small></div>)}</div></section>}
+    {reviewFocus && <section className="practice-plan card" aria-label="Plan de práctica recomendado"><div><span className="panel-eyebrow">RECOMENDACIÓN PERSONAL</span><h3>Un punto breve para repasar</h3><p>En tus intentos recientes se repitió <strong>{reviewFocus.label.toLocaleLowerCase()}</strong> ({reviewFocus.count} veces). {reviewFocus.activity}</p></div><button type="button" className="btn btn-primary" onClick={() => onNavigate('simulador')}>Practicar ahora</button><small>Este plan se calcula en tu dispositivo a partir de tus ejercicios. No se envían tus respuestas escritas.</small></section>}
     <p className="home-progress-note">Tu progreso: <strong>{learning.xp} XP</strong> · {progress.correct} respuestas correctas de {progress.attempts} intentos{progress.attempts ? ` · ${progress.accuracy}% de aciertos` : ''}. Guardado en este dispositivo.</p>
   </div>;
 }
@@ -265,16 +271,19 @@ function handlePracticeTabKeyDown(event) {
 }
 
 function FreeChatView({ quiz }) {
+  const { language } = useTranslation();
+  const [photoBusy, setPhotoBusy] = useState(false);
   const logRef = useRef(null);
   useEffect(() => {
     logRef.current?.scrollTo?.({ top: logRef.current.scrollHeight, behavior: 'smooth' });
   }, [quiz.charlaLog.length, quiz.streamText, quiz.busy]);
   const freeHistory = quiz.history.filter(session => session.tipo === 'chat-libre' || session.tema === 'Chat libre');
+  const latestTutorText = [...quiz.charlaLog].reverse().find(message => message.role !== 'alumno')?.text ?? '';
   return <div className="tutor-mode-panel" id="tutor-panel" role="tabpanel" aria-labelledby="tutor-tab-free">
     <div className="quiz-head">
       <div><h2>Chat libre</h2><p>Preguntale al tutor sin completar tarjetas ni cuestionarios.</p></div>
       <span className="chip">Consultas disponibles hoy: {quiz.charlaLeft}/15</span>
-      <button type="button" className="btn btn-secondary chat-new-button" onClick={quiz.newFreeConversation} disabled={quiz.busy}>Nueva conversación</button>
+      <button type="button" className="btn btn-secondary chat-new-button" onClick={quiz.newFreeConversation} disabled={quiz.busy || photoBusy}>Nueva conversación</button>
     </div>
     <div className="chats-scroll" ref={logRef} aria-live="polite">
       {!quiz.charlaLog.length && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble">¡Hola! Estoy acá para ayudarte con Física. Escribí tu pregunta cuando quieras.</div>}
@@ -282,15 +291,17 @@ function FreeChatView({ quiz }) {
         <MathText text={message.text} />
         {message.role !== 'alumno' && message.source && <small className="chat-message-source">{tutorSourceLabel(message)}</small>}
       </div>)}
-      {quiz.busy && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-typing" role="status" aria-live="polite"><span>El tutor está respondiendo</span><span className="chat-typing-dots" aria-hidden="true"><i /><i /><i /></span></div>}
+      {quiz.busy && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-typing" role="status" aria-live="polite"><span>PyFis está escribiendo</span><span className="chat-typing-dots" aria-hidden="true"><i /><i /><i /></span></div>}
       {quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-streaming" aria-live="off"><MathText text={quiz.streamText} /></div>}
     </div>
+    <ExercisePhotoTutor quiz={quiz} language={language} onBusyChange={setPhotoBusy} />
     <form className="chats-input-area" onSubmit={event => { event.preventDefault(); quiz.askFreeQuestion(); }}>
-      <input className="quiz-input" type="text" inputMode="text" autoComplete="off" aria-label="Pregunta para el tutor" placeholder={quiz.charlaLeft > 0 ? 'Escribí tu pregunta…' : 'Llegaste al límite diario de consultas'} value={quiz.charlaText} onChange={event => quiz.setCharlaText(event.target.value)} disabled={quiz.busy || quiz.charlaLeft <= 0} />
-      <button type="submit" className="btn btn-primary" disabled={quiz.busy || quiz.charlaLeft <= 0 || !quiz.charlaText.trim()}>{quiz.busy ? 'El tutor está respondiendo…' : 'Enviar pregunta'}</button>
+      <input className="quiz-input" type="text" inputMode="text" autoComplete="off" aria-label="Pregunta para el tutor" placeholder={quiz.charlaLeft > 0 ? 'Escribí tu pregunta…' : 'Llegaste al límite diario de consultas'} value={quiz.charlaText} onChange={event => quiz.setCharlaText(event.target.value)} disabled={quiz.busy || photoBusy || quiz.charlaLeft <= 0} />
+      <button type="submit" className="btn btn-primary" disabled={quiz.busy || photoBusy || quiz.charlaLeft <= 0 || !quiz.charlaText.trim()}>{photoBusy ? 'PyFis está procesando…' : quiz.busy ? 'PyFis está escribiendo…' : 'Enviar pregunta'}</button>
+      <VoiceChatControls language={language} disabled={quiz.busy || photoBusy || quiz.charlaLeft <= 0} onTranscript={text => quiz.setCharlaText(current => current ? `${current} ${text}` : text)} speechText={latestTutorText} />
     </form>
     {quiz.charlaLeft <= 0 && <p className="deck-selector-note">Alcanzaste las 15 consultas diarias. Iniciar otra conversación no reinicia el límite.</p>}
-    {freeHistory.length > 0 && <details className="chat-history"><summary>Conversaciones anteriores ({freeHistory.length})</summary><ul className="chat-history-list">{[...freeHistory].reverse().map(session => <li key={session.id} className="chat-history-item"><button type="button" className="chat-history-button" onClick={() => quiz.openFreeConversation(session)} disabled={quiz.busy}><strong>{session.tema}</strong><br />{session.fecha} · {session.mensajes?.length ?? 0} mensajes</button></li>)}</ul></details>}
+    {freeHistory.length > 0 && <details className="chat-history"><summary>Conversaciones anteriores ({freeHistory.length})</summary><ul className="chat-history-list">{[...freeHistory].reverse().map(session => <li key={session.id} className="chat-history-item"><button type="button" className="chat-history-button" onClick={() => quiz.openFreeConversation(session)} disabled={quiz.busy || photoBusy}><strong>{session.tema}</strong><br />{session.fecha} · {session.mensajes?.length ?? 0} mensajes</button></li>)}</ul></details>}
   </div>;
 }
 function ChatsView({ quiz, mode, onModeChange, onCardConsolidated }) {

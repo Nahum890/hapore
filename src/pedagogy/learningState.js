@@ -31,7 +31,7 @@ export function loadLearningState() {
   };
 }
 
-export function recordExerciseResult({ correct, hintsUsed = 0, exerciseId = null, durationMs = 0 } = {}) {
+export function recordExerciseResult({ correct, hintsUsed = 0, exerciseId = null, durationMs = 0, errorType = null, expectedConcept = null, scenario = null } = {}) {
   const completed = storedList(STORAGE_KEYS.COMPLETED);
   const alreadyCompleted = Boolean(exerciseId && completed.includes(exerciseId));
   const reward = alreadyCompleted
@@ -55,7 +55,14 @@ export function recordExerciseResult({ correct, hintsUsed = 0, exerciseId = null
   const attempts = storedAttempts() + 1;
   writeJSON(STORAGE_KEYS.ATTEMPTS, attempts);
   const attemptLog = storedList(STORAGE_KEYS.ATTEMPT_LOG);
-  writeJSON(STORAGE_KEYS.ATTEMPT_LOG, [...attemptLog, { exerciseId, correct: Boolean(correct), hintsUsed: Math.max(0, Number(hintsUsed) || 0), durationMs: Math.max(0, Math.round(Number(durationMs) || 0)), at: new Date().toISOString() }].slice(-200));
+  writeJSON(STORAGE_KEYS.ATTEMPT_LOG, [...attemptLog, {
+    exerciseId, correct: Boolean(correct), hintsUsed: Math.max(0, Number(hintsUsed) || 0),
+    durationMs: Math.max(0, Math.round(Number(durationMs) || 0)),
+    errorType: !correct && typeof errorType === 'string' ? errorType.slice(0, 64) : null,
+    expectedConcept: typeof expectedConcept === 'string' ? expectedConcept.slice(0, 100) : null,
+    scenario: typeof scenario === 'string' ? scenario.slice(0, 40) : null,
+    at: new Date().toISOString(),
+  }].slice(-200));
   if (correct && exerciseId && !alreadyCompleted) {
     writeJSON(STORAGE_KEYS.COMPLETED, [...completed, exerciseId]);
   }

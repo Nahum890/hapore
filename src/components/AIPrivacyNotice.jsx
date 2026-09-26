@@ -6,7 +6,7 @@ export default function AIPrivacyNotice() {
   return <aside className="ai-privacy-notice" aria-label="Privacidad del tutor con Gemini">
     <div className="ai-privacy-copy">
       <strong>{consent === 'online' ? 'Gemini online está habilitado en esta pestaña' : consent === 'local' ? 'Estás usando el tutor local' : 'Elegí cómo querés usar el tutor'}</strong>
-      <p>Con Gemini se envía tu pregunta y hasta los últimos 4 mensajes de esta conversación a Google para generar la respuesta. No incluyas tu nombre, escuela ni otros datos personales. La elección dura hasta que cierres esta pestaña.</p>
+      <p>Con Gemini se envía tu pregunta y hasta los últimos 4 mensajes de esta conversación a Google para generar la respuesta. Si usás la herramienta de fotos, también se envía la imagen para leer el ejercicio; el texto y los pasos confirmados se guardan en el historial local del chat. No incluyas tu nombre, escuela ni otros datos personales. La elección dura hasta que cierres esta pestaña.</p>
     </div>
     <div className="ai-privacy-actions">
       {consent !== 'online' && <button type="button" className="btn btn-primary" onClick={() => setOnlineConsent('online')}>Permitir Gemini online</button>}

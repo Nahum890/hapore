@@ -4,6 +4,7 @@ import { createLaunch, evaluateTrajectory, maxHeight, positionAt, range, timeOfF
 import './ExplorationLab.css';
 
 const CHART = { width: 760, height: 310, left: 48, right: 18, top: 18, bottom: 40 };
+const TIME_CHART = { width: 560, height: 220, left: 54, right: 16, top: 16, bottom: 34 };
 
 function launchFrom(values) {
   return createLaunch(values.v0, values.angle, { gravity: values.gravity, y0: values.y0 ?? 0 });
@@ -68,6 +69,51 @@ function MetricCards({ launch }) {
     <div><span>Tiempo hasta el suelo</span><strong>{number(result.time)} s</strong></div>
     <div><span>Velocidad horizontal</span><strong>{number(result.vx)} m/s</strong></div>
   </div>;
+}
+
+function KinematicsPlot({ launch, elapsed, kind }) {
+  const id = useId().replace(/:/g, '');
+  const total = timeOfFlight(launch);
+  const samples = Array.from({ length: 41 }, (_, index) => {
+    const t = total * index / 40;
+    const position = positionAt(launch, t);
+    return { t, x: position.x, y: position.y, vx: launch.vx, vy: launch.vy - launch.gravity * t };
+  });
+  const series = kind === 'position'
+    ? [{ key: 'x', label: 'x(t)', color: 'exploration-path-a' }, { key: 'y', label: 'y(t)', color: 'exploration-path-b' }]
+    : [{ key: 'vx', label: 'vx(t)', color: 'exploration-path-a' }, { key: 'vy', label: 'vy(t)', color: 'exploration-path-b' }];
+  const allValues = samples.flatMap(point => series.map(line => point[line.key]));
+  let minY = Math.min(0, ...allValues), maxY = Math.max(0, ...allValues);
+  if (Math.abs(maxY - minY) < 0.001) { minY -= 1; maxY += 1; }
+  const plotWidth = TIME_CHART.width - TIME_CHART.left - TIME_CHART.right;
+  const plotHeight = TIME_CHART.height - TIME_CHART.top - TIME_CHART.bottom;
+  const x = t => TIME_CHART.left + (total > 0 ? t / total : 0) * plotWidth;
+  const y = value => TIME_CHART.top + ((maxY - value) / (maxY - minY)) * plotHeight;
+  const currentT = Math.min(Math.max(0, elapsed ?? 0), total);
+  const current = samples.reduce((best, point) => Math.abs(point.t - currentT) < Math.abs(best.t - currentT) ? point : best, samples[0]);
+  const isPosition = kind === 'position';
+  return <figure className="exploration-time-plot">
+    <figcaption><strong>{isPosition ? 'Posición en el tiempo' : 'Velocidad en el tiempo'}</strong><span>{isPosition ? 'x(t), y(t) · metros' : 'vx(t), vy(t) · m/s'}</span></figcaption>
+    <svg viewBox={`0 0 ${TIME_CHART.width} ${TIME_CHART.height}`} role="img" aria-labelledby={`kinematics-title-${id} kinematics-desc-${id}`}>
+      <title id={`kinematics-title-${id}`}>{isPosition ? 'Gráfica de posición por tiempo' : 'Gráfica de velocidad por tiempo'}</title>
+      <desc id={`kinematics-desc-${id}`}>{isPosition ? 'Posición horizontal y vertical del proyectil a lo largo del tiempo.' : 'Velocidad horizontal constante y velocidad vertical afectada por la gravedad.'}</desc>
+      {[0, .25, .5, .75, 1].map(fraction => {
+        const value = minY + (maxY - minY) * fraction;
+        return <g className="exploration-gridline" key={fraction}><line x1={TIME_CHART.left} x2={TIME_CHART.width - TIME_CHART.right} y1={y(value)} y2={y(value)} /><text x={TIME_CHART.left - 7} y={y(value) + 3} textAnchor="end">{number(value)}</text></g>;
+      })}
+      <line className="exploration-axis" x1={TIME_CHART.left} x2={TIME_CHART.width - TIME_CHART.right} y1={TIME_CHART.height - TIME_CHART.bottom} y2={TIME_CHART.height - TIME_CHART.bottom} />
+      <line className="exploration-axis" x1={TIME_CHART.left} x2={TIME_CHART.left} y1={TIME_CHART.top} y2={TIME_CHART.height - TIME_CHART.bottom} />
+      {series.map(line => <g key={line.key}><polyline className={`exploration-path ${line.color}`} points={samples.map(point => `${x(point.t)},${y(point[line.key])}`).join(' ')} /><circle className="exploration-series-marker" cx={x(current.t)} cy={y(current[line.key])} r="4" /><text className="exploration-legend" x={TIME_CHART.left + (line.key === 'x' || line.key === 'vx' ? 12 : 105)} y={TIME_CHART.top + 10}>{line.label}</text></g>)}
+      <text className="exploration-axis-label" x={TIME_CHART.width / 2} y={TIME_CHART.height - 4} textAnchor="middle">Tiempo (s)</text>
+    </svg>
+  </figure>;
+}
+
+function KinematicsCharts({ launch, elapsed }) {
+  return <section className="exploration-kinematics" aria-label="Gráficos de posición y velocidad a lo largo del tiempo">
+    <KinematicsPlot launch={launch} elapsed={elapsed} kind="position" />
+    <KinematicsPlot launch={launch} elapsed={elapsed} kind="velocity" />
+  </section>;
 }
 
 function ActivityLab() {
@@ -174,6 +220,7 @@ export default function ExplorationLab() {
         </div>
         <div className="exploration-visual">
           <Plot launches={chartLaunches} elapsed={comparedLaunches.length ? null : elapsed} labels={comparedLaunches.length ? ['Lanzamiento A', 'Lanzamiento B'] : ['Lanzamiento actual']} />
+          <KinematicsCharts launch={launch} elapsed={elapsed} />
           {!comparedLaunches.length && <MetricCards launch={launch} />}
           {comparedLaunches.length === 2 && <div className="exploration-metric-comparison">
             {[

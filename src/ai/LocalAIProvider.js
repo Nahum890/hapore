@@ -19,10 +19,10 @@ function wait(ms, signal) {
   });
 }
 export function buildChatPayload(context = {}) {
-  const message = safeText(context.message ?? 'Ayuda con el ejercicio', 1600);
+  const message = safeText(context.message ?? 'Ayuda con el ejercicio', 3200);
   const history = Array.isArray(context.history) ? context.history.slice(-4).map(item => ({
     role: item?.role === 'tutor' || item?.role === 'assistant' ? 'tutor' : 'alumno',
-    text: safeText(item?.text, 400),
+    text: safeText(item?.text, 1200),
   })).filter(item => item.text) : [];
   const sourceExercise = context.exercise;
   const values = Object.fromEntries(numberFields
@@ -42,6 +42,7 @@ export function buildChatPayload(context = {}) {
       language: context.language === 'es' ? 'es' : 'gn-jopara',
       type: safeText(context.type, 40),
       tipo: ['charla_libre', 'evaluacion_cuestionario'].includes(context.tipo) ? context.tipo : null,
+      interaction: context.interaction === 'photo-socratic' ? 'photo-socratic' : null,
       subtema: safeText(context.topic ?? context.subtema ?? context.expectedConcept, 120),
       ejercicio: safeText(context.exerciseId ?? context.exercise?.id ?? context.ejercicio ?? context.pregunta ?? context.enunciado ?? exercise?.question ?? context.preguntaId, 700),
       pregunta: safeText(context.pregunta ?? context.enunciado ?? exercise?.question, 700),

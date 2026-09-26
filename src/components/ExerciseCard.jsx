@@ -4,6 +4,7 @@ import { hasHintsLeft, totalHints } from '../pedagogy/hintEngine.js';
 import { validateExercise } from '../physics/physicsValidator.js';
 import { diagnoseAttempt } from '../pedagogy/diagnoseAttempt.js';
 import { useTranslation } from '../i18n/LanguageProvider.jsx';
+import SocraticExerciseGuide from './SocraticExerciseGuide.jsx';
 export function isNumericAnswer(value) {
   const text = String(value ?? '').trim();
   return /^[+-]?(?:\d+(?:[.,]\d*)?|[.,]\d+)(?:e[+-]?\d+)?$/i.test(text) && Number.isFinite(Number(text.replace(',', '.')));
@@ -58,7 +59,7 @@ export default function ExerciseCard({ exercise, onResult, onAskHint, onSimulati
     const result = validateExercise(exercise, answer);
     const diagnosis = result.correct ? null : diagnoseAttempt(exercise, answer, language);
     setFeedback({ ...result, diagnosisMessage: diagnosis?.message });
-    onResult?.({ correct: result.correct, hintsUsed, exerciseId: exercise.id, durationMs: Date.now() - startedAt.current });
+    onResult?.({ correct: result.correct, hintsUsed, exerciseId: exercise.id, durationMs: Date.now() - startedAt.current, errorType: diagnosis?.key ?? null, expectedConcept: exercise.expectedConcept ?? null, scenario: exercise.scenario ?? null });
     onSimulationCheck?.({ exerciseId: exercise.id, answer: result.student, result });
     if (!result.correct) onAskHint?.({ type: 'mistake', topic: exercise.topic, exercise, exerciseId: exercise.id, expectedConcept: exercise.expectedConcept, errorType: diagnosis?.key, studentAnswer: result.student ?? answer, expectedAnswer: result.expected, hintLevel: hintsUsed + 1 });
   };
@@ -129,6 +130,7 @@ export default function ExerciseCard({ exercise, onResult, onAskHint, onSimulati
           )}
         </div>
       )}
+      <SocraticExerciseGuide exercise={exercise} language={language} />
     </section>
   );
 }
