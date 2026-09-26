@@ -409,7 +409,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
         response = { message: 'No pude completar la consulta. Volvé a intentarlo cuando el tutor esté disponible.', available: false, source: null };
       }
       if (generation !== generationRef.current) return;
-      const finalLog = [...nextLog, { role: 'tutor', text: response.message, source: response.source ?? null, available: response.available !== false }];
+      const finalLog = [...nextLog, { role: 'tutor', text: response.message, source: response.source ?? null, reason: response.reason ?? null, available: response.available !== false }];
       setCharlaLog(finalLog);
       persistFreeConversation(finalLog);
       setTutorQuota(getTutorQuota());

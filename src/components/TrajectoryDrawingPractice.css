@@ -1,5 +1,5 @@
 .trajectory-drawing { padding: clamp(16px, 3vw, 26px); }
-.practice-mode-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.tutor-mode-tabs.practice-mode-tabs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .practice-mode-tabs button { padding-inline: 8px; font-size: 13px; line-height: 1.25; }
 .drawing-heading { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; }
 .drawing-heading h2 { margin: 3px 0 5px; font-size: clamp(21px, 3vw, 27px); }
@@ -56,8 +56,7 @@
   .drawing-help small { margin-top: 0; }
 }
 @media (max-width: 700px) {
-  .practice-mode-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .practice-mode-tabs button:last-child { grid-column: 1 / -1; }
+  .tutor-mode-tabs.practice-mode-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 560px) {
   .drawing-steps { grid-template-columns: 1fr; gap: 7px; margin: 14px 0; }

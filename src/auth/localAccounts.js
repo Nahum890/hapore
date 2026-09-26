@@ -1,7 +1,8 @@
 const ACCOUNTS_KEY = 'guarania:accounts:v1';
 const SESSION_KEY = 'guarania:session:v1';
 const ITERATIONS = 120000;
-const FALLBACK_ITERATIONS = 1000;
+const FALLBACK_ITERATIONS = 20000;
+const LEGACY_FALLBACK_ITERATIONS = 1000;
 const LEGACY_PROGRESS_KEYS = [
   'guarania:confidence', 'guarania:currentExercise', 'guarania:attempts',
   'guarania:flashcardState', 'guarania:completed', 'guarania:xp',
@@ -151,6 +152,7 @@ function pbkdf2Sha256(passwordStr, saltBytes, iterations = FALLBACK_ITERATIONS) 
   return result;
 }
 
+// Este fallback solo forma identificadores locales; nunca se usa para sales.
 export function getRandomBytes(length) {
   const bytes = new Uint8Array(length);
   if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
@@ -160,6 +162,13 @@ export function getRandomBytes(length) {
     bytes[i] = (Math.random() * 256) | 0;
   }
   return bytes;
+}
+
+function getSecureRandomBytes(length) {
+  if (typeof crypto === 'undefined' || typeof crypto.getRandomValues !== 'function') {
+    throw new Error('Este navegador no ofrece aleatoriedad segura. Abrí la app con HTTPS o localhost para crear una cuenta.');
+  }
+  return crypto.getRandomValues(new Uint8Array(length));
 }
 
 // Conservar referencia original nativa si existe para prevenir recursión infinita
@@ -192,7 +201,10 @@ try {
 
 async function hashPassword(password, salt, targetHash) {
   if (targetHash && targetHash.startsWith('fb:')) {
-    return 'fb:' + bytesToHex(pbkdf2Sha256(password, hexToBytes(salt), FALLBACK_ITERATIONS));
+    return 'fb:' + bytesToHex(pbkdf2Sha256(password, hexToBytes(salt), LEGACY_FALLBACK_ITERATIONS));
+  }
+  if (targetHash && targetHash.startsWith('fb2:')) {
+    return 'fb2:' + bytesToHex(pbkdf2Sha256(password, hexToBytes(salt), FALLBACK_ITERATIONS));
   }
   if (typeof crypto !== 'undefined' && crypto?.subtle?.importKey) {
     try {
@@ -206,7 +218,7 @@ async function hashPassword(password, salt, targetHash) {
   if (targetHash && !targetHash.startsWith('fb:')) {
     throw new Error('Esta cuenta fue creada en un entorno con HTTPS. Para ingresar desde esta conexión local, volvé a crearla o usá localhost/HTTPS.');
   }
-  return 'fb:' + bytesToHex(pbkdf2Sha256(password, hexToBytes(salt), FALLBACK_ITERATIONS));
+  return 'fb2:' + bytesToHex(pbkdf2Sha256(password, hexToBytes(salt), FALLBACK_ITERATIONS));
 }
 
 function publicAccount(account) {
@@ -304,7 +316,7 @@ export async function register({ name, username, password, role, phone, email })
   const contact = validateContact({ phone, email });
   const saved = accounts();
   if (saved.some(item => item.username === cleanUsername)) throw new Error('Ese nombre de usuario ya existe en este dispositivo.');
-  const salt = bytesToHex(getRandomBytes(16));
+  const salt = bytesToHex(getSecureRandomBytes(16));
   const account = { id: generateUUID(), name: cleanName, username: cleanUsername, role, ...contact, salt, passwordHash: await hashPassword(password, salt) };
   try {
     storage().setItem(ACCOUNTS_KEY, JSON.stringify([...saved, account]));
@@ -326,6 +338,17 @@ export async function login({ username, password }) {
   if (!account || !account.salt || !account.passwordHash) throw new Error('Usuario o contraseña incorrectos.');
   const candidate = await hashPassword(password, account.salt, account.passwordHash);
   if (candidate !== account.passwordHash) throw new Error('Usuario o contraseña incorrectos.');
+  if (account.passwordHash.startsWith('fb:')) {
+    try {
+      const salt = bytesToHex(getSecureRandomBytes(16));
+      account.salt = salt;
+      account.passwordHash = await hashPassword(password, salt);
+      storage().setItem(ACCOUNTS_KEY, JSON.stringify(accounts().map(item => item.id === account.id ? account : item)));
+    } catch {
+      // No bloquear perfiles existentes en navegadores antiguos; el hash
+      // legado se reemplaza si la plataforma ofrece un generador seguro.
+    }
+  }
   storage().setItem(SESSION_KEY, account.id);
   return publicAccount(account);
 }
