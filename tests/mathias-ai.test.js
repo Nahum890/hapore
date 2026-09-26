@@ -52,13 +52,14 @@ test('si el tutor local tampoco puede responder, recién ahí se explica la fall
   }
 });
 
-test('reintenta 429 con pausa exponencial y conserva el contexto',async()=>{
-  let count=0,payload;
-  const provider=new LocalAIProvider({timeoutMs:1000,retryDelayMs:1,fetch:async(_url,options)=>{count++;payload=JSON.parse(options.body);return count===1?new Response('',{status:429}):Response.json({text:'Respuesta útil'});}});
+test('no reenvía una consulta 429 y usa el tutor local sin duplicar cuota',async()=>{
+  let count=0;
+  const provider=new LocalAIProvider({timeoutMs:1000,fetch:async()=>{count++;return new Response('',{status:429});}});
   const result=await provider.respond({tipo:'charla_libre',message:'¿Qué es gravedad?'});
-  assert.equal(count,2);
-  assert.equal(result.message,'Respuesta útil');
-  assert.equal(payload.context.message,'¿Qué es gravedad?');
+  assert.equal(count,1);
+  assert.equal(result.source,'rules');
+  assert.equal(result.reason,'rate-limited');
+  assert.match(result.message,/gravedad/i);
 });
 
 test('streaming muestra texto parcial y sanitiza al completar',async()=>{

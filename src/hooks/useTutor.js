@@ -35,7 +35,10 @@ export function useTutor() {
 
   const ask = useCallback(async (context) => {
     const id = ++requestId.current;
-    const onToken = (message) => { if (id === requestId.current) setTutor({ message, source: 'gemini', available: true, streaming: true }); };
+    setTutor(current => ({ ...current, loading: true }));
+    const onToken = (message, source) => {
+      if (id === requestId.current) setTutor({ message, source, available: true, streaming: true, loading: false });
+    };
     try {
       const response = await providerRef.current.respond({ language, ...context, onToken });
       if (id === requestId.current) setTutor(response);

@@ -2,10 +2,14 @@ import { sanitizeMarkup } from '../utils/validation.js';
 import RuleTutorProvider from './RuleTutorProvider.js';
 import { evaluateQuizContext } from './quizEngine.js';
 import { getTutorQuota, recordTutorQuery, tutorQuotaMessage } from './tutorQuota.js';
+import { hasOnlineConsent, getOnlineConsent } from './onlineConsent.js';
+import { getCloudSession, isCloudConfigured } from '../cloud/cloudClient.js';
 
 const RETRY_STATUS = new Set([408, 429, 500, 502, 503, 504]);
-const MAX_WAIT_MS = 50000;
+const MAX_WAIT_MS = 15000;
 const aborted = () => new DOMException('Tiempo de espera agotado', 'AbortError');
+const safeText = (value, limit) => String(value ?? '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').trim().slice(0, limit);
+const numberFields = ['v0', 'angle', 'gravity', 'x0', 'y0', 'targetX', 'targetY'];
 function wait(ms, signal) {
   return new Promise((resolve, reject) => {
     if (signal.aborted) { reject(aborted()); return; }
@@ -15,19 +19,38 @@ function wait(ms, signal) {
   });
 }
 export function buildChatPayload(context = {}) {
+  const message = safeText(context.message ?? 'Ayuda con el ejercicio', 1600);
+  const history = Array.isArray(context.history) ? context.history.slice(-4).map(item => ({
+    role: item?.role === 'tutor' || item?.role === 'assistant' ? 'tutor' : 'alumno',
+    text: safeText(item?.text, 400),
+  })).filter(item => item.text) : [];
+  const sourceExercise = context.exercise;
+  const values = Object.fromEntries(numberFields
+    .filter(key => sourceExercise?.values?.[key] !== null && sourceExercise?.values?.[key] !== '' && Number.isFinite(Number(sourceExercise?.values?.[key])))
+    .map(key => [key, Number(sourceExercise.values[key])]));
+  const exercise = sourceExercise && typeof sourceExercise === 'object' ? {
+    id: safeText(sourceExercise.id, 80),
+    question: safeText(sourceExercise.question, 700),
+    difficulty: safeText(sourceExercise.difficulty, 40),
+    expectedConcept: safeText(sourceExercise.expectedConcept, 100),
+    ...(Object.keys(values).length ? { values } : {}),
+  } : undefined;
   return {
-    message: context.message ?? 'Ayuda con el ejercicio',
+    message,
     context: {
-      ...context,
-      message: context.message,
-      tipo: context.tipo ?? null,
-      subtema: context.topic ?? context.subtema ?? context.expectedConcept ?? null,
-      ejercicio: context.exerciseId ?? context.exercise?.id ?? context.ejercicio ?? context.preguntaId ?? null,
-      pregunta: context.pregunta ?? context.enunciado ?? context.exercise?.question ?? null,
-      respuestaAlumno: context.studentAnswer ?? context.respuestaAlumno ?? context.respuesta ?? null,
-      respuestaCorrecta: context.expectedAnswer ?? context.respuestaCorrecta ?? null,
-      tipoError: context.errorType ?? context.tipoError ?? context.expectedConcept ?? null,
-      nivelPista: context.hintLevel ?? context.nivelPista ?? 0,
+      message,
+      language: context.language === 'es' ? 'es' : 'gn-jopara',
+      type: safeText(context.type, 40),
+      tipo: ['charla_libre', 'evaluacion_cuestionario'].includes(context.tipo) ? context.tipo : null,
+      subtema: safeText(context.topic ?? context.subtema ?? context.expectedConcept, 120),
+      ejercicio: safeText(context.exerciseId ?? context.exercise?.id ?? context.ejercicio ?? context.pregunta ?? context.enunciado ?? exercise?.question ?? context.preguntaId, 700),
+      pregunta: safeText(context.pregunta ?? context.enunciado ?? exercise?.question, 700),
+      ...(exercise ? { exercise } : {}),
+      respuestaAlumno: safeText(context.studentAnswer ?? context.respuestaAlumno ?? context.respuesta, 500),
+      respuestaCorrecta: safeText(context.expectedAnswer ?? context.respuestaCorrecta, 500),
+      tipoError: safeText(context.errorType ?? context.tipoError ?? context.expectedConcept, 120),
+      nivelPista: Math.min(4, Math.max(0, Math.floor(Number(context.hintLevel ?? context.nivelPista) || 0))),
+      history,
     },
   };
 }
@@ -41,15 +64,17 @@ export default class LocalAIProvider {
     this.id = 'gemini';
     this.options = options;
     this.fallback = options.fallback ?? new RuleTutorProvider(options);
-    this.timeoutMs = Math.min(MAX_WAIT_MS, Math.max(1, Number(options.timeoutMs) || MAX_WAIT_MS));
-    this.maxRetries = Math.min(2, Math.max(0, Math.floor(options.maxRetries ?? 2)));
+    this.timeoutMs = Math.min(MAX_WAIT_MS, Math.max(1, Number(options.timeoutMs) || 12000));
+    // Every server attempt consumes quota, so production falls back locally
+    // instead of resending a billable query by default.
+    this.maxRetries = Math.min(1, Math.max(0, Math.floor(options.maxRetries ?? 0)));
     this.retryDelayMs = Math.max(1, options.retryDelayMs ?? 150);
     this.fetch = options.fetch ?? ((...args) => fetch(...args));
     this.model = null;
   }
-  notify(callback, text) {
+  notify(callback, text, source = this.id) {
     if (typeof callback !== 'function') return;
-    try { callback(sanitizeMarkup(text)); } catch { /* A UI callback cannot break fallback. */ }
+    try { callback(sanitizeMarkup(text), source); } catch { /* A UI callback cannot break fallback. */ }
   }
   async readResponse(response, signal, onToken) {
     const mime = response.headers?.get?.('content-type') ?? '';
@@ -70,7 +95,7 @@ export default class LocalAIProvider {
       if (data.error) throw new Error('El servicio interrumpió la respuesta');
       const delta = data.delta ?? data.token ?? '';
       text = typeof data.text === 'string' ? data.text : text + delta;
-      this.notify(onToken, text);
+      this.notify(onToken, text, this.id);
     };
     const cancel = () => { reader.cancel().catch(() => {}); };
     signal.addEventListener('abort', cancel, { once: true });
@@ -97,9 +122,14 @@ export default class LocalAIProvider {
     for (let attempt = 0; ; attempt += 1) {
       if (signal.aborted) throw aborted();
       try {
+        const headers = { 'Content-Type': 'application/json', Accept: 'text/event-stream, application/json' };
+        if (isCloudConfigured()) {
+          const session = await getCloudSession();
+          if (session?.accessToken) headers.Authorization = `Bearer ${session.accessToken}`;
+        }
         const response = await this.fetch('/api/chat', {
           method: 'POST', signal,
-          headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream, application/json' },
+          headers,
           body: JSON.stringify({ ...buildChatPayload(context), stream: true }),
         });
         if (!response.ok) {
@@ -133,7 +163,7 @@ export default class LocalAIProvider {
    * cualquier motivo (sin servidor, sin credencial, error del servicio):
    * en ambos casos el alumno debe seguir teniendo un tutor que responde,
    * no un mensaje de error sin salida. */
-  async respondLocally(context, onToken) {
+  async respondLocally(context, onToken, fallbackReason = 'offline') {
     const localResult = this.options.loadLocalModel
       ? await this.local(context, new AbortController().signal, onToken)
       : await this.fallback.respond(context);
@@ -148,10 +178,11 @@ export default class LocalAIProvider {
       message: sanitizeMarkup(text),
       source: this.options.loadLocalModel ? 'local-model' : 'rules',
       available: true,
+      reason: fallbackReason,
       ...nextQuota,
       ...(context.tipo === 'evaluacion_cuestionario' ? evaluateQuizContext(context) : {}),
     };
-    this.notify(onToken, result.message);
+    this.notify(onToken, result.message, result.source);
     return result;
   }
   async respond(context = {}) {
@@ -164,7 +195,7 @@ export default class LocalAIProvider {
     }
     if (offline) {
       try {
-        return await this.respondLocally(context, onToken);
+        return await this.respondLocally(context, onToken, 'offline');
       } catch {
         return {
           message: 'No pude preparar una respuesta sin conexión. Revisá el contenido guardado o volvé a intentarlo.',
@@ -175,10 +206,13 @@ export default class LocalAIProvider {
         };
       }
     }
+    if (!hasOnlineConsent()) {
+      return this.respondLocally(context, onToken, getOnlineConsent() === 'local' ? 'local-only' : 'consent-required');
+    }
     const controller = new AbortController();
     let timer;
     let active = true;
-    const emit = text => { if (active && !controller.signal.aborted) this.notify(onToken, text); };
+    const emit = text => { if (active && !controller.signal.aborted) this.notify(onToken, text, this.id); };
     const deadline = new Promise((_, reject) => {
       timer = setTimeout(() => { controller.abort(); reject(aborted()); }, this.timeoutMs);
     });
@@ -198,7 +232,7 @@ export default class LocalAIProvider {
       controller.abort();
       if (this.options.loadLocalModel) this.model = null;
       try {
-        return await this.respondLocally(context, onToken);
+        return await this.respondLocally(context, onToken, error?.status === 429 ? 'rate-limited' : error?.name === 'AbortError' ? 'timeout' : 'online-fallback');
       } catch {
         // El tutor local tampoco pudo responder (sin material offline para
         // esta consulta): recién ahí se muestra el motivo del fallo online.
