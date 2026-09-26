@@ -4,13 +4,13 @@ PWA educativa para aprender Física de 3.º curso con ejercicios, simulaciones l
 
 ## Contenido principal
 
-La propuesta para la competencia se concentra en:
+El único tema educativo de la app es **Movimiento Parabólico**, con tres situaciones que comparten el mismo motor físico:
 
-- **Termodinámica:** calor sensible, temperatura final y equilibrio térmico.
-- **Óptica:** reflexión, espejos planos e índice de refracción.
-- Situaciones cercanas como agua para el mate o tereré, recipientes, espejos y objetos dentro del agua.
+- **Dron:** entregas con salida y llegada a la misma altura.
+- **Básquetbol:** lanzamientos a la canasta.
+- **Pelota sobre un paredón:** tiro que debe superar un obstáculo.
 
-Movimiento parabólico, cinemática, vectores y Ley de Hooke permanecen como práctica complementaria.
+Velocidad, gravedad, vectores y ángulo de lanzamiento se explican como apoyo conceptual para entender el movimiento parabólico, no como temas propios.
 
 ## Funciones disponibles
 
@@ -33,8 +33,12 @@ Movimiento parabólico, cinemática, vectores y Ley de Hooke permanecen como pr�
 - Selección de temas, cantidad de tarjetas y cantidad de ejercicios.
 - Generación de un código de clase que se interpreta sin base de datos.
 - Vista de configuración aplicada.
-- Laboratorio complementario para proyectar trayectorias.
+- Proyector de trayectorias con vista previa del ejercicio antes de mostrarlo a la clase.
 - Generación de una ficha PDF imprimible y disponible sin conexión.
+
+### Minijuego
+
+- "Predecí y lanzá": el alumno estima el resultado (alcance o ángulo) antes de ver la simulación, compara su predicción con el resultado real y puede reintentar. Usa el mismo motor físico que el resto de la app.
 
 ## Tutor e IA
 
@@ -87,7 +91,7 @@ npm run build
 npm run preview
 ```
 
-La suite actual cubre cuentas y roles, motor físico, contenido, códigos de clase, simulaciones, progresión, fallback, reintentos, streaming, servidor y criterios de Termodinámica y Óptica.
+La suite actual cubre cuentas y roles, motor físico, contenido, códigos de clase, simulaciones, progresión, fallback, reintentos, streaming y servidor, todo sobre movimiento parabólico.
 
 ## Estructura principal
 
@@ -107,8 +111,8 @@ src/
 
 - Validación lingüística de todos los textos en Jopara por una persona competente.
 - Revisión y aprobación del contenido por un docente de Física.
-- Matriz de trazabilidad con las fuentes del programa MEC.
-- Endpoint `/api/chat` desplegable si se presenta la IA generativa online.
+- Matriz de trazabilidad con las fuentes del programa MEC: se buscó un programa oficial de Física de 3.º curso publicado en mec.gov.py y no se encontró un documento puntual sobre movimiento parabólico verificable en línea; falta que el equipo aporte la fuente oficial exacta (ver `src/data/contentReviewStatus.json`).
+- Endpoint `/api/chat` desplegable si se presenta la IA generativa online (hoy depende del servidor de desarrollo/vista previa de Vite; no está pensado para tocarse en esta etapa).
 - Pruebas de instalación y modo avión en teléfonos reales.
 - Pitch, guion de demostración, evidencia de colaboración y plan de continuidad.
 

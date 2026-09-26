@@ -13,7 +13,7 @@
   "curriculumTraceability": {
     "status": "pending-source",
     "source": null,
-    "note": "Preparar la matriz MEC cuando el equipo aporte la fuente curricular oficial; no se declara alineación curricular sin verificar esa fuente."
+    "note": "Se buscó en mec.gov.py (Programas de Estudio Actualizados) un programa oficial de Física de 3.º curso con movimiento parabólico; no se encontró un documento puntual y verificable en línea. Preparar la matriz MEC cuando el equipo aporte la fuente curricular oficial exacta; no se declara alineación curricular sin verificar esa fuente."
   },
   "collections": {
     "concepts": { "count": 7, "joparaStatus": "draft", "joparaNamesPresent": 7, "joparaDefinitionsPresent": 7 },
