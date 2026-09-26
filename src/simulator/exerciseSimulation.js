@@ -12,18 +12,65 @@ export function scenarioOf(exercise) {
 // El valor exacto solo debe mostrarse una vez que termina la animación.
 export const shouldRevealSimulatorAnswer = phase => phase === 'landed';
 
+const toRad = degrees => (degrees * Math.PI) / 180;
+const toDeg = radians => (radians * 180) / Math.PI;
+
 export function sceneForExercise(exercise, studentAnswer) {
   const values = exercise?.values ?? {};
   const initial = startingControls(exercise);
   let speed = initial.speed;
   let angle = Number(values.angleB ?? values.angle ?? initial.angle);
   const gravity = Number(values.gravity) || 9.8;
-  if (Number.isFinite(Number(values.vx)) && Number.isFinite(Number(values.t)) && !values.v0) {
+  const v0 = Number(values.v0);
+  const definedByVxT = Number.isFinite(Number(values.vx)) && Number.isFinite(Number(values.t)) && !values.v0;
+  if (definedByVxT) {
     const vy = gravity * Number(values.t) / 2;
     speed = Math.hypot(Number(values.vx), vy);
-    angle = Math.atan2(vy, Number(values.vx)) * 180 / Math.PI;
+    angle = toDeg(Math.atan2(vy, Number(values.vx)));
   }
-  if (exercise?.unit === '°' && Number.isFinite(Number(studentAnswer))) angle = Number(studentAnswer);
+  // La escena se recalcula a partir de lo que escribió el alumno (correcto o
+  // no), no solo del dato "verdadero" del enunciado: si la respuesta es una
+  // componente de velocidad, una altura o un tiempo, se reconstruye un vuelo
+  // hipotético consistente con esos datos, para que un cálculo equivocado se
+  // vea realmente distinto en vez de dibujar siempre el mismo lanzamiento.
+  const guess = Number(String(studentAnswer ?? '').replace(',', '.'));
+  if (Number.isFinite(guess)) {
+    const concept = exercise?.expectedConcept;
+    const baseAngleRad = toRad(Number(values.angle) || 0);
+    if (exercise?.unit === '°') {
+      angle = guess;
+    } else if (concept === 'componente-horizontal' && Number.isFinite(v0) && guess !== 0) {
+      const vy = v0 * Math.sin(baseAngleRad);
+      speed = Math.hypot(guess, vy);
+      angle = toDeg(Math.atan2(vy, guess));
+    } else if (concept === 'componente-vertical' && Number.isFinite(v0)) {
+      const vx = v0 * Math.cos(baseAngleRad);
+      speed = Math.hypot(vx, guess);
+      angle = toDeg(Math.atan2(guess, vx));
+    } else if (concept === 'altura-maxima' && Number.isFinite(v0) && guess >= 0) {
+      const vx = v0 * Math.cos(baseAngleRad);
+      const vy = Math.sqrt(2 * gravity * guess);
+      speed = Math.hypot(vx, vy);
+      angle = toDeg(Math.atan2(vy, vx));
+    } else if (concept === 'tiempo-de-vuelo' && Number.isFinite(v0) && guess > 0) {
+      const vx = v0 * Math.cos(baseAngleRad);
+      const vy = gravity * guess / 2;
+      speed = Math.hypot(vx, vy);
+      angle = toDeg(Math.atan2(vy, vx));
+    } else if (concept === 'alcance' && guess > 0) {
+      if (definedByVxT) {
+        const vx = Number(values.vx);
+        const flightTime = guess / vx;
+        const vy = gravity * flightTime / 2;
+        speed = Math.hypot(vx, vy);
+        angle = toDeg(Math.atan2(vy, vx));
+      } else if (Number.isFinite(v0) && v0 > 0) {
+        const ratio = Math.max(-1, Math.min(1, (guess * gravity) / (v0 * v0)));
+        angle = toDeg(Math.asin(ratio) / 2);
+        speed = v0;
+      }
+    }
+  }
   const flight = planFlight({
     speed,
     angle,

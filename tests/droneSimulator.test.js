@@ -38,6 +38,33 @@ test('el ángulo escrito cambia el recorrido mostrado para la misión de entrega
   assert.ok(Math.abs(correct.flight.landingX - correct.flight.targetX) < 0.01);
 });
 
+test('una componente de velocidad mal calculada dibuja un vuelo distinto, no siempre el mismo', () => {
+  // Caso real reportado: eb-01 pide vx (correcta 7,71 m/s). Antes de este
+  // fix, cualquier respuesta (90, 12, 7.71...) dibujaba siempre el mismo
+  // lanzamiento real (v0=12, ángulo=50°) y caía en el mismo punto.
+  const exercise = exercises.find(item => item.id === 'eb-01');
+  const guess90 = sceneForExercise(exercise, 90);
+  const guess12 = sceneForExercise(exercise, 12);
+  const correct = sceneForExercise(exercise, exercise.correctAnswer);
+  assert.notEqual(guess90.flight.landingX, guess12.flight.landingX);
+  assert.notEqual(guess12.flight.landingX, correct.flight.landingX);
+  assert.ok(Math.abs(correct.flight.landingX - correct.flight.targetX) < 0.05);
+});
+
+test('altura, tiempo y alcance mal calculados también cambian el vuelo dibujado', () => {
+  const altura = exercises.find(item => item.id === 'ej-03');
+  assert.notEqual(sceneForExercise(altura, 2).flight.landingX, sceneForExercise(altura, 20).flight.landingX);
+
+  const tiempo = exercises.find(item => item.id === 'ej-mec-03');
+  assert.notEqual(sceneForExercise(tiempo, 0.5).flight.duration, sceneForExercise(tiempo, 5).flight.duration);
+
+  const alcanceDesdeVxT = exercises.find(item => item.id === 'ej-04');
+  assert.notEqual(sceneForExercise(alcanceDesdeVxT, 5).flight.landingX, sceneForExercise(alcanceDesdeVxT, 60).flight.landingX);
+
+  const alcanceDesdeV0 = exercises.find(item => item.id === 'ej-07');
+  assert.notEqual(sceneForExercise(alcanceDesdeV0, 5).flight.landingX, sceneForExercise(alcanceDesdeV0, 60).flight.landingX);
+});
+
 test('el simulador no revela el resultado hasta que termina la comprobación', () => {
   assert.equal(shouldRevealSimulatorAnswer('idle'), false);
   assert.equal(shouldRevealSimulatorAnswer('flying'), false);

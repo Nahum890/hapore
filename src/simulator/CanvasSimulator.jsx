@@ -77,15 +77,16 @@ export default function CanvasSimulator({ mission, submission }) {
   const isCorrect = Boolean(currentSubmission?.result?.correct);
   const settled = currentSubmission && phase === 'landed';
   verdictRef.current = currentSubmission ? isCorrect : null;
-  // El ángulo es el único dato que cambia la trayectoria dibujada: en esos
-  // ejercicios "quedó a X m de la meta" describe algo real. En el resto la
-  // escena siempre muestra el lanzamiento verdadero del ejercicio (para que
-  // se pueda comparar), así que un cálculo mal hecho no mueve el dibujo.
-  const isAngleDriven = exercise?.unit === '°';
+  // sceneForExercise reconstruye un vuelo hipotético a partir de la propia
+  // respuesta del alumno (componente, altura, tiempo, alcance o ángulo), así
+  // que un cálculo mal hecho se ve realmente distinto en vez de dibujar
+  // siempre el lanzamiento verdadero del ejercicio.
+  const DRIVEN_CONCEPTS = ['componente-horizontal', 'componente-vertical', 'altura-maxima', 'tiempo-de-vuelo', 'alcance'];
+  const answerDrivesFlight = exercise?.unit === '°' || DRIVEN_CONCEPTS.includes(exercise?.expectedConcept);
   // La respuesta correcta exacta solo se muestra cuando el intento fue acertado;
   // si falló, se da una pista de dirección/desfasaje, nunca el valor esperado.
   const measured = formatMeasure(scene.measured);
-  const offTarget = settled && isAngleDriven && !isCorrect && scene.flight
+  const offTarget = settled && answerDrivesFlight && !isCorrect && scene.flight
     ? Math.abs(scene.flight.error)
     : null;
 
@@ -98,10 +99,10 @@ export default function CanvasSimulator({ mission, submission }) {
           <p className="simulator-verdict">{isCorrect ? '¡Tu respuesta coincide!' : 'Tu respuesta todavía no coincide.'}</p>
           {isCorrect
             ? <div className="simulator-comparison"><span>Escribiste <strong>{answer} {unit}</strong></span><span>El ejercicio muestra <strong>{measured} {unit}</strong></span></div>
-            : <p className="simulator-miss-note">{isAngleDriven
-                ? <>Escribiste <strong>{answer}{unit}</strong>{offTarget !== null ? `; con ese ángulo el lanzamiento hubiera quedado a ${formatMeasure(offTarget)} m de la meta.` : '.'} No te muestro el ángulo correcto: pedile una pista al tutor o volvé a calcular con los datos de arriba.</>
+            : <p className="simulator-miss-note">{answerDrivesFlight
+                ? <>Escribiste <strong>{answer}{unit ? ` ${unit}` : ''}</strong>{offTarget !== null ? `; con esa respuesta, el lanzamiento hubiera quedado a ${formatMeasure(offTarget)} m de la meta.` : '.'} No te muestro el valor correcto: pedile una pista al tutor o volvé a calcular con los datos de arriba.</>
                 : <>Escribiste <strong>{answer} {unit}</strong>. La escena siempre dibuja el lanzamiento real de este ejercicio para que compares tu cálculo con la trayectoria; no te muestro el valor correcto: pedile una pista al tutor o volvé a calcular con los datos de arriba.</>}</p>}
-          {settled && isAngleDriven && <p>Con tu ángulo, el lanzamiento llegó a {formatMeasure(scene.flight.landingX)} m; la meta está a {formatMeasure(scene.flight.targetX)} m.</p>}
+          {settled && answerDrivesFlight && <p>Con esa respuesta, el lanzamiento llegó a {formatMeasure(scene.flight.landingX)} m; la meta real está a {formatMeasure(scene.flight.targetX)} m.</p>}
           {settled && scenario === 'wall' && scene.flight.obstacle && <p>{scene.flight.clearsObstacle ? 'Superó el paredón.' : 'No llegó a superar el paredón: probá con más altura.'}</p>}
         </>}
       </div>}
