@@ -74,6 +74,15 @@ El proveedor online incluye:
 
 La clave de Gemini se lee desde el servidor de desarrollo o vista previa y nunca se incluye en el bundle. Para una publicación en alojamiento estático se debe desplegar `/api/chat` como función de servidor o mantener solo el tutor por reglas.
 
+### Qué hace hoy el tutor (y por qué no es "abrir Gemini")
+
+- **Método socrático:** en las pistas de un ejercicio, los niveles 1 y 2 no explican: preguntan. El nivel 1 pregunta qué datos identifica el alumno y qué le piden encontrar (usando los valores reales de ESE ejercicio); el nivel 2 pregunta qué fórmula usaría. El alumno puede responder en una mini conversación antes de que el tutor avance a la fórmula (nivel 3) y al paso trabajado (nivel 4). Esto vale tanto con Gemini online (`ai/prompt.js`) como sin conexión (`ai/RuleTutorProvider.js`): un chat genérico no conoce el banco de ejercicios de la app ni sus cuatro niveles pedagógicos.
+- **Foto del ejercicio:** en Chat libre se puede adjuntar una foto de un ejercicio escrito a mano. Con conexión, Gemini primero transcribe lo que lee (enunciado, datos, unidades) y pide confirmación antes de guiar; si hay pasos ya resueltos, señala el primero con error sin resolver el ejercicio directamente. Sin conexión se explica con claridad que hace falta internet para leer una imagen, en vez de inventar una respuesta a partir de palabras sueltas.
+- **Voz:** se puede preguntar hablando y escuchar la respuesta, con las APIs nativas del navegador (sin costo ni modelo adicional). El reconocimiento de voz de los navegadores no tiene guaraní: se usa español, y una consulta en Jopara puede reconocerse mal (se avisa en la interfaz).
+- **Plan de práctica:** si el alumno repite el mismo tipo de error (por ejemplo, confundir seno y coseno) dos veces o más, la pantalla de inicio le sugiere un ejercicio corto de ese concepto puntual (`pedagogy/progression.js`).
+- **Dificultades frecuentes (docente):** en Aula → Compartir clase → Alumnos en esta computadora se ve qué errores se repiten entre los alumnos de este dispositivo, combinados y sin decir quién se equivocó, para saber qué reforzar en la próxima clase.
+- **Por qué el tutor offline no es "simple":** no es una búsqueda de palabras que devuelve texto cualquiera. Conoce el banco de ejercicios exacto de la app (con sus valores numéricos), aplica cuatro niveles pedagógicos definidos, diagnostica errores típicos de Física con matemática real (`pedagogy/diagnoseAttempt.js`, no un modelo de lenguaje) y funciona sin conexión ni costo por consulta. Gemini se usa cuando hay conexión y cuota disponible porque conversa mejor en lenguaje libre; el motor offline es el que garantiza que la app funcione siempre, en cualquier aula sin internet, que es el objetivo del proyecto.
+
 ## Uso sin conexión
 
 Después de la primera carga, el service worker guarda la interfaz, los contenidos y los recursos estáticos. El tutor por reglas, las simulaciones, los ejercicios, las flashcards, el PDF y el progreso local siguen disponibles sin Internet.
