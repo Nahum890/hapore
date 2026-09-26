@@ -92,10 +92,10 @@ function ConceptSlide({ concept }) {
   </div>;
 }
 
-function ExerciseSlide({ exercise, showAnswer, onToggleAnswer }) {
+function ExerciseSlide({ slide, exercise, showAnswer, onToggleAnswer }) {
   if (!exercise) return <p className="projector-empty">Elegí un ejercicio para esta diapositiva (si era un ejercicio propio, pudo haberse eliminado).</p>;
   return <div className="projector-slide projector-exercise-slide">
-    <span className="projector-kicker">{exercise.custom ? 'Ejercicio propio' : 'Ejercicio'} · {exercise.difficulty || 'Práctica'}</span>
+    <span className="projector-kicker">{slide.title ? `${slide.title} · ` : ''}{exercise.custom ? 'Ejercicio propio' : 'Ejercicio'} · {exercise.difficulty || 'Práctica'}</span>
     <MathText as="h2" text={exercise.question} />
     <div className="projector-given-values">
       {Object.entries(exercise.values ?? {}).map(([key, value]) => <span key={key}><small>{VALUE_LABELS[key] ?? key}</small><strong>{value}{key.startsWith('angle') ? '°' : VALUE_UNITS[key] ?? ''}</strong></span>)}
@@ -124,7 +124,7 @@ export function SlideView({ slide, exercises, concepts, large = false, showAnswe
   if (slide.type === 'titulo') return <TitleSlide slide={slide} />;
   if (slide.type === 'texto') return <TextSlide slide={slide} />;
   if (slide.type === 'concepto') return <ConceptSlide concept={concepts.find(item => item.id === slide.conceptId)} />;
-  if (slide.type === 'ejercicio') return <ExerciseSlide exercise={exercises.find(item => item.id === slide.exerciseId)} showAnswer={showAnswer} onToggleAnswer={onToggleAnswer} />;
+  if (slide.type === 'ejercicio') return <ExerciseSlide slide={slide} exercise={exercises.find(item => item.id === slide.exerciseId)} showAnswer={showAnswer} onToggleAnswer={onToggleAnswer} />;
   if (slide.type === 'simulador') return <SimulatorSlide slide={slide} large={large} />;
   return <p className="projector-empty">Tipo de diapositiva desconocido.</p>;
 }
@@ -133,7 +133,7 @@ export function slideSummary(slide, exercises, concepts) {
   if (slide.type === 'titulo') return slide.title || 'Portada';
   if (slide.type === 'texto') return slide.title || String(slide.body ?? '').split('\n')[0] || 'Texto';
   if (slide.type === 'concepto') return concepts.find(item => item.id === slide.conceptId)?.name ?? 'Concepto sin elegir';
-  if (slide.type === 'ejercicio') return exercises.find(item => item.id === slide.exerciseId)?.question ?? 'Ejercicio sin elegir';
+  if (slide.type === 'ejercicio') return slide.title || exercises.find(item => item.id === slide.exerciseId)?.question || 'Ejercicio sin elegir';
   if (slide.type === 'simulador') return slide.title || `${slide.v0} m/s · ${slide.angle}°`;
   return slide.type;
 }

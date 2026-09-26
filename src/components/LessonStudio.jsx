@@ -3,14 +3,15 @@ import { concepts as conceptCatalog, exercises as exerciseCatalog, localizeCatal
 import { useTranslation } from '../i18n/LanguageProvider.jsx';
 import {
   GRAVITY_PRESETS, SLIDE_TYPES, createLesson, createSlide, deleteLesson, duplicateLesson,
-  getLessons, launchErrors, moveItem, saveLesson,
+  createGuidedLesson, getLessons, launchErrors, moveItem, saveLesson,
 } from '../utils/lessons.js';
 import { SlideView, slideSummary } from './LessonSlides.jsx';
+import './Aula.css';
 
 const typeLabel = type => SLIDE_TYPES.find(item => item.type === type)?.label ?? type;
 const formatDate = iso => { try { return new Date(iso).toLocaleDateString('es-PY', { day: 'numeric', month: 'short', year: 'numeric' }); } catch { return ''; } };
 
-function LessonList({ lessons, onCreate, onEdit, onPresent, onDuplicate, onDelete }) {
+function LessonList({ lessons, onCreate, onCreateGuided, onEdit, onPresent, onDuplicate, onDelete }) {
   const [title, setTitle] = useState('');
   const [confirmId, setConfirmId] = useState(null);
   const create = event => { event.preventDefault(); onCreate(title); setTitle(''); };
@@ -18,6 +19,10 @@ function LessonList({ lessons, onCreate, onEdit, onPresent, onDuplicate, onDelet
     <span className="panel-eyebrow">PRESENTACIONES</span>
     <h2 id="lesson-list-title">Mis clases</h2>
     <p className="teacher-note">Prepará tu clase como una presentación: agregá diapositivas de portada, texto, conceptos, ejercicios y simulaciones con los valores que quieras. Después proyectala desde acá.</p>
+    <div className="aula-guided-template">
+      <div><strong>¿Querés empezar con una guía?</strong><p>Gancho → demostración → práctica → ticket de salida. Podés editar todo antes de proyectar.</p></div>
+      <button type="button" className="btn btn-primary" onClick={onCreateGuided}>Crear clase guiada</button>
+    </div>
     <form className="lesson-create" onSubmit={create}>
       <label className="teacher-field">Nombre de la nueva clase
         <input className="quiz-input" value={title} onChange={event => setTitle(event.target.value)} placeholder="Ej.: Tiro parabólico · 3.º B" maxLength={80} />
@@ -258,6 +263,12 @@ export default function LessonStudio({ exercises: exercisesProp }) {
     refresh();
     setEditingId(lesson.id);
   };
+  const createGuided = () => {
+    const practice = exercises.find(item => item.id === 'ew-02') ?? exercises[0];
+    const lesson = saveLesson(createGuidedLesson('Movimiento parabólico · clase guiada', { practiceExerciseId: practice?.id ?? '' }));
+    refresh();
+    setEditingId(lesson.id);
+  };
   const change = lesson => {
     saveLesson(lesson);
     refresh();
@@ -270,6 +281,7 @@ export default function LessonStudio({ exercises: exercisesProp }) {
         : <LessonList
           lessons={lessons}
           onCreate={create}
+          onCreateGuided={createGuided}
           onEdit={setEditingId}
           onPresent={(id, at) => setPresenting({ id, at })}
           onDuplicate={id => { duplicateLesson(id); refresh(); }}

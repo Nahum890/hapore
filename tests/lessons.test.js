@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  SLIDE_TYPES, createLesson, createSlide, deleteLesson, duplicateLesson, getLessons, launchErrors, moveItem, saveLesson,
+  SLIDE_TYPES, createGuidedLesson, createLesson, createSlide, deleteLesson, duplicateLesson, getLessons, launchErrors, moveItem, saveLesson,
 } from '../src/utils/lessons.js';
 import { removeKey, setActiveProfile } from '../src/utils/storage.js';
 import { planFlight } from '../src/simulator/flightPlan.js';
@@ -15,6 +15,21 @@ test('una clase nueva empieza con una portada y cada tipo de diapositiva se pued
   assert.equal(lesson.slides[0].type, 'titulo');
   for (const { type } of SLIDE_TYPES) assert.equal(createSlide(type).type, type);
   assert.throws(() => createSlide('video'));
+});
+
+test('la plantilla guiada prepara gancho, demostración, práctica y ticket en ese orden', () => {
+  const lesson = createGuidedLesson('Cinemática · 3.º B', { practiceExerciseId: 'ew-02' });
+  assert.equal(lesson.title, 'Cinemática · 3.º B');
+  assert.deepEqual(lesson.slides.map(slide => slide.type), ['titulo', 'texto', 'simulador', 'ejercicio', 'texto']);
+  assert.match(lesson.slides[1].title, /Gancho/);
+  assert.match(lesson.slides[2].title, /Demostración/);
+  assert.equal(lesson.slides[2].compare, true);
+  assert.equal(lesson.slides[2].angle, 30);
+  assert.equal(lesson.slides[2].angleB, 60);
+  assert.equal(lesson.slides[3].title, '3. Práctica');
+  assert.equal(lesson.slides[3].exerciseId, 'ew-02');
+  assert.match(lesson.slides[4].title, /Ticket de salida/);
+  assert.match(lesson.description, /Supuestos del modelo/);
 });
 
 test('los valores del lanzamiento no tienen topes arbitrarios, solo sentido físico', () => {
