@@ -26,7 +26,7 @@ const params = url => Object.fromEntries([...url.searchParams].map(([k, v]) => [
 const isTeacher = (classId, uid) => classes.some(c => c.id === classId && c.teacher_id === uid);
 const isParticipant = (classId, uid) => isTeacher(classId, uid) || members.some(m => m.class_id === classId && m.student_id === uid);
 
-http.createServer(async (req, res) => {
+const server = http.createServer(async (req, res) => {
   if (req.method === 'OPTIONS') return send(res, 204);
   const url = new URL(req.url, 'http://x');
   let raw = ''; for await (const chunk of req) raw += chunk;
@@ -38,7 +38,10 @@ http.createServer(async (req, res) => {
   if (!uid) return send(res, 401, { message: 'JWT inválido' });
 
   if (url.pathname === '/rest/v1/rpc/create_class') {
-    const code = Array.from({ length: 6 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join('');
+    let code;
+    do {
+      code = Array.from({ length: 6 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join('');
+    } while (classes.some(item => item.code === code));
     const row = { id: randomUUID(), code, teacher_id: uid, teacher_name: body.p_teacher_name, teacher_avatar: body.p_teacher_avatar, teacher_phone: body.p_teacher_phone, teacher_email: body.p_teacher_email, title: body.p_title, content: body.p_content, created_at: new Date().toISOString() };
     classes.push(row);
     return send(res, 200, [{ id: row.id, code }]);
@@ -106,4 +109,12 @@ http.createServer(async (req, res) => {
     }
   }
   return send(res, 404, { message: `sin ruta ${req.method} ${url.pathname}` });
-}).listen(54321, () => console.log('supabase-mock listo en http://127.0.0.1:54321'));
+});
+
+// Solo la PC local por defecto. Para probar desde teléfonos en una red privada,
+// la persona debe habilitar explícitamente el acceso LAN y usar una Wi-Fi de confianza.
+const host = process.env.MOCK_SERVER_HOST?.trim() || '127.0.0.1';
+server.listen(54321, host, () => {
+  const displayHost = host === '0.0.0.0' ? '127.0.0.1' : host;
+  console.log(`supabase-mock listo en http://${displayHost}:54321 (solo pruebas; datos en memoria)`);
+});

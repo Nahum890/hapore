@@ -45,6 +45,9 @@ Hay dos caminos:
 
    Debe decir `supabase-mock listo en http://127.0.0.1:54321`. Dejarla abierta.
 
+   El mock escucha solo en esta PC por defecto. Para usar un celular en una
+   Wi-Fi privada, sigue el paso 5 para habilitar acceso a la red local.
+
 2. Crear el archivo `.env.development.local` en la raíz (está ignorado por
    git, no se sube) con:
 
@@ -56,7 +59,7 @@ Hay dos caminos:
 3. En otra terminal:
 
    ```bash
-   npm run dev -- --host
+   npm run dev -- --host 127.0.0.1
    ```
 
 4. Simular dos dispositivos en la misma PC: abrir **dos orígenes distintos**,
@@ -66,12 +69,22 @@ Hay dos caminos:
 
    (Si Vite eligió otro puerto, usar el que muestra la terminal.)
 
-5. Probar desde un celular en la **misma red Wi-Fi**: buscar la IP de la PC
-   (`ipconfig` en Windows → "Dirección IPv4", por ejemplo `192.168.0.20`),
+5. Para probar desde un celular en una **Wi-Fi privada de confianza**, habilitar
+   explícitamente el acceso local antes de iniciar el mock. Si ya está activo,
+   detenelo con `Ctrl+C` en su terminal y volvé a iniciarlo. En PowerShell:
+
+   ```powershell
+   $env:MOCK_SERVER_HOST = '0.0.0.0'
+   node supabase/mock-server.mjs
+   ```
+
+   En macOS/Linux: `MOCK_SERVER_HOST=0.0.0.0 node supabase/mock-server.mjs`.
+   Buscar la IP de la PC (`ipconfig` en Windows → "Dirección IPv4", por ejemplo `192.168.0.20`),
    cambiar en `.env.development.local` la URL a
-   `http://192.168.0.20:54321`, reiniciar `npm run dev -- --host` y abrir
+   `http://192.168.0.20:54321`, reiniciar `npm run dev -- --host 0.0.0.0` y abrir
    `http://192.168.0.20:5173` en el celular. Si Windows pregunta por el
-   firewall, permitir Node.js en redes privadas.
+   firewall, permitir Node.js solo en redes privadas. El mock no tiene
+   autenticación real; detenerlo al terminar y no usar datos personales.
 
 Limitaciones: los datos viven en memoria y se pierden al cerrar el mock. Solo
 sirve para probar.
