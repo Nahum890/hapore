@@ -21,7 +21,10 @@ export function startingControls(exercise) {
  * physicsValidator, nunca con esta tolerancia gráfica.
  */
 export function planFlight({ speed, angle, gravity = 9.8, targetX = 35, obstacle = null }) {
-  const safeSpeed = clamp(speed, SPEED_LIMITS.min, SPEED_LIMITS.max, 20);
+  // Sin tope superior: un ejercicio propio del docente con v0 = 50 m/s debe
+  // simularse a 50 m/s, no recortarse en silencio. El renderizador ya se
+  // auto-escala al alcance y la altura del vuelo.
+  const safeSpeed = Number.isFinite(Number(speed)) && Number(speed) > 0 ? Number(speed) : 20;
   const safeAngle = clamp(angle, 1, 89, 45);
   const safeGravity = Number.isFinite(Number(gravity)) && Number(gravity) > 0 ? Number(gravity) : 9.8;
   const launch = createLaunch(safeSpeed, safeAngle, { gravity: safeGravity });

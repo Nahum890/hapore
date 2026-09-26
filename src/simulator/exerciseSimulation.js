@@ -18,10 +18,10 @@ const toDeg = radians => (radians * 180) / Math.PI;
 export function sceneForExercise(exercise, studentAnswer) {
   const values = exercise?.values ?? {};
   const initial = startingControls(exercise);
-  let speed = initial.speed;
+  const v0 = Number(values.v0);
+  let speed = v0 > 0 ? v0 : initial.speed;
   let angle = Number(values.angleB ?? values.angle ?? initial.angle);
   const gravity = Number(values.gravity) || 9.8;
-  const v0 = Number(values.v0);
   const definedByVxT = Number.isFinite(Number(values.vx)) && Number.isFinite(Number(values.t)) && !values.v0;
   if (definedByVxT) {
     const vy = gravity * Number(values.t) / 2;
