@@ -27,7 +27,7 @@ function fakeSupabase() {
     if (path.startsWith('/auth/v1/token')) return json({ access_token: 'tok-refreshed', refresh_token: 'ref-2', expires_in: 3600, user: { id: 'student-uid' } });
     if (path === '/rest/v1/rpc/join_class') {
       if (body.p_code !== 'K7PQ2M') return json({ message: 'Código de clase inexistente.' }, 400);
-      return json([{ class_id: 'class-1', code: 'K7PQ2M', title: '3.º B', teacher_name: 'Profe Rosa', teacher_avatar: 'sol', content: { version: 1, config: { subtemas: ['dron'], ejercicios: 2, flashcards: 5 }, cards: [{ id: 'custom-card-a', frente_es: '¿vx cambia?', dorso_concepto: 'No', custom: true }], exercises: [] } }]);
+      return json([{ class_id: 'class-1', code: 'K7PQ2M', title: '3.º B', teacher_id: 'teacher-uid', teacher_name: 'Profe Rosa', teacher_avatar: 'sol', teacher_phone: '0981 111 222', teacher_email: 'rosa@ejemplo.com', content: { version: 1, config: { subtemas: ['dron'], ejercicios: 2, flashcards: 5 }, cards: [{ id: 'custom-card-a', frente_es: '¿vx cambia?', dorso_concepto: 'No', custom: true }], exercises: [] } }]);
     }
     if (path.startsWith('/rest/v1/class_members')) return new Response(null, { status: 204 });
     return json({ message: 'no encontrado' }, 404);
@@ -45,12 +45,16 @@ test('descargar una clase la guarda para usarla sin internet', async () => {
   configureCloud({ url: 'https://demo.supabase.co/', key: 'anon-key', fetch: server.fetch });
   assert.equal(isCloudConfigured(), true);
 
-  const pkg = await useOnline(true, () => downloadClass({ code: 'k7pq-2m', displayName: 'Ana', avatar: 'rio' }));
+  const pkg = await useOnline(true, () => downloadClass({ code: 'k7pq-2m', displayName: 'Ana', avatar: 'rio', phone: '0982 333 444', email: 'ana@ejemplo.com' }));
   assert.equal(pkg.classId, 'class-1');
   assert.equal(getClassPackage().teacherName, 'Profe Rosa');
+  assert.equal(getClassPackage().teacherPhone, '0981 111 222', 'el alumno guarda el contacto de su docente');
+  assert.equal(getClassPackage().teacherEmail, 'rosa@ejemplo.com');
   assert.equal(getClassPackage().content.cards[0].id, 'custom-card-a');
   const join = server.calls.find(call => call.path === '/rest/v1/rpc/join_class');
   assert.equal(join.body.p_code, 'K7PQ2M');
+  assert.equal(join.body.p_phone, '0982 333 444', 'el docente recibe el contacto del alumno');
+  assert.equal(join.body.p_email, 'ana@ejemplo.com');
   assert.equal(join.auth, 'Bearer tok-1', 'usa el token de la sesión, no la clave pública');
 
   await assert.rejects(() => useOnline(true, () => downloadClass({ code: 'ZZZZZZ', displayName: 'Ana' })), /inexistente/);

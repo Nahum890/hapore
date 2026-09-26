@@ -4,6 +4,7 @@ import { getTeacherLinkForStudent } from '../utils/classroom.js';
 import { getAccountById } from '../auth/localAccounts.js';
 import { CLOUD_CODE_PATTERN, normalizeCloudCode } from '../cloud/classCloud.js';
 import Avatar from './Avatars.jsx';
+import ContactLinks from './ContactLinks.jsx';
 
 function LocalTeacherCard({ studentId }) {
   const link = getTeacherLinkForStudent(studentId);
@@ -11,7 +12,7 @@ function LocalTeacherCard({ studentId }) {
   if (!teacher) return null;
   return <div className="teacher-card">
     <Avatar id={teacher.avatar} size={48} />
-    <div><h3>{teacher.name}</h3><p>@{teacher.username}</p></div>
+    <div><h3>{teacher.name}</h3><p>@{teacher.username}</p><ContactLinks person={teacher} /></div>
   </div>;
 }
 
@@ -64,7 +65,7 @@ export default function StudentClass({ classConfig, onJoinClass, studentId, clas
       <h2 id="student-class-title">{classPackage.title}</h2>
       <div className="teacher-card">
         <Avatar id={classPackage.teacherAvatar} size={48} />
-        <div><h3>{classPackage.teacherName}</h3><p>Tu docente</p></div>
+        <div><h3>{classPackage.teacherName}</h3><p>Tu docente</p><ContactLinks person={{ phone: classPackage.teacherPhone, email: classPackage.teacherEmail }} /></div>
       </div>
       <p className="sync-status is-synced">✓ Clase descargada: podés resolverla sin internet.</p>
       <div className="student-class-summary"><span>Ejercicios</span><strong>{content.config.ejercicios}</strong><span>Tarjetas</span><strong>{content.cards.length}</strong></div>

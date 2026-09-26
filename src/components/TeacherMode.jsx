@@ -7,6 +7,7 @@ import { createCustomFlashcard, deleteCustomFlashcard, getCustomFlashcards } fro
 import CustomExerciseForm from './CustomExerciseForm.jsx';
 import StudentRoster from './StudentRoster.jsx';
 import Avatar from './Avatars.jsx';
+import ContactLinks from './ContactLinks.jsx';
 import { registerClassCode } from '../utils/classroom.js';
 import { isCloudConfigured } from '../cloud/cloudClient.js';
 import { buildClassContent, createCloudClass, deleteCloudClass, listTeacherClasses } from '../cloud/classCloud.js';
@@ -111,6 +112,7 @@ function CloudClassList({ refreshKey }) {
               <span className="chip">{member.cards_consolidated} tarjetas dominadas</span>
               <span className="chip">Confianza {member.confidence}/100</span>
             </div>
+            <ContactLinks person={member} />
             <small>Último avance recibido: {formatWhen(member.last_sync)}</small>
           </div>
         </li>)}</ul>
@@ -148,7 +150,7 @@ function CloudClassSetup({ teacher, allExercises, customExercises }) {
       const cards = allCards.filter(card => selectedCards.includes(card.id));
       const sharedExercises = customExercises.filter(item => selectedExercises.includes(item.id) && subtopics.includes(item.scenario));
       const content = buildClassContent({ config: { subtemas: subtopics, ejercicios: Number(exerciseCount) }, cards, exercises: sharedExercises });
-      const result = await createCloudClass({ title: title.trim(), teacherName: teacher.name, teacherAvatar: teacher.avatar, content });
+      const result = await createCloudClass({ title: title.trim(), teacherName: teacher.name, teacherAvatar: teacher.avatar, teacherPhone: teacher.phone, teacherEmail: teacher.email, content });
       setCreated(result);
       setRefreshKey(value => value + 1);
     } catch (failure) {

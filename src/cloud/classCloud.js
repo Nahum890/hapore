@@ -27,15 +27,18 @@ export function buildClassContent({ config, cards, exercises }) {
   };
 }
 
-export async function createCloudClass({ title, teacherName, teacherAvatar, content }) {
-  const rows = await rpc('create_class', { p_title: title, p_teacher_name: teacherName, p_teacher_avatar: teacherAvatar ?? null, p_content: content });
+export async function createCloudClass({ title, teacherName, teacherAvatar, teacherPhone, teacherEmail, content }) {
+  const rows = await rpc('create_class', {
+    p_title: title, p_teacher_name: teacherName, p_teacher_avatar: teacherAvatar ?? null,
+    p_teacher_phone: teacherPhone ?? null, p_teacher_email: teacherEmail ?? null, p_content: content,
+  });
   const row = Array.isArray(rows) ? rows[0] : rows;
   if (!row?.code) throw new Error('La nube no devolvió un código de clase.');
   return row;
 }
 
 export async function listTeacherClasses() {
-  const select = 'id,code,title,created_at,class_members(student_id,display_name,avatar,xp,level,attempts,correct,confidence,cards_consolidated,last_sync,joined_at)';
+  const select = 'id,code,title,created_at,class_members(student_id,display_name,avatar,xp,level,attempts,correct,confidence,cards_consolidated,last_sync,joined_at,phone,email)';
   return rest(session => `classes?select=${select}&teacher_id=eq.${session.userId}&order=created_at.desc`);
 }
 
@@ -49,17 +52,35 @@ export function getClassPackage() {
 }
 
 /** "Descargar clase": se une en la nube y guarda todo para usarlo offline. */
-export async function downloadClass({ code, displayName, avatar }) {
-  const rows = await rpc('join_class', { p_code: normalizeCloudCode(code), p_display_name: displayName, p_avatar: avatar ?? null });
+export async function downloadClass({ code, displayName, avatar, phone, email }) {
+  const rows = await rpc('join_class', {
+    p_code: normalizeCloudCode(code), p_display_name: displayName, p_avatar: avatar ?? null,
+    p_phone: phone ?? null, p_email: email ?? null,
+  });
   const row = Array.isArray(rows) ? rows[0] : rows;
   if (!row?.class_id) throw new Error('No se pudo descargar la clase.');
   const pkg = {
     classId: row.class_id, code: row.code, title: row.title,
-    teacherName: row.teacher_name, teacherAvatar: row.teacher_avatar,
+    teacherId: row.teacher_id, teacherName: row.teacher_name, teacherAvatar: row.teacher_avatar,
+    teacherPhone: row.teacher_phone ?? '', teacherEmail: row.teacher_email ?? '',
     content: row.content, downloadedAt: new Date().toISOString(),
   };
   writeJSON(PACKAGE_KEY, pkg);
   return pkg;
+}
+
+/** Docente y alumnos de una clase, con sus contactos. La nube solo responde
+ * si quien pregunta es parte de esa clase. */
+export async function getClassDirectory(classId) {
+  const rows = await rpc('class_directory', { p_class_id: classId });
+  return Array.isArray(rows) ? rows : [];
+}
+
+/** Copia nombre, foto y contactos del perfil local a todas las clases de la
+ * nube donde participa esta cuenta. */
+export async function syncMyProfile(user) {
+  if (!isCloudConfigured() || !user) return;
+  await rpc('sync_my_profile', { p_display_name: user.name, p_avatar: user.avatar ?? null, p_phone: user.phone ?? null, p_email: user.email ?? null });
 }
 
 export async function leaveCloudClass() {

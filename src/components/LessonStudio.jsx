@@ -179,7 +179,7 @@ function LessonEditor({ lesson, exercises, concepts, onChange, onBack, onPresent
   </section>;
 }
 
-function Presenter({ lesson, startAt, exercises, concepts, onExit }) {
+export function Presenter({ lesson, startAt = 0, exercises, concepts, onExit }) {
   const [index, setIndex] = useState(Math.min(startAt, lesson.slides.length - 1));
   const [showAnswer, setShowAnswer] = useState(false);
   const stageRef = useRef(null);
