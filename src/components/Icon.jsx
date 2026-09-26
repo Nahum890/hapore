@@ -14,6 +14,8 @@ const PATHS = {
   ball: <><circle cx="12" cy="12" r="8.5" /><path d="M12 3.5v17M3.5 12h17" /><path d="M5.6 5.6a8.5 8.5 0 0 0 12.8 12.8M18.4 5.6A8.5 8.5 0 0 1 5.6 18.4" /></>,
   people: <><circle cx="9" cy="8.5" r="3" /><path d="M3.5 19a5.5 5.5 0 0 1 11 0" /><circle cx="16.5" cy="9.5" r="2.4" /><path d="M15 14.2a4.5 4.5 0 0 1 5.5 4.3" /></>,
   image: <><rect x="3.5" y="5" width="17" height="14" rx="2" /><circle cx="9" cy="10" r="1.8" /><path d="M4 17l5-4.5 4 3.5 3-2.5 4 3.5" /></>,
+  mic: <><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5.5 11a6.5 6.5 0 0 0 13 0" /><path d="M12 17.5v3M9 20.5h6" /></>,
+  speaker: <><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z" /><path d="M15.5 9a4.2 4.2 0 0 1 0 6" /><path d="M18 6.5a8 8 0 0 1 0 11" /></>,
   wall: <><path d="M3.5 6h17v12h-17z" /><path d="M3.5 12h17M8.5 6v6M15.5 6v6M6 12v6M12 12v6M18 12v6" /></>,
 };
 

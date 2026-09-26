@@ -18,8 +18,21 @@ function wait(ms, signal) {
     signal.addEventListener('abort', cancel, { once: true });
   });
 }
+const IMAGE_DATA_URL = /^data:image\/(jpeg|png|webp);base64,([a-z0-9+/=]+)$/i;
+
+/** Valida y separa un data URL de imagen en { mimeType, data } para
+ * mandarlo a Gemini (contenido multimodal). Devuelve null si no es válido
+ * o si pesa más de lo razonable para una consulta (~900 KB en base64). */
+export function normalizeChatImage(image) {
+  const dataUrl = typeof image === 'string' ? image : image?.dataUrl;
+  const match = IMAGE_DATA_URL.exec(String(dataUrl ?? ''));
+  if (!match || match[2].length > 900_000) return null;
+  return { mimeType: `image/${match[1].toLowerCase()}`, data: match[2] };
+}
+
 export function buildChatPayload(context = {}) {
   const message = safeText(context.message ?? 'Ayuda con el ejercicio', 1600);
+  const image = normalizeChatImage(context.image);
   const history = Array.isArray(context.history) ? context.history.slice(-4).map(item => ({
     role: item?.role === 'tutor' || item?.role === 'assistant' ? 'tutor' : 'alumno',
     text: safeText(item?.text, 400),
@@ -37,11 +50,14 @@ export function buildChatPayload(context = {}) {
   } : undefined;
   return {
     message,
+    ...(image ? { image } : {}),
     context: {
       message,
       language: context.language === 'es' ? 'es' : 'gn-jopara',
       type: safeText(context.type, 40),
-      tipo: ['charla_libre', 'evaluacion_cuestionario'].includes(context.tipo) ? context.tipo : null,
+      // Con foto, siempre es una charla libre: el estudiante manda su
+      // consulta junto con la imagen del ejercicio de su cuaderno.
+      tipo: image ? 'charla_libre' : ['charla_libre', 'evaluacion_cuestionario'].includes(context.tipo) ? context.tipo : null,
       subtema: safeText(context.topic ?? context.subtema ?? context.expectedConcept, 120),
       ejercicio: safeText(context.exerciseId ?? context.exercise?.id ?? context.ejercicio ?? context.pregunta ?? context.enunciado ?? exercise?.question ?? context.preguntaId, 700),
       pregunta: safeText(context.pregunta ?? context.enunciado ?? exercise?.question, 700),
@@ -193,6 +209,15 @@ export default class LocalAIProvider {
     if (quota.remaining <= 0) {
       return { message: tutorQuotaMessage(), source: null, available: false, reason: 'daily-limit', ...quota };
     }
+    // Leer una foto necesita un modelo de verdad: el tutor local (por reglas
+    // o en el dispositivo) no puede interpretar una imagen, así que se avisa
+    // en vez de inventar una respuesta a partir de palabras sueltas.
+    if (context.image && (offline || !hasOnlineConsent())) {
+      const message = context.language === 'es'
+        ? 'Para leer la foto del ejercicio necesitás conexión a internet. Guardala y probá cuando tengas señal; mientras tanto podés escribir el enunciado.'
+        : 'Ta\'ãnga ejercicio-gua rehecha hag̃ua tekotevẽ internet. Eñongatu ha eñeha\'ã jey oĩ jave conexión; upe mboyve ikatu ehai pe enunciado.';
+      return { message, source: null, available: false, reason: offline ? 'offline-image' : 'consent-required-image', ...quota };
+    }
     if (offline) {
       try {
         return await this.respondLocally(context, onToken, 'offline');
@@ -231,7 +256,10 @@ export default class LocalAIProvider {
       active = false;
       controller.abort();
       if (this.options.loadLocalModel) this.model = null;
-      try {
+      // El tutor local no puede leer una imagen: si falló el intento online,
+      // no tiene sentido que además invente una respuesta a partir de texto
+      // suelto, así que se salta directo al mensaje de error de más abajo.
+      if (!context.image) try {
         return await this.respondLocally(context, onToken, error?.status === 429 ? 'rate-limited' : error?.name === 'AbortError' ? 'timeout' : 'online-fallback');
       } catch {
         // El tutor local tampoco pudo responder (sin material offline para

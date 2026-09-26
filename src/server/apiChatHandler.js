@@ -1,11 +1,28 @@
-import { SYSTEM_PROMPT, buildDiagnosticPrompt, buildFreeChatPrompt, buildQuizEvaluationPrompt } from '../ai/prompt.js';
+import { SYSTEM_PROMPT, buildDiagnosticPrompt, buildFreeChatPrompt, buildPhotoExercisePrompt, buildQuizEvaluationPrompt } from '../ai/prompt.js';
 import { sanitizeMarkup } from '../utils/validation.js';
 
 const DAILY_LIMIT = 15;
 const BURST_LIMIT = 5;
 const MAX_BODY_BYTES = 12000;
+// Una foto de ejercicio pesa mucho más que una consulta de texto: se admite
+// un cuerpo más grande solo para ese caso, ya normalizeChatImage() en el
+// cliente comprime la imagen antes de mandarla.
+const MAX_IMAGE_BODY_BYTES = 950_000;
+const IMAGE_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 const SERVER_TIMEOUT_MS = 18000;
 const FALLBACK_MODEL = 'gemini-flash-latest';
+
+/** Valida `{ mimeType, data }` ya separados por el cliente (ver
+ * ai/LocalAIProvider.js normalizeChatImage). Nunca confía en el tamaño
+ * declarado: mide el base64 real. */
+function validImage(image) {
+  if (!image || typeof image !== 'object') return null;
+  const mimeType = String(image.mimeType ?? '');
+  const data = String(image.data ?? '');
+  if (!IMAGE_MIME_TYPES.has(mimeType)) return null;
+  if (!data || data.length > 900_000 || !/^[a-z0-9+/=]+$/i.test(data)) return null;
+  return { mimeType, data };
+}
 
 function localDay(now = new Date()) {
   return new Intl.DateTimeFormat('en-CA', {
@@ -121,13 +138,13 @@ export function createApiChatHandler(apiKey, primaryModel, options = {}) {
       let body;
       if (req.body && typeof req.body === 'object') {
         const raw = JSON.stringify(req.body);
-        if (Buffer.byteLength(raw, 'utf8') > MAX_BODY_BYTES) { json(413, { error: 'Consulta demasiado extensa.' }); return; }
+        if (Buffer.byteLength(raw, 'utf8') > MAX_IMAGE_BODY_BYTES) { json(413, { error: 'Consulta demasiado extensa.' }); return; }
         body = req.body;
       } else {
         let raw = '', bytes = 0;
         for await (const chunk of req) {
           bytes += chunk.length;
-          if (bytes > MAX_BODY_BYTES) { json(413, { error: 'Consulta demasiado extensa.' }); return; }
+          if (bytes > MAX_IMAGE_BODY_BYTES) { json(413, { error: 'Consulta demasiado extensa.' }); return; }
           raw += chunk;
         }
         try { body = JSON.parse(raw); } catch { json(400, { error: 'La consulta no tiene un formato válido.' }); return; }
@@ -135,6 +152,9 @@ export function createApiChatHandler(apiKey, primaryModel, options = {}) {
       if (!body || typeof body !== 'object' || Array.isArray(body) || !body.context || typeof body.context !== 'object' || Array.isArray(body.context)) {
         json(400, { error: 'Falta el contexto de la consulta.' }); return;
       }
+      const image = validImage(body.image);
+      if (body.image && !image) { json(400, { error: 'La foto no es válida o pesa demasiado.' }); return; }
+      if (!image && Buffer.byteLength(JSON.stringify(body), 'utf8') > MAX_BODY_BYTES) { json(413, { error: 'Consulta demasiado extensa.' }); return; }
       const context = normalizeContext({ ...body.context, message: body.context.message ?? body.message });
       if (!context.message) { json(400, { error: 'Escribí una pregunta antes de enviar.' }); return; }
       let quotaError;
@@ -145,12 +165,16 @@ export function createApiChatHandler(apiKey, primaryModel, options = {}) {
       }
       if (quotaError) { json(quotaError.status, quotaError.body); return; }
 
-      const buildPrompt = context.tipo === 'evaluacion_cuestionario'
-        ? buildQuizEvaluationPrompt
-        : context.tipo === 'charla_libre' ? buildFreeChatPrompt : buildDiagnosticPrompt;
+      const buildPrompt = image
+        ? buildPhotoExercisePrompt
+        : context.tipo === 'evaluacion_cuestionario'
+          ? buildQuizEvaluationPrompt
+          : context.tipo === 'charla_libre' ? buildFreeChatPrompt : buildDiagnosticPrompt;
+      const parts = [{ text: buildPrompt(context) }];
+      if (image) parts.unshift({ inlineData: { mimeType: image.mimeType, data: image.data } });
       const requestBody = JSON.stringify({
         systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        contents: [{ role: 'user', parts: [{ text: buildPrompt(context) }] }],
+        contents: [{ role: 'user', parts }],
         generationConfig: { maxOutputTokens: 4096 },
       });
       const streaming = body.stream === true;

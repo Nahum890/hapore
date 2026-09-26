@@ -17,6 +17,8 @@ import PredictLaunchGame from './simulator/PredictLaunchGame.jsx';
 import TrajectoryDrawingPractice from './components/TrajectoryDrawingPractice.jsx';
 import ExplorationLab from './simulator/ExplorationLab.jsx';
 import AIPrivacyNotice from './components/AIPrivacyNotice.jsx';
+import { useSpeechRecognition, useSpeechSynthesis } from './hooks/useSpeech.js';
+import { imageFileToDataUrl } from './utils/imageData.js';
 import {
   concepts as conceptsData,
   errors as errorsData,
@@ -45,7 +47,7 @@ import { useQuiz } from './hooks/useQuiz.js';
 import { readJSON, writeJSON, setActiveProfile } from './utils/storage.js';
 import { getSession, hasContactInfo, logout } from './auth/localAccounts.js';
 import { decodeClassConfig, encodeClassConfig, selectClassExercises } from './utils/classCode.js';
-import { recommendExercise, summarizeAttempts } from './pedagogy/progression.js';
+import { practiceRecommendation, recommendExercise, summarizeAttempts } from './pedagogy/progression.js';
 import './components/TutorModes.css';
 import Icon from './components/Icon.jsx';
 import { LaunchScene, Nanduti } from './components/Nanduti.jsx';
@@ -85,6 +87,10 @@ function HomeView({ user, learning, classConfig, onNavigate, onGuide }) {
     const ids = new Set(getAllExercises().filter(item => item.scenario === scenario.id).map(item => item.id));
     return { topic: scenario.label, ...summarizeAttempts(learning.attemptLog.filter(item => ids.has(item.exerciseId))) };
   });
+  // Plan de práctica: si el alumno repite el mismo tipo de error dos veces o
+  // más, se le sugiere un ejercicio corto enfocado en esa dificultad puntual.
+  const practicePlan = !teacher ? practiceRecommendation(getAllExercises(), learning.attemptLog) : null;
+  const goToPractice = exerciseId => { learning.onSelectExercise(exerciseId); onNavigate('simulador'); };
   return <div className="home-view">
     <section className="home-hero">
       <div className="home-hero-copy">
@@ -107,6 +113,12 @@ function HomeView({ user, learning, classConfig, onNavigate, onGuide }) {
       <button className="home-action-card is-tutor" type="button" onClick={() => onNavigate('chats')}><span className="home-card-icon" aria-hidden="true"><Icon name="chat" size={26} /></span><Bilingual k="nav.chats" as="strong" /><span className="home-card-text">{t('home.tutorText')}</span><small aria-hidden="true"><Icon name="arrow" size={18} /></small></button>
     </div>
     <section className="home-class-card"><Nanduti size={64} spokes={16} rings={3} className="home-class-nanduti" /><div><span className="panel-eyebrow">{teacher ? 'PARA TU CLASE' : 'APRENDÉ EN CLASE'}</span><h3>{teacher ? '¿Qué necesitás para tu clase?' : classConfig ? 'Tu clase está configurada' : '¿Tenés un código de clase?'}</h3><p>{teacher ? 'Compartí una clase, creá un ejercicio o prepará una presentación para proyectar.' : classConfig ? 'Ya podés practicar los materiales que preparó tu docente.' : 'Ingresalo para ver los ejercicios y tarjetas de tu docente.'}</p></div><button className="btn btn-secondary" type="button" onClick={() => onNavigate('aula')}>{teacher ? 'Ir a Aula docente' : 'Ir a Mi clase'}</button></section>
+    {practicePlan && <section className="card practice-plan" aria-label="Plan de práctica personalizado">
+      <span className="panel-eyebrow">TU PLAN DE PRÁCTICA</span>
+      <h2>{practicePlan.reason}</h2>
+      <p>Lo notamos porque te pasó {practicePlan.pattern.count} veces. Practicar esto un rato te va a ayudar a que no se repita.</p>
+      <button type="button" className="btn btn-primary" onClick={() => goToPractice(practicePlan.exercise.id)}>Practicar ahora <Icon name="arrow" size={18} /></button>
+    </section>}
     {progress.attempts > 0 && <section className="card learning-progress" aria-label="Progreso por tema"><div className="learning-progress-head"><div><span className="panel-eyebrow">TU AVANCE</span><h2>Así vas aprendiendo</h2></div><strong>{progress.accuracy}% de aciertos</strong></div><div className="learning-topic-grid">{topicProgress.map(item => <div key={item.topic}><div className="learning-topic-title"><strong>{item.topic}</strong><span>{item.correct}/{item.attempts} aciertos</span></div><div className="learning-topic-track"><span style={{width:`${item.accuracy}%`}} /></div><small>{item.attempts ? `Tiempo promedio: ${item.averageSeconds} s` : 'Todavía sin intentos'}</small></div>)}</div></section>}
     <p className="home-progress-note">Tu progreso: <strong>{learning.xp} XP</strong> · {progress.correct} respuestas correctas de {progress.attempts} intentos{progress.attempts ? ` · ${progress.accuracy}% de aciertos` : ''}. Guardado en este dispositivo.</p>
   </div>;
@@ -264,31 +276,74 @@ function handlePracticeTabKeyDown(event) {
   tabs[target].click();
 }
 
+function SpeakerButton({ text, id, speech }) {
+  if (!speech.supported || !text) return null;
+  const speaking = speech.speakingId === id;
+  return <button type="button" className={'chat-speak-button' + (speaking ? ' is-speaking' : '')} aria-label={speaking ? 'Dejar de escuchar' : 'Escuchar esta respuesta'} onClick={() => speech.speak(text, id)}>
+    <Icon name="speaker" size={14} />
+  </button>;
+}
+
 function FreeChatView({ quiz }) {
   const logRef = useRef(null);
+  const fileRef = useRef(null);
+  const [photoError, setPhotoError] = useState('');
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const recognition = useSpeechRecognition();
+  const speech = useSpeechSynthesis();
   useEffect(() => {
     logRef.current?.scrollTo?.({ top: logRef.current.scrollHeight, behavior: 'smooth' });
   }, [quiz.charlaLog.length, quiz.streamText, quiz.busy]);
   const freeHistory = quiz.history.filter(session => session.tipo === 'chat-libre' || session.tema === 'Chat libre');
+
+  const pickPhoto = async event => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    setPhotoError(''); setPhotoBusy(true);
+    try { quiz.setCharlaImage(await imageFileToDataUrl(file, { maxSize: 1400, maxChars: 850_000 })); }
+    catch (failure) { setPhotoError(failure.message); }
+    finally { setPhotoBusy(false); }
+  };
+  const toggleMic = () => {
+    if (recognition.listening) { recognition.stop(); return; }
+    recognition.start(text => quiz.setCharlaText(current => (current ? current + ' ' : '') + text));
+  };
+
   return <div className="tutor-mode-panel" id="tutor-panel" role="tabpanel" aria-labelledby="tutor-tab-free">
     <div className="quiz-head">
-      <div><h2>Chat libre</h2><p>Preguntale al tutor sin completar tarjetas ni cuestionarios.</p></div>
+      <div><h2>Chat libre</h2><p>Preguntale al tutor sin completar tarjetas ni cuestionarios. Podés escribir, hablar o mandar una foto del ejercicio.</p></div>
       <span className="chip">Consultas disponibles hoy: {quiz.charlaLeft}/15</span>
-      <button type="button" className="btn btn-secondary chat-new-button" onClick={quiz.newFreeConversation} disabled={quiz.busy}>Nueva conversación</button>
+      <button type="button" className="btn btn-secondary chat-new-button" onClick={() => { quiz.newFreeConversation(); speech.stop(); }} disabled={quiz.busy}>Nueva conversación</button>
     </div>
     <div className="chats-scroll" ref={logRef} aria-live="polite">
-      {!quiz.charlaLog.length && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble">¡Hola! Estoy acá para ayudarte con Física. Escribí tu pregunta cuando quieras.</div>}
+      {!quiz.charlaLog.length && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble">¡Hola! Estoy acá para ayudarte con Física. Escribí tu pregunta, mandala por voz o adjuntá una foto del ejercicio de tu cuaderno.</div>}
       {quiz.charlaLog.map((message, position) => <div key={message.id ?? 'free-' + position} className={'chat-bubble ' + (message.role === 'alumno' ? 'chat-alumno-bubble' : 'chat-tutor-bubble')}>
+        {message.image && <img className="chat-attached-photo" src={message.image} alt="Foto del ejercicio enviada al tutor" />}
         <MathText text={message.text} />
-        {message.role !== 'alumno' && message.source && <small className="chat-message-source">{tutorSourceLabel(message)}</small>}
+        {message.role !== 'alumno' && <div className="chat-bubble-actions">
+          {message.source && <small className="chat-message-source">{tutorSourceLabel(message)}</small>}
+          <SpeakerButton text={message.text} id={'free-' + position} speech={speech} />
+        </div>}
       </div>)}
       {quiz.busy && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-typing" role="status" aria-live="polite"><span>El tutor está respondiendo</span><span className="chat-typing-dots" aria-hidden="true"><i /><i /><i /></span></div>}
       {quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-streaming" aria-live="off"><MathText text={quiz.streamText} /></div>}
     </div>
+    {quiz.charlaImage && <div className="chat-photo-preview"><img src={quiz.charlaImage} alt="Foto lista para enviar" /><button type="button" className="btn btn-text" onClick={() => quiz.setCharlaImage(null)}>Quitar foto</button></div>}
+    {photoError && <p className="field-error" role="alert">{photoError}</p>}
+    {recognition.error && <p className="field-error" role="alert">{recognition.error}</p>}
     <form className="chats-input-area" onSubmit={event => { event.preventDefault(); quiz.askFreeQuestion(); }}>
-      <input className="quiz-input" type="text" inputMode="text" autoComplete="off" aria-label="Pregunta para el tutor" placeholder={quiz.charlaLeft > 0 ? 'Escribí tu pregunta…' : 'Llegaste al límite diario de consultas'} value={quiz.charlaText} onChange={event => quiz.setCharlaText(event.target.value)} disabled={quiz.busy || quiz.charlaLeft <= 0} />
-      <button type="submit" className="btn btn-primary" disabled={quiz.busy || quiz.charlaLeft <= 0 || !quiz.charlaText.trim()}>{quiz.busy ? 'El tutor está respondiendo…' : 'Enviar pregunta'}</button>
+      <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" hidden onChange={pickPhoto} />
+      <button type="button" className="btn btn-icon chat-photo-button" title="Adjuntar foto del ejercicio" aria-label="Adjuntar foto del ejercicio" onClick={() => fileRef.current?.click()} disabled={quiz.busy || photoBusy || quiz.charlaLeft <= 0}>
+        <Icon name="image" size={20} />
+      </button>
+      {recognition.supported && <button type="button" className={'btn btn-icon chat-mic-button' + (recognition.listening ? ' is-listening' : '')} title="Preguntar por voz (español)" aria-label={recognition.listening ? 'Escuchando…' : 'Preguntar por voz'} onClick={toggleMic} disabled={quiz.busy || quiz.charlaLeft <= 0}>
+        <Icon name="mic" size={20} />
+      </button>}
+      <input className="quiz-input" type="text" inputMode="text" autoComplete="off" aria-label="Pregunta para el tutor" placeholder={quiz.charlaLeft > 0 ? (recognition.listening ? 'Escuchando…' : 'Escribí tu pregunta…') : 'Llegaste al límite diario de consultas'} value={quiz.charlaText} onChange={event => quiz.setCharlaText(event.target.value)} disabled={quiz.busy || quiz.charlaLeft <= 0} />
+      <button type="submit" className="btn btn-primary" disabled={quiz.busy || quiz.charlaLeft <= 0 || (!quiz.charlaText.trim() && !quiz.charlaImage)}>{quiz.busy ? 'El tutor está respondiendo…' : 'Enviar'}</button>
     </form>
+    {recognition.supported && <p className="field-help chat-voice-note">La voz reconoce español (beta); en Jopara puede fallar. Probala primero con una pregunta corta.</p>}
     {quiz.charlaLeft <= 0 && <p className="deck-selector-note">Alcanzaste las 15 consultas diarias. Iniciar otra conversación no reinicia el límite.</p>}
     {freeHistory.length > 0 && <details className="chat-history"><summary>Conversaciones anteriores ({freeHistory.length})</summary><ul className="chat-history-list">{[...freeHistory].reverse().map(session => <li key={session.id} className="chat-history-item"><button type="button" className="chat-history-button" onClick={() => quiz.openFreeConversation(session)} disabled={quiz.busy}><strong>{session.tema}</strong><br />{session.fecha} · {session.mensajes?.length ?? 0} mensajes</button></li>)}</ul></details>}
   </div>;

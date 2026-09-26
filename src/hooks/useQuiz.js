@@ -92,6 +92,9 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
   const [charlaLog, setCharlaLog] = useState([]);
   const [tutorQuota, setTutorQuota] = useState(() => getTutorQuota());
   const [charlaText, setCharlaText] = useState('');
+  // Foto del ejercicio del cuaderno, todavía sin enviar (data URL). Nunca se
+  // guarda en el historial persistido: solo viaja en la consulta al tutor.
+  const [charlaImage, setCharlaImage] = useState(null);
   const [history, setHistory] = useState(() => {
     const stored = readJSON(STORAGE_KEYS.CHAT_HISTORY, []);
     return Array.isArray(stored) ? stored : [];
@@ -384,21 +387,27 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
 
   const askFreeQuestion = useCallback(async () => {
     const text = charlaText.trim();
-    if (!text || requestLock.current || tutorQuota.remaining <= 0) return;
+    const image = charlaImage;
+    if ((!text && !image) || requestLock.current || tutorQuota.remaining <= 0) return;
     requestLock.current = true;
     const generation = generationRef.current;
     setBusy(true);
     setStreamText('');
-    const nextLog = [...charlaLog, { role: 'alumno', text }];
+    const displayText = text || (language === 'es' ? 'Ayuda con esta foto del ejercicio' : 'Epytyvõ ko ta\'ãnga ejercicio-gua reheve');
+    // La imagen viaja en el mensaje que se muestra (para la miniatura), pero
+    // nunca en lo que se guarda en el historial de conversaciones.
+    const nextLog = [...charlaLog, { role: 'alumno', text: displayText, image }];
     if (!freeSessionRef.current) freeSessionRef.current = 'free-chat-' + Date.now() + '-' + Math.random().toString(36).slice(2);
     setCharlaLog(nextLog);
     setCharlaText('');
+    setCharlaImage(null);
     try {
       let response;
       try {
         response = await providerRef.current.answerFreeQuestion({
-          message: text,
-          history: charlaLog.slice(-8),
+          message: displayText,
+          image,
+          history: charlaLog.slice(-8).map(({ image: _drop, ...rest }) => rest),
           language,
           onToken: (token) => {
             if (generation === generationRef.current) setStreamText(token);
@@ -411,7 +420,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
       if (generation !== generationRef.current) return;
       const finalLog = [...nextLog, { role: 'tutor', text: response.message, source: response.source ?? null, reason: response.reason ?? null, available: response.available !== false }];
       setCharlaLog(finalLog);
-      persistFreeConversation(finalLog);
+      persistFreeConversation(finalLog.map(({ image: _drop, ...rest }) => rest));
       setTutorQuota(getTutorQuota());
     } finally {
       if (generation === generationRef.current) {
@@ -420,13 +429,14 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
         setBusy(false);
       }
     }
-  }, [charlaText, tutorQuota.remaining, charlaLog, persistFreeConversation, language]);
+  }, [charlaText, charlaImage, tutorQuota.remaining, charlaLog, persistFreeConversation, language]);
 
   const newFreeConversation = useCallback(() => {
     if (requestLock.current) return;
     freeSessionRef.current = null;
     setCharlaLog([]);
     setCharlaText('');
+    setCharlaImage(null);
     setStreamText('');
   }, []);
 
@@ -494,6 +504,8 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
     busy,
     streamText,
     charlaLog,
+    charlaImage,
+    setCharlaImage,
     charlaUsed: tutorQuota.used,
     charlaLeft,
     tutorQuota,
