@@ -14,6 +14,7 @@ import CurriculumBadge from './components/CurriculumBadge.jsx';
 import TheorySection from './components/TheorySection.jsx';
 import CanvasSimulator from './simulator/CanvasSimulator.jsx';
 import PredictLaunchGame from './simulator/PredictLaunchGame.jsx';
+import TrajectoryDrawingPractice from './components/TrajectoryDrawingPractice.jsx';
 import ExplorationLab from './simulator/ExplorationLab.jsx';
 import AIPrivacyNotice from './components/AIPrivacyNotice.jsx';
 import {
@@ -639,13 +640,14 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
         {activeTab === 'inicio' && <HomeView user={user} learning={learning} classConfig={classConfig} onNavigate={navigate} onGuide={() => setShowGuide(true)} />}
         {activeTab === 'simulador' && (
           <>
-            <div className="tutor-mode-tabs" role="tablist" aria-label="Modo de práctica">
+            <div className="tutor-mode-tabs practice-mode-tabs" role="tablist" aria-label="Modo de práctica">
               <button id="practice-tab-ejercicio" type="button" role="tab" aria-controls="practice-panel" aria-selected={practiceMode === 'ejercicio'} tabIndex={practiceMode === 'ejercicio' ? 0 : -1} className={practiceMode === 'ejercicio' ? 'is-active' : ''} onKeyDown={handlePracticeTabKeyDown} onClick={() => setPracticeMode('ejercicio')}>Ejercicios</button>
+              <button id="practice-tab-dibujo" type="button" role="tab" aria-controls="practice-panel" aria-selected={practiceMode === 'dibujo'} tabIndex={practiceMode === 'dibujo' ? 0 : -1} className={practiceMode === 'dibujo' ? 'is-active' : ''} onKeyDown={handlePracticeTabKeyDown} onClick={() => setPracticeMode('dibujo')}>Dibujar parábolas</button>
               <button id="practice-tab-minijuego" type="button" role="tab" aria-controls="practice-panel" aria-selected={practiceMode === 'minijuego'} tabIndex={practiceMode === 'minijuego' ? 0 : -1} className={practiceMode === 'minijuego' ? 'is-active' : ''} onKeyDown={handlePracticeTabKeyDown} onClick={() => setPracticeMode('minijuego')}>Minijuego: Predecí y lanzá</button>
               <button id="practice-tab-laboratorio" type="button" role="tab" aria-controls="practice-panel" aria-selected={practiceMode === 'laboratorio'} tabIndex={practiceMode === 'laboratorio' ? 0 : -1} className={practiceMode === 'laboratorio' ? 'is-active' : ''} onKeyDown={handlePracticeTabKeyDown} onClick={() => setPracticeMode('laboratorio')}>Laboratorio de exploración</button>
             </div>
             <div id="practice-panel" role="tabpanel" aria-labelledby={`practice-tab-${practiceMode}`} tabIndex={0}>
-            {practiceMode === 'minijuego' ? <PredictLaunchGame /> : practiceMode === 'laboratorio' ? <ExplorationLab /> : <>
+            {practiceMode === 'dibujo' ? <TrajectoryDrawingPractice /> : practiceMode === 'minijuego' ? <PredictLaunchGame /> : practiceMode === 'laboratorio' ? <ExplorationLab /> : <>
             <section className="topic-picker card" aria-label="Elegir situación de práctica">
               <div><span className="panel-eyebrow">MOVIMIENTO PARABÓLICO</span><h2>Elegí una situación</h2><p>El cálculo es siempre el mismo; cambia el contexto y la escena del simulador.</p></div>
               <div className="scenario-options">{availableScenarios.map(scenario => <button key={scenario.id} type="button" className={'scenario-option' + (currentExercise?.scenario === scenario.id ? ' is-active' : '')} aria-pressed={currentExercise?.scenario === scenario.id} onClick={() => selectScenario(scenario.id)}><Icon name={scenario.icon} size={22} /><span><strong>{scenario.label}</strong><small>{scenario.lead}</small></span></button>)}</div>
