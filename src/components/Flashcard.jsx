@@ -38,7 +38,6 @@ export default function Flashcard({ flashcard, consolidated, onConsolidate, onRe
     >
       <div className={'flashcard-inner ' + (flipped ? 'is-flipped' : '')}>
         <div className="flashcard-face flashcard-front" aria-hidden={flipped} inert={flipped ? '' : undefined}>
-        <div className="flashcard-face flashcard-front" aria-hidden={flipped} inert={flipped ? '' : undefined}>
           <div>
             <p className="flashcard-topic">{flashcard?.topic || 'Movimiento Parabólico'}</p>
             <h3 className="flashcard-text">
