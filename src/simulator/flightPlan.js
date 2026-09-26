@@ -31,7 +31,10 @@ export function planFlight({
   wind = 0,
   temperature = 21,
 }) {
-  const safeSpeed = clamp(speed, 1, 100, 20);
+  // Sin tope superior: un ejercicio propio del docente con v0 = 50 m/s debe
+  // simularse a 50 m/s, no recortarse en silencio. El renderizador ya se
+  // auto-escala al alcance y la altura del vuelo.
+  const safeSpeed = Number.isFinite(Number(speed)) && Number(speed) > 0 ? Number(speed) : 20;
   const safeAngle = clamp(angle, 1, 89, 45);
   const safeGravity = Number.isFinite(Number(gravity)) && Number(gravity) > 0 ? Number(gravity) : 9.8;
   const safeY0 = Number.isFinite(Number(y0)) && Number(y0) >= 0 ? Number(y0) : 0;

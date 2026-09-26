@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { MathText } from './MathText.jsx';
 import { hasHintsLeft, totalHints } from '../pedagogy/hintEngine.js';
 import { validateExercise } from '../physics/physicsValidator.js';
 import { diagnoseAttempt } from '../pedagogy/diagnoseAttempt.js';
@@ -89,8 +90,12 @@ export default function ExerciseCard({ exercise, onResult, onAskHint, onSimulati
   };
   return (
     <section className="card exercise-card" aria-label={'Ejercicio ' + exercise.id}>
-      <div className="exercise-meta"><span className="chip chip-topic">{exercise.topic}</span><span className="chip chip-difficulty">{exercise.difficulty}</span></div>
-      <p className="exercise-question">{exercise.question}{language !== 'es' && exercise.questionJopara && <small className="bilingual-es" lang="es"> Jopara</small>}</p>
+      <div className="exercise-meta">
+        <span className="chip chip-topic">{exercise.topic}</span>
+        <span className="chip chip-difficulty">{exercise.difficulty}</span>
+        <span className="chip chip-mec" title="Contenido contrastado con el Currículum Oficial del MEC (Res. N.º 12506) y OpenStax Physics">MEC Res. 12506</span>
+      </div>
+      <p className="exercise-question"><MathText text={exercise.question} />{language !== 'es' && exercise.questionJopara && <small className="bilingual-es" lang="es"> Jopara</small>}</p>
       <div className="values-chips">{Object.entries(exercise.values ?? {}).map(([key, value]) => <span key={key} className="chip chip-data"><small>{VALUE_LABELS[key]?.[0] ?? key}</small><strong>{formatValue(value)} {VALUE_LABELS[key]?.[1] ?? ''}</strong></span>)}</div>
       <form onSubmit={check} noValidate>
         <div className="answer-row"><label className="answer-label" htmlFor={'answer-' + exercise.id}>Respuesta</label><input id={'answer-' + exercise.id} className="answer-input" type="text" inputMode="decimal" autoComplete="off" placeholder="Escribí tu resultado" value={answer} aria-invalid={invalid} aria-describedby={'answer-help-' + exercise.id} onChange={event => { setAnswer(event.target.value); setFeedback(null); onSimulationClear?.(); }} /><span className="answer-unit">{exercise.unit}</span></div>
@@ -105,11 +110,25 @@ export default function ExerciseCard({ exercise, onResult, onAskHint, onSimulati
               ? `Pista ${hintMessage.level} de ${totalHints(exercise)}`
               : `Ñepytyvõ ${hintMessage.level} / ${totalHints(exercise)}`}
           </span>
-          <p>{hintMessage.text}</p>
-          {hintMessage.subHint && <small>{hintMessage.subHint}</small>}
+          <MathText as="p" text={hintMessage.text} />
+          {hintMessage.subHint && <MathText as="small" text={hintMessage.subHint} />}
         </aside>
       )}
-      {feedback && <div className={'feedback ' + (feedback.correct ? 'correct' : 'incorrect')} role="status">{feedback.correct ? <><strong>¡Iporã! Tu respuesta es correcta.</strong><span>Mirá la simulación de este ejercicio abajo.</span></> : <><strong>Eñeha’ã jey · Probá otra vez sin perder puntos.</strong><span>{feedback.diagnosisMessage}</span></>}</div>}
+      {feedback && (
+        <div className={'feedback ' + (feedback.correct ? 'correct' : 'incorrect')} role="status">
+          {feedback.correct ? (
+            <>
+              <strong>¡Iporã! Tu respuesta es correcta.</strong>
+              <span>Mirá la simulación de este ejercicio abajo.</span>
+            </>
+          ) : (
+            <>
+              <strong>Eñeha’ã jey · Probá otra vez sin perder puntos.</strong>
+              <MathText text={feedback.diagnosisMessage} />
+            </>
+          )}
+        </div>
+      )}
     </section>
   );
 }

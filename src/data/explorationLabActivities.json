@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "language": "es",
+  "contentStatus": "borrador",
+  "review": {
+    "jopara": "pendiente",
+    "fisica": "pendiente"
+  },
+  "modelAssumptions": {
+    "airResistance": false,
+    "gravity": "constante durante cada lanzamiento",
+    "launchAndLandingSameHeight": true,
+    "heightReference": "el punto de lanzamiento"
+  },
+  "activities": [
+    {
+      "id": "alcance-angulos-complementarios",
+      "title": "¿Dos ángulos pueden llegar igual de lejos?",
+      "objective": "Comparar alcance, altura máxima y tiempo de vuelo cuando solo cambia el ángulo.",
+      "instructions": [
+        "Antes de ejecutar la simulación, predice qué lanzamiento llegará más lejos.",
+        "Compara 30° y 60° con la misma rapidez inicial y la misma gravedad.",
+        "Usa las mediciones para revisar tu predicción y explica qué cambió además del alcance."
+      ],
+      "changedVariable": "angle",
+      "launchA": { "v0": 20, "angle": 30, "gravity": 10 },
+      "launchB": { "v0": 20, "angle": 60, "gravity": 10 },
+      "observationTargets": ["alcance", "altura máxima", "tiempo de vuelo"],
+      "expectedExplanation": "En el modelo ideal, ambos alcances son aproximadamente 34,64 m porque los ángulos son complementarios y sen(60°) = sen(120°). El lanzamiento a 60° alcanza más altura y permanece más tiempo en el aire. La explicación supone salida y llegada al mismo nivel y no incluye resistencia del aire.",
+      "exitTicket": {
+        "question": "¿Qué evidencia de la simulación te hizo corregir o mantener tu predicción?",
+        "expectedEvidence": "Menciona los alcances cercanos a 34,64 m y distingue las alturas o tiempos de vuelo.",
+        "optionalSelfCheck": true
+      }
+    },
+    {
+      "id": "efecto-de-la-rapidez",
+      "title": "¿Qué ocurre si duplicamos la rapidez?",
+      "objective": "Relacionar un cambio en la rapidez inicial con el alcance, la altura máxima y el tiempo de vuelo.",
+      "instructions": [
+        "Predice si al duplicar la rapidez también se duplicará el alcance.",
+        "Compara 10 m/s con 20 m/s manteniendo el ángulo en 45° y la gravedad en 10 m/s².",
+        "Compara las mediciones y describe cómo cambió cada una."
+      ],
+      "changedVariable": "v0",
+      "launchA": { "v0": 10, "angle": 45, "gravity": 10 },
+      "launchB": { "v0": 20, "angle": 45, "gravity": 10 },
+      "observationTargets": ["alcance", "altura máxima", "tiempo de vuelo"],
+      "expectedExplanation": "Al duplicar v0, el alcance y la altura máxima se cuadruplican en estas condiciones (10 m y 2,5 m pasan a 40 m y 10 m). El tiempo de vuelo se duplica (aproximadamente 1,41 s a 2,83 s). Se mantienen el ángulo, la gravedad, el nivel de llegada y la ausencia de resistencia del aire.",
+      "exitTicket": {
+        "question": "Si mantienes el ángulo y la gravedad, ¿duplicar la rapidez duplica el alcance? Justifica usando una medición.",
+        "expectedEvidence": "Explica que no: con los valores probados, el alcance pasa de 10 m a 40 m.",
+        "optionalSelfCheck": true
+      }
+    },
+    {
+      "id": "gravedad-tierra-luna",
+      "title": "Un mismo lanzamiento en la Tierra y la Luna",
+      "objective": "Observar cómo la gravedad cambia la duración y la trayectoria de un lanzamiento ideal.",
+      "instructions": [
+        "Predice en cuál escenario el objeto tardará más en volver al nivel de salida.",
+        "Compara v0 = 20 m/s y ángulo = 45° con g = 9,8 m/s² y g = 1,62 m/s².",
+        "Observa el alcance y el tiempo; luego indica qué simplificación del modelo podría cambiar en una situación real."
+      ],
+      "changedVariable": "gravity",
+      "launchA": { "v0": 20, "angle": 45, "gravity": 9.8 },
+      "launchB": { "v0": 20, "angle": 45, "gravity": 1.62 },
+      "observationTargets": ["alcance", "altura máxima", "tiempo de vuelo"],
+      "expectedExplanation": "Con menor gravedad, el modelo ideal predice más tiempo de vuelo, mayor altura y mayor alcance. Para estos datos, el alcance es aproximadamente 40,82 m con g = 9,8 m/s² y 246,91 m con g = 1,62 m/s². La simulación desprecia la resistencia del aire y no representa otros efectos de una misión real.",
+      "exitTicket": {
+        "question": "¿Por qué el lanzamiento de la Luna recorre más distancia en esta simulación?",
+        "expectedEvidence": "Relaciona la gravedad menor con una caída más lenta y un mayor tiempo disponible para avanzar horizontalmente.",
+        "optionalSelfCheck": true
+      }
+    }
+  ]
+}

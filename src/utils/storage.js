@@ -48,6 +48,7 @@ export const STORAGE_KEYS = {
   CHAT_HISTORY: 'guarania_chat_history',
   TUTOR_USAGE: 'guarania:tutorUsage',
   ATTEMPT_LOG: 'guarania:attemptLog',
+  GUIDE_SEEN: 'guarania:guideSeen:v2',
 };
 
 export function readJSON(key, fallback) {

@@ -1,4 +1,8 @@
 import { jsPDF } from 'jspdf';
+import { toTextbookPlain } from '../utils/mathText.js';
+
+// NotoSans no trae ≈ ni →: se reemplazan para que el PDF no muestre huecos.
+const pdfMath = text => toTextbookPlain(text).replace(/≈/g, '~').replace(/\s*→\s*/g, '; ');
 import notoSansUrl from './assets/NotoSans-Regular.ttf?url';
 import { concepts, exercises, scienceSources, localizeCatalogItem } from '../data/catalogs.js';
 import { DEFAULT_LANGUAGE, translate } from '../i18n/messages.js';
@@ -7,7 +11,7 @@ import { selectClassExercises } from '../utils/classCode.js';
 const PAGE = { width: 210, height: 297, margin: 16, bottom: 278 };
 const SCENARIO_MESSAGE = { dron: 'pdf.scenario.dron', basketball: 'pdf.scenario.basketball', wall: 'pdf.scenario.wall' };
 const DIFFICULTY_MESSAGE = { básico: 'pdf.difficulty.basico', intermedio: 'pdf.difficulty.intermedio', avanzado: 'pdf.difficulty.avanzado' };
-const green = [23, 72, 59], ink = [31, 41, 55], soft = [92, 109, 100];
+const navy = [12, 21, 39], brandBlue = [29, 91, 216], ink = [15, 23, 42], soft = [100, 116, 139], lineMuted = [226, 232, 240];
 const formatNumber = value => String(value).replace('.', ',');
 
 async function registerUnicodeFont(doc) {
@@ -45,10 +49,12 @@ export async function createStudyPdf({ config = null, language = DEFAULT_LANGUAG
 
   let y = 40, page = 1;
   const drawHeader = () => {
-    doc.setFillColor(...green); doc.rect(0, 0, PAGE.width, 29, 'F');
+    doc.setFillColor(...navy); doc.rect(0, 0, PAGE.width, 27, 'F');
+    doc.setFillColor(...brandBlue); doc.rect(0, 27, PAGE.width, 2, 'F');
     doc.setTextColor(255, 255, 255); doc.setFont('NotoSans', 'normal'); doc.setFontSize(18);
     doc.text('PyFis IA · ' + label('pdf.title'), PAGE.margin, 13);
-    doc.setFontSize(9); doc.text(label('pdf.subtitle'), PAGE.margin, 21);
+    doc.setFontSize(9); doc.setTextColor(203, 213, 225);
+    doc.text(label('pdf.subtitle'), PAGE.margin, 21);
     doc.setTextColor(...ink); y = 39;
   };
   const addPage = () => { doc.addPage(); page += 1; drawHeader(); };
@@ -75,7 +81,7 @@ export async function createStudyPdf({ config = null, language = DEFAULT_LANGUAG
     y += gap;
   };
   const addSection = title => {
-    y += 3; addText(title, { size: 14, color: green, gap: 4 });
+    y += 3; addText(title, { size: 13, color: brandBlue, gap: 4 });
   };
   drawHeader();
   addText(`${label('pdf.name')}: ____________________________________     ${label('pdf.date')}: ${now.toLocaleDateString('es-PY')}`, { size: 9 });
@@ -89,26 +95,26 @@ export async function createStudyPdf({ config = null, language = DEFAULT_LANGUAG
   const relevantConcepts = localizedConcepts.filter(item => conceptIds.has(item.id));
   if (relevantConcepts.length) {
     addSection(label('pdf.relations'));
-    for (const concept of relevantConcepts) addText(`${concept.name}: ${concept.formula || concept.definition}`, { size: 9 });
+    for (const concept of relevantConcepts) addText(`${concept.name}: ${pdfMath(concept.formula || concept.definition)}`, { size: 9 });
   }
 
   addSection(label('pdf.exercises'));
   localized.forEach((exercise, index) => {
     const scenario = SCENARIO_MESSAGE[exercise.scenario];
     const difficulty = DIFFICULTY_MESSAGE[exercise.difficulty?.toLocaleLowerCase('es')];
-    addText(`${index + 1}. ${exercise.topic}${scenario ? ' · ' + label(scenario) : ''} · ${difficulty ? label(difficulty) : exercise.difficulty}`, { size: 11, color: green, gap: 2 });
-    addText(exercise.question, { size: 9, indent: 3, gap: 4 });
+    addText(`${index + 1}. ${exercise.topic}${scenario ? ' · ' + label(scenario) : ''} · ${difficulty ? label(difficulty) : exercise.difficulty}`, { size: 11, color: brandBlue, gap: 2 });
+    addText(pdfMath(exercise.question), { size: 9, indent: 3, gap: 4 });
     for (let line = 0; line < 2; line += 1) {
       if (y + 8 > PAGE.bottom) addPage();
-      doc.setDrawColor(205, 218, 209); doc.line(PAGE.margin + 3, y + 4, PAGE.width - PAGE.margin, y + 4); y += 8;
+      doc.setDrawColor(...lineMuted); doc.line(PAGE.margin + 3, y + 4, PAGE.width - PAGE.margin, y + 4); y += 8;
     }
   });
 
   addPage(); addSection(label('pdf.review'));
   localized.forEach((exercise, index) => {
-    addText(`${index + 1}. ${exercise.topic}`, { size: 10, color: green, gap: 2 });
+    addText(`${index + 1}. ${exercise.topic}`, { size: 10, color: brandBlue, gap: 2 });
     addText(`${label('pdf.answer')}: ${formatNumber(exercise.correctAnswer)} ${exercise.unit}`, { size: 9, indent: 3 });
-    if (exercise.hints?.length) addText(exercise.hints.at(-1), { size: 8, indent: 3 });
+    if (exercise.hints?.length) addText(pdfMath(exercise.hints.at(-1)), { size: 8, indent: 3 });
   });
 
   addPage(); addSection(label('pdf.references'));
@@ -125,7 +131,7 @@ export async function createStudyPdf({ config = null, language = DEFAULT_LANGUAG
 
   const pages = doc.getNumberOfPages();
   for (let current = 1; current <= pages; current += 1) {
-    doc.setPage(current); doc.setDrawColor(210, 220, 215); doc.line(PAGE.margin, 284, PAGE.width - PAGE.margin, 284);
+    doc.setPage(current); doc.setDrawColor(...lineMuted); doc.line(PAGE.margin, 284, PAGE.width - PAGE.margin, 284);
     doc.setFont('NotoSans', 'normal'); doc.setFontSize(7); doc.setTextColor(...soft);
     doc.text(label('pdf.footer'), PAGE.margin, 289); doc.text(`${label('pdf.page')} ${current} / ${pages}`, PAGE.width - PAGE.margin, 289, { align: 'right' });
   }

@@ -1,15 +1,9 @@
 import { useState } from 'react';
-import { readLanguage, useTranslation } from '../i18n/LanguageProvider.jsx';
+import { useTranslation } from '../i18n/LanguageProvider.jsx';
 
 /** Keep Unicode intact; the shared PDF generator embeds Noto Sans. */
 export function printableText(value) {
   return String(value ?? '').replaceAll('θ', 'ángulo').replaceAll('≈', 'aprox.').replaceAll('−', '-').replace(/[–—]/gu, '-');
-}
-
-/** Kept as the public entry point consumed by TeacherProjector. */
-export async function generateGuaraniaPdf() {
-  const { downloadStudyPdf } = await import('../pdf/createStudyPdf.js');
-  return downloadStudyPdf({ language: readLanguage() });
 }
 
 export default function PrintableSheet({ className = '' }) {

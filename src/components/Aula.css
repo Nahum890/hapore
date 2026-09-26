@@ -1,0 +1,24 @@
+.aula-guided-template {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius);
+  background: var(--c-primary-soft);
+}
+
+.aula-guided-template p {
+  margin: 4px 0 0;
+  color: var(--c-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+@media (max-width: 600px) {
+  .aula-guided-template {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

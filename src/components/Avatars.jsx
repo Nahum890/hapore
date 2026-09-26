@@ -79,8 +79,15 @@ function Cielo() {
 
 const RENDERERS = { sol: Sol, rio: Rio, selva: Selva, tierra: Tierra, cielo: Cielo };
 
+export const isPhotoAvatar = id => typeof id === 'string' && /^data:image\/(jpeg|png|webp);base64,/.test(id);
+
 export default function Avatar({ id, size = 40, className = '' }) {
+  const style = { width: size, height: size, display: 'inline-block', borderRadius: '50%', overflow: 'hidden', flex: 'none' };
+  // Foto subida por la persona (ya recortada y reducida a un data URL).
+  if (isPhotoAvatar(id)) {
+    return <span className={'avatar-icon ' + className} style={style}><img src={id} alt="" width={size} height={size} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} /></span>;
+  }
   const Renderer = RENDERERS[id];
   if (!Renderer) return null;
-  return <span className={'avatar-icon ' + className} style={{ width: size, height: size, display: 'inline-block', borderRadius: '50%', overflow: 'hidden' }}><Renderer /></span>;
+  return <span className={'avatar-icon ' + className} style={style}><Renderer /></span>;
 }

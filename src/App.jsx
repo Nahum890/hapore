@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import './components/ChatConversation.css';
 import Header from './components/Header.jsx';
 import ConfidenceBar from './components/ConfidenceBar.jsx';
@@ -10,8 +10,12 @@ import StudentClass from './components/StudentClass.jsx';
 import AuthScreen from './components/AuthScreen.jsx';
 import PdfButton from './components/PdfButton.jsx';
 import Onboarding from './components/Onboarding.jsx';
+import CurriculumBadge from './components/CurriculumBadge.jsx';
+import TheorySection from './components/TheorySection.jsx';
 import CanvasSimulator from './simulator/CanvasSimulator.jsx';
 import PredictLaunchGame from './simulator/PredictLaunchGame.jsx';
+import ExplorationLab from './simulator/ExplorationLab.jsx';
+import AIPrivacyNotice from './components/AIPrivacyNotice.jsx';
 import {
   concepts as conceptsData,
   errors as errorsData,
@@ -24,6 +28,10 @@ import {
 import { getCustomExercises } from './utils/customExercises.js';
 import { joinClass, leaveClass } from './utils/classroom.js';
 import ProfileSettings from './components/ProfileSettings.jsx';
+import { Formula, MathText } from './components/MathText.jsx';
+const ClassChat = lazy(() => import('./components/ClassChat.jsx'));
+import { isCloudConfigured } from './cloud/cloudClient.js';
+import { downloadClass, flushProgress, getClassPackage, getPendingProgress, leaveCloudClass, progressSnapshot, queueProgress, syncMyProfile } from './cloud/classCloud.js';
 
 // Los ejercicios que crea el docente viven en este dispositivo (ver
 // src/utils/customExercises.js) y se suman a los del banco fijo dondequiera
@@ -34,7 +42,7 @@ import { useTutor } from './hooks/useTutor.js';
 import { useMission } from './hooks/useMission.js';
 import { useQuiz } from './hooks/useQuiz.js';
 import { readJSON, writeJSON, setActiveProfile } from './utils/storage.js';
-import { getSession, logout } from './auth/localAccounts.js';
+import { getSession, hasContactInfo, logout } from './auth/localAccounts.js';
 import { decodeClassConfig, encodeClassConfig, selectClassExercises } from './utils/classCode.js';
 import { recommendExercise, summarizeAttempts } from './pedagogy/progression.js';
 import './components/TutorModes.css';
@@ -50,6 +58,7 @@ const SECTIONS = [
   { id: 'tarjetas', icon: 'cards', accent: 'sun' },
   { id: 'chats', icon: 'chat', accent: 'sky' },
   { id: 'aula', icon: 'class', accent: 'primary' },
+  { id: 'mensajes', icon: 'people', accent: 'sky' },
 ];
 
 // Un solo tema (Movimiento Parabólico) con tres situaciones: mismo motor
@@ -96,7 +105,7 @@ function HomeView({ user, learning, classConfig, onNavigate, onGuide }) {
       <button className="home-action-card is-review" type="button" onClick={() => onNavigate('tarjetas')}><span className="home-card-icon" aria-hidden="true"><Icon name="cards" size={26} /></span><Bilingual k="nav.tarjetas" as="strong" /><span className="home-card-text">{t('home.reviewText')}</span><small aria-hidden="true"><Icon name="arrow" size={18} /></small></button>
       <button className="home-action-card is-tutor" type="button" onClick={() => onNavigate('chats')}><span className="home-card-icon" aria-hidden="true"><Icon name="chat" size={26} /></span><Bilingual k="nav.chats" as="strong" /><span className="home-card-text">{t('home.tutorText')}</span><small aria-hidden="true"><Icon name="arrow" size={18} /></small></button>
     </div>
-    <section className="home-class-card"><Nanduti size={64} spokes={16} rings={3} className="home-class-nanduti" /><div><span className="panel-eyebrow">{teacher ? 'PARA TU CLASE' : 'APRENDÉ EN CLASE'}</span><h3>{teacher ? '¿Qué necesitás para tu clase?' : classConfig ? 'Tu clase está configurada' : '¿Tenés un código de clase?'}</h3><p>{teacher ? 'Compartí una clase, creá un ejercicio o abrí el proyector.' : classConfig ? 'Ya podés practicar los materiales que preparó tu docente.' : 'Ingresalo para ver los ejercicios y tarjetas de tu docente.'}</p></div><button className="btn btn-secondary" type="button" onClick={() => onNavigate('aula')}>{teacher ? 'Ir a Aula docente' : 'Ir a Mi clase'}</button></section>
+    <section className="home-class-card"><Nanduti size={64} spokes={16} rings={3} className="home-class-nanduti" /><div><span className="panel-eyebrow">{teacher ? 'PARA TU CLASE' : 'APRENDÉ EN CLASE'}</span><h3>{teacher ? '¿Qué necesitás para tu clase?' : classConfig ? 'Tu clase está configurada' : '¿Tenés un código de clase?'}</h3><p>{teacher ? 'Compartí una clase, creá un ejercicio o prepará una presentación para proyectar.' : classConfig ? 'Ya podés practicar los materiales que preparó tu docente.' : 'Ingresalo para ver los ejercicios y tarjetas de tu docente.'}</p></div><button className="btn btn-secondary" type="button" onClick={() => onNavigate('aula')}>{teacher ? 'Ir a Aula docente' : 'Ir a Mi clase'}</button></section>
     {progress.attempts > 0 && <section className="card learning-progress" aria-label="Progreso por tema"><div className="learning-progress-head"><div><span className="panel-eyebrow">TU AVANCE</span><h2>Así vas aprendiendo</h2></div><strong>{progress.accuracy}% de aciertos</strong></div><div className="learning-topic-grid">{topicProgress.map(item => <div key={item.topic}><div className="learning-topic-title"><strong>{item.topic}</strong><span>{item.correct}/{item.attempts} aciertos</span></div><div className="learning-topic-track"><span style={{width:`${item.accuracy}%`}} /></div><small>{item.attempts ? `Tiempo promedio: ${item.averageSeconds} s` : 'Todavía sin intentos'}</small></div>)}</div></section>}
     <p className="home-progress-note">Tu progreso: <strong>{learning.xp} XP</strong> · {progress.correct} respuestas correctas de {progress.attempts} intentos{progress.attempts ? ` · ${progress.accuracy}% de aciertos` : ''}. Guardado en este dispositivo.</p>
   </div>;
@@ -133,13 +142,13 @@ function ResourceLibrary({ concepts, errors, examples, glossary, sources }) {
     <label className="resource-search">Buscar en {selected.label.toLocaleLowerCase()}<input type="search" className="quiz-input" value={query} onChange={event => setQuery(event.target.value)} placeholder="Escribí una palabra o fórmula" /></label>
     {visibleItems.length ? <div className="resource-card-grid">
       {visibleItems.map(item => category === 'conceptos' ? <article className="resource-card" key={item.id}>
-        <span className="resource-card-label">IDEA CLAVE</span><h3>{item.name}</h3><p>{item.definition}</p>{item.formula && <code className="resource-formula">{item.formula}</code>}
+        <span className="resource-card-label">IDEA CLAVE</span><h3>{item.name}</h3><p>{item.definition}</p>{item.formula && <code className="resource-formula"><Formula text={item.formula} /></code>}
       </article> : category === 'errores' ? <article className="resource-card" key={item.id}>
-        <span className="resource-card-label">PARA REVISAR</span><h3>{item.name}</h3><p>{item.description}</p>{item.example && <div className="resource-example"><strong>Cómo corregirlo</strong><p>{item.example}</p></div>}
+        <span className="resource-card-label">PARA REVISAR</span><h3>{item.name}</h3><p>{item.description}</p>{item.example && <div className="resource-example"><strong>Cómo corregirlo</strong><MathText as="p" text={item.example} /></div>}
       </article> : category === 'ejemplos' ? <article className="resource-card resource-worked-example" key={item.id}>
-        <span className="resource-card-label">{item.topic} · {item.difficulty}</span><h3>{item.question}</h3>
+        <span className="resource-card-label">{item.topic} · {item.difficulty}</span><MathText as="h3" text={item.question} />
         <div className="resource-given-values">{Object.entries(item.values ?? {}).map(([key, value]) => <span key={key}><small>{RESOURCE_VALUE_LABELS[key] ?? key}</small><strong>{value}{RESOURCE_VALUE_UNITS[key] ? ` ${RESOURCE_VALUE_UNITS[key]}` : ''}</strong></span>)}</div>
-        <details><summary>Ver resolución y respuesta</summary><p className="resource-answer">{item.correctAnswer} {item.unit}</p><ol>{(item.hints ?? []).map((hint, index) => <li key={`${item.id}-${index}`}>{hint}</li>)}</ol></details>
+        <details><summary>Ver resolución y respuesta</summary><p className="resource-answer">{item.correctAnswer} {item.unit}</p><ol>{(item.hints ?? []).map((hint, index) => <li key={`${item.id}-${index}`}><MathText text={hint} /></li>)}</ol></details>
       </article> : category === 'glosario' ? <article className="resource-card" key={item.id}>
         <span className="resource-card-label">TÉRMINO</span><h3>{item.term}</h3>{language === 'es' && item.joparaTerm && <p className="resource-translation"><strong>Jopara:</strong> {item.joparaTerm}</p>}<p>{item.definition}</p>{language !== 'es' && item.ejemploJopara && <div className="resource-example"><strong>Ejemplo</strong><p>{item.ejemploJopara}</p></div>}
       </article> : <article className="resource-card resource-source-card" key={item.id}>
@@ -149,11 +158,11 @@ function ResourceLibrary({ concepts, errors, examples, glossary, sources }) {
   </section>;
 }
 
-function AulaView({ classConfig, onJoinClass, concepts, errors, examples, glossary, sources, teacherId }) {
+function AulaView({ classConfig, onJoinClass, concepts, errors, examples, glossary, sources, teacher }) {
   return (
     <>
       <div className="aula-toolbar"><p>Prepará materiales para usar con tu grupo.</p><PdfButton /></div>
-      <TeacherMode classConfig={classConfig} onJoinClass={onJoinClass} teacherId={teacherId} />
+      <TeacherMode classConfig={classConfig} onJoinClass={onJoinClass} teacher={teacher} />
       <ResourceLibrary concepts={concepts} errors={errors} examples={examples} glossary={glossary} sources={sources} />
     </>
   );
@@ -230,6 +239,30 @@ function TutorModeTabs({ mode, onModeChange, disabled = false }) {
   </div>;
 }
 
+function tutorSourceLabel(entry = {}) {
+  if (entry.source === 'gemini') return 'Gemini con conexión';
+  if (entry.source === 'local-model') return 'Modelo en el dispositivo';
+  if (entry.source !== 'rules') return '';
+  if (entry.reason === 'offline') return 'Tutor local · sin conexión';
+  if (['consent-required', 'local-only'].includes(entry.reason)) return 'Tutor local · Gemini no habilitado';
+  if (entry.reason === 'rate-limited') return 'Tutor local · Gemini alcanzó su límite temporal';
+  if (entry.reason === 'timeout') return 'Tutor local · Gemini tardó demasiado';
+  if (entry.reason === 'online-fallback') return 'Tutor local · respaldo de Gemini';
+  return 'Tutor local';
+}
+
+function handlePracticeTabKeyDown(event) {
+  const tabs = [...event.currentTarget.parentElement.querySelectorAll('[role="tab"]')];
+  const current = tabs.indexOf(event.currentTarget);
+  const target = event.key === 'ArrowRight' ? (current + 1) % tabs.length
+    : event.key === 'ArrowLeft' ? (current - 1 + tabs.length) % tabs.length
+      : event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : -1;
+  if (target < 0) return;
+  event.preventDefault();
+  tabs[target].focus();
+  tabs[target].click();
+}
+
 function FreeChatView({ quiz }) {
   const logRef = useRef(null);
   useEffect(() => {
@@ -245,11 +278,11 @@ function FreeChatView({ quiz }) {
     <div className="chats-scroll" ref={logRef} aria-live="polite">
       {!quiz.charlaLog.length && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble">¡Hola! Estoy acá para ayudarte con Física. Escribí tu pregunta cuando quieras.</div>}
       {quiz.charlaLog.map((message, position) => <div key={message.id ?? 'free-' + position} className={'chat-bubble ' + (message.role === 'alumno' ? 'chat-alumno-bubble' : 'chat-tutor-bubble')}>
-        {message.text}
-        {message.role !== 'alumno' && message.source && <small className="chat-message-source">{message.source === 'gemini' ? 'Gemini' : message.source === 'rules' ? 'Tutor local · sin conexión' : message.source === 'local-model' ? 'Modelo local' : ''}</small>}
+        <MathText text={message.text} />
+        {message.role !== 'alumno' && message.source && <small className="chat-message-source">{tutorSourceLabel(message)}</small>}
       </div>)}
-      {quiz.busy && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-typing" role="status" aria-live="polite"><span>Jopara está respondiendo</span><span className="chat-typing-dots" aria-hidden="true"><i /><i /><i /></span></div>}
-      {quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-streaming" aria-live="off">{quiz.streamText}</div>}
+      {quiz.busy && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-typing" role="status" aria-live="polite"><span>El tutor está respondiendo</span><span className="chat-typing-dots" aria-hidden="true"><i /><i /><i /></span></div>}
+      {quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-streaming" aria-live="off"><MathText text={quiz.streamText} /></div>}
     </div>
     <form className="chats-input-area" onSubmit={event => { event.preventDefault(); quiz.askFreeQuestion(); }}>
       <input className="quiz-input" type="text" inputMode="text" autoComplete="off" aria-label="Pregunta para el tutor" placeholder={quiz.charlaLeft > 0 ? 'Escribí tu pregunta…' : 'Llegaste al límite diario de consultas'} value={quiz.charlaText} onChange={event => quiz.setCharlaText(event.target.value)} disabled={quiz.busy || quiz.charlaLeft <= 0} />
@@ -312,28 +345,26 @@ function ChatsView({ quiz, mode, onModeChange, onCardConsolidated }) {
             </div>
           ) : (
             <div key={`quiz-${position}`} className="chat-entry">
-              <div className="chat-bubble chat-tutor-bubble">{entry.statement}</div>
+              <div className="chat-bubble chat-tutor-bubble"><MathText text={entry.statement} /></div>
               <div className="chat-bubble chat-alumno-bubble">Vos: {entry.studentText}</div>
               <div
                 className={`chat-bubble ${entry.tutor?.correct ? 'chat-correct' : 'chat-incorrect'}`}
                 role="status"
               >
-                {entry.tutor?.message}
-                {entry.tutor?.source && <small className="chat-message-source">{entry.tutor.source === 'gemini' ? 'Gemini' : entry.tutor.source === 'rules' ? 'Tutor local · sin conexión' : ''}</small>}
+                <MathText text={entry.tutor?.message} />
+                {entry.tutor?.source && <small className="chat-message-source">{tutorSourceLabel(entry.tutor)}</small>}
               </div>
             </div>
           ),
         )}
 
         {quiz.busy && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-typing" role="status" aria-live="polite"><span>Jopara está respondiendo</span><span className="chat-typing-dots" aria-hidden="true"><i /><i /><i /></span></div>}
-        {quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-streaming" aria-live="off">{quiz.streamText}</div>}
+        {quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-streaming" aria-live="off"><MathText text={quiz.streamText} /></div>}
 
         {quiz.step === 'quiz' && quiz.currentQuestion && (
           <div className="chat-entry">
             <div className="chat-bubble chat-tutor-bubble">
-              {quiz.currentQuestion.tipo === 'vf'
-                ? quiz.currentQuestion.enunciado
-                : quiz.currentQuestion.pregunta}
+              <MathText text={quiz.currentQuestion.tipo === 'vf' ? quiz.currentQuestion.enunciado : quiz.currentQuestion.pregunta} />
               {quiz.currentQuestion.tipo === 'vf' && <span className="chip">Verdadero o falso</span>}
             </div>
           </div>
@@ -463,11 +494,19 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
   const { t, language } = useTranslation();
   const [activeTab, setActiveTab] = useState('inicio');
   const [practiceMode, setPracticeMode] = useState('ejercicio');
+  const [repasoMode, setRepasoMode] = useState('tarjetas');
   const [tutorMode, setTutorMode] = useState('cuestionario');
   const [simulationSubmission, setSimulationSubmission] = useState(null);
   const [showGuide, setShowGuide] = useState(() => !readJSON('guarania:guideSeen:v2', false));
   const [showSettings, setShowSettings] = useState(false);
-  const [classConfig, setClassConfig] = useState(() => decodeClassConfig(readJSON('guarania:classCode', null)));
+  // Cuentas creadas antes de que teléfono y correo fueran obligatorios.
+  const missingContact = !hasContactInfo(user);
+  const [localClassConfig, setClassConfig] = useState(() => decodeClassConfig(readJSON('guarania:classCode', null)));
+  // Clase descargada de la nube (alumno): trae las tarjetas y ejercicios que
+  // eligió el docente y queda guardada para usarla sin internet.
+  const [classPackage, setClassPackage] = useState(getClassPackage);
+  const classConfig = classPackage?.content?.config ?? localClassConfig;
+  const [syncState, setSyncState] = useState(() => ({ status: getPendingProgress() ? 'pending' : 'idle', at: null }));
   // El docente puede crear ejercicios propios mientras la app sigue abierta
   // (en Aula) y esperar verlos de inmediato en Practicar/el proyector; este
   // contador fuerza a releer la lista cuando eso pasa, sin recargar la app.
@@ -480,10 +519,12 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
   // Los ejercicios se localizan acá: enunciado y pistas cambian con el idioma
   // elegido sin tocar scenario/values/correctAnswer (localizeCatalogItem solo
   // reemplaza campos de texto).
-  const visibleExercises = useMemo(
-    () => selectClassExercises(getAllExercises(), classConfig).map(item => localizeCatalogItem(item, language)),
-    [classConfig, language, customExercisesVersion],
-  );
+  const visibleExercises = useMemo(() => {
+    const pool = [...getAllExercises(), ...(classPackage?.content?.exercises ?? [])];
+    const unique = [...new Map(pool.map(item => [item.id, item])).values()];
+    return selectClassExercises(unique, classConfig).map(item => localizeCatalogItem(item, language));
+  }, [classConfig, classPackage, language, customExercisesVersion]);
+  const deckCards = classPackage?.content?.cards?.length ? classPackage.content.cards : flashcardsData;
   const supportExercises = useMemo(
     () => getAllExercises().map(item => localizeCatalogItem(item, language)),
     [language, customExercisesVersion],
@@ -498,11 +539,58 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
     learning.currentExercise,
     learning.onSelectExercise,
   );
-  const quiz = useQuiz(flashcardsData, {
+  const quiz = useQuiz(deckCards, {
     onMoveToChat: () => { setTutorMode('cuestionario'); setActiveTab('chats'); },
     onQuizAnswer: learning.onQuizAnswer,
     classConfig,
+    includeTheory: !classPackage,
   });
+
+  // Avance del alumno: cada cambio deja una foto pendiente y se intenta
+  // subir; si no hay internet queda guardada y se sube al volver la conexión.
+  const snapshotKey = JSON.stringify(progressSnapshot(learning));
+  useEffect(() => {
+    if (user.role !== 'alumno' || !classPackage || !isCloudConfigured()) return undefined;
+    queueProgress(JSON.parse(snapshotKey));
+    setSyncState(state => ({ ...state, status: 'pending' }));
+    const timer = setTimeout(async () => setSyncState(await flushProgress()), 1500);
+    return () => clearTimeout(timer);
+  }, [snapshotKey, classPackage, user.role]);
+  useEffect(() => {
+    if (user.role !== 'alumno' || !isCloudConfigured()) return undefined;
+    const retry = async () => { if (getPendingProgress()) setSyncState(await flushProgress()); };
+    window.addEventListener('online', retry);
+    retry();
+    return () => window.removeEventListener('online', retry);
+  }, [user.role]);
+
+  const handleDownloadClass = async code => {
+    const pkg = await downloadClass({ code, displayName: user.name, avatar: user.avatar, phone: user.phone, email: user.email });
+    setClassPackage(pkg);
+    queueProgress(progressSnapshot(learning));
+    setSyncState(await flushProgress());
+    return pkg;
+  };
+  // Si cambia la foto o los contactos, se actualizan también en la nube (en
+  // todas las clases de esta cuenta). Sin conexión queda pendiente.
+  const syncProfile = async account => {
+    if (!isCloudConfigured()) return;
+    try { await syncMyProfile(account); writeJSON('guarania:profileSyncPending', false); }
+    catch { writeJSON('guarania:profileSyncPending', true); }
+  };
+  const handleProfileSaved = account => { onUpdateUser(account); syncProfile(account); };
+  useEffect(() => {
+    const retry = () => { if (readJSON('guarania:profileSyncPending', false)) syncProfile(user); };
+    window.addEventListener('online', retry);
+    retry();
+    return () => window.removeEventListener('online', retry);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+  const handleLeaveCloudClass = async () => {
+    await leaveCloudClass();
+    setClassPackage(null);
+    setSyncState({ status: 'idle', at: null });
+  };
 
   useEffect(() => {
     if (activeTab === 'inicio') return;
@@ -546,15 +634,18 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
         <div className="section-copy"><p className="section-eyebrow">{t(user.role === 'maestro' ? 'section.teacher' : 'section.student')}</p><h2 id="section-title">{t(`section.${sectionKey}.title`)}</h2><p>{t(`section.${sectionKey}.description`)}</p></div>
         <button type="button" className="guide-replay" onClick={() => setShowGuide(true)}><Icon name="help" size={18} />{t('section.guide')}</button>
       </section>}
+      <AIPrivacyNotice />
       <div className="app-layout"><main className="app-main">
         {activeTab === 'inicio' && <HomeView user={user} learning={learning} classConfig={classConfig} onNavigate={navigate} onGuide={() => setShowGuide(true)} />}
         {activeTab === 'simulador' && (
           <>
             <div className="tutor-mode-tabs" role="tablist" aria-label="Modo de práctica">
-              <button type="button" role="tab" aria-selected={practiceMode === 'ejercicio'} className={practiceMode === 'ejercicio' ? 'is-active' : ''} onClick={() => setPracticeMode('ejercicio')}>Ejercicios</button>
-              <button type="button" role="tab" aria-selected={practiceMode === 'minijuego'} className={practiceMode === 'minijuego' ? 'is-active' : ''} onClick={() => setPracticeMode('minijuego')}>Minijuego: Predecí y lanzá</button>
+              <button id="practice-tab-ejercicio" type="button" role="tab" aria-controls="practice-panel" aria-selected={practiceMode === 'ejercicio'} tabIndex={practiceMode === 'ejercicio' ? 0 : -1} className={practiceMode === 'ejercicio' ? 'is-active' : ''} onKeyDown={handlePracticeTabKeyDown} onClick={() => setPracticeMode('ejercicio')}>Ejercicios</button>
+              <button id="practice-tab-minijuego" type="button" role="tab" aria-controls="practice-panel" aria-selected={practiceMode === 'minijuego'} tabIndex={practiceMode === 'minijuego' ? 0 : -1} className={practiceMode === 'minijuego' ? 'is-active' : ''} onKeyDown={handlePracticeTabKeyDown} onClick={() => setPracticeMode('minijuego')}>Minijuego: Predecí y lanzá</button>
+              <button id="practice-tab-laboratorio" type="button" role="tab" aria-controls="practice-panel" aria-selected={practiceMode === 'laboratorio'} tabIndex={practiceMode === 'laboratorio' ? 0 : -1} className={practiceMode === 'laboratorio' ? 'is-active' : ''} onKeyDown={handlePracticeTabKeyDown} onClick={() => setPracticeMode('laboratorio')}>Laboratorio de exploración</button>
             </div>
-            {practiceMode === 'minijuego' ? <PredictLaunchGame /> : <>
+            <div id="practice-panel" role="tabpanel" aria-labelledby={`practice-tab-${practiceMode}`} tabIndex={0}>
+            {practiceMode === 'minijuego' ? <PredictLaunchGame /> : practiceMode === 'laboratorio' ? <ExplorationLab /> : <>
             <section className="topic-picker card" aria-label="Elegir situación de práctica">
               <div><span className="panel-eyebrow">MOVIMIENTO PARABÓLICO</span><h2>Elegí una situación</h2><p>El cálculo es siempre el mismo; cambia el contexto y la escena del simulador.</p></div>
               <div className="scenario-options">{availableScenarios.map(scenario => <button key={scenario.id} type="button" className={'scenario-option' + (currentExercise?.scenario === scenario.id ? ' is-active' : '')} aria-pressed={currentExercise?.scenario === scenario.id} onClick={() => selectScenario(scenario.id)}><Icon name={scenario.icon} size={22} /><span><strong>{scenario.label}</strong><small>{scenario.lead}</small></span></button>)}</div>
@@ -581,17 +672,56 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
               </button>
             </div>
             </>}
+            </div>
           </>
         )}
 
         {activeTab === 'tarjetas' && (
           <>
-            {quiz.step === 'cantidad' && <QuizSelector quiz={quiz} />}
-            {quiz.step === 'repaso' && (
-              <RepasoView quiz={quiz} onCardConsolidated={handleCardConsolidated} />
+            <div className="tutor-mode-tabs" role="tablist" aria-label="Modo de repaso">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={repasoMode === 'tarjetas'}
+                className={repasoMode === 'tarjetas' ? 'is-active' : ''}
+                onClick={() => setRepasoMode('tarjetas')}
+              >
+                Tarjetas de repaso
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={repasoMode === 'teoria'}
+                className={repasoMode === 'teoria' ? 'is-active' : ''}
+                onClick={() => setRepasoMode('teoria')}
+              >
+                Teoría: Movimiento Parabólico
+              </button>
+            </div>
+
+            {repasoMode === 'teoria' ? (
+              <TheorySection />
+            ) : (
+              <>
+                {quiz.step === 'cantidad' && <QuizSelector quiz={quiz} />}
+                {quiz.step === 'repaso' && (
+                  <RepasoView quiz={quiz} onCardConsolidated={handleCardConsolidated} />
+                )}
+              </>
             )}
           </>
         )}
+
+        {activeTab === 'mensajes' && <Suspense fallback={<p className="teacher-note">Cargando mensajes…</p>}><ClassChat
+          user={user}
+          classPackage={classPackage}
+          exercises={supportExercises}
+          concepts={localizedConcepts}
+          onExerciseResult={learning.onExerciseResult}
+          onAskHint={ask}
+          hintsUsed={learning.hintsUsed}
+          onIncrementHint={learning.incrementHints}
+        /></Suspense>}
 
         {activeTab === 'chats' && <ChatsView quiz={quiz} mode={tutorMode} onModeChange={setTutorMode} onCardConsolidated={handleCardConsolidated} />}
 
@@ -604,11 +734,23 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
             examples={supportExercises}
             glossary={localizedGlossary}
             sources={scienceSourcesData}
-            teacherId={user.id}
-          /> : <StudentClass classConfig={classConfig} onJoinClass={handleJoinClass} studentId={user.id} />)}
+            teacher={user}
+          /> : <StudentClass
+            classConfig={localClassConfig}
+            onJoinClass={handleJoinClass}
+            studentId={user.id}
+            classPackage={classPackage}
+            cloudEnabled={isCloudConfigured()}
+            syncState={syncState}
+            onDownload={handleDownloadClass}
+            onLeaveCloud={handleLeaveCloudClass}
+            onPractice={() => navigate('simulador')}
+            onReview={() => navigate('tarjetas')}
+          />)}
       </main><aside className="app-sidebar" aria-label="Tu progreso y ayuda"><ConfidenceBar xp={learning.xp} level={learning.level} confidence={learning.confidence} /><TutorCard tutor={tutor} /></aside></div>
       <Onboarding open={showGuide} onDismiss={dismissGuide} onStart={startPracticing} role={user.role} />
-      <ProfileSettings open={showSettings} user={user} onClose={() => setShowSettings(false)} onSaved={onUpdateUser} />
+      <ProfileSettings open={showSettings || missingContact} required={missingContact} user={user} onClose={() => setShowSettings(false)} onSaved={handleProfileSaved} />
+      <CurriculumBadge />
     </div>
   );
 }
