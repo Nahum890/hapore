@@ -15,13 +15,16 @@ function ConfigSummary({ config, applied = false }) {
   const available = exercises.filter(item => scenarioMatchesConfig(item.scenario, config.subtemas)).length;
   return <div className="class-summary" role="status" aria-live="polite"><h3>{applied ? 'Configuración aplicada' : 'Vista previa de la clase'}</h3><p>{SUBTEMAS.filter(item=>config.subtemas.includes(item.id)).map(item=>item.label).join(' · ') || 'Elegí al menos una situación.'}</p><dl><div><dt>Tarjetas de repaso</dt><dd>{Math.min(config.flashcards || 0,cards)} de {cards} disponibles</dd></div><div><dt>Ejercicios prácticos</dt><dd>{Math.min(config.ejercicios || 0,available)} de {available} disponibles</dd></div></dl>{(config.flashcards > cards || config.ejercicios > available) && <p className="field-help">Se usará el contenido disponible de las situaciones elegidas.</p>}</div>;
 }
-export default function TeacherMode({ attempts = 0, confidence = 0, classConfig, onJoinClass }) {
-  const [projectorOpen, setProjectorOpen] = useState(false);
+export default function TeacherMode({ attempts = 0, xp = 0, classConfig, onJoinClass }) {
   return <>
-    <section className="card teacher-mode" aria-label="Modo docente y clase"><h2>Tu aula, también sin conexión</h2><p className="teacher-note">Compartí un código para que cada estudiante aplique la misma configuración en su dispositivo.</p><div className="teacher-metrics"><span><strong>{attempts}</strong> intentos</span><span><strong>{Number(confidence)||0}</strong> XP</span></div>
+    <section className="card teacher-mode" aria-label="Modo docente y clase"><h2>Tu aula, también sin conexión</h2><p className="teacher-note">Compartí un código para que cada estudiante aplique la misma configuración en su dispositivo.</p><div className="teacher-metrics"><span><strong>{attempts}</strong> intentos</span><span><strong>{Number(xp)||0}</strong> XP</span></div>
       {classConfig ? <div className="teacher-block"><ConfigSummary config={classConfig} applied /><p className="class-code-display">Código de clase: <strong>{encodeClassConfig(classConfig)}</strong></p><button type="button" className="btn btn-secondary" onClick={()=>onJoinClass?.(null)}>Salir de la clase</button></div> : <TeacherControls onJoinClass={onJoinClass} />}
     </section>
-    <details className="projector-details" onToggle={event => setProjectorOpen(event.currentTarget.open)}><summary>Laboratorio complementario: proyector de trayectorias</summary>{projectorOpen && <Suspense fallback={<p className="teacher-note">Cargando proyector…</p>}><TeacherProjector attempts={attempts} xp={confidence} /></Suspense>}</details>
+    <section className="projector-section" aria-label="Proyector de trayectorias">
+      <h3>Proyector de trayectorias</h3>
+      <p className="teacher-note">Elegí un ejercicio, revisá la vista previa y proyectalo cuando estés listo para tu clase.</p>
+      <Suspense fallback={<p className="teacher-note">Cargando proyector…</p>}><TeacherProjector attempts={attempts} xp={xp} /></Suspense>
+    </section>
   </>;
 }
 function TeacherControls({onJoinClass}) {
