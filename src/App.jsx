@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import './components/ChatConversation.css';
 import Header from './components/Header.jsx';
 import ConfidenceBar from './components/ConfidenceBar.jsx';
@@ -11,12 +11,14 @@ import AuthScreen from './components/AuthScreen.jsx';
 import PdfButton from './components/PdfButton.jsx';
 import Onboarding from './components/Onboarding.jsx';
 import CanvasSimulator from './simulator/CanvasSimulator.jsx';
+import PredictLaunchGame from './simulator/PredictLaunchGame.jsx';
 import {
   concepts as conceptsData,
   errors as errorsData,
   exercises as exercisesData,
   flashcards as flashcardsData,
   glossary as glossaryData,
+  localizeCatalogItem,
 } from './data/catalogs.js';
 import { useOfflineStorage } from './hooks/useOfflineStorage.js';
 import { useTutor } from './hooks/useTutor.js';
@@ -98,21 +100,21 @@ function ResourceGroup({ title, items, getTitle, getDescription }) {
   </details>;
 }
 
-function AulaView({ attempts, xp, classConfig, onJoinClass }) {
+function AulaView({ attempts, xp, classConfig, onJoinClass, concepts, errors, glossary }) {
   return (
     <>
       <div className="aula-toolbar"><p>Herramientas para preparar y compartir tu clase.</p><PdfButton /></div>
       <TeacherMode
         attempts={attempts}
-        confidence={xp}
+        xp={xp}
         classConfig={classConfig}
         onJoinClass={onJoinClass}
       />
       <section className="resource-section" aria-label="Biblioteca de apoyo">
         <div className="resource-heading"><h2>Biblioteca de apoyo</h2><p>Abrí solo el material que quieras consultar.</p></div>
-        <ResourceGroup title="Conceptos clave" items={conceptsData} getTitle={item => item.name} getDescription={item => item.definition} />
-        <ResourceGroup title="Errores frecuentes" items={errorsData} getTitle={item => item.name} getDescription={item => item.description} />
-        <ResourceGroup title="Glosario" items={glossaryData} getTitle={item => item.term} getDescription={item => item.definition} />
+        <ResourceGroup title="Conceptos clave" items={concepts} getTitle={item => item.name} getDescription={item => item.definition} />
+        <ResourceGroup title="Errores frecuentes" items={errors} getTitle={item => item.name} getDescription={item => item.description} />
+        <ResourceGroup title="Glosario" items={glossary} getTitle={item => item.term} getDescription={item => item.definition} />
       </section>
     </>
   );
@@ -156,7 +158,6 @@ function RepasoView({ quiz, onCardConsolidated }) {
             id: card.id,
             topic: card.tema,
             frente_es: card.frente,
-            frente_jopara: card.jopara,
             dorso_concepto: card.dorso,
             formula: card.formula,
           }}
@@ -420,13 +421,23 @@ function ChatsView({ quiz, mode, onModeChange, onCardConsolidated }) {
 }
 
 function LearningApp({ user, onLogout }) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [activeTab, setActiveTab] = useState('inicio');
+  const [practiceMode, setPracticeMode] = useState('ejercicio');
   const [tutorMode, setTutorMode] = useState('cuestionario');
   const [simulationSubmission, setSimulationSubmission] = useState(null);
   const [showGuide, setShowGuide] = useState(() => !readJSON('guarania:guideSeen:v2', false));
   const [classConfig, setClassConfig] = useState(() => decodeClassConfig(readJSON('guarania:classCode', null)));
-  const visibleExercises = selectClassExercises(exercisesData, classConfig);
+  // Los ejercicios se localizan acá: enunciado y pistas cambian con el idioma
+  // elegido sin tocar scenario/values/correctAnswer (localizeCatalogItem solo
+  // reemplaza campos de texto).
+  const visibleExercises = useMemo(
+    () => selectClassExercises(exercisesData, classConfig).map(item => localizeCatalogItem(item, language)),
+    [classConfig, language],
+  );
+  const localizedConcepts = useMemo(() => conceptsData.map(item => localizeCatalogItem(item, language)), [language]);
+  const localizedErrors = useMemo(() => errorsData.map(item => localizeCatalogItem(item, language)), [language]);
+  const localizedGlossary = useMemo(() => glossaryData.map(item => localizeCatalogItem(item, language)), [language]);
   const learning = useOfflineStorage();
   const { tutor, ask } = useTutor();
   const { mission, currentExercise, index, next, prev } = useMission(
@@ -482,6 +493,11 @@ function LearningApp({ user, onLogout }) {
         {activeTab === 'inicio' && <HomeView user={user} learning={learning} classConfig={classConfig} onNavigate={navigate} onGuide={() => setShowGuide(true)} />}
         {activeTab === 'simulador' && (
           <>
+            <div className="tutor-mode-tabs" role="tablist" aria-label="Modo de práctica">
+              <button type="button" role="tab" aria-selected={practiceMode === 'ejercicio'} className={practiceMode === 'ejercicio' ? 'is-active' : ''} onClick={() => setPracticeMode('ejercicio')}>Ejercicios</button>
+              <button type="button" role="tab" aria-selected={practiceMode === 'minijuego'} className={practiceMode === 'minijuego' ? 'is-active' : ''} onClick={() => setPracticeMode('minijuego')}>Minijuego: Predecí y lanzá</button>
+            </div>
+            {practiceMode === 'minijuego' ? <PredictLaunchGame /> : <>
             <section className="topic-picker card" aria-label="Elegir situación de práctica">
               <div><span className="panel-eyebrow">MOVIMIENTO PARABÓLICO</span><h2>Elegí una situación</h2><p>El cálculo es siempre el mismo; cambia el contexto y la escena del simulador.</p></div>
               <div className="scenario-options">{availableScenarios.map(scenario => <button key={scenario.id} type="button" className={'scenario-option' + (currentExercise?.scenario === scenario.id ? ' is-active' : '')} aria-pressed={currentExercise?.scenario === scenario.id} onClick={() => selectScenario(scenario.id)}><Icon name={scenario.icon} size={22} /><span><strong>{scenario.label}</strong><small>{scenario.lead}</small></span></button>)}</div>
@@ -507,6 +523,7 @@ function LearningApp({ user, onLogout }) {
                 Siguiente ejercicio
               </button>
             </div>
+            </>}
           </>
         )}
 
@@ -527,8 +544,11 @@ function LearningApp({ user, onLogout }) {
             xp={learning.xp}
             classConfig={classConfig}
             onJoinClass={handleJoinClass}
+            concepts={localizedConcepts}
+            errors={localizedErrors}
+            glossary={localizedGlossary}
           /> : <StudentClass classConfig={classConfig} onJoinClass={handleJoinClass} />)}
-      </main><aside className="app-sidebar" aria-label="Tu progreso y ayuda"><ConfidenceBar xp={learning.xp} level={learning.level} /><TutorCard tutor={tutor} /></aside></div>
+      </main><aside className="app-sidebar" aria-label="Tu progreso y ayuda"><ConfidenceBar xp={learning.xp} level={learning.level} confidence={learning.confidence} /><TutorCard tutor={tutor} /></aside></div>
       <Onboarding open={showGuide} onDismiss={dismissGuide} onStart={startPracticing} role={user.role} />
     </div>
   );
