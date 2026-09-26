@@ -1,9 +1,9 @@
 {
   "greetings": {
     "jopara": [
-      "¡Mba'éichapa! Sos bienvenido/a a PyFis IA. Eju, jahechami movimiento parabólico kyhyje'ỹme.",
+      "¡Mba'éichapa! Eju porã PyFis IA-pe. Eju, jahechami movimiento parabólico kyhyje'ỹme.",
       "¡Mba'éichapa! Ko'ápe ñañepyrũta jaipapa pe trayectoria parabólica.",
-      "¡Maitei! Ani rekyhyje rejavy hag̃ua: jajapóvo ejercicio jaaprende porãve.",
+      "¡Maitei! Ani rekyhyje rejavýgui: jajapóvo ejercicio jaaprende porãve.",
       "¡Jaha! Eñepractica: dron, básquetbol térã paredón, eiporavo mba'e situación-pa reikoseva."
     ],
     "es": [
@@ -37,7 +37,7 @@
     "chats": {
       "jopara": [
         "Ápe reikuaaukavaerã: cuestionario térã chat libre. Eporandu chéve mba'e reikuaaséva.",
-        "Ani rekyhyje eporandu hag̃ua: ndaipóri pregunta vai."
+        "Ani rekyhyje eporandúgui: ndaipóri pregunta vai."
       ],
       "es": [
         "Acá podés elegir: cuestionario o chat libre. Preguntame lo que necesites.",
@@ -56,7 +56,7 @@
     }
   },
   "fallbackHint": {
-    "jopara": "Ehecha jey el enunciado, eñepyrũ peteĩ paso pequeñito. Ani aflojá: ikatu.",
+    "jopara": "Ehecha jey el enunciado, eñepyrũ peteĩ paso pequeñito. Ani eafloháke: ikatu.",
     "es": "Releé el enunciado y empezá por un paso pequeño. No aflojes: podés resolverlo."
   },
   "errors": [
@@ -97,7 +97,7 @@
           "es": ["La velocidad se separa en dos partes: horizontal (adelante) y vertical (arriba). Cada una usa una función distinta.", "No uses la misma función para las dos componentes: horizontal y vertical no son lo mismo."]
         },
         "nivel_3": {
-          "jopara": ["Horizontal-pe: vx = v0 * cos(ángulo). Vertical-pe: v0y = v0 * sen(ángulo). Ani ene ñemboja'o.", "Nemandu'áke: coseno oho horizontal-pe, seno oho vertical-pe."],
+          "jopara": ["Horizontal-pe: vx = v0 * cos(ángulo). Vertical-pe: v0y = v0 * sen(ángulo).", "Nemandu'áke: coseno oho horizontal-pe, seno oho vertical-pe."],
           "es": ["Horizontal: vx = v0 * cos(ángulo). Vertical: v0y = v0 * sen(ángulo). No las mezcles.", "Recordá: el coseno acompaña a la horizontal, el seno acompaña a la vertical."]
         },
         "nivel_4": {
@@ -107,11 +107,11 @@
       },
       "confunde_altura_alcance": {
         "nivel_1": {
-          "jopara": ["¿Yvatépa ojerure, térã mombyry pe suelo ári?", "Emoñe'ẽ jey: pe ejercicio ojerure mba'e magnitud-pa exactamente."],
+          "jopara": ["¿Altura-pa ojerure, térã alcance pe suelo ári?", "Emoñe'ẽ jey: pe ejercicio ojerure mba'e magnitud-pa exactamente."],
           "es": ["¿Te piden qué tan alto llega, o qué tan lejos cae?", "Releé el enunciado: ¿qué magnitud exacta te están pidiendo?"]
         },
         "nivel_2": {
-          "jopara": ["Altura máxima ha'e yvatevéva (vertical); alcance ha'e mombyryvéva (horizontal). Son fórmulas diferentes.", "Ani ene ndoconfundivi: altura sube, alcance avanza sobre el suelo."],
+          "jopara": ["Altura máxima ha'e yvatevéva (vertical); alcance ha'e mombyryvéva (horizontal). Son fórmulas diferentes.", "Altura ojupi, alcance ohasa yvýre: mokõi fórmula opaichagua."],
           "es": ["La altura máxima es lo más alto (vertical); el alcance es lo más lejos (horizontal). Son fórmulas diferentes.", "No las confundas: la altura sube, el alcance avanza sobre el suelo."]
         },
         "nivel_3": {

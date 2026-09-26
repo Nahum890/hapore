@@ -3,13 +3,13 @@
   "reviewNote": "Las traducciones añadidas aquí son borradores de trabajo y requieren revisión de una persona competente en guaraní paraguayo. Fórmulas, valores y unidades se conservan sin cambios.",
   "items": {
     "fc-01": { "dorso_jopara": "Oñembojoaju movimiento horizontal velocidad constante reheve ha movimiento vertical gravedad reheve. Pe trayectoria ha'e parábola." },
-    "fc-02": { "dorso_jopara": "Nahániri. Jajapórõ modelo aire'ỹre, vx opyta constante; gravedad omboambue velocidad vertical año." },
+    "fc-02": { "dorso_jopara": "Nahániri. Jajapórõ modelo aire'ỹre, vx opyta constante; gravedad okambia velocidad vertical año." },
     "fc-03": { "dorso_jopara": "Pe altura máxima-pe, velocidad vertical vale cero; horizontal opyta peteĩcha ha proyectil osegi tenonde gotyo." },
     "fc-04": { "dorso_jopara": "Pe altura máxima odepende componente vertical ha gravedad rehe. V0 = 19,6 m/s ha ángulo 45° ramo, altura máxima ha'e 9,8 m." },
     "fc-mec-01": { "dorso_jopara": "Pe velocidad parte omboguatáva proyectil tenonde gotyo. Opyta constante vuelo pukukue." },
     "fc-mec-02": { "dorso_jopara": "Pe velocidad componente vertical omopu'ã proyectil; gravedad omboguejy ha omboguejyve ohóvo." },
     "fc-mec-03": { "dorso_jopara": "Gravedad omboguejy tapia mba'ekuéra, aceleración g reheve." },
-    "fc-mec-04": { "dorso_jopara": "Ángulo omboambue mba'éichapa oñemboja'o velocidad: avance horizontal ha subida. Suelo peteĩ altura-pe ramo, 45° ome'ẽ alcance tuichavéva." },
+    "fc-mec-04": { "dorso_jopara": "Ángulo okambia mba'éichapa oñemboja'o velocidad: avance horizontal ha subida. Suelo peteĩ altura-pe ramo, 45° ome'ẽ alcance tuichavéva." },
     "fc-mec-05": { "dorso_jopara": "Ha'e ángulos complementarios ha oguereko peteĩchagua sen(2 · ángulo). Umi supuesto peteĩcha ramo, alcance peteĩcha." },
     "fc-mec-06": { "dorso_jopara": "Cúspide-pe vy = 0 m/s, hákatu vx osegi omboguata proyectil tenonde gotyo." }
   }

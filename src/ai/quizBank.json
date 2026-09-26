@@ -93,7 +93,7 @@
     "enunciado": "El tiempo de vuelo depende solo de la componente vertical: T = (2 * v0y) / g.",
     "esVerdadero": true,
     "explicacion": "Cuanto mayor es el impulso hacia arriba (v0y = v0 * sen(ángulo)), más segundos permanece en el aire.",
-    "explicacionJopara": "Pe v0y oha mbarete: T = (2 * v0y) / g ha oho hetave segundo."
+    "explicacionJopara": "Pe v0y ha'e tuicha ramo: T = (2 * v0y) / g ha oho hetave segundo."
   },
   {
     "id": "q-mp-11",
@@ -129,6 +129,6 @@
     "enunciado": "Durante la caída, la velocidad vertical del proyectil aumenta.",
     "esVerdadero": true,
     "explicacion": "En la caída la gravedad acelera el movimiento vertical: la velocidad crece hacia abajo hasta tocar el suelo.",
-    "explicacionJopara": "Pe gravedad omboguejy pya'e: pe vy ohóvo mbarete ape yvýpe."
+    "explicacionJopara": "Pe gravedad omboguejy pya'e: pe vy otuichave ohóvo ape yvýpe."
   }
 ]

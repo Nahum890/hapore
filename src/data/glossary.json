@@ -18,14 +18,14 @@
     "term": "Velocidad inicial (v0)",
     "joparaTerm": "La velocidad inicial",
     "definition": "Magnitud vectorial de la rapidez con la que el proyectil abandona el punto de lanzamiento.",
-    "ejemploJopara": "La velocidad inicial imbarete, pero tekotevẽ jaikuaa pe ángulo."
+    "ejemploJopara": "La velocidad inicial ha'e tuicha, pero tekotevẽ jaikuaa pe ángulo."
   },
   {
     "id": "glos-angulo",
     "term": "Ángulo de tiro (θ)",
     "joparaTerm": "El ángulo",
     "definition": "Inclinación de la velocidad inicial respecto a la horizontal, medida en grados sexagesimales (0° a 90°).",
-    "ejemploJopara": "Ñamoambuéke el ángulo ha jahechami mba'éichapa okambia pe vuelo."
+    "ejemploJopara": "Ñakambiáke pe ángulo ha jahechami mba'éichapa okambia pe vuelo."
   },
   {
     "id": "glos-componente-vertical",
@@ -39,7 +39,7 @@
     "term": "Componente horizontal (vx)",
     "joparaTerm": "Pe componente horizontal",
     "definition": "Fracción de la velocidad que desplaza el proyectil sobre el suelo a rapidez constante.",
-    "ejemploJopara": "Pe componente horizontal ombopya'e el avance tenonde gotyo."
+    "ejemploJopara": "Pe componente horizontal ogueraha el avance tenonde gotyo."
   },
   {
     "id": "glos-alcance",
