@@ -210,7 +210,49 @@ async function hashPassword(password, salt, targetHash) {
 }
 
 function publicAccount(account) {
-  return { id: account.id, name: account.name, username: account.username, role: account.role };
+  return {
+    id: account.id,
+    name: account.name,
+    username: account.username,
+    role: account.role,
+    phone: account.phone ?? '',
+    email: account.email ?? '',
+    avatar: account.avatar ?? null,
+  };
+}
+
+function saveAccounts(list) {
+  storage().setItem(ACCOUNTS_KEY, JSON.stringify(list));
+}
+
+/** Datos de contacto y foto de perfil: quedan en este dispositivo, igual que
+ * el resto de la cuenta. No hay verificación de teléfono/correo: son solo
+ * datos que el alumno o el docente eligen mostrar (por ejemplo, para que su
+ * clase sepa cómo son o cómo contactarlos). */
+export function updateProfile(accountId, { phone, email, avatar } = {}) {
+  const saved = accounts();
+  const index = saved.findIndex(item => item.id === accountId);
+  if (index === -1) throw new Error('No se encontró la cuenta en este dispositivo.');
+  const next = { ...saved[index] };
+  if (phone !== undefined) next.phone = String(phone || '').trim().slice(0, 30);
+  if (email !== undefined) next.email = String(email || '').trim().slice(0, 120);
+  if (avatar !== undefined) next.avatar = avatar || null;
+  const list = [...saved];
+  list[index] = next;
+  saveAccounts(list);
+  return publicAccount(next);
+}
+
+/** Cuentas visibles en este dispositivo (sin contraseñas), para que un
+ * alumno pueda ver quién es su docente y un docente pueda ver su lista de
+ * alumnos. Nunca sale de este dispositivo. */
+export function listAccounts() {
+  return accounts().map(publicAccount);
+}
+
+export function getAccountById(id) {
+  const found = accounts().find(item => item.id === id);
+  return found ? publicAccount(found) : null;
 }
 
 export function getSession() {

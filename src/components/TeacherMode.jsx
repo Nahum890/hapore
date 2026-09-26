@@ -4,6 +4,8 @@ import { encodeClassConfig, decodeClassConfig, scenarioMatchesConfig } from '../
 import { exercises, flashcards as flashcardsData, quizBank } from '../data/catalogs.js';
 import { getCustomExercises } from '../utils/customExercises.js';
 import CustomExerciseForm from './CustomExerciseForm.jsx';
+import StudentRoster from './StudentRoster.jsx';
+import { registerClassCode } from '../utils/classroom.js';
 const SUBTEMAS = [{id:'dron',label:'Entregas en dron'},{id:'basketball',label:'Tiros de básquetbol'},{id:'wall',label:'Pelota sobre el paredón'}];
 export function validClassCode(text) {
   const code = String(text ?? '').trim().toUpperCase();
@@ -17,14 +19,15 @@ function ConfigSummary({ config, applied = false, allExercises = exercises }) {
   const available = allExercises.filter(item => scenarioMatchesConfig(item.scenario, config.subtemas)).length;
   return <div className="class-summary" role="status" aria-live="polite"><h3>{applied ? 'Configuración aplicada' : 'Vista previa de la clase'}</h3><p>{SUBTEMAS.filter(item=>config.subtemas.includes(item.id)).map(item=>item.label).join(' · ') || 'Elegí al menos una situación.'}</p><dl><div><dt>Tarjetas de repaso</dt><dd>{Math.min(config.flashcards || 0,cards)} de {cards} disponibles</dd></div><div><dt>Ejercicios prácticos</dt><dd>{Math.min(config.ejercicios || 0,available)} de {available} disponibles</dd></div></dl>{(config.flashcards > cards || config.ejercicios > available) && <p className="field-help">Se usará el contenido disponible de las situaciones elegidas.</p>}</div>;
 }
-export default function TeacherMode({ attempts = 0, xp = 0, classConfig, onJoinClass }) {
+export default function TeacherMode({ attempts = 0, xp = 0, classConfig, onJoinClass, teacherId }) {
   const [customExercises, setCustomExercises] = useState(getCustomExercises);
   const refreshCustomExercises = () => setCustomExercises(getCustomExercises());
   const allExercises = useMemo(() => [...exercises, ...customExercises], [customExercises]);
   return <>
     <section className="card teacher-mode" aria-label="Modo docente y clase"><h2>Tu aula, también sin conexión</h2><p className="teacher-note">Compartí un código para que cada estudiante aplique la misma configuración en su dispositivo.</p><div className="teacher-metrics"><span><strong>{attempts}</strong> intentos</span><span><strong>{Number(xp)||0}</strong> XP</span></div>
-      {classConfig ? <div className="teacher-block"><ConfigSummary config={classConfig} applied allExercises={allExercises} /><p className="class-code-display">Código de clase: <strong>{encodeClassConfig(classConfig)}</strong></p><button type="button" className="btn btn-secondary" onClick={()=>onJoinClass?.(null)}>Salir de la clase</button></div> : <TeacherControls onJoinClass={onJoinClass} allExercises={allExercises} />}
+      {classConfig ? <div className="teacher-block"><ConfigSummary config={classConfig} applied allExercises={allExercises} /><p className="class-code-display">Código de clase: <strong>{encodeClassConfig(classConfig)}</strong></p><button type="button" className="btn btn-secondary" onClick={()=>onJoinClass?.(null)}>Salir de la clase</button></div> : <TeacherControls onJoinClass={onJoinClass} allExercises={allExercises} teacherId={teacherId} />}
     </section>
+    <StudentRoster teacherId={teacherId} />
     <section className="card" aria-label="Tus propios ejercicios">
       <h2>Ejercicios propios</h2>
       <p className="teacher-note">Cargá tus propios datos; la respuesta correcta se calcula sola con el mismo motor físico de la app. Quedan guardados en este dispositivo, disponibles para practicar y para el proyector.</p>
@@ -37,7 +40,7 @@ export default function TeacherMode({ attempts = 0, xp = 0, classConfig, onJoinC
     </section>
   </>;
 }
-function TeacherControls({onJoinClass, allExercises = exercises}) {
+function TeacherControls({onJoinClass, allExercises = exercises, teacherId}) {
   const [flashcards,setFlashcards]=useState(10), [ejercicios,setEjercicios]=useState(3), [subtemas,setSubtemas]=useState(['dron','basketball','wall']);
   const [generated,setGenerated]=useState(false), [error,setError]=useState(''), [copied,setCopied]=useState(false);
   const config=useMemo(()=>({flashcards:Number(flashcards),ejercicios:Number(ejercicios),subtemas}),[flashcards,ejercicios,subtemas]);
@@ -53,7 +56,7 @@ function TeacherControls({onJoinClass, allExercises = exercises}) {
       <label className="teacher-field">Ejercicios prácticos (1 a 10)<input className="quiz-input" type="number" min="1" max="10" step="1" required value={ejercicios} onChange={event=>{setEjercicios(event.target.value);setCopied(false);}} /></label>
       <ConfigSummary config={config} allExercises={allExercises} />
       {!subtemas.length && <p className="field-error">Seleccioná al menos una situación.</p>}
-      <button type="submit" className="btn btn-primary" disabled={!valid}>Generar código de clase</button>
+      <button type="submit" className="btn btn-primary" disabled={!valid} onClick={()=>{if(valid) registerClassCode({teacherId, code, config});}}>Generar código de clase</button>
       {generated&&valid&&<><p className="class-code-display">Código para compartir: <strong>{code}</strong></p><div className="class-actions"><button type="button" className="btn btn-secondary" onClick={copy}>{copied?'Copiado':'Copiar código'}</button><button type="button" className="btn btn-primary" onClick={()=>onJoinClass?.(config)}>Aplicar en este dispositivo</button></div></>}
     </form>
     {error&&<p className="teacher-error" role="alert">{error}</p>}

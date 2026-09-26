@@ -21,6 +21,8 @@ import {
   localizeCatalogItem,
 } from './data/catalogs.js';
 import { getCustomExercises } from './utils/customExercises.js';
+import { joinClass, leaveClass } from './utils/classroom.js';
+import ProfileSettings from './components/ProfileSettings.jsx';
 
 // Los ejercicios que crea el docente viven en este dispositivo (ver
 // src/utils/customExercises.js) y se suman a los del banco fijo dondequiera
@@ -106,7 +108,7 @@ function ResourceGroup({ title, items, getTitle, getDescription }) {
   </details>;
 }
 
-function AulaView({ attempts, xp, classConfig, onJoinClass, concepts, errors, glossary }) {
+function AulaView({ attempts, xp, classConfig, onJoinClass, concepts, errors, glossary, teacherId }) {
   return (
     <>
       <div className="aula-toolbar"><p>Herramientas para preparar y compartir tu clase.</p><PdfButton /></div>
@@ -115,6 +117,7 @@ function AulaView({ attempts, xp, classConfig, onJoinClass, concepts, errors, gl
         xp={xp}
         classConfig={classConfig}
         onJoinClass={onJoinClass}
+        teacherId={teacherId}
       />
       <section className="resource-section" aria-label="Biblioteca de apoyo">
         <div className="resource-heading"><h2>Biblioteca de apoyo</h2><p>Abrí solo el material que quieras consultar.</p></div>
@@ -426,13 +429,14 @@ function ChatsView({ quiz, mode, onModeChange, onCardConsolidated }) {
   );
 }
 
-function LearningApp({ user, onLogout }) {
+function LearningApp({ user, onLogout, onUpdateUser }) {
   const { t, language } = useTranslation();
   const [activeTab, setActiveTab] = useState('inicio');
   const [practiceMode, setPracticeMode] = useState('ejercicio');
   const [tutorMode, setTutorMode] = useState('cuestionario');
   const [simulationSubmission, setSimulationSubmission] = useState(null);
   const [showGuide, setShowGuide] = useState(() => !readJSON('guarania:guideSeen:v2', false));
+  const [showSettings, setShowSettings] = useState(false);
   const [classConfig, setClassConfig] = useState(() => decodeClassConfig(readJSON('guarania:classCode', null)));
   // El docente puede crear ejercicios propios mientras la app sigue abierta
   // (en Aula) y esperar verlos de inmediato en Practicar/el proyector; este
@@ -476,9 +480,13 @@ function LearningApp({ user, onLogout }) {
     quiz.consolidateCard(flashcardId);
   };
 
-  const handleJoinClass = (config) => {
+  const handleJoinClass = (config, code) => {
     writeJSON('guarania:classCode', config ? encodeClassConfig(config) : null);
     setClassConfig(config);
+    if (user.role === 'alumno') {
+      if (config) joinClass({ studentId: user.id, code: code ?? encodeClassConfig(config) });
+      else leaveClass(user.id);
+    }
   };
   const dismissGuide = () => { writeJSON('guarania:guideSeen:v2', true); setShowGuide(false); };
   const startPracticing = () => { setActiveTab('simulador'); dismissGuide(); };
@@ -495,7 +503,7 @@ function LearningApp({ user, onLogout }) {
 
   return (
     <div className="app" data-accent={section.accent}>
-      <Header user={user} onHome={() => navigate('inicio')} onLogout={onLogout} />
+      <Header user={user} onHome={() => navigate('inicio')} onLogout={onLogout} onOpenSettings={() => setShowSettings(true)} />
       <nav className="primary-nav" aria-label={t('nav.label')}>
         {SECTIONS.map(item => <button key={item.id} type="button" data-accent={item.accent} className={'primary-nav-item' + (activeTab === item.id ? ' is-active' : '')} aria-current={activeTab === item.id ? 'page' : undefined} onClick={() => navigate(item.id)}><span className="primary-nav-icon"><Icon name={item.icon} size={22} /></span><Bilingual k={'nav.' + item.id} className="primary-nav-label" /></button>)}
       </nav>
@@ -562,9 +570,11 @@ function LearningApp({ user, onLogout }) {
             concepts={localizedConcepts}
             errors={localizedErrors}
             glossary={localizedGlossary}
-          /> : <StudentClass classConfig={classConfig} onJoinClass={handleJoinClass} />)}
+            teacherId={user.id}
+          /> : <StudentClass classConfig={classConfig} onJoinClass={handleJoinClass} studentId={user.id} />)}
       </main><aside className="app-sidebar" aria-label="Tu progreso y ayuda"><ConfidenceBar xp={learning.xp} level={learning.level} confidence={learning.confidence} /><TutorCard tutor={tutor} /></aside></div>
       <Onboarding open={showGuide} onDismiss={dismissGuide} onStart={startPracticing} role={user.role} />
+      <ProfileSettings open={showSettings} user={user} onClose={() => setShowSettings(false)} onSaved={onUpdateUser} />
     </div>
   );
 }
@@ -573,5 +583,5 @@ export default function App() {
   const [user, setUser] = useState(getSession);
   setActiveProfile(user?.id);
   const handleLogout = () => { logout(); setActiveProfile(null); setUser(null); };
-  return user ? <LearningApp key={user.id} user={user} onLogout={handleLogout} /> : <AuthScreen onAuthenticated={setUser} />;
+  return user ? <LearningApp key={user.id} user={user} onLogout={handleLogout} onUpdateUser={setUser} /> : <AuthScreen onAuthenticated={setUser} />;
 }

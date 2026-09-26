@@ -76,4 +76,19 @@ export function removeKey(key) {
   }
 }
 
+/** Lee el progreso de OTRO perfil sin cambiar el perfil activo. Se usa solo
+ * para lecturas locales entre cuentas del mismo dispositivo (por ejemplo, el
+ * docente viendo el progreso de un alumno que se unió a su clase); nunca
+ * sale de este dispositivo. */
+export function readJSONForProfile(profileId, key, fallback) {
+  const prefixed = profileId ? `guarania:profile:${profileId}:${key}` : key;
+  try {
+    const raw = safeStorage.getItem(prefixed);
+    if (raw === null || raw === undefined) return fallback;
+    return JSON.parse(raw);
+  } catch {
+    return fallback;
+  }
+}
+
 export default safeStorage;
