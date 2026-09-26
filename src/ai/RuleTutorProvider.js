@@ -4,7 +4,7 @@ import { sanitizeMarkup } from '../utils/validation.js';
 
 // Cuatro niveles de pista: observación, concepto, fórmula, cálculo.
 export const HINT_LEVELS_MAX = 4;
-const CHAT_STOP_WORDS = new Set('que como cual cuales cuando donde porque para pero por una uno unos unas los las del con entre sobre desde hasta este esta esto esa ese son ser sea tiene tienen vale todo toda todos durante solo parte forma muy mas hay cada me te se es al lo la un y o de en mi tu explicar explicame decir decime ayudar ayuda funciona'.split(' '));
+const CHAT_STOP_WORDS = new Set('que como cual cuales cuando donde porque para pero por una uno unos unas los las del con entre sobre desde hasta este esta esto esa ese son ser sea tiene tienen vale todo toda todos durante solo parte forma muy mas hay cada me te se es al lo la un y o de en mi tu explicar explicame decir decime ayudar ayuda funciona completo completa detallado detallada paso pasos extenso extensa profundo profunda largo larga desde cero bien explicado ejemplo ejemplos con todo'.split(' '));
 // Palabras habituales en jopara/guaraní informal que aparecen en preguntas
 // sobre movimiento parabólico: se traducen a la palabra clave en español que
 // ya usan las búsquedas internas, para que una pregunta informal en jopara
@@ -31,11 +31,11 @@ function bestKnowledgeMatch(message, records) {
   return best;
 }
 const CHAT_TOPIC_HINTS = [
-  { pattern: /(?:cuanto|tiempo|tarda|mboy).*(?:aire|vuelo|aterriz)|(?:vuelo|aire).*(?:parabol|proyectil|tiempo)/, query: 'tiempo de vuelo' },
-  { pattern: /(?:hasta donde|que distancia|cuanto avanza|lejos llega|distancia total|mombyry|oguahe)/, query: 'alcance horizontal' },
-  { pattern: /(?:punto mas alto|altura maxima|deja de subir|pico de la trayectoria|yvate)/, query: 'altura máxima movimiento parabólico' },
-  { pattern: /(?:eje x|horizontal|avanza hacia adelante|tenonde)/, query: 'componente horizontal de velocidad' },
-  { pattern: /(?:eje y|vertical|sube o baja|ojupi)/, query: 'componente vertical de velocidad' },
+  { pattern: /(?:cuanto|tiempo|tarda|mboy).*(?:aire|vuelo|aterriz|caer)|(?:vuelo|aire).*(?:parabol|proyectil|tiempo)|(?:cuantos segundos|cuando vuelve)/, query: 'tiempo de vuelo' },
+  { pattern: /(?:hasta donde|donde aterriza|que distancia|cuanto avanza|lejos llega|distancia total|mombyry|oguahe|alcance)/, query: 'alcance horizontal' },
+  { pattern: /(?:punto mas alto|altura maxima|altura|deja de subir|pico de la trayectoria|yvate)/, query: 'altura máxima movimiento parabólico' },
+  { pattern: /(?:eje x|horizontal|avanza hacia adelante|tenonde|coseno)/, query: 'componente horizontal de velocidad' },
+  { pattern: /(?:eje y|vertical|sube o baja|ojupi|seno)/, query: 'componente vertical de velocidad' },
   { pattern: /(?:mba.?epa|mba.?erepa|por que).*(?:ho.?a|cae|baja)|(?:cae|baja).*(?:rapido|pya.?e)/, query: 'gravedad cae rápido' },
   { pattern: /(?:que angulo|mba.?e angulo).*(?:iporave|mejor|optimo)|angulo.*(?:optimo|mejor|iporave)/, query: 'ángulo óptimo 45 grados mayor alcance' },
   { pattern: /(?:30|60).*(?:angulo|grados)|complementari/, query: 'ángulos complementarios mismo alcance' },
@@ -46,15 +46,38 @@ function previousTutorText(history = []) {
   return [...history].reverse().find((message) => ['tutor', 'assistant'].includes(message?.role))?.text ?? '';
 }
 function isShortContinuation(message) {
-  return /^(si|dale|claro|exacto|eso|ajam|contame mas|decime mas|segui|continua|y eso|por que|como asi)$/u.test(normalizeText(message));
+  return /^(?:si|dale|claro|exacto|ajam|eso|contame mas|decime mas|segui|continua|y eso|por que|como asi|(?:si|dale|claro|ajam)\s+(?:contame mas|decime mas|segui|continua|eso|por que|como asi))$/u.test(normalizeText(message));
 }
-function relatedQuestion(match) {
+function relatedQuestion(match, history = []) {
   const search = normalizeText(match?.search ?? '');
-  if (search.includes('alcance')) return '¿Cómo influye el ángulo inicial en el alcance horizontal?';
-  if (search.includes('vuelo')) return '¿Qué pasa con la velocidad vertical en el punto más alto?';
-  if (search.includes('componente')) return '¿Por qué se separa la velocidad en dos componentes?';
-  if (search.includes('angulo') || search.includes('45')) return '¿Qué pasa con el alcance si el ángulo es muy chico o muy grande?';
-  return '¿Cómo se aplica esta idea en un ejercicio con datos y unidades?';
+  const options = search.includes('alcance')
+    ? ['¿Cómo influye el ángulo inicial en el alcance horizontal?', '¿Por qué dos ángulos complementarios pueden llegar igual de lejos?']
+    : search.includes('vuelo')
+      ? ['¿Qué pasa con la velocidad vertical en el punto más alto?', '¿Cómo cambia el tiempo de vuelo si aumenta la gravedad?']
+      : search.includes('componente')
+        ? ['¿Por qué se separa la velocidad en dos componentes?', '¿Qué diferencia hay entre vx y vy?']
+        : search.includes('angulo') || search.includes('45')
+          ? ['¿Qué pasa con el alcance si el ángulo es muy chico o muy grande?', '¿Por qué 45° maximiza el alcance en el modelo ideal?']
+          : ['¿Cómo se aplica esta idea en un ejercicio con datos y unidades?', '¿Qué cambia si el objeto sale desde cierta altura?'];
+  const asked = normalizeText((history ?? []).map(item => item?.text ?? '').join(' '));
+  return options.find(item => !asked.includes(normalizeText(item).replace(/[¿?]/g, ''))) ?? '¿Qué cambia si el objeto sale desde cierta altura?';
+}
+
+function workedExample(exercise, language) {
+  if (!exercise) return '';
+  const item = localizeCatalogItem(exercise, language);
+  const values = Object.entries(item.values ?? {}).map(([key, value]) => `${key} = ${value}`).join(', ');
+  const hints = Array.isArray(item.hints) ? item.hints.filter(Boolean) : [];
+  const answer = Number.isFinite(Number(item.correctAnswer)) ? `${item.correctAnswer}${item.unit ? ` ${item.unit}` : ''}` : '';
+  const labels = language === 'es'
+    ? { example: 'Ejemplo del material', data: 'Datos', steps: 'Pasos', result: 'Resultado del ejercicio' }
+    : { example: 'Techapyrã material-gui', data: 'Datos', steps: 'Pasos', result: 'Resultado del ejercicio' };
+  return [
+    `${labels.example}: ${item.question}`,
+    values ? `${labels.data}: ${values}.` : '',
+    hints.length ? `${labels.steps}: ${hints.join(' ')}` : '',
+    answer ? `${labels.result}: ${answer}.` : '',
+  ].filter(Boolean).join('\n\n');
 }
 export function obtenerVariantePista(variants, previous) {
   if (!Array.isArray(variants)) return variants ?? null;
@@ -102,8 +125,10 @@ export default class RuleTutorProvider {
     }
     if (context.tipo === 'charla_libre') {
       const question = normalizeText(context.message);
-      if (/^(hola|buenas|mba.?eichapa|maitei)\b/.test(question)) return this.result(this.choose('chat:greeting', this.data.greetings, language));
-      if (/\b(gracias|aguyje)\b/.test(question)) {
+      const greetingOnly = /^(?:hola|buenas|mba\s?eichapa|maitei)(?:\s+(?:como estas|mba\s?eichapa|que tal))?$/u.test(question);
+      if (greetingOnly) return this.result(this.choose('chat:greeting', this.data.greetings, language));
+      const thankYouOnly = /^(?:muchas gracias|gracias|aguyje)(?:\s+(?:por todo|ndéve))?$/u.test(question);
+      if (thankYouOnly) {
         return this.result(language === 'es'
           ? '¡De nada! ¿Hay algo más sobre movimiento parabólico que quieras repasar? Preguntame.'
           : '¡Aguyje ndéve! ¿Oimépa gueteri mba\'e reikuaaséva movimiento parabólico rehe? Eporandu chéve.');
@@ -112,7 +137,7 @@ export default class RuleTutorProvider {
       const ideaClave = language === 'es' ? 'La idea clave es' : 'Pe idea clave ha\'e';
       const abrirSimulador = language === 'es' ? 'Podés abrir este ejercicio en el simulador para resolverlo paso a paso.' : 'Ikatu embojuruja ko ejercicio simulador-pe eresolve hag̃ua paso a paso.';
       const knowledge = [
-        ...this.concepts.map(loc).map(item => ({ kind: 'concept', search: `${item.id} ${item.name} ${item.definition} ${item.formula}`, answer: `${item.name}: ${item.definition}${item.formula ? ` Fórmula: ${item.formula}.` : ''}` })),
+        ...this.concepts.map(loc).map(item => ({ kind: 'concept', expectedConcept: item.id, search: `${item.id} ${item.name} ${item.definition} ${item.formula}`, answer: `${item.name}: ${item.definition}${item.formula ? ` Fórmula: ${item.formula}.` : ''}` })),
         ...this.glossary.map(loc).map(item => ({ kind: 'glossary', search: `${item.term} ${item.joparaTerm} ${item.definition}`, answer: `${item.term}: ${item.definition}` })),
         ...this.errors.map(loc).map(item => ({ kind: 'error', search: `${item.name} ${item.description} ${item.example} ${item.expectedConcept}`, answer: `${item.name}: ${item.description} ${item.example}` })),
         ...this.bank.map(loc).map(item => ({ kind: 'question', search: `${item.pregunta} ${item.enunciado} ${item.respuesta} ${item.explicacion} ${item.tema}`, answer: item.respuesta || item.explicacion || '' })),
@@ -123,18 +148,25 @@ export default class RuleTutorProvider {
       const continuation = isShortContinuation(context.message ?? '') && lastTutorText;
       const directMatch = bestKnowledgeMatch(context.message ?? '', knowledge);
       const continuationMatch = continuation ? bestKnowledgeMatch(lastTutorText, knowledge) : null;
-      const topicHint = CHAT_TOPIC_HINTS.find(({ pattern }) => pattern.test(question + ' ' + normalizeText(lastTutorText)));
+      const topicHint = CHAT_TOPIC_HINTS.find(({ pattern }) => pattern.test(question));
       const match = directMatch ?? continuationMatch ?? (topicHint ? bestKnowledgeMatch(topicHint.query, knowledge) : null);
       if (match) {
         const detailed = /\b(completo|completa|detallado|detallada|paso a paso|extenso|extensa|profundo|profunda|largo|larga|desde cero|con todo|bien explicado|mas detalle)\b/u.test(question);
-        const answer = continuation ? (language === 'es' ? 'Seguimos con lo que veíamos. ' : '¡Iporã! Seguimos con lo que estábamos viendo. ') + match.answer : match.answer;
+        const greetingPrefix = /^(?:hola|buenas|maite[ií]|mba\s?eichapa)\b/u.test(question) ? (language === 'es' ? '¡Hola! ' : '¡Maitei! ') : '';
+        const continuationPrefix = continuation ? (language === 'es' ? 'Seguimos con lo que veíamos. ' : 'Seguimos con lo que estábamos viendo. ') : '';
+        const answer = continuationPrefix + match.answer;
+        const example = detailed && match.expectedConcept
+          ? workedExample(this.exercises.find(item => item.expectedConcept === match.expectedConcept), language)
+          : '';
         const explanation = detailed
-          ? ' Para aplicarlo paso a paso, identificá los datos y sus unidades, elegí la relación correspondiente y reemplazá cada símbolo con el dato correcto; no inventes los que falten.'
+          ? (language === 'es'
+            ? '\n\nPara resolverlo, identificá cada dato y su unidad; separá el movimiento horizontal del vertical; elegí la fórmula que corresponde al dato pedido; sustituí únicamente valores del enunciado y revisá que la unidad final tenga sentido.'
+            : '\n\nDatos ha unidad-kuéra rehecha; emboja’o movimiento horizontal ha vertical; eiporavo fórmula oikóva pe dato rehekáva rehe; emoinge umi valor enunciado-pe oĩva año, ha ehecha unidad ipahaguápe.')
           : '';
         const followUp = language === 'es'
-          ? '\n\n¿Querés seguir viendo esto? Podés preguntarme, por ejemplo: ' + relatedQuestion(match)
-          : '\n\n¿Reikuaasépa avei? Ejemplo de pregunta para seguir: ' + relatedQuestion(match);
-        return this.result(answer + explanation + followUp, { knowledgeType: match.kind });
+          ? '\n\n¿Querés seguir viendo esto? Ejemplo de pregunta para seguir: ' + relatedQuestion(match, context.history)
+          : '\n\n¿Reikuaasépa avei? Techapyrã: ' + relatedQuestion(match, context.history);
+        return this.result(greetingPrefix + answer + explanation + (example ? `\n\n${example}` : '') + followUp, { knowledgeType: match.kind });
       }
       return this.result(language === 'es'
         ? 'No encontré una explicación suficientemente cercana en el material offline. Probá preguntar por componentes de la velocidad, gravedad, tiempo de vuelo, altura máxima, alcance o el ángulo óptimo del movimiento parabólico.'

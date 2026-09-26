@@ -12,6 +12,8 @@ import PdfButton from './components/PdfButton.jsx';
 import Onboarding from './components/Onboarding.jsx';
 import CanvasSimulator from './simulator/CanvasSimulator.jsx';
 import PredictLaunchGame from './simulator/PredictLaunchGame.jsx';
+import ExplorationLab from './simulator/ExplorationLab.jsx';
+import AIPrivacyNotice from './components/AIPrivacyNotice.jsx';
 import {
   concepts as conceptsData,
   errors as errorsData,
@@ -235,6 +237,30 @@ function TutorModeTabs({ mode, onModeChange, disabled = false }) {
   </div>;
 }
 
+function tutorSourceLabel(entry = {}) {
+  if (entry.source === 'gemini') return 'Gemini con conexión';
+  if (entry.source === 'local-model') return 'Modelo en el dispositivo';
+  if (entry.source !== 'rules') return '';
+  if (entry.reason === 'offline') return 'Tutor local · sin conexión';
+  if (['consent-required', 'local-only'].includes(entry.reason)) return 'Tutor local · Gemini no habilitado';
+  if (entry.reason === 'rate-limited') return 'Tutor local · Gemini alcanzó su límite temporal';
+  if (entry.reason === 'timeout') return 'Tutor local · Gemini tardó demasiado';
+  if (entry.reason === 'online-fallback') return 'Tutor local · respaldo de Gemini';
+  return 'Tutor local';
+}
+
+function handlePracticeTabKeyDown(event) {
+  const tabs = [...event.currentTarget.parentElement.querySelectorAll('[role="tab"]')];
+  const current = tabs.indexOf(event.currentTarget);
+  const target = event.key === 'ArrowRight' ? (current + 1) % tabs.length
+    : event.key === 'ArrowLeft' ? (current - 1 + tabs.length) % tabs.length
+      : event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : -1;
+  if (target < 0) return;
+  event.preventDefault();
+  tabs[target].focus();
+  tabs[target].click();
+}
+
 function FreeChatView({ quiz }) {
   const logRef = useRef(null);
   useEffect(() => {
@@ -251,9 +277,9 @@ function FreeChatView({ quiz }) {
       {!quiz.charlaLog.length && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble">¡Hola! Estoy acá para ayudarte con Física. Escribí tu pregunta cuando quieras.</div>}
       {quiz.charlaLog.map((message, position) => <div key={message.id ?? 'free-' + position} className={'chat-bubble ' + (message.role === 'alumno' ? 'chat-alumno-bubble' : 'chat-tutor-bubble')}>
         <MathText text={message.text} />
-        {message.role !== 'alumno' && message.source && <small className="chat-message-source">{message.source === 'gemini' ? 'Gemini' : message.source === 'rules' ? 'Tutor local · sin conexión' : message.source === 'local-model' ? 'Modelo local' : ''}</small>}
+        {message.role !== 'alumno' && message.source && <small className="chat-message-source">{tutorSourceLabel(message)}</small>}
       </div>)}
-      {quiz.busy && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-typing" role="status" aria-live="polite"><span>Jopara está respondiendo</span><span className="chat-typing-dots" aria-hidden="true"><i /><i /><i /></span></div>}
+      {quiz.busy && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-typing" role="status" aria-live="polite"><span>El tutor está respondiendo</span><span className="chat-typing-dots" aria-hidden="true"><i /><i /><i /></span></div>}
       {quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-streaming" aria-live="off"><MathText text={quiz.streamText} /></div>}
     </div>
     <form className="chats-input-area" onSubmit={event => { event.preventDefault(); quiz.askFreeQuestion(); }}>
@@ -324,7 +350,7 @@ function ChatsView({ quiz, mode, onModeChange, onCardConsolidated }) {
                 role="status"
               >
                 <MathText text={entry.tutor?.message} />
-                {entry.tutor?.source && <small className="chat-message-source">{entry.tutor.source === 'gemini' ? 'Gemini' : entry.tutor.source === 'rules' ? 'Tutor local · sin conexión' : ''}</small>}
+                {entry.tutor?.source && <small className="chat-message-source">{tutorSourceLabel(entry.tutor)}</small>}
               </div>
             </div>
           ),
@@ -605,15 +631,18 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
         <div className="section-copy"><p className="section-eyebrow">{t(user.role === 'maestro' ? 'section.teacher' : 'section.student')}</p><h2 id="section-title">{t(`section.${sectionKey}.title`)}</h2><p>{t(`section.${sectionKey}.description`)}</p></div>
         <button type="button" className="guide-replay" onClick={() => setShowGuide(true)}><Icon name="help" size={18} />{t('section.guide')}</button>
       </section>}
+      <AIPrivacyNotice />
       <div className="app-layout"><main className="app-main">
         {activeTab === 'inicio' && <HomeView user={user} learning={learning} classConfig={classConfig} onNavigate={navigate} onGuide={() => setShowGuide(true)} />}
         {activeTab === 'simulador' && (
           <>
             <div className="tutor-mode-tabs" role="tablist" aria-label="Modo de práctica">
-              <button type="button" role="tab" aria-selected={practiceMode === 'ejercicio'} className={practiceMode === 'ejercicio' ? 'is-active' : ''} onClick={() => setPracticeMode('ejercicio')}>Ejercicios</button>
-              <button type="button" role="tab" aria-selected={practiceMode === 'minijuego'} className={practiceMode === 'minijuego' ? 'is-active' : ''} onClick={() => setPracticeMode('minijuego')}>Minijuego: Predecí y lanzá</button>
+              <button id="practice-tab-ejercicio" type="button" role="tab" aria-controls="practice-panel" aria-selected={practiceMode === 'ejercicio'} tabIndex={practiceMode === 'ejercicio' ? 0 : -1} className={practiceMode === 'ejercicio' ? 'is-active' : ''} onKeyDown={handlePracticeTabKeyDown} onClick={() => setPracticeMode('ejercicio')}>Ejercicios</button>
+              <button id="practice-tab-minijuego" type="button" role="tab" aria-controls="practice-panel" aria-selected={practiceMode === 'minijuego'} tabIndex={practiceMode === 'minijuego' ? 0 : -1} className={practiceMode === 'minijuego' ? 'is-active' : ''} onKeyDown={handlePracticeTabKeyDown} onClick={() => setPracticeMode('minijuego')}>Minijuego: Predecí y lanzá</button>
+              <button id="practice-tab-laboratorio" type="button" role="tab" aria-controls="practice-panel" aria-selected={practiceMode === 'laboratorio'} tabIndex={practiceMode === 'laboratorio' ? 0 : -1} className={practiceMode === 'laboratorio' ? 'is-active' : ''} onKeyDown={handlePracticeTabKeyDown} onClick={() => setPracticeMode('laboratorio')}>Laboratorio de exploración</button>
             </div>
-            {practiceMode === 'minijuego' ? <PredictLaunchGame /> : <>
+            <div id="practice-panel" role="tabpanel" aria-labelledby={`practice-tab-${practiceMode}`} tabIndex={0}>
+            {practiceMode === 'minijuego' ? <PredictLaunchGame /> : practiceMode === 'laboratorio' ? <ExplorationLab /> : <>
             <section className="topic-picker card" aria-label="Elegir situación de práctica">
               <div><span className="panel-eyebrow">MOVIMIENTO PARABÓLICO</span><h2>Elegí una situación</h2><p>El cálculo es siempre el mismo; cambia el contexto y la escena del simulador.</p></div>
               <div className="scenario-options">{availableScenarios.map(scenario => <button key={scenario.id} type="button" className={'scenario-option' + (currentExercise?.scenario === scenario.id ? ' is-active' : '')} aria-pressed={currentExercise?.scenario === scenario.id} onClick={() => selectScenario(scenario.id)}><Icon name={scenario.icon} size={22} /><span><strong>{scenario.label}</strong><small>{scenario.lead}</small></span></button>)}</div>
@@ -640,6 +669,7 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
               </button>
             </div>
             </>}
+            </div>
           </>
         )}
 
