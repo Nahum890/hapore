@@ -77,7 +77,11 @@ La clave de Gemini se lee desde el servidor de desarrollo o vista previa y nunca
 
 Después de la primera carga, el service worker guarda la interfaz, los contenidos y los recursos estáticos. El tutor por reglas, las simulaciones, los ejercicios, las flashcards, el PDF y el progreso local siguen disponibles sin Internet.
 
-Las cuentas, sesiones, códigos de clase y progreso se guardan en el navegador de cada dispositivo. No existe sincronización remota entre dispositivos.
+Las cuentas, sesiones y el progreso se guardan en el navegador de cada dispositivo.
+
+## Clases compartidas entre dispositivos (opcional)
+
+Si se configura Supabase (ver [`supabase/README.md`](supabase/README.md)), el docente crea una clase con un código, elige qué tarjetas compartir (incluidas las propias) y ve la lista de alumnos con su avance. El alumno descarga la clase una vez con internet, la resuelve sin conexión y su avance se sube solo cuando vuelve la conexión. Sin esa configuración, los códigos solo funcionan dentro del mismo dispositivo.
 
 ## Instalación y ejecución
 
