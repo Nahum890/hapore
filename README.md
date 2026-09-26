@@ -41,8 +41,9 @@ Velocidad, gravedad, vectores y ángulo de lanzamiento se explican como apoyo co
 ### Para docentes
 
 - Registro e inicio de sesión local como maestro.
-- Preparación de una clase con situaciones y cantidades sugeridas.
-- Generación de un código que aplica la misma selección en el dispositivo del alumno.
+- Preparación de una clase guiada con gancho, demostración, práctica y ticket de salida.
+- En modo local, un código de práctica aplica la misma selección en otro dispositivo, sin crear un roster ni enviar progreso.
+- Con Supabase, clases reales con materiales compartidos y avance sincronizado entre dispositivos.
 - Creación de ejercicios propios con respuesta calculada automáticamente.
 - Proyector con vista grande para simulaciones, ejercicios y conceptos.
 - Biblioteca con conceptos, ejercicios resueltos, errores frecuentes, glosario y fuentes.
@@ -81,7 +82,7 @@ Las cuentas, sesiones y el progreso se guardan en el navegador de cada dispositi
 
 ## Clases compartidas entre dispositivos (opcional)
 
-Si se configura Supabase (ver [`supabase/README.md`](supabase/README.md)), el docente crea una clase con un código, elige qué tarjetas compartir (incluidas las propias) y ve la lista de alumnos con su avance. El alumno descarga la clase una vez con internet, la resuelve sin conexión y su avance se sube solo cuando vuelve la conexión. Sin esa configuración, los códigos solo funcionan dentro del mismo dispositivo.
+Si se configura Supabase (ver [`supabase/README.md`](supabase/README.md)), el docente crea una clase con un código, elige qué tarjetas y ejercicios compartir y ve el avance sincronizado de sus alumnos. El alumno descarga la clase una vez con internet, la resuelve sin conexión y su avance se sube cuando vuelve la conexión. Sin Supabase, el código comparte solo una selección de situaciones y cantidades: no crea una clase identificada ni sincroniza progreso. Para entender la diferencia entre Vite, Supabase y el servidor simulado, consulta [docs/SERVIDOR_Y_COMUNICACION.md](docs/SERVIDOR_Y_COMUNICACION.md).
 
 ## Instalación y ejecución
 

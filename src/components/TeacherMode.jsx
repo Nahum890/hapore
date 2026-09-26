@@ -19,7 +19,7 @@ const SUBTEMAS = [
 ];
 
 const TOOLS = [
-  { id: 'clase', label: 'Compartir clase', description: 'Elegí tarjetas y ejercicios y creá un código.' },
+  { id: 'clase', label: 'Compartir clase', description: 'Elegí materiales y creá una clase con seguimiento.' },
   { id: 'ejercicios', label: 'Crear ejercicio', description: 'Prepará un problema propio.' },
   { id: 'clases', label: 'Mis clases', description: 'Prepará diapositivas y proyectalas.' },
 ];
@@ -198,17 +198,17 @@ function ClassSetup({ allExercises, customExercises, teacher, classConfig, onLea
   const cloud = isCloudConfigured();
   return <section className="card teacher-tool-panel" aria-label="Compartir configuración de clase">
     <span className="panel-eyebrow">PASO A PASO</span>
-    <h2>Compartí una clase</h2>
+    <h2>{cloud ? 'Compartí una clase' : 'Compartí una práctica'}</h2>
     <p className="teacher-note">{cloud
       ? 'Elegí qué tarjetas y ejercicios comparten tus alumnos. Ellos descargan la clase con el código, la resuelven aunque no tengan internet y su avance te llega acá.'
-      : 'Elegí las situaciones y creá un código para que tus alumnos tengan los mismos materiales.'}</p>
+      : 'Elegí las situaciones y compartí un código de práctica. Sirve para aplicar la misma selección en otro dispositivo; no crea una clase sincronizada ni envía el progreso.'}</p>
     {cloud
       ? <CloudClassSetup teacher={teacher} allExercises={allExercises} customExercises={customExercises} />
       : <>
-        <p className="field-help cloud-missing">La nube no está configurada en esta instalación: el código solo ajusta cantidades y situaciones, y el avance de alumnos en otros dispositivos no llega acá. Ver <code>supabase/README.md</code>.</p>
+        <p className="field-help cloud-missing">La nube no está configurada. El código de práctica comparte cantidades y situaciones, pero no identifica una clase ni sincroniza alumnos o progreso. Para el seguimiento entre dispositivos, configurá Supabase; ver <code>supabase/README.md</code>.</p>
         {classConfig ? <div className="teacher-block">
-          <p>Esta cuenta tiene una configuración de clase guardada.</p>
-          <p className="class-code-display">Código <strong>{encodeClassConfig(classConfig)}</strong></p>
+      <p>Esta cuenta tiene una selección de práctica guardada.</p>
+      <p className="class-code-display">Código de práctica <strong>{encodeClassConfig(classConfig)}</strong></p>
           <button type="button" className="btn btn-secondary" onClick={onLeaveClass}>Quitar configuración</button>
         </div> : <TeacherControls allExercises={allExercises} teacherId={teacher.id} />}
         <details className="teacher-roster-details"><summary>Alumnos en esta computadora</summary>
@@ -220,15 +220,19 @@ function ClassSetup({ allExercises, customExercises, teacher, classConfig, onLea
 
 export default function TeacherMode({ classConfig, onJoinClass, teacher }) {
   const [tool, setTool] = useState('clase');
+  const cloudEnabled = isCloudConfigured();
   const [customExercises, setCustomExercises] = useState(getCustomExercises);
   const refreshCustomExercises = () => setCustomExercises(getCustomExercises());
   const allExercises = useMemo(() => [...exercises, ...customExercises], [customExercises]);
 
   return <section className="teacher-hub" aria-label="Herramientas para docentes">
     <div className="teacher-tool-picker" role="group" aria-label="Elegí una herramienta">
-      {TOOLS.map(item => <button key={item.id} type="button" className={tool === item.id ? 'is-active' : ''} aria-pressed={tool === item.id} onClick={() => setTool(item.id)}>
-        <strong>{item.label}</strong><span>{item.description}</span>
-      </button>)}
+      {TOOLS.map(item => {
+        const localPractice = item.id === 'clase' && !cloudEnabled;
+        return <button key={item.id} type="button" className={tool === item.id ? 'is-active' : ''} aria-pressed={tool === item.id} onClick={() => setTool(item.id)}>
+          <strong>{localPractice ? 'Compartir práctica' : item.label}</strong><span>{localPractice ? 'Compartí una selección de materiales, sin seguimiento sincronizado.' : item.description}</span>
+        </button>;
+      })}
     </div>
 
     <div hidden={tool !== 'clase'}><ClassSetup allExercises={allExercises} customExercises={customExercises} teacher={teacher} classConfig={classConfig} onLeaveClass={() => onJoinClass?.(null)} /></div>
@@ -295,9 +299,9 @@ function TeacherControls({ allExercises = exercises, teacherId }) {
     {!code && <button type="submit" className="btn btn-primary" disabled={!valid}>2. Crear código</button>}
     {code && <div className="class-code-result" role="status">
       <span className="panel-eyebrow">LISTO PARA COMPARTIR</span>
-      <p className="class-code-display">Código de clase <strong>{code}</strong></p>
+      <p className="class-code-display">Código de práctica <strong>{code}</strong></p>
       <button type="button" className="btn btn-primary" onClick={copyCode}>{copied ? 'Código copiado' : 'Copiar código'}</button>
-      <p className="field-help">El alumno escribe este código en “Mi clase”. Los materiales se ajustan en su dispositivo; el progreso no se envía a esta pantalla.</p>
+      <p className="field-help">El alumno ingresa este código en “Mi clase” para aplicar la selección en su dispositivo. No crea una clase sincronizada ni comparte el progreso; eso requiere Supabase.</p>
       <button type="button" className="btn btn-secondary" onClick={() => { setCode(''); setCopied(false); }}>Crear otro código</button>
     </div>}
     {error && <p className="teacher-error" role="alert">{error}</p>}

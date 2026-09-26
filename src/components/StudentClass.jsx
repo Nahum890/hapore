@@ -83,18 +83,20 @@ export default function StudentClass({ classConfig, onJoinClass, studentId, clas
 
   return <section className="card student-class" aria-labelledby="student-class-title">
     <span className="panel-eyebrow">MI CLASE</span>
-    <h2 id="student-class-title">{classConfig ? 'Ya estás en una clase' : 'Unite a la clase de tu docente'}</h2>
+    <h2 id="student-class-title">{classConfig ? 'Ya tenés la práctica lista' : cloudEnabled ? 'Descargá la clase de tu docente' : 'Aplicá la práctica de tu docente'}</h2>
     {classConfig ? <>
-      <p>Los temas, las tarjetas y los ejercicios de la clase ya están listos en este dispositivo.</p>
+      <p>Las situaciones, tarjetas y ejercicios seleccionados ya están listos en este dispositivo.</p>
       <div className="student-class-summary"><span>Situaciones seleccionadas</span><strong>{classConfig.subtemas.length}</strong><span>Ejercicios</span><strong>{classConfig.ejercicios}</strong><span>Tarjetas</span><strong>{classConfig.flashcards}</strong></div>
-      <p className="field-help">✓ Todo está guardado en este dispositivo; podés practicar sin conexión.</p>
+      <p className="field-help">✓ Podés practicar sin conexión. Este código comparte la selección de materiales; no envía tu progreso al docente.</p>
       <ClassActions onPractice={onPractice} onReview={onReview} />
       <LocalTeacherCard studentId={studentId} />
       <button className="btn btn-secondary" type="button" onClick={() => onJoinClass(null)}>Salir de la clase</button>
     </> : <>
-      <p>Escribí el código que te dio tu docente y tocá <strong>Descargar clase</strong>. Después vas a poder resolverla aunque no tengas internet.</p>
-      <form onSubmit={submit} className="student-class-form"><label htmlFor="student-class-code">Código de clase</label><div><input id="student-class-code" className="quiz-input" type="text" autoComplete="off" autoCapitalize="characters" spellCheck={false} maxLength={8} value={code} onChange={event => { setCode(event.target.value.toUpperCase()); setError(''); }} placeholder="Ej.: K7PQ2M" /><button className="btn btn-primary" type="submit" disabled={!code.trim() || busy}>{busy ? 'Descargando…' : 'Descargar clase'}</button></div>{error && <p role="alert" className="field-error">{error}</p>}</form>
-      {!cloudEnabled && <p className="field-help student-class-note">Esta instalación no tiene la nube configurada: solo funcionan códigos creados en este mismo dispositivo.</p>}
+      <p>{cloudEnabled
+        ? <>Escribí el código de 6 caracteres y tocá <strong>Descargar clase</strong>. Después podés resolverla sin conexión; tu avance se envía cuando vuelve internet.</>
+        : <>Escribí el código de práctica que te dio tu docente. La selección se aplica en este dispositivo y podés resolver sin conexión.</>}</p>
+      <form onSubmit={submit} className="student-class-form"><label htmlFor="student-class-code">{cloudEnabled ? 'Código de clase' : 'Código de práctica'}</label><div><input id="student-class-code" className="quiz-input" type="text" autoComplete="off" autoCapitalize="characters" spellCheck={false} maxLength={8} value={code} onChange={event => { setCode(event.target.value.toUpperCase()); setError(''); }} placeholder={cloudEnabled ? 'Ej.: K7PQ2M' : 'Ej.: GP10D03'} /><button className="btn btn-primary" type="submit" disabled={!code.trim() || busy}>{busy ? 'Cargando…' : cloudEnabled ? 'Descargar clase' : 'Aplicar práctica'}</button></div>{error && <p role="alert" className="field-error">{error}</p>}</form>
+      {!cloudEnabled && <p className="field-help student-class-note">El código de práctica no identifica una clase ni envía tu progreso. Para compartirlo con seguimiento entre dispositivos, hace falta Supabase.</p>}
     </>}
   </section>;
 }
