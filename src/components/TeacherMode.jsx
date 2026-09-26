@@ -1,64 +1,129 @@
 import { lazy, Suspense, useMemo, useState } from 'react';
 const TeacherProjector = lazy(() => import('./TeacherProjector.jsx'));
-import { encodeClassConfig, decodeClassConfig, scenarioMatchesConfig } from '../utils/classCode.js';
+import { encodeClassConfig, decodeClassConfig } from '../utils/classCode.js';
 import { exercises, flashcards as flashcardsData, quizBank } from '../data/catalogs.js';
 import { getCustomExercises } from '../utils/customExercises.js';
 import CustomExerciseForm from './CustomExerciseForm.jsx';
 import StudentRoster from './StudentRoster.jsx';
 import { registerClassCode } from '../utils/classroom.js';
-const SUBTEMAS = [{id:'dron',label:'Entregas en dron'},{id:'basketball',label:'Tiros de básquetbol'},{id:'wall',label:'Pelota sobre el paredón'}];
+
+const SUBTEMAS = [
+  { id: 'dron', label: 'Dron' },
+  { id: 'basketball', label: 'Básquetbol' },
+  { id: 'wall', label: 'Paredón' },
+];
+
+const TOOLS = [
+  { id: 'clase', label: 'Compartir clase', description: 'Elegí situaciones y creá un código.' },
+  { id: 'ejercicios', label: 'Crear ejercicio', description: 'Prepará un problema propio.' },
+  { id: 'proyector', label: 'Proyectar', description: 'Mostrá una simulación, ejercicio o concepto.' },
+];
+
 export function validClassCode(text) {
   const code = String(text ?? '').trim().toUpperCase();
   const config = decodeClassConfig(code);
   return config && encodeClassConfig(config) === code ? config : null;
 }
-function ConfigSummary({ config, applied = false, allExercises = exercises }) {
-  // Las tarjetas y preguntas teóricas son de repaso general (no dependen de
-  // la situación elegida); solo los ejercicios prácticos se filtran por ella.
-  const cards = flashcardsData.length + quizBank.filter(item => item.tipo === 'abierta').length;
-  const available = allExercises.filter(item => scenarioMatchesConfig(item.scenario, config.subtemas)).length;
-  return <div className="class-summary" role="status" aria-live="polite"><h3>{applied ? 'Configuración aplicada' : 'Vista previa de la clase'}</h3><p>{SUBTEMAS.filter(item=>config.subtemas.includes(item.id)).map(item=>item.label).join(' · ') || 'Elegí al menos una situación.'}</p><dl><div><dt>Tarjetas de repaso</dt><dd>{Math.min(config.flashcards || 0,cards)} de {cards} disponibles</dd></div><div><dt>Ejercicios prácticos</dt><dd>{Math.min(config.ejercicios || 0,available)} de {available} disponibles</dd></div></dl>{(config.flashcards > cards || config.ejercicios > available) && <p className="field-help">Se usará el contenido disponible de las situaciones elegidas.</p>}</div>;
+
+function ClassSetup({ allExercises, teacherId, classConfig, onLeaveClass }) {
+  return <section className="card teacher-tool-panel" aria-label="Compartir configuración de clase">
+    <span className="panel-eyebrow">PASO A PASO</span>
+    <h2>Compartí una clase</h2>
+    <p className="teacher-note">Elegí las situaciones y creá un código para que tus alumnos tengan los mismos materiales.</p>
+    {classConfig ? <div className="teacher-block">
+      <p>Esta cuenta tiene una configuración de clase guardada.</p>
+      <p className="class-code-display">Código <strong>{encodeClassConfig(classConfig)}</strong></p>
+      <button type="button" className="btn btn-secondary" onClick={onLeaveClass}>Quitar configuración</button>
+    </div> : <TeacherControls allExercises={allExercises} teacherId={teacherId} />}
+    <details className="teacher-roster-details"><summary>Alumnos en esta computadora</summary>
+      <p className="field-help">La app guarda los datos aquí. No recibe avances de alumnos conectados desde otros dispositivos.</p>
+      <StudentRoster teacherId={teacherId} />
+    </details>
+  </section>;
 }
-export default function TeacherMode({ attempts = 0, xp = 0, classConfig, onJoinClass, teacherId }) {
+
+export default function TeacherMode({ classConfig, onJoinClass, teacherId }) {
+  const [tool, setTool] = useState('clase');
   const [customExercises, setCustomExercises] = useState(getCustomExercises);
   const refreshCustomExercises = () => setCustomExercises(getCustomExercises());
   const allExercises = useMemo(() => [...exercises, ...customExercises], [customExercises]);
-  return <>
-    <section className="card teacher-mode" aria-label="Modo docente y clase"><h2>Tu aula, también sin conexión</h2><p className="teacher-note">Compartí un código para que cada estudiante aplique la misma configuración en su dispositivo.</p><div className="teacher-metrics"><span><strong>{attempts}</strong> intentos</span><span><strong>{Number(xp)||0}</strong> XP</span></div>
-      {classConfig ? <div className="teacher-block"><ConfigSummary config={classConfig} applied allExercises={allExercises} /><p className="class-code-display">Código de clase: <strong>{encodeClassConfig(classConfig)}</strong></p><button type="button" className="btn btn-secondary" onClick={()=>onJoinClass?.(null)}>Salir de la clase</button></div> : <TeacherControls onJoinClass={onJoinClass} allExercises={allExercises} teacherId={teacherId} />}
-    </section>
-    <StudentRoster teacherId={teacherId} />
-    <section className="card" aria-label="Tus propios ejercicios">
-      <h2>Ejercicios propios</h2>
-      <p className="teacher-note">Cargá tus propios datos; la respuesta correcta se calcula sola con el mismo motor físico de la app. Quedan guardados en este dispositivo, disponibles para practicar y para el proyector.</p>
+
+  return <section className="teacher-hub" aria-label="Herramientas para docentes">
+    <div className="teacher-tool-picker" role="group" aria-label="Elegí una herramienta">
+      {TOOLS.map(item => <button key={item.id} type="button" className={tool === item.id ? 'is-active' : ''} aria-pressed={tool === item.id} onClick={() => setTool(item.id)}>
+        <strong>{item.label}</strong><span>{item.description}</span>
+      </button>)}
+    </div>
+
+    <div hidden={tool !== 'clase'}><ClassSetup allExercises={allExercises} teacherId={teacherId} classConfig={classConfig} onLeaveClass={() => onJoinClass?.(null)} /></div>
+    <section hidden={tool !== 'ejercicios'} className="card teacher-tool-panel" aria-label="Crear ejercicios propios">
+      <span className="panel-eyebrow">EJERCICIOS PROPIOS</span><h2>Armá un ejercicio</h2>
+      <p className="teacher-note">Completá el enunciado y los datos. La respuesta se calcula sola.</p>
       <CustomExerciseForm exercises={customExercises} onChange={refreshCustomExercises} />
     </section>
-    <section className="projector-section" aria-label="Proyector de aula">
-      <h3>Proyector de aula</h3>
-      <p className="teacher-note">Proyectá un concepto, o elegí un ejercicio, revisá la vista previa y mostrá su simulador cuando estés listo para tu clase.</p>
-      <Suspense fallback={<p className="teacher-note">Cargando proyector…</p>}><TeacherProjector attempts={attempts} xp={xp} exercises={allExercises} /></Suspense>
-    </section>
-  </>;
+    <div hidden={tool !== 'proyector'}><Suspense fallback={<p className="teacher-note">Cargando proyector…</p>}>
+      <TeacherProjector exercises={allExercises} />
+    </Suspense></div>
+  </section>;
 }
-function TeacherControls({onJoinClass, allExercises = exercises, teacherId}) {
-  const [flashcards,setFlashcards]=useState(10), [ejercicios,setEjercicios]=useState(3), [subtemas,setSubtemas]=useState(['dron','basketball','wall']);
-  const [generated,setGenerated]=useState(false), [error,setError]=useState(''), [copied,setCopied]=useState(false);
-  const config=useMemo(()=>({flashcards:Number(flashcards),ejercicios:Number(ejercicios),subtemas}),[flashcards,ejercicios,subtemas]);
-  const valid=Number.isInteger(config.flashcards)&&config.flashcards>=5&&config.flashcards<=20&&Number.isInteger(config.ejercicios)&&config.ejercicios>=1&&config.ejercicios<=10&&subtemas.length>0;
-  const code=valid?encodeClassConfig(config):'';
-  const toggle=id=>{setCopied(false);setSubtemas(previous=>previous.includes(id)?previous.filter(item=>item!==id):[...previous,id]);};
-  const copy=async()=>{try{await navigator.clipboard.writeText(code);setCopied(true);}catch{setError('No se pudo copiar. Podés seleccionar el código y copiarlo.');}};
-  return <div className="teacher-stack">
-    <form className="teacher-block" onSubmit={event=>{event.preventDefault();if(valid){setGenerated(true);setCopied(false);}}}>
-      <h3>Preparar una clase</h3>
-      <label className="teacher-field">Tarjetas por repaso (5 a 20)<input className="quiz-input" type="number" min="5" max="20" step="1" required value={flashcards} onChange={event=>{setFlashcards(event.target.value);setCopied(false);}} /></label>
-      <fieldset className="teacher-subtemas"><legend>Situaciones para practicar</legend>{SUBTEMAS.map(item=><label key={item.id} className={`teacher-subtema ${subtemas.includes(item.id) ? 'is-selected' : ''}`}><input type="checkbox" checked={subtemas.includes(item.id)} onChange={()=>toggle(item.id)} />{item.label}</label>)}</fieldset>
-      <label className="teacher-field">Ejercicios prácticos (1 a 10)<input className="quiz-input" type="number" min="1" max="10" step="1" required value={ejercicios} onChange={event=>{setEjercicios(event.target.value);setCopied(false);}} /></label>
-      <ConfigSummary config={config} allExercises={allExercises} />
-      {!subtemas.length && <p className="field-error">Seleccioná al menos una situación.</p>}
-      <button type="submit" className="btn btn-primary" disabled={!valid} onClick={()=>{if(valid) registerClassCode({teacherId, code, config});}}>Generar código de clase</button>
-      {generated&&valid&&<><p className="class-code-display">Código para compartir: <strong>{code}</strong></p><div className="class-actions"><button type="button" className="btn btn-secondary" onClick={copy}>{copied?'Copiado':'Copiar código'}</button><button type="button" className="btn btn-primary" onClick={()=>onJoinClass?.(config)}>Aplicar en este dispositivo</button></div></>}
-    </form>
-    {error&&<p className="teacher-error" role="alert">{error}</p>}
-  </div>;
+
+function TeacherControls({ allExercises = exercises, teacherId }) {
+  const totalCards = flashcardsData.length + quizBank.filter(item => item.tipo === 'abierta').length;
+  const availableExercises = Math.min(10, allExercises.length);
+  const availableCards = Math.min(20, totalCards);
+  const [flashcards, setFlashcards] = useState(Math.min(10, availableCards));
+  const [exerciseCount, setExerciseCount] = useState(Math.min(3, availableExercises));
+  const [subtopics, setSubtopics] = useState(SUBTEMAS.map(item => item.id));
+  const [code, setCode] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState('');
+  const config = useMemo(() => ({ flashcards: Number(flashcards), ejercicios: Number(exerciseCount), subtemas: subtopics }), [flashcards, exerciseCount, subtopics]);
+  const valid = Number.isInteger(config.flashcards) && config.flashcards >= 5 && config.flashcards <= availableCards
+    && Number.isInteger(config.ejercicios) && config.ejercicios >= 1 && config.ejercicios <= availableExercises
+    && subtopics.length > 0;
+  const nextCode = valid ? encodeClassConfig(config) : '';
+
+  const toggle = id => {
+    setCode(''); setCopied(false); setError('');
+    setSubtopics(current => current.includes(id) ? current.filter(item => item !== id) : [...current, id]);
+  };
+
+  const createCode = event => {
+    event.preventDefault();
+    if (!valid) return;
+    setCode(nextCode); setCopied(false); setError('');
+    registerClassCode({ teacherId, code: nextCode, config });
+  };
+
+  const copyCode = async () => {
+    try { await navigator.clipboard.writeText(code); setCopied(true); setError(''); }
+    catch { setCopied(false); setError('No se pudo copiar. Seleccioná el código y copialo.'); }
+  };
+
+  const updateCount = (setter, value) => { setter(value); setCode(''); setCopied(false); };
+
+  return <form className="teacher-block class-setup-form" onSubmit={createCode}>
+    <fieldset className="teacher-topic-picker"><legend>1. ¿Qué van a practicar?</legend>
+      <div className="teacher-topic-options">{SUBTEMAS.map(item => <button key={item.id} type="button" aria-pressed={subtopics.includes(item.id)} className={subtopics.includes(item.id) ? 'is-selected' : ''} onClick={() => toggle(item.id)}>{item.label}</button>)}</div>
+      <small>Podés elegir más de una situación.</small>
+    </fieldset>
+
+    <details className="class-quantity-options"><summary>Ajustar cantidad de tarjetas y ejercicios</summary>
+      <label className="teacher-field">Tarjetas de repaso<input className="quiz-input" type="number" min="5" max={availableCards} step="1" value={flashcards} onChange={event => updateCount(setFlashcards, event.target.value)} /></label>
+      <label className="teacher-field">Ejercicios prácticos<input className="quiz-input" type="number" min="1" max={availableExercises} step="1" value={exerciseCount} onChange={event => updateCount(setExerciseCount, event.target.value)} /></label>
+      <small>Dejá los valores sugeridos si no necesitás cambiarlos.</small>
+    </details>
+
+    {!subtopics.length && <p className="field-error">Elegí al menos una situación.</p>}
+    {!valid && subtopics.length > 0 && <p className="field-error">Revisá la cantidad de tarjetas y ejercicios disponibles.</p>}
+    {!code && <button type="submit" className="btn btn-primary" disabled={!valid}>2. Crear código</button>}
+    {code && <div className="class-code-result" role="status">
+      <span className="panel-eyebrow">LISTO PARA COMPARTIR</span>
+      <p className="class-code-display">Código de clase <strong>{code}</strong></p>
+      <button type="button" className="btn btn-primary" onClick={copyCode}>{copied ? 'Código copiado' : 'Copiar código'}</button>
+      <p className="field-help">El alumno escribe este código en “Mi clase”. Los materiales se ajustan en su dispositivo; el progreso no se envía a esta pantalla.</p>
+      <button type="button" className="btn btn-secondary" onClick={() => { setCode(''); setCopied(false); }}>Crear otro código</button>
+    </div>}
+    {error && <p className="teacher-error" role="alert">{error}</p>}
+  </form>;
 }
