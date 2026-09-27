@@ -565,7 +565,14 @@ button, input, select, textarea { max-width: 100%; }
 .practice-recommendation strong { color: var(--c-sky-deep); font-size: 14px; }
 .practice-recommendation p { margin: 3px 0 0; color: var(--c-ink-soft); font-size: 13px; }
 .practice-recommendation .btn { flex: none; }
-.mission-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mission-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+/* Separación entre el ejercicio, la recomendación y los botones de navegación
+   (antes quedaban pegados y parecían encimados). */
+#practice-panel { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+#practice-panel:focus-visible { outline: none; }
+/* Crédito al pie de la página */
+.app-credit { margin: 28px auto 18px; padding: 14px 16px 0; max-width: 1200px; border-top: 1px solid var(--c-line, #e2e8f0); text-align: center; font-size: 13px; color: var(--c-ink-soft, #64748b); }
+.app-credit strong { color: var(--c-ink, #0f172a); }
 
 /* Escenas conceptuales (animaciones existentes de cinemática) */
 .concept-cart.is-moving { animation: cart-run 1.9s ease-in-out forwards; }
