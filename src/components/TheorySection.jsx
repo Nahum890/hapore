@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Formula, MathText } from './MathText.jsx';
 import Icon from './Icon.jsx';
 import { readJSON, writeJSON } from '../utils/storage.js';
+import { useTranslation } from '../i18n/LanguageProvider.jsx';
+import { localizeTheoryModule } from '../data/theoryJopara.js';
 
 const STORAGE_KEY = 'guarania:theoryProgress:parabolic';
 
@@ -352,7 +354,10 @@ const MODULES = [
   },
 ];
 
+export { MODULES as THEORY_MODULES };
+
 export default function TheorySection() {
+  const { t, language } = useTranslation();
   const [activeModuleId, setActiveModuleId] = useState(MODULES[0].id);
   const [completedModules, setCompletedModules] = useState(() => {
     return new Set(readJSON(STORAGE_KEY, []));
@@ -364,8 +369,9 @@ export default function TheorySection() {
   const [labSpeed, setLabSpeed] = useState(20);
   const [labGravity, setLabGravity] = useState(9.8);
 
-  const activeModuleIndex = MODULES.findIndex(m => m.id === activeModuleId);
-  const activeModule = MODULES[activeModuleIndex] ?? MODULES[0];
+  const localizedModules = useMemo(() => MODULES.map(module => localizeTheoryModule(module, language)), [language]);
+  const activeModuleIndex = localizedModules.findIndex(m => m.id === activeModuleId);
+  const activeModule = localizedModules[activeModuleIndex] ?? localizedModules[0];
 
   // Cálculos en tiempo real del mini-laboratorio
   const labCalculations = useMemo(() => {
@@ -448,23 +454,23 @@ export default function TheorySection() {
   };
 
   return (
-    <section className="theory-course-container card" aria-label="Plataforma de Teoría MEC: Movimiento Parabólico">
+    <section className="theory-course-container card" aria-label={t('theory.ariaTitle')}>
       {/* Encabezado del curso */}
       <header className="theory-course-header">
         <div className="theory-header-meta">
-          <span className="chip chip-mec">MEC Paraguay · Bachillerato Científico</span>
-          <span className="chip chip-consolidated">Resolución N.º 12506</span>
+          <span className="chip chip-mec">{t('theory.school')}</span>
+          <span className="chip chip-consolidated">{t('theory.resolution')}</span>
         </div>
-        <h2>Unidad Curricular: Movimiento Parabólico y Balística Clásica</h2>
+        <h2>{t('theory.title')}</h2>
         <p className="theory-header-desc">
-          Plan Específico en Ciencias Básicas y Tecnología (Pág. 251). Estudio analítico de la cinemática en dos dimensiones, deducción de expresiones y laboratorio de simulación.
+          {t('theory.lead')}
         </p>
 
         {/* Barra de progreso general */}
-        <div className="theory-progress-panel" role="region" aria-label="Progreso del curso">
+        <div className="theory-progress-panel" role="region" aria-label={t('theory.progressAria')}>
           <div className="theory-progress-labels">
             <span>
-              Progreso del tema: <strong>{completedModules.size} de {MODULES.length} lecciones completadas</strong>
+              {t('theory.progressLabel')} <strong>{t('theory.progressCount', { done: completedModules.size, total: localizedModules.length })}</strong>
             </span>
             <span className="theory-progress-pct">{progressPercent}%</span>
           </div>
@@ -480,10 +486,10 @@ export default function TheorySection() {
       {/* Disposición tipo Cisco NetAcad: Navegador lateral / Contenido principal */}
       <div className="theory-course-layout">
         {/* Navegador de Lecciones (Sidebar) */}
-        <nav className="theory-course-nav" aria-label="Índice de lecciones">
-          <div className="theory-nav-title">Índice del Módulo</div>
+        <nav className="theory-course-nav" aria-label={t('theory.lessonIndex')}>
+          <div className="theory-nav-title">{t('theory.lessonIndex')}</div>
           <ol className="theory-lesson-list">
-            {MODULES.map((module, idx) => {
+            {localizedModules.map((module, idx) => {
               const isCompleted = completedModules.has(module.id);
               const isActive = activeModule.id === module.id;
               return (
@@ -518,8 +524,8 @@ export default function TheorySection() {
             {/* Banner de la Lección Activa */}
             <div className="theory-lesson-banner">
               <div className="theory-banner-badges">
-                <span className="theory-badge-index">Lección {activeModule.number}</span>
-                <span className="theory-badge-curriculum">{activeModule.mecCap}</span>
+                <span className="theory-badge-index">{t('theory.lesson', { number: activeModule.number })}</span>
+                <span className="theory-badge-curriculum">{activeModule.mecCap ?? activeModule.curriculumRef}</span>
               </div>
               <h3 className="theory-lesson-heading">{activeModule.title}</h3>
               <p className="theory-lesson-tagline">{activeModule.tagline}</p>
@@ -527,13 +533,13 @@ export default function TheorySection() {
 
             {/* Objetivo instruccional */}
             <div className="theory-block theory-objective-block">
-              <strong>Objetivo de Aprendizaje:</strong>
+              <strong>{t('theory.objective')}</strong>
               <p>{activeModule.objective}</p>
             </div>
 
             {/* Desarrollo teórico */}
             <div className="theory-block theory-body-block">
-              <h4>Fundamentación Física</h4>
+              <h4>{t('theory.foundations')}</h4>
               {activeModule.content.map((paragraph, index) => (
                 <p key={index}><MathText text={paragraph} /></p>
               ))}
@@ -541,7 +547,7 @@ export default function TheorySection() {
 
             {/* Fórmulas y deducción matemática */}
             <div className="theory-block theory-math-block">
-              <h4>Expresiones Matemáticas y Variables</h4>
+              <h4>{t('theory.formulas')}</h4>
               <div className="theory-formula-grid">
                 {activeModule.formulas.map((formula, index) => (
                   <div key={index} className="theory-formula-card">
@@ -557,24 +563,24 @@ export default function TheorySection() {
 
             {/* Alerta de examen */}
             <div className="theory-block theory-exam-block">
-              <div className="theory-block-label">Criterio Crítico de Examen</div>
+              <div className="theory-block-label">{t('theory.examCriteria')}</div>
               <p><MathText text={activeModule.examNote} /></p>
             </div>
 
             {/* Mini-Laboratorio Interactivo (Cisco Lab Sandbox) */}
             <div className="theory-block theory-sandbox-block">
               <div className="theory-sandbox-header">
-                <span className="panel-eyebrow">LABORATORIO INTERACTIVO</span>
-                <h4>Simulador de Parámetros de Balística</h4>
+                <span className="panel-eyebrow">{t('theory.labEyebrow')}</span>
+                <h4>{t('theory.labTitle')}</h4>
                 <p>
-                  Ajustá los controles deslizantes para observar cómo varían instantáneamente las componentes, la altura y el alcance según el modelo ideal del MEC.
+                  {t('theory.labLead')}
                 </p>
               </div>
 
               <div className="theory-sandbox-controls">
                 <div className="theory-slider-group">
                   <label htmlFor="theory-angle-slider">
-                    <span>Ángulo de tiro (θ):</span>
+                    <span>{t('theory.angle')} (θ):</span>
                     <strong>{labAngle}°</strong>
                   </label>
                   <input
@@ -591,7 +597,7 @@ export default function TheorySection() {
 
                 <div className="theory-slider-group">
                   <label htmlFor="theory-speed-slider">
-                    <span>Velocidad inicial (v0):</span>
+                    <span>{t('theory.speed')} (v0):</span>
                     <strong>{labSpeed} m/s</strong>
                   </label>
                   <input
@@ -608,7 +614,7 @@ export default function TheorySection() {
 
                 <div className="theory-slider-group">
                   <label htmlFor="theory-gravity-select">
-                    <span>Gravedad (g):</span>
+                    <span>{t('theory.gravity')} (g):</span>
                     <strong>{labGravity} m/s²</strong>
                   </label>
                   <select
@@ -624,27 +630,27 @@ export default function TheorySection() {
               </div>
 
               {/* Botones de preajustes rápidos */}
-              <div className="theory-presets-row" role="group" aria-label="Preajustes balísticos">
+                <div className="theory-presets-row" role="group" aria-label={t('theory.presets')}>
                 <button
                   type="button"
                   className="btn btn-secondary theory-preset-btn"
                   onClick={() => setLabAngle(45)}
                 >
-                  Alcance Máximo (45°)
+                  {t('theory.maxRangePreset')}
                 </button>
                 <button
                   type="button"
                   className="btn btn-secondary theory-preset-btn"
                   onClick={() => setLabAngle(30)}
                 >
-                  Tiro Rasante (30°)
+                  {t('theory.lowPreset')}
                 </button>
                 <button
                   type="button"
                   className="btn btn-secondary theory-preset-btn"
                   onClick={() => setLabAngle(60)}
                 >
-                  Tiro Elevado (60°)
+                  {t('theory.highPreset')}
                 </button>
               </div>
 
@@ -668,31 +674,31 @@ export default function TheorySection() {
                   />
 
                   {/* Etiquetas de los ejes */}
-                  <text x="35" y="32" fill="#64748b" fontSize="10" fontFamily="sans-serif">Eje Y (Altura)</text>
-                  <text x="330" y="165" fill="#64748b" fontSize="10" fontFamily="sans-serif">Eje X (Alcance)</text>
+                  <text x="35" y="32" fill="#64748b" fontSize="10" fontFamily="sans-serif">{t('theory.axisY')}</text>
+                  <text x="330" y="165" fill="#64748b" fontSize="10" fontFamily="sans-serif">{t('theory.axisX')}</text>
                 </svg>
               </div>
 
               {/* Tabla de Métricas calculadas al instante */}
               <div className="theory-metrics-grid">
                 <div className="theory-metric-item">
-                  <small>Componente vx</small>
+                  <small>{t('theory.componentX')}</small>
                   <strong>{labCalculations.vx} m/s</strong>
                 </div>
                 <div className="theory-metric-item">
-                  <small>Componente vy0</small>
+                  <small>{t('theory.componentY')}</small>
                   <strong>{labCalculations.vy0} m/s</strong>
                 </div>
                 <div className="theory-metric-item">
-                  <small>Altura Máxima (Hmax)</small>
+                  <small>{t('theory.maxHeight')}</small>
                   <strong>{labCalculations.hMax} m</strong>
                 </div>
                 <div className="theory-metric-item">
-                  <small>Tiempo de Vuelo (T)</small>
+                  <small>{t('theory.flightTime')}</small>
                   <strong>{labCalculations.timeOfFlight} s</strong>
                 </div>
                 <div className="theory-metric-item is-highlight">
-                  <small>Alcance Total (R)</small>
+                  <small>{t('theory.totalRange')}</small>
                   <strong>{labCalculations.range} m</strong>
                 </div>
               </div>
@@ -700,10 +706,10 @@ export default function TheorySection() {
 
             {/* Comprobación de Conocimiento (Cisco Knowledge Check) */}
             <div className="theory-block theory-quiz-block">
-              <div className="theory-block-label">Comprobación de Comprensión</div>
-              <h4>Autoevaluación de la Lección</h4>
+              <div className="theory-block-label">{t('theory.checkLabel')}</div>
+              <h4>{t('theory.selfCheck')}</h4>
               <p>
-                Respondé correctamente a las dos preguntas para validar tu aprendizaje y habilitar la finalización de esta lección.
+                {t('theory.checkLead')}
               </p>
 
               <div className="theory-questions-list">
@@ -715,7 +721,7 @@ export default function TheorySection() {
                   return (
                     <div key={question.id} className="theory-question-card">
                       <p className="theory-question-prompt">
-                        <strong>Pregunta {qIdx + 1}:</strong> {question.prompt}
+                        <strong>{t('theory.question', { number: qIdx + 1 })}:</strong> {question.prompt}
                       </p>
 
                       <div className="theory-options-list" role="radiogroup">
@@ -744,7 +750,7 @@ export default function TheorySection() {
                           className={`theory-feedback-box ${isCorrect ? 'is-correct' : 'is-incorrect'}`}
                           role="status"
                         >
-                          <strong>{isCorrect ? 'Respuesta Correcta' : 'Respuesta Incorrecta'}</strong>
+                            <strong>{t(isCorrect ? 'theory.correct' : 'theory.incorrect')}</strong>
                           <p>{question.options[selectedIndex].explanation}</p>
                         </div>
                       )}
@@ -763,13 +769,13 @@ export default function TheorySection() {
                   <Icon name="class" size={18} />
                   <span>
                     {completedModules.has(activeModule.id)
-                      ? 'Lección completada (Desmarcar)'
-                      : 'Marcar lección como comprendida'}
+                      ? t('theory.completed')
+                      : t('theory.markComplete')}
                   </span>
                 </button>
                 {isCurrentModuleComplete && !completedModules.has(activeModule.id) && (
                   <span className="theory-qualify-note">
-                    ¡Comprobación aprobada! Podés marcar la lección y avanzar.
+                    {t('theory.passed')}
                   </span>
                 )}
               </div>
@@ -783,10 +789,10 @@ export default function TheorySection() {
                 onClick={goToPrev}
                 disabled={activeModuleIndex === 0}
               >
-                Anterior
+                {t('common.previous')}
               </button>
               <span className="theory-page-indicator">
-                {activeModuleIndex + 1} de {MODULES.length}
+                {t('theory.page', { current: activeModuleIndex + 1, total: localizedModules.length })}
               </span>
               <button
                 type="button"
@@ -794,7 +800,7 @@ export default function TheorySection() {
                 onClick={goToNext}
                 disabled={activeModuleIndex === MODULES.length - 1}
               >
-                Siguiente Lección
+                {t('theory.nextLesson')}
               </button>
             </footer>
           </article>

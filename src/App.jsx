@@ -31,6 +31,8 @@ import {
 import { getCustomExercises } from './utils/customExercises.js';
 import { joinClass, leaveClass } from './utils/classroom.js';
 import ProfileSettings from './components/ProfileSettings.jsx';
+import NotificationsCenter from './components/NotificationsCenter.jsx';
+import useClassNotifications from './hooks/useClassNotifications.js';
 import { Formula, MathText } from './components/MathText.jsx';
 import TutorWorkbench from './components/TutorWorkbench.jsx';
 const ClassChat = lazy(() => import('./components/ClassChat.jsx'));
@@ -531,12 +533,14 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
   const [simulationSubmission, setSimulationSubmission] = useState(null);
   const [showGuide, setShowGuide] = useState(() => !readJSON('guarania:guideSeen:v2', false));
   const [showSettings, setShowSettings] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   // Cuentas creadas antes de que teléfono y correo fueran obligatorios.
   const missingContact = !hasContactInfo(user);
   const [localClassConfig, setClassConfig] = useState(() => decodeClassConfig(readJSON('guarania:classCode', null)));
   // Clase descargada de la nube (alumno): trae las tarjetas y ejercicios que
   // eligió el docente y queda guardada para usarla sin internet.
   const [classPackage, setClassPackage] = useState(getClassPackage);
+  const notifications = useClassNotifications(user, classPackage);
   const classConfig = classPackage?.content?.config ?? localClassConfig;
   const [syncState, setSyncState] = useState(() => ({ status: getPendingProgress() ? 'pending' : 'idle', at: null }));
   // El docente puede crear ejercicios propios mientras la app sigue abierta
@@ -657,7 +661,7 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
 
   return (
     <div className="app" data-accent={section.accent}>
-      <Header user={user} onHome={() => navigate('inicio')} onLogout={onLogout} onOpenSettings={() => setShowSettings(true)} />
+      <Header user={user} onHome={() => navigate('inicio')} onLogout={onLogout} onOpenSettings={() => setShowSettings(true)} onOpenNotifications={() => { notifications.refresh(); setShowNotifications(true); }} notificationCount={notifications.notificationCount} />
       <nav className="primary-nav" aria-label={t('nav.label')}>
         {SECTIONS.map(item => <button key={item.id} type="button" data-accent={item.accent} className={'primary-nav-item' + (activeTab === item.id ? ' is-active' : '')} aria-current={activeTab === item.id ? 'page' : undefined} onClick={() => navigate(item.id)}><span className="primary-nav-icon"><Icon name={item.icon} size={22} /></span><Bilingual k={'nav.' + item.id} className="primary-nav-label" /></button>)}
       </nav>
@@ -764,6 +768,7 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
       </main>{activeTab !== 'chats' && <aside className="app-sidebar" aria-label="Tu progreso y ayuda"><ConfidenceBar xp={learning.xp} level={learning.level} confidence={learning.confidence} /><TutorCard tutor={tutor} /></aside>}</div>
       <Onboarding open={showGuide} onDismiss={dismissGuide} onStart={startPracticing} role={user.role} />
       <ProfileSettings open={showSettings || missingContact} required={missingContact} user={user} onClose={() => setShowSettings(false)} onSaved={handleProfileSaved} />
+      <NotificationsCenter open={showNotifications} onClose={() => setShowNotifications(false)} onOpenMessages={() => navigate('mensajes')} messageNotifications={notifications.messageNotifications} upcomingMeetings={notifications.upcomingMeetings} />
       <CurriculumBadge />
     </div>
   );

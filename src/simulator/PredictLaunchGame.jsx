@@ -76,7 +76,7 @@ export default function PredictLaunchGame() {
         width, height, flight, progress: progressRef.current,
         phase: phase === 'flying' ? 'flying' : phase === 'result' ? 'landed' : 'idle',
         now: 0, scenario: round.scenario.id, verdict: result ? result.correct : null,
-        hideTarget: phase !== 'result', guessX, guessLabel: t('game.guessMark'),
+        hideTarget: phase !== 'result', guessX, guessLabel: t('game.guessMark'), language,
       });
     };
     const resize = () => {
@@ -131,11 +131,10 @@ export default function PredictLaunchGame() {
             <h2>{t('game.title')}</h2>
             <p>{t('game.intro')}</p>
           </header>
-          <ol className="predict-steps" aria-hidden="true">
-            <li className={phase === 'predicting' ? 'is-current' : ''}>{t('game.step1')}</li>
-            <li className={phase === 'predicting' ? 'is-current' : ''}>{t('game.step2')}</li>
-            <li className={phase !== 'predicting' ? 'is-current' : ''}>{t('game.step3')}</li>
-          </ol>
+          <div className="predict-instruction" role="status">
+            <span>{phase === 'predicting' ? '1' : phase === 'flying' ? '2' : '3'}</span>
+            <p>{t(phase === 'predicting' ? 'game.instructionPredict' : phase === 'flying' ? 'game.instructionFlight' : 'game.instructionCompare')}</p>
+          </div>
           <div className="values-chips">
             <span className="chip chip-data"><small>{t('value.v0')}</small><strong>{round.v0} m/s</strong></span>
             <span className="chip chip-data"><small>{t('value.angle')}</small><strong>{round.angle}°</strong></span>
@@ -147,7 +146,7 @@ export default function PredictLaunchGame() {
           </div>
           {phase === 'predicting' && (
             <form className="predict-form" onSubmit={event => { event.preventDefault(); launch(); }}>
-              <label htmlFor="predict-guess">{t('game.predictLabel')}</label>
+                <label htmlFor="predict-guess">{t('game.predictLabel')}</label>
               <div className="predict-input-row">
                 <input id="predict-guess" className="quiz-input" type="text" inputMode="decimal" autoComplete="off" value={prediction} onChange={event => setPrediction(event.target.value)} placeholder={t('game.placeholder')} />
                 <span className="predict-unit">m</span>

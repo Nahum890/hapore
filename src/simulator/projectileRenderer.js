@@ -94,12 +94,12 @@ function farmBackdrop(ctx, width, height, groundY) {
   for (let x = 12; x < width; x += 32) { ctx.beginPath(); ctx.moveTo(x, groundY - 30); ctx.lineTo(x, groundY - 6); ctx.stroke(); }
   for (const y of [groundY - 23, groundY - 13]) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke(); }
 }
-function deliveryTarget(ctx, x, groundY, hit) {
+function deliveryTarget(ctx, x, groundY, hit, title) {
   ctx.fillStyle = hit ? '#4a9d65' : C.blue;
   ctx.beginPath(); ctx.ellipse(x, groundY - 3, 19, 7, 0, 0, Math.PI * 2); ctx.fill();
   ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(x, groundY - 3, 12, 4, 0, 0, Math.PI * 2); ctx.stroke();
   crate(ctx, x + 22, groundY - 19, 16); crate(ctx, x + 35, groundY - 18, 15); crate(ctx, x + 28, groundY - 35, 16);
-  ctx.fillStyle = C.ink; ctx.font = '700 10px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('ENTREGA', x, groundY - 47);
+  ctx.fillStyle = C.ink; ctx.font = '700 10px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.fillText(title, x, groundY - 47);
 }
 function drone(ctx, x, y, size, rotorPhase, flying, carrying) {
   ctx.save(); ctx.translate(x, y);
@@ -122,7 +122,10 @@ function drone(ctx, x, y, size, rotorPhase, flying, carrying) {
   }
   ctx.restore();
 }
-function drawDrone(ctx, { width, height, flight, progress, phase, now, verdict, hideTarget, guessX, guessLabel }) {
+function drawDrone(ctx, { width, height, flight, progress, phase, now, verdict, hideTarget, guessX, guessLabel, language }) {
+  const labels = language === 'es'
+    ? { delivery: 'ENTREGA', start: 'INICIO', ideal: 'Vuelo ideal · sin motor' }
+    : { delivery: 'OG̃UAHẼ', start: 'ÑEPYRŨ', ideal: 'Vuelo ideal · motor’ỹre' };
   const groundY = height - Math.max(34, height * .13);
   farmBackdrop(ctx, width, height, groundY);
   const originX = Math.max(34, width * .07);
@@ -135,18 +138,18 @@ function drawDrone(ctx, { width, height, flight, progress, phase, now, verdict, 
   // El color de la zona refleja si la respuesta escrita fue correcta, no si
   // el dibujo geométrico "cayó cerca": ambas cosas pueden diferir cuando la
   // trayectoria mostrada no depende del número que escribió el estudiante.
-  if (!hideTarget) deliveryTarget(ctx, targetPoint.x, groundY, phase === 'landed' && verdict === true);
+  if (!hideTarget) deliveryTarget(ctx, targetPoint.x, groundY, phase === 'landed' && verdict === true, labels.delivery);
   if (Number.isFinite(guessX) && phase === 'landed') guessMarker(ctx, originX + guessX * scale, groundY, width, guessLabel);
   if (phase !== 'idle') trajectory(ctx, points, Math.round(progress * (points.length - 1)) + 1, C.orange, false);
   ctx.fillStyle = 'rgba(30,65,54,.2)'; ctx.beginPath(); ctx.ellipse(current.x, groundY - 3, 14, 4, 0, 0, Math.PI * 2); ctx.fill();
   drone(ctx, current.x, Math.min(current.y - 29, groundY - 30), Math.max(20, Math.min(26, width * .05)), now * .045, phase === 'flying', phase !== 'landed');
   if (phase === 'landed') crate(ctx, current.x - 8, groundY - 18, 16);
-  label(ctx, Math.max(8, originX - 18), groundY - 70, 'INICIO', C.ink);
-  label(ctx, 8, 24, 'Vuelo ideal · sin motor', C.forest);
+  label(ctx, Math.max(8, originX - 18), groundY - 70, labels.start, C.ink);
+  label(ctx, 8, 24, labels.ideal, C.forest);
 }
 
 /* ---------- Escenario "básquetbol": tiro a la canasta reglamentaria (3.05 m) ---------- */
-function court(ctx, width, height, groundY, environment) {
+function court(ctx, width, height, groundY, environment, language) {
   // Techo y vigas de gimnasio techado con iluminación deportiva
   const gymCeiling = ctx.createLinearGradient(0, 0, 0, groundY);
   gymCeiling.addColorStop(0, '#1c2833');
@@ -231,9 +234,9 @@ function court(ctx, width, height, groundY, environment) {
   const isIndoor = environment?.isIndoor !== false;
   const windVal = environment?.wind || 0;
   const windArrow = windVal > 0 ? ' →' : windVal < 0 ? ' ←' : '';
-  const envText = isIndoor
-    ? '🏀 Gimnasio techado · 21°C · Sin viento (vuelo ideal)'
-    : `🌬️ Cancha exterior · Viento: ${windVal > 0 ? '+' : ''}${windVal} m/s${windArrow} · ${environment?.temperature ?? 21}°C`;
+  const envText = language === 'es'
+    ? isIndoor ? 'Gimnasio techado · 21 °C · Sin viento' : `Cancha exterior · Viento: ${windVal > 0 ? '+' : ''}${windVal} m/s${windArrow} · ${environment?.temperature ?? 21} °C`
+    : isIndoor ? 'Gimnasio techado · 21 °C · Yvytu’ỹre' : `Cancha okápe · Yvytu: ${windVal > 0 ? '+' : ''}${windVal} m/s${windArrow} · ${environment?.temperature ?? 21} °C`;
   ctx.fillStyle = 'rgba(20, 30, 45, 0.82)';
   const tw = ctx.measureText(envText).width + 20;
   roundedRect(ctx, width - tw - 12, 10, tw, 22, 4, 'rgba(20, 30, 45, 0.82)');
@@ -274,7 +277,10 @@ function drawWindFlow(ctx, width, groundY, wind, now = 0) {
   ctx.restore();
 }
 
-function hoopTarget(ctx, x, groundY, scale, hit, hoopHeight = 3.05, collision = null, progress = 1, bballOutcome = null) {
+function hoopTarget(ctx, x, groundY, scale, hit, hoopHeight = 3.05, collision = null, progress = 1, bballOutcome = null, language = 'gn-jopara') {
+  const labels = language === 'es'
+    ? { impact: 'Impacto en el tablero', bankIn: '¡TABLERO Y ADENTRO!', rimIn: '¡ARO Y ADENTRO!', swish: '¡CANASTA LIMPIA!', hoop: `Aro ${hoopHeight.toFixed(2)} m · Ø 45 cm` }
+    : { impact: 'Ohupyty tablero-pe', bankIn: '¡TABLERO HA OIKE!', rimIn: '¡ARO HA OIKE!', swish: '¡CANASTA PORÃ!', hoop: `Aro · yvate ${hoopHeight.toFixed(2)} m · Ø 45 cm` };
   // Altura física reglamentaria del aro FIBA / NBA: 3.05 metros
   const rimY = groundY - hoopHeight * scale;
   const rimWidth = Math.max(18, 0.45 * scale); // Diámetro reglamentario del aro: 45 cm (0.45 m)
@@ -323,7 +329,7 @@ function hoopTarget(ctx, x, groundY, scale, hit, hoopHeight = 3.05, collision = 
     ctx.fillStyle = collision.isBasket ? '#2ecc71' : '#e67e22';
     ctx.font = '700 11px system-ui, sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText('💥 ¡CLAC! Tablero', backboardX + 8, impactY + 4);
+    ctx.fillText(labels.impact, backboardX + 8, impactY + 4);
     ctx.restore();
   }
 
@@ -360,11 +366,7 @@ function hoopTarget(ctx, x, groundY, scale, hit, hoopHeight = 3.05, collision = 
 
   // 5. Destellos de enceste si acertó (swish, bank-in, rim-in)
   if (hit) {
-    const bannerText = bballOutcome === 'bank-in'
-      ? '¡TABLERAZO Y ADENTRO!'
-      : bballOutcome === 'rim-in'
-        ? '¡ARO Y ADENTRO!'
-        : '¡CANASTA LIMPIA (SWISH)!';
+    const bannerText = bballOutcome === 'bank-in' ? labels.bankIn : bballOutcome === 'rim-in' ? labels.rimIn : labels.swish;
     // A la izquierda del aro para no quedar encima del tablero.
     pill(ctx, rimLeft - 10, rimY - 22, bannerText, { bg: '#16a34a', align: 'right', size: 11 });
   }
@@ -383,7 +385,7 @@ function hoopTarget(ctx, x, groundY, scale, hit, hoopHeight = 3.05, collision = 
   ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1; ctx.setLineDash([3, 4]);
   ctx.beginPath(); ctx.moveTo(rimLeft - 4, rimY); ctx.lineTo(rimLeft - 4, groundY - 2); ctx.stroke();
   ctx.restore();
-  pill(ctx, rimLeft - 10, rimY + 4, `Aro ${hoopHeight.toFixed(2)} m · Ø 45 cm`, { align: 'right', size: 9.5 });
+  pill(ctx, rimLeft - 10, rimY + 4, labels.hoop, { align: 'right', size: 9.5 });
 }
 
 function basketballPlayer(ctx, x, groundY, size, hasBall) {
@@ -434,9 +436,12 @@ function ball(ctx, x, y, radius, spin) {
   ctx.restore();
 }
 
-function drawBasketball(ctx, { width, height, flight, progress, phase, now, verdict }) {
+function drawBasketball(ctx, { width, height, flight, progress, phase, now, verdict, language }) {
+  const labels = language === 'es'
+    ? { launch: 'Lanzamiento', scene: 'Tiro parabólico · Cancha de básquetbol', enterSpeed: 'Ingresá v₀' }
+    : { launch: 'Ñemombo', scene: 'Ñemombo parabólico · Cancha de básquetbol', enterSpeed: 'Ehai v₀' };
   const groundY = height - Math.max(30, height * .12);
-  court(ctx, width, height, groundY, flight.environment);
+  court(ctx, width, height, groundY, flight.environment, language);
   if (flight.environment?.isIndoor === false) drawWindFlow(ctx, width, groundY, flight.environment.wind, now);
   const originX = Math.max(30, width * .08);
   const worldWidth = Math.max(flight.targetX, flight.landingX, 12) * 1.2;
@@ -449,7 +454,7 @@ function drawBasketball(ctx, { width, height, flight, progress, phase, now, verd
 
   // El aro suspendido a 3.05 m de altura (reglamentario)
   const isHit = phase === 'landed' && (verdict === true || flight.basketSwish || flight.hit);
-  hoopTarget(ctx, targetPoint.x, groundY, scale, isHit, hoopH, flight.collision, progress, flight.bballOutcome);
+  hoopTarget(ctx, targetPoint.x, groundY, scale, isHit, hoopH, flight.collision, progress, flight.bballOutcome, language);
 
   // Trayectoria parabólica
   if (phase !== 'idle') trajectory(ctx, points, Math.round(progress * (points.length - 1)) + 1, '#e65c00', false);
@@ -488,7 +493,7 @@ function drawBasketball(ctx, { width, height, flight, progress, phase, now, verd
     ctx.fillStyle = '#ffffff';
     ctx.strokeStyle = '#1b2a41';
     ctx.lineWidth = 3;
-    const labelText = speedVal ? `${Math.round(flight.launch.angle)}° · ${speedVal.toFixed(1)} m/s` : `${Math.round(flight.launch.angle)}° (Ingresá v₀)`;
+    const labelText = speedVal ? `${Math.round(flight.launch.angle)}° · ${speedVal.toFixed(1)} m/s` : `${Math.round(flight.launch.angle)}° (${labels.enterSpeed})`;
     ctx.strokeText(labelText, endX + 8, endY + 3);
     ctx.fillText(labelText, endX + 8, endY + 3);
     ctx.restore();
@@ -506,8 +511,8 @@ function drawBasketball(ctx, { width, height, flight, progress, phase, now, verd
     ball(ctx, current.x, current.y, ballRadiusPx, now * 0.015);
   }
 
-  pill(ctx, originX - 6, groundY - playerSize * 1.4 - 8, 'Lanzamiento', { bg: 'rgba(255,255,255,.92)', color: C.ink });
-  label(ctx, 8, 24, 'Tiro parabólico · Cancha de básquetbol', '#a4501f');
+  pill(ctx, originX - 6, groundY - playerSize * 1.4 - 8, labels.launch, { bg: 'rgba(255,255,255,.92)', color: C.ink });
+  label(ctx, 8, 24, labels.scene, '#a4501f');
 }
 
 /* ---------- Escenario "pared" / "tiro libre" (estilo Roberto Carlos) ---------- */
@@ -531,7 +536,7 @@ function floodlight(ctx, x, baseY, topY) {
   ctx.restore();
 }
 
-function soccerPitch(ctx, width, height, groundY) {
+function soccerPitch(ctx, width, height, groundY, language) {
   // Cielo de estadio al anochecer
   const sky = ctx.createLinearGradient(0, 0, 0, groundY);
   sky.addColorStop(0, '#14264a'); sky.addColorStop(0.55, '#2c5c9c'); sky.addColorStop(1, '#8fc1e8');
@@ -569,7 +574,7 @@ function soccerPitch(ctx, width, height, groundY) {
   for (let x = 0, i = 0; x < width; x += 90, i += 1) {
     roundedRect(ctx, x + 2, boardY, 86, 10, 2, i % 2 ? '#1d5bd8' : '#e53e3e');
     ctx.fillStyle = '#ffffff'; ctx.font = '800 7.5px system-ui, sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText(i % 2 ? 'FÍSICA 3.º CURSO' : 'PYFIS IA', x + 45, boardY + 7.8);
+    ctx.fillText(i % 2 ? (language === 'es' ? 'FÍSICA 3.º CURSO' : 'FÍSICA 3.º CURSO · PYFIS') : 'PYFIS IA', x + 45, boardY + 7.8);
   }
 
   // Césped en perspectiva: franjas de corte horizontales que se ensanchan
@@ -655,17 +660,19 @@ function soccerPlayer(ctx, x, groundY, size, { jersey = '#f6e05e', shorts = '#2b
   ctx.restore();
 }
 
-function soccerWallBarrier(ctx, x, groundY, scale, barrierHeight = 1.8) {
+function soccerWallBarrier(ctx, x, groundY, scale, barrierHeight = 1.8, language = 'gn-jopara') {
   // Barrera reglamentaria FIFA a 9.15 m: cuatro defensores de 1.80 m.
   const size = Math.max(30, barrierHeight * scale);
   const gap = Math.max(7, size * .26);
   for (let i = 0; i < 4; i += 1) {
     soccerPlayer(ctx, x + (i - 1.5) * gap, groundY, size, { jersey: '#2b6cb0', shorts: '#ffffff', socks: '#e53e3e', arms: 'cover' });
   }
-  pill(ctx, x, groundY - size * 1.15 - 8, `Barrera · 9.15 m · ${barrierHeight.toFixed(2)} m`, { size: 9.5 });
+  pill(ctx, x, groundY - size * 1.15 - 8, language === 'es'
+    ? `Barrera · 9,15 m · ${barrierHeight.toFixed(2)} m`
+    : `Barrera · 9,15 m · yvate ${barrierHeight.toFixed(2)} m`, { size: 9.5 });
 }
 
-function soccerGoal(ctx, x, groundY, scale, hit, goalHeight = 2.44) {
+function soccerGoal(ctx, x, groundY, scale, hit, goalHeight = 2.44, language = 'gn-jopara') {
   // Arco reglamentario FIFA: travesaño a 2.44 m, con profundidad de red.
   const hPx = Math.max(32, goalHeight * scale);
   const depth = Math.max(18, 1.8 * scale);
@@ -693,23 +700,55 @@ function soccerGoal(ctx, x, groundY, scale, hit, goalHeight = 2.44) {
   ctx.beginPath(); ctx.moveTo(x, groundY); ctx.lineTo(x, groundY - hPx); ctx.lineTo(x + 6, groundY - hPx); ctx.stroke();
   ctx.restore();
 
-  if (hit) pill(ctx, x + depth / 2, groundY - hPx - 10, '¡GOLAZO!', { bg: '#2f855a', size: 12 });
-  pill(ctx, x - 8, groundY - hPx + 4, `Arco ${goalHeight.toFixed(2)} m`, { align: 'right', size: 9.5 });
+  if (hit) pill(ctx, x + depth / 2, groundY - hPx - 10, language === 'es' ? '¡GOL!' : '¡GOL!', { bg: '#2f855a', size: 12 });
+  pill(ctx, x - 8, groundY - hPx + 4, language === 'es' ? `Arco ${goalHeight.toFixed(2)} m` : `Arco · yvate ${goalHeight.toFixed(2)} m`, { align: 'right', size: 9.5 });
 }
 
 function yard(ctx, width, height, groundY) {
   skyBackdrop(ctx, width, height, groundY, '#dcecf7', '#f2f6e9');
-  ctx.fillStyle = '#8fc48a'; ctx.fillRect(0, groundY - 4, width, height - groundY + 4);
-  ctx.strokeStyle = 'rgba(255,255,255,.4)'; ctx.lineWidth = 1;
-  for (let x = 6; x < width; x += 18) { ctx.beginPath(); ctx.moveTo(x, groundY); ctx.lineTo(x + 6, groundY + 10); ctx.stroke(); }
+  // Fondo de patio de barrio: siluetas bajas y piso claro dan contexto sin
+  // competir con la pelota ni con la trayectoria.
+  ctx.fillStyle = '#9ebc9a'; ctx.fillRect(0, groundY - 32, width, 32);
+  const houseX = width * .65, houseW = width * .2, houseH = Math.max(24, height * .16), houseY = groundY - 32 - houseH;
+  ctx.fillStyle = '#f3e6ce'; ctx.fillRect(houseX, houseY, houseW, houseH);
+  ctx.fillStyle = '#b56d52'; ctx.beginPath(); ctx.moveTo(houseX - 8, houseY + 2); ctx.lineTo(houseX + houseW / 2, houseY - height * .07); ctx.lineTo(houseX + houseW + 8, houseY + 2); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#7593a0'; ctx.fillRect(houseX + houseW * .16, houseY + houseH * .28, houseW * .22, houseH * .3);
+  ctx.fillStyle = '#886750'; ctx.fillRect(houseX + houseW * .65, groundY - 32 - houseH * .56, houseW * .2, houseH * .56);
+  for (const x of [width * .18, width * .49, width * .91]) {
+    ctx.fillStyle = '#718f66'; ctx.beginPath(); ctx.arc(x, groundY - 35, Math.max(11, width * .025), 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#9cb27a'; ctx.beginPath(); ctx.arc(x - 7, groundY - 40, Math.max(7, width * .017), 0, Math.PI * 2); ctx.fill();
+  }
+  const floor = ctx.createLinearGradient(0, groundY, 0, height);
+  floor.addColorStop(0, '#d9d0ba'); floor.addColorStop(1, '#bcae91');
+  ctx.fillStyle = floor; ctx.fillRect(0, groundY - 3, width, height - groundY + 3);
+  ctx.strokeStyle = 'rgba(126,103,75,.2)'; ctx.lineWidth = 1;
+  for (let y = groundY + 13; y < height; y += 15) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke(); }
+  for (let x = 8; x < width; x += 28) { ctx.beginPath(); ctx.moveTo(x, groundY); ctx.lineTo(x - 7, height); ctx.stroke(); }
 }
-function wall(ctx, x, groundY, scale, obstacleHeight, cleared) {
-  const wallHeightPx = Math.max(26, obstacleHeight * scale);
-  ctx.fillStyle = cleared === false ? '#c0392b' : '#9a8b74';
-  roundedRect(ctx, x - 7, groundY - wallHeightPx, 14, wallHeightPx, 3, cleared === false ? '#c0392b' : '#9a8b74');
-  ctx.strokeStyle = '#6b5d47'; ctx.lineWidth = 1;
-  for (let row = 0; row < wallHeightPx; row += 8) { ctx.beginPath(); ctx.moveTo(x - 7, groundY - row); ctx.lineTo(x + 7, groundY - row); ctx.stroke(); }
-  ctx.fillStyle = C.ink; ctx.font = '700 10px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('PAREDÓN', x, groundY - wallHeightPx - 8);
+function wall(ctx, x, groundY, scale, obstacleHeight, cleared, title = 'PAREDÓN') {
+  const wallHeightPx = Math.max(30, obstacleHeight * scale);
+  const wallWidth = Math.max(22, Math.min(38, scale * .42));
+  const left = x - wallWidth / 2, top = groundY - wallHeightPx;
+  ctx.save();
+  ctx.fillStyle = 'rgba(38,48,42,.2)'; ctx.beginPath(); ctx.ellipse(x + 7, groundY - 2, wallWidth * .9, 5, 0, 0, Math.PI * 2); ctx.fill();
+  // Muro de bloques con borde superior y laterales suaves, más legible que
+  // una línea delgada al cruzar la trayectoria.
+  const face = ctx.createLinearGradient(left, top, left + wallWidth, top);
+  face.addColorStop(0, cleared === false ? '#c47c71' : '#e3d8c7'); face.addColorStop(.72, cleared === false ? '#aa655e' : '#cfc2ae'); face.addColorStop(1, '#a99982');
+  ctx.fillStyle = face; ctx.fillRect(left, top, wallWidth, wallHeightPx);
+  ctx.strokeStyle = 'rgba(89,73,57,.35)'; ctx.lineWidth = 1;
+  const rowHeight = Math.max(8, Math.min(13, wallHeightPx / 4));
+  for (let row = 1; row < wallHeightPx / rowHeight; row += 1) {
+    const y = groundY - row * rowHeight;
+    ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(left + wallWidth, y); ctx.stroke();
+    const shift = row % 2 ? wallWidth * .46 : wallWidth * .56;
+    ctx.beginPath(); ctx.moveTo(left + shift, y); ctx.lineTo(left + shift, y - rowHeight); ctx.stroke();
+  }
+  roundedRect(ctx, left - 3, top - 4, wallWidth + 6, 6, 2, cleared === false ? '#8c4b47' : '#aa9a82');
+  ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(left + 2, top + 2); ctx.lineTo(left + 2, groundY - 2); ctx.stroke();
+  ctx.restore();
+  ctx.fillStyle = C.ink; ctx.font = '700 9px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.fillText(title, x, top - 9);
 }
 function landingSpot(ctx, x, groundY, hit) {
   ctx.fillStyle = hit ? '#4a9d65' : C.blue;
@@ -746,14 +785,18 @@ function soccerBall(ctx, x, y, radius, spin) {
   ctx.restore();
 }
 
-function drawWall(ctx, { width, height, flight, progress, phase, now, verdict, hideTarget, guessX, guessLabel }) {
+function drawWall(ctx, { width, height, flight, progress, phase, now, verdict, hideTarget, guessX, guessLabel, language }) {
+  const spanish = language === 'es';
+  const labels = spanish
+    ? { wall: 'PAREDÓN', launch: 'LANZAMIENTO', fail: 'No pasó el paredón', ideal: 'Vuelo ideal · sin viento', impact: 'La barrera frenó la pelota (h < 1,80 m)', freeKick: 'Tiro libre · vuelo vertical', kickLabel: distance => `Tiro libre · ${distance} m` }
+    : { wall: 'PAREDÓN', launch: 'ÑEMOMBO', fail: 'Pe pelota ndohasái paredón ári', ideal: 'Vuelo ideal · yvytu’ỹre', impact: 'Barrera ojoko pe pelota (h < 1,80 m)', freeKick: 'Tiro libre · vuelo yvate gotyo', kickLabel: distance => `Ñemombo libre · ${distance} m` };
   const isFreeKick = Boolean(flight.isFreeKick || flight.obstacle?.isFreeKick);
   // En el tiro libre el suelo sube (72 %) para mostrar el césped en
   // perspectiva y que el cielo no ocupe casi toda la escena.
   const groundY = isFreeKick ? Math.round(height * .72) : height - Math.max(30, height * .12);
 
   if (isFreeKick) {
-    soccerPitch(ctx, width, height, groundY);
+    soccerPitch(ctx, width, height, groundY, language);
   } else {
     yard(ctx, width, height, groundY);
   }
@@ -773,11 +816,11 @@ function drawWall(ctx, { width, height, flight, progress, phase, now, verdict, h
     // "¡GOLAZO!" solo si el reto lo evaluó como gol (verdict); la regla
     // geométrica queda de respaldo para quien no pase veredicto.
     const isGoal = typeof verdict === 'boolean' ? verdict : flight.clearsObstacle && (flight.landingX >= flight.targetX - 2);
-    soccerGoal(ctx, targetPoint.x, groundY, scale, phase === 'landed' && isGoal);
-    soccerWallBarrier(ctx, obstacleX, groundY, scale, obstacle.height || 1.8);
+    soccerGoal(ctx, targetPoint.x, groundY, scale, phase === 'landed' && isGoal, 2.44, language);
+    soccerWallBarrier(ctx, obstacleX, groundY, scale, obstacle.height || 1.8, language);
   } else {
     if (!hideTarget) landingSpot(ctx, targetPoint.x, groundY, phase === 'landed' && verdict === true);
-    wall(ctx, obstacleX, groundY, scale, obstacle.height, phase === 'landed' ? flight.clearsObstacle : null);
+    wall(ctx, obstacleX, groundY, scale, obstacle.height, phase === 'landed' ? flight.clearsObstacle : null, labels.wall);
   }
   if (Number.isFinite(guessX) && phase === 'landed') guessMarker(ctx, originX + guessX * scale, groundY, width, guessLabel);
 
@@ -808,11 +851,11 @@ function drawWall(ctx, { width, height, flight, progress, phase, now, verdict, h
     }
   }
 
-  if (isFreeKick) pill(ctx, originX - 12, groundY - kickerSize * 1.2 - 8, `Tiro libre · ${Math.round(flight.targetX * 10) / 10} m`, { bg: 'rgba(255,255,255,.92)', color: C.ink });
-  else label(ctx, Math.max(8, originX - 20), groundY - 64, 'LANZAMIENTO', C.ink);
+  if (isFreeKick) pill(ctx, originX - 12, groundY - kickerSize * 1.2 - 8, labels.kickLabel(Math.round(flight.targetX * 10) / 10), { bg: 'rgba(255,255,255,.92)', color: C.ink });
+  else label(ctx, Math.max(8, originX - 20), groundY - 64, labels.launch, C.ink);
   const explainerText = isFreeKick
-    ? (flight.clearsObstacle === false && phase === 'landed' ? 'Impactó en la barrera (h < 1.80 m)' : 'Tiro Libre (estilo Roberto Carlos) · Vuelo vertical')
-    : (flight.clearsObstacle === false && phase === 'landed' ? 'No superó el paredón' : 'Vuelo ideal · sin motor');
+    ? (flight.clearsObstacle === false && phase === 'landed' ? labels.impact : labels.freeKick)
+    : (flight.clearsObstacle === false && phase === 'landed' ? labels.fail : labels.ideal);
   label(ctx, 8, 24, explainerText, isFreeKick ? '#c53030' : '#256a4a');
 }
 
@@ -828,9 +871,9 @@ function guessMarker(ctx, x, groundY, width, text) {
   ctx.restore();
 }
 
-export function drawScene(ctx, { width, height, flight, progress = 0, phase = 'idle', now = 0, scenario = 'dron', verdict = null, hideTarget = false, guessX = null, guessLabel = '' }) {
+export function drawScene(ctx, { width, height, flight, progress = 0, phase = 'idle', now = 0, scenario = 'dron', verdict = null, hideTarget = false, guessX = null, guessLabel = '', language = 'gn-jopara' }) {
   if (!(width > 0 && height > 0) || !flight) return;
-  const args = { width, height, flight, progress, phase, now, verdict, hideTarget, guessX, guessLabel };
+  const args = { width, height, flight, progress, phase, now, verdict, hideTarget, guessX, guessLabel, language };
   if (scenario === 'basketball') return drawBasketball(ctx, args);
   if (scenario === 'wall' || scenario === 'roberto-carlos') return drawWall(ctx, args);
   return drawDrone(ctx, args);

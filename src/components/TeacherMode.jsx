@@ -5,6 +5,7 @@ import { encodeClassConfig, decodeClassConfig } from '../utils/classCode.js';
 import { exercises, flashcards as flashcardsData, quizBank } from '../data/catalogs.js';
 import { getCustomExercises } from '../utils/customExercises.js';
 import CustomExerciseForm from './CustomExerciseForm.jsx';
+import TeacherMeetings from './TeacherMeetings.jsx';
 import StudentRoster from './StudentRoster.jsx';
 import ClassDashboard from './ClassDashboard.jsx';
 import { registerClassCode } from '../utils/classroom.js';
@@ -14,7 +15,7 @@ import { useTranslation } from '../i18n/LanguageProvider.jsx';
 
 // Situaciones de práctica (nombres visibles en messages.js: scenario.<id>).
 const SUBTEMAS = ['dron', 'basketball', 'wall'];
-const TOOLS = ['grupo', 'actividad', 'analisis', 'ejercicios', 'clase'];
+const TOOLS = ['grupo', 'actividad', 'reuniones', 'analisis', 'ejercicios', 'clase'];
 
 export function validClassCode(text) {
   const code = String(text ?? '').trim().toUpperCase();
@@ -69,7 +70,7 @@ function CloudClassList({ refreshKey }) {
       <header>
         <div><strong>{item.title}</strong><span className="class-code-display">{t('teacher.code')} <strong>{item.code}</strong></span></div>
         {confirmId === item.id
-          ? <span className="cloud-class-delete"><button type="button" className="btn btn-danger" onClick={async () => { try { await deleteCloudClass(item.id); } catch (failure) { setError(failure.message); } setConfirmId(null); load(); }}>{t('teacher.confirmDelete')}</button><button type="button" className="btn btn-secondary" onClick={() => setConfirmId(null)}>{t('common.cancel')}</button></span>
+          ? <span className="cloud-class-delete"><button type="button" className="btn btn-danger" onClick={async () => { try { await deleteCloudClass(item.id); } catch (failure) { setError(failure.message); } setConfirmId(null); load(); window.dispatchEvent(new Event('teacher-classes-changed')); }}>{t('teacher.confirmDelete')}</button><button type="button" className="btn btn-secondary" onClick={() => setConfirmId(null)}>{t('common.cancel')}</button></span>
           : <button type="button" className="btn btn-secondary" onClick={() => setConfirmId(item.id)}>{t('teacher.deleteClass')}</button>}
       </header>
       <p className="field-help">{t('teacher.groupMemberCount', { n: item.class_members?.length ?? 0 })}</p>
@@ -142,6 +143,7 @@ function CloudClassSetup({ teacher }) {
       const result = await createCloudClass({ title: title.trim(), teacherName: teacher.name, teacherAvatar: teacher.avatar, teacherPhone: teacher.phone, teacherEmail: teacher.email, content });
       setCreated(result);
       setRefreshKey(value => value + 1);
+      window.dispatchEvent(new Event('teacher-classes-changed'));
     } catch (failure) {
       setError(failure.offline ? t('teacher.createOffline') : t('teacher.createError', { msg: failure.message }));
     } finally { setBusy(false); }
@@ -212,6 +214,7 @@ export default function TeacherMode({ classConfig, onJoinClass, teacher }) {
 
     <div hidden={tool !== 'grupo'}><ClassSetup allExercises={allExercises} teacher={teacher} classConfig={classConfig} onLeaveClass={() => onJoinClass?.(null)} /></div>
     <div hidden={tool !== 'actividad'}><TeacherActivityStudio exercises={allExercises} /></div>
+    <div hidden={tool !== 'reuniones'}><TeacherMeetings /></div>
     <div hidden={tool !== 'analisis'}><TeacherAnalytics active={tool === 'analisis'} exercises={allExercises} /></div>
     <section hidden={tool !== 'ejercicios'} className="card teacher-tool-panel" aria-label={t('teacher.ownLabel')}>
       <span className="panel-eyebrow">{t('teacher.ownEyebrow')}</span><h2>{t('teacher.ownTitle')}</h2>

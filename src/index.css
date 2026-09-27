@@ -210,6 +210,10 @@ button, input, select, textarea { max-width: 100%; }
 .user-chip strong, .user-chip small { display: block; line-height: 1.2; }
 .user-chip strong { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; color: var(--text-primary); }
 .user-chip small { color: var(--text-muted); font-size: 11px; }
+.header-action-button { position: relative; display: grid; place-items: center; flex: none; width: 40px; height: 40px; padding: 0; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text-secondary); cursor: pointer; transition: background var(--motion-fast), color var(--motion-fast), border-color var(--motion-fast), transform var(--motion-fast); }
+.header-action-button:hover { background: var(--brand-blue-soft); color: var(--brand-blue-deep); border-color: var(--brand-blue); }
+.header-action-button:focus-visible { outline: 2.5px solid var(--brand-blue); outline-offset: 2px; }
+.header-notification-badge { position: absolute; top: -5px; right: -5px; display: grid; place-items: center; min-width: 19px; height: 19px; padding: 0 4px; border: 2px solid var(--surface); border-radius: 999px; background: var(--danger-coral, #dc5a55); color: #fff; font-size: 10px; font-weight: 900; line-height: 1; }
 .logout-button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text-secondary); font-size: 12px; font-weight: 750; cursor: pointer; transition: background var(--motion-fast), color var(--motion-fast), border-color var(--motion-fast); }
 .logout-button:hover { background: var(--danger-coral-soft); color: var(--danger-coral-deep); border-color: var(--danger-coral); }
 
@@ -1527,6 +1531,55 @@ button, input, select, textarea { max-width: 100%; }
 .settings-dialog { width: min(460px, calc(100vw - 24px)); }
 .settings-form { display: flex; flex-direction: column; gap: 14px; margin-top: 12px; }
 .settings-form h2 { margin: 0; font-size: 20px; }
+.settings-extra { display: grid; gap: 12px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); }
+.settings-preference, .settings-password-form { display: grid; gap: 12px; padding: 14px; border: 1px solid var(--border); border-radius: 16px; background: var(--background); }
+.settings-preference { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+.settings-preference > .field-error { grid-column: 1 / -1; margin: 0; }
+.settings-preference h3, .settings-password-form h3 { margin: 0; font-size: 15px; }
+.settings-preference p { margin: 4px 0 0; color: var(--text-secondary); font-size: 12.5px; line-height: 1.45; }
+.settings-password-form .teacher-field { margin: 0; }
+.settings-switch { position: relative; display: block; width: 48px; height: 28px; cursor: pointer; }
+.settings-switch input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.settings-switch > span { display: block; width: 48px; height: 28px; border: 1px solid var(--border-strong); border-radius: 999px; background: var(--border); transition: background var(--motion-fast), border-color var(--motion-fast); }
+.settings-switch > span::after { position: absolute; top: 4px; left: 4px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: var(--shadow-sm); content: ''; transition: transform var(--motion-fast); }
+.settings-switch input:checked + span { border-color: var(--brand-blue); background: var(--brand-blue); }
+.settings-switch input:checked + span::after { transform: translateX(20px); }
+.settings-switch input:focus-visible + span { outline: 3px solid var(--c-sky, #3fa9d6); outline-offset: 3px; }
+.notifications-dialog { position: fixed; inset: 0; width: min(560px, calc(100vw - 24px)); max-height: min(88dvh, 760px); margin: auto; padding: 0; overflow: auto; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); color: var(--text-primary); box-shadow: var(--shadow-lg); }
+.notifications-dialog[open] { animation: pop-in var(--motion-normal) var(--ease-bounce); }
+.notifications-dialog::backdrop { background: rgba(12, 21, 39, .68); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); }
+.notifications-panel { display: grid; gap: 14px; padding: clamp(16px, 4vw, 24px); }
+.notifications-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.notifications-heading h2 { margin: 3px 0 0; font-size: 22px; }
+.notifications-section { display: grid; gap: 9px; padding: 14px; border: 1px solid var(--border); border-radius: 16px; background: var(--background); }
+.notifications-section h3 { margin: 0; font-size: 15px; }
+.notifications-section > .field-help { margin: 0; }
+.notifications-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.notification-message-item, .notification-meeting-item { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-width: 0; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text-primary); text-align: left; }
+.notification-message-item { width: 100%; cursor: pointer; font: inherit; }
+.notification-message-item:hover { border-color: var(--brand-blue); }
+.notification-message-item > span:first-child, .notification-meeting-item > div { display: grid; gap: 4px; min-width: 0; }
+.notification-message-item strong, .notification-meeting-item strong { overflow-wrap: anywhere; }
+.notification-message-item small, .notification-meeting-item small { color: var(--text-muted); font-size: 12px; }
+.notification-meeting-item p { margin: 3px 0 0; color: var(--text-secondary); font-size: 13px; }
+.notification-count { display: grid; place-items: center; flex: none; min-width: 28px; height: 28px; padding: 0 6px; border-radius: 999px; background: var(--brand-blue-soft); color: var(--brand-blue-deep); font-size: 12px; font-weight: 850; }
+.notifications-footer { display: flex; justify-content: flex-end; }
+.teacher-meetings-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.teacher-meetings-heading h2 { margin: 0; font-size: 21px; }
+.teacher-meetings-heading .teacher-note { margin: 4px 0 0; }
+.meeting-form { display: grid; gap: 11px; padding: 15px; border: 1px solid var(--c-line); border-radius: 16px; background: var(--c-paper); }
+.meeting-form .teacher-field { margin: 0; }
+.meeting-form .field-help, .meeting-form .field-error { margin: 0; }
+.meeting-form textarea.quiz-input { min-height: 76px; resize: vertical; }
+.meeting-list { display: grid; gap: 9px; }
+.meeting-list h3 { margin: 4px 0 0; font-size: 16px; }
+.meeting-list > .field-help { margin: 0; }
+.meeting-card { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 13px; border: 1px solid var(--c-line); border-radius: 14px; background: var(--c-surface); }
+.meeting-card > div:first-child { display: grid; gap: 4px; min-width: 0; }
+.meeting-card strong { overflow-wrap: anywhere; }
+.meeting-card time { color: var(--c-muted); font-size: 12px; }
+.meeting-card p { margin: 3px 0 0; color: var(--c-ink-soft); font-size: 13px; }
+.meeting-card-actions { display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; gap: 6px; flex: none; }
 .avatar-picker { border: 0; padding: 0; margin: 0; }
 .avatar-picker legend { padding: 0; margin-bottom: 8px; font-size: 13.5px; font-weight: 750; }
 .avatar-options { display: flex; flex-wrap: wrap; gap: 10px; }
@@ -1659,6 +1712,7 @@ button, input, select, textarea { max-width: 100%; }
   .primary-nav-label { display: block; max-width: 100%; line-height: 1.1; text-align: center; overflow-wrap: normal; }
   .connection-text, .user-chip-text, .logout-button span { display: none; }
   .logout-button { padding: 6px 9px; }
+  .header-action-button { width: 38px; height: 38px; }
   .header-brand small { display: none; }
   .home-hero { grid-template-columns: 1fr; }
   .hero-art { min-height: 190px; order: -1; }
@@ -1705,13 +1759,20 @@ button, input, select, textarea { max-width: 100%; }
   .exercise-actions { grid-template-columns: 1fr; }
   .exercise-actions .btn-primary { order: -1; }
   .aula-toolbar { flex-direction: column; align-items: flex-start; }
+  .teacher-meetings-heading { flex-direction: column; }
+  .meeting-card { align-items: stretch; flex-direction: column; }
+  .meeting-card-actions { justify-content: flex-start; }
+  .notification-meeting-item { align-items: stretch; flex-direction: column; }
+  .notification-meeting-item .btn { align-self: flex-start; }
 }
 
 @media (max-width: 430px) {
   .auth-page { padding: 12px; }
   .role-picker { gap: 8px; }
   .role-picker label { padding: 10px; }
-  .header-account { gap: 6px; }
+  .header-account { gap: 5px; }
+  .header-action-button, .logout-button { width: 34px; min-width: 34px; height: 34px; min-height: 34px; padding: 0; border-radius: 10px; }
+  .pyfis-language-selector select { max-width: 76px; padding-right: 19px; }
   .free-chat-heading-main { flex-direction: column; gap: 8px; }
   .free-chat-history-toggle { min-height: 36px; }
   .connection-label { padding: 4px 8px; font-size: 11px; min-height: 34px; }
@@ -1734,6 +1795,7 @@ button, input, select, textarea { max-width: 100%; }
   .header-brand strong { font-size: 15.5px; }
   .header-brand { gap: 7px; }
   .brand-mark { width: 32px; height: 32px; }
+  .header-action-button, .logout-button { width: 32px; min-width: 32px; height: 32px; min-height: 32px; }
   .primary-nav-item { font-size: 10.5px; }
   .exercise-actions { grid-template-columns: 1fr; }
   .confidence-value { font-size: 20px; }

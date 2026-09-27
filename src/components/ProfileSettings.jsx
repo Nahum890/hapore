@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import { updateProfile } from '../auth/localAccounts.js';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { changePassword, updateProfile } from '../auth/localAccounts.js';
+import { getOnlineConsent, setOnlineConsent, subscribeOnlineConsent } from '../ai/onlineConsent.js';
 import Avatar, { AVATAR_OPTIONS, isPhotoAvatar } from './Avatars.jsx';
 import { imageFileToDataUrl } from '../utils/imageData.js';
 import { useTranslation } from '../i18n/LanguageProvider.jsx';
@@ -17,6 +18,13 @@ export default function ProfileSettings({ open, user, onClose, onSaved, required
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
   const [loadingPhoto, setLoadingPhoto] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordStatus, setPasswordStatus] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [geminiError, setGeminiError] = useState('');
+  const geminiConsent = useSyncExternalStore(subscribeOnlineConsent, getOnlineConsent, () => 'unset');
 
   // Solo se reinician los campos al ABRIR el diálogo, no en cada cambio de
   // `user` (guardar exitosamente actualiza `user` en el componente padre, lo
@@ -28,6 +36,8 @@ export default function ProfileSettings({ open, user, onClose, onSaved, required
     if (open && !dialog.open) {
       setPhone(user?.phone ?? ''); setEmail(user?.email ?? ''); setAvatar(user?.avatar ?? AVATAR_OPTIONS[0]);
       setSaved(false); setError('');
+      setCurrentPassword(''); setNewPassword(''); setConfirmPassword(''); setPasswordStatus(''); setPasswordError('');
+      setGeminiError('');
       dialog.showModal();
     } else if (!open && dialog.open) {
       dialog.close();
@@ -61,6 +71,27 @@ export default function ProfileSettings({ open, user, onClose, onSaved, required
     } catch (failure) {
       setError(failure.message || t('settings.errSave'));
     }
+  };
+
+  const submitPassword = async event => {
+    event.preventDefault();
+    setPasswordError(''); setPasswordStatus('');
+    if (newPassword !== confirmPassword) { setPasswordError('settings.passwordMismatch'); return; }
+    try {
+      await changePassword(user.id, { currentPassword, newPassword });
+      setCurrentPassword(''); setNewPassword(''); setConfirmPassword('');
+      setPasswordStatus('settings.passwordSaved');
+    } catch (failure) {
+      const key = failure.message === 'PASSWORD_CURRENT_INVALID' ? 'settings.passwordWrong'
+        : failure.message === 'PASSWORD_TOO_SHORT' ? 'settings.passwordShort'
+          : failure.message === 'PASSWORD_UNAVAILABLE' ? 'settings.passwordUnavailable' : 'settings.passwordError';
+      setPasswordError(key);
+    }
+  };
+
+  const updateGeminiConsent = event => {
+    setGeminiError('');
+    if (!setOnlineConsent(event.target.checked ? 'online' : 'local')) setGeminiError('settings.geminiError');
   };
 
   return (
@@ -104,6 +135,23 @@ export default function ProfileSettings({ open, user, onClose, onSaved, required
             <button type="submit" className="btn btn-primary">{t('common.save')}</button>
           </div>
         </form>
+        {!required && <div className="settings-extra">
+          <section className="settings-preference" aria-labelledby="settings-gemini-title">
+            <div><h3 id="settings-gemini-title">{t('settings.geminiTitle')}</h3><p>{t(geminiConsent === 'online' ? 'settings.geminiOnline' : 'settings.geminiLocal')}</p></div>
+            <label className="settings-switch"><span className="sr-only">{t('settings.geminiToggle')}</span><input type="checkbox" checked={geminiConsent === 'online'} onChange={updateGeminiConsent} /><span aria-hidden="true" /></label>
+            {geminiError && <p className="field-error" role="alert">{t(geminiError)}</p>}
+          </section>
+          <form className="settings-password-form" onSubmit={submitPassword}>
+            <h3>{t('settings.passwordTitle')}</h3>
+            <p className="field-help">{t('settings.passwordScope')}</p>
+            <label className="teacher-field">{t('settings.passwordCurrent')}<input className="quiz-input" type="password" required autoComplete="current-password" value={currentPassword} onChange={event => setCurrentPassword(event.target.value)} /></label>
+            <label className="teacher-field">{t('settings.passwordNew')}<input className="quiz-input" type="password" required minLength={8} autoComplete="new-password" value={newPassword} onChange={event => setNewPassword(event.target.value)} /></label>
+            <label className="teacher-field">{t('settings.passwordConfirm')}<input className="quiz-input" type="password" required minLength={8} autoComplete="new-password" value={confirmPassword} onChange={event => setConfirmPassword(event.target.value)} /></label>
+            {passwordError && <p className="field-error" role="alert">{t(passwordError)}</p>}
+            {passwordStatus && <p className="field-help" role="status">{t(passwordStatus)}</p>}
+            <button type="submit" className="btn btn-secondary">{t('settings.passwordSave')}</button>
+          </form>
+        </div>}
       </div>
     </dialog>
   );

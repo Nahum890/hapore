@@ -29,6 +29,11 @@ export function fetchMessages(classId, afterId = 0) {
   return rest(`messages?select=${COLUMNS}&class_id=eq.${encodeURIComponent(classId)}&id=gt.${Number(afterId) || 0}&order=id.asc&limit=200`);
 }
 
+export function fetchRecentMessages(classId, limit = 80) {
+  const safeLimit = Math.max(1, Math.min(200, Math.floor(Number(limit) || 80)));
+  return rest(`messages?select=${COLUMNS}&class_id=eq.${encodeURIComponent(classId)}&order=id.desc&limit=${safeLimit}`);
+}
+
 export function validateMessage({ kind = 'text', body = '', payload = null }) {
   const text = String(body ?? '').trim();
   if (text.length > MAX_BODY) throw new Error(`El mensaje es muy largo (máximo ${MAX_BODY} caracteres).`);

@@ -171,6 +171,7 @@ export default function BasketballChallenge({ langKey = 'gn-jopara', onProgress 
         now,
         scenario: 'basketball',
         verdict: evalResult?.result === 'swish' || evalResult?.result === 'bank-in' || evalResult?.result === 'rim-in',
+        language: langKey,
       });
     };
 
@@ -215,7 +216,7 @@ export default function BasketballChallenge({ langKey = 'gn-jopara', onProgress 
       cancelAnimationFrame(frameId);
       observer.disconnect();
     };
-  }, [flight, phase, evalResult]);
+  }, [flight, phase, evalResult, langKey]);
 
   const handleShoot = (e) => {
     e?.preventDefault();

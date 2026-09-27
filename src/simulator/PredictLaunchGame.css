@@ -9,6 +9,9 @@
 .predict-steps { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
 .predict-steps li { padding: 5px 10px; border-radius: 999px; background: var(--c-paper, #f1f5f9); color: var(--c-muted, #64748b); font-size: 12.5px; font-weight: 700; }
 .predict-steps li.is-current { background: var(--brand-blue-soft, #dbeafe); color: var(--brand-blue-deep, #123ea1); }
+.predict-instruction { display: flex; align-items: flex-start; gap: 11px; padding: 12px 14px; border: 1px solid color-mix(in srgb, var(--brand-blue, #1d5bd8) 22%, transparent); border-radius: 14px; background: var(--brand-blue-soft, #dbeafe); color: var(--c-ink, #0f172a); }
+.predict-instruction > span { display: grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--brand-blue, #1d5bd8); color: #fff; font-weight: 850; }
+.predict-instruction p { margin: 1px 0 0; font-size: 14px; line-height: 1.5; }
 /* El canvas vive en un marco con relación fija: la escena nunca se estira ni desborda. */
 .predict-canvas-frame { position: relative; width: 100%; min-width: 0; }
 .predict-canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; }

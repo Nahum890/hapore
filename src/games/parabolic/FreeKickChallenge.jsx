@@ -88,6 +88,7 @@ export default function FreeKickChallenge({ langKey = 'gn-jopara', onProgress })
         now,
         scenario: 'wall',
         verdict: evalResult?.result === 'goal',
+        language: langKey,
       });
     };
 
@@ -128,7 +129,7 @@ export default function FreeKickChallenge({ langKey = 'gn-jopara', onProgress })
       cancelAnimationFrame(frameId);
       observer.disconnect();
     };
-  }, [flight, phase, evalResult]);
+  }, [flight, phase, evalResult, langKey]);
 
   const handleKick = (e) => {
     e?.preventDefault();

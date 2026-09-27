@@ -460,18 +460,25 @@
   overflow: hidden;
   border-top: 4px solid var(--pgame-accent, #1d5bd8);
 }
-.pgame-challenge-option:nth-child(1) { --pgame-accent: #ea580c; --pgame-soft: #fff7ed; --pgame-icon: '🏀'; }
-.pgame-challenge-option:nth-child(2) { --pgame-accent: #16a34a; --pgame-soft: #f0fdf4; --pgame-icon: '⚽'; }
-.pgame-challenge-option:nth-child(3) { --pgame-accent: #2563eb; --pgame-soft: #eff6ff; --pgame-icon: '📐'; }
+.pgame-challenge-option:nth-child(1) { --pgame-accent: #ea580c; --pgame-soft: #fff7ed; --pgame-number: '01'; }
+.pgame-challenge-option:nth-child(2) { --pgame-accent: #16a34a; --pgame-soft: #f0fdf4; --pgame-number: '02'; }
+.pgame-challenge-option:nth-child(3) { --pgame-accent: #2563eb; --pgame-soft: #eff6ff; --pgame-number: '03'; }
 .pgame-challenge-option::after {
-  content: var(--pgame-icon, '');
+  content: var(--pgame-number, '');
   position: absolute;
   top: 0.7rem;
   right: 0.8rem;
-  font-size: 2.1rem;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--pgame-soft, #eff4fe);
+  color: var(--pgame-accent, #123ea1);
+  font-size: 0.82rem;
+  font-weight: 850;
   line-height: 1;
-  opacity: 0.9;
-  filter: drop-shadow(0 3px 5px rgba(15, 23, 42, 0.15));
+  opacity: 0.95;
 }
 .pgame-challenge-option .pgame-option-kicker {
   background: var(--pgame-soft, #eff4fe);
@@ -565,8 +572,8 @@
 .pgame-feedback > strong::before {
   margin-right: 0.35rem;
 }
-.pgame-feedback.is-success > strong::before { content: '✅'; }
-.pgame-feedback.is-fail > strong::before { content: '🔁'; }
+.pgame-feedback.is-success > strong::before { content: '✓'; color: #15803d; }
+.pgame-feedback.is-fail > strong::before { content: '↻'; color: #b91c1c; }
 .pgame-calc-breakdown {
   border: 1px solid rgba(15, 23, 42, 0.06);
 }

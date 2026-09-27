@@ -74,6 +74,7 @@ export default function TargetChallenge({ langKey = 'gn-jopara', onProgress }) {
         now,
         scenario: 'dron',
         verdict: evalResult?.result === 'perfect',
+        language: langKey,
       });
     };
 
@@ -114,7 +115,7 @@ export default function TargetChallenge({ langKey = 'gn-jopara', onProgress }) {
       cancelAnimationFrame(frameId);
       observer.disconnect();
     };
-  }, [flight, phase, evalResult]);
+  }, [flight, phase, evalResult, langKey]);
 
   const handleFire = (e) => {
     e?.preventDefault();
