@@ -42,3 +42,40 @@ export function gradeDrawingPoint(challenge, stepIndex, plottedPoint) {
     yTolerance,
   };
 }
+
+/** Evalúa un trazo continuo en los cuatro puntos de control del lanzamiento. */
+export function gradeDrawingStroke(challenge, plottedPoints) {
+  const points = Array.isArray(plottedPoints)
+    ? plottedPoints.filter(point => Number.isFinite(point?.x) && Number.isFinite(point?.y)).sort((a, b) => a.x - b.x)
+    : [];
+  if (points.length < 4) return { correct: false, reason: 'short', matches: 0, total: challenge.points.length };
+
+  const { horizontalRange, highestPoint } = challenge;
+  const start = points[0];
+  const finish = points.at(-1);
+  if (start.x > horizontalRange * 0.1 || start.y > highestPoint * 0.18) {
+    return { correct: false, reason: 'start', matches: 0, total: challenge.points.length };
+  }
+  if (finish.x < horizontalRange * 0.88 || finish.y > highestPoint * 0.18) {
+    return { correct: false, reason: 'finish', matches: 0, total: challenge.points.length };
+  }
+
+  const samples = challenge.points.map(expected => {
+    let afterIndex = points.findIndex(point => point.x >= expected.x);
+    if (afterIndex < 0) afterIndex = points.length - 1;
+    const before = points[Math.max(0, afterIndex - 1)];
+    const after = points[afterIndex];
+    const ratio = after.x === before.x ? 0 : (expected.x - before.x) / (after.x - before.x);
+    const actualY = before.y + (after.y - before.y) * Math.max(0, Math.min(1, ratio));
+    const tolerance = highestPoint * 0.18;
+    return { x: expected.x, expectedY: expected.y, actualY, correct: Math.abs(actualY - expected.y) <= tolerance };
+  });
+  const matches = samples.filter(sample => sample.correct).length;
+  return {
+    correct: matches === samples.length,
+    reason: matches === samples.length ? null : 'curve',
+    matches,
+    total: samples.length,
+    samples,
+  };
+}

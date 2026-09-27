@@ -230,9 +230,10 @@ function court(ctx, width, height, groundY, environment) {
   // Placa de condiciones ambientales
   const isIndoor = environment?.isIndoor !== false;
   const windVal = environment?.wind || 0;
+  const windArrow = windVal > 0 ? ' →' : windVal < 0 ? ' ←' : '';
   const envText = isIndoor
     ? '🏀 Gimnasio techado · 21°C · Sin viento (vuelo ideal)'
-    : `🌬️ Cancha exterior · Viento: ${windVal > 0 ? '+' : ''}${windVal} m/s · ${environment?.temperature ?? 21}°C`;
+    : `🌬️ Cancha exterior · Viento: ${windVal > 0 ? '+' : ''}${windVal} m/s${windArrow} · ${environment?.temperature ?? 21}°C`;
   ctx.fillStyle = 'rgba(20, 30, 45, 0.82)';
   const tw = ctx.measureText(envText).width + 20;
   roundedRect(ctx, width - tw - 12, 10, tw, 22, 4, 'rgba(20, 30, 45, 0.82)');
@@ -240,6 +241,37 @@ function court(ctx, width, height, groundY, environment) {
   ctx.font = '700 10px system-ui, sans-serif';
   ctx.textAlign = 'right';
   ctx.fillText(envText, width - 22, 25);
+}
+
+// Trazos casi transparentes para que el estudiante perciba hacia dónde sopla
+// el viento sin tapar la cancha ni la trayectoria. En el modelo, +x empuja
+// hacia el aro y -x en sentido contrario.
+function drawWindFlow(ctx, width, groundY, wind, now = 0) {
+  const strength = Math.abs(Number(wind) || 0);
+  if (strength < 0.05) return;
+  const direction = Math.sign(Number(wind));
+  const speed = 16 + Math.min(strength, 8) * 17;
+  const span = width + 90;
+  const travel = (((now / 1000) * speed) % span) * direction;
+  ctx.save();
+  for (let index = 0; index < 7; index += 1) {
+    const x = ((index * span / 7 + travel) % span + span) % span - 45;
+    const y = groundY * (0.18 + (index % 4) * 0.15);
+    const length = 16 + Math.min(strength, 8) * 1.8 + (index % 3) * 5;
+    ctx.globalAlpha = 0.035 + Math.min(strength, 8) * 0.009;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.2;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.quadraticCurveTo(x + direction * length * 0.5, y - 2, x + direction * length, y);
+    ctx.stroke();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(x + direction * length, y, 1.3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
 }
 
 function hoopTarget(ctx, x, groundY, scale, hit, hoopHeight = 3.05, collision = null, progress = 1, bballOutcome = null) {
@@ -405,6 +437,7 @@ function ball(ctx, x, y, radius, spin) {
 function drawBasketball(ctx, { width, height, flight, progress, phase, now, verdict }) {
   const groundY = height - Math.max(30, height * .12);
   court(ctx, width, height, groundY, flight.environment);
+  if (flight.environment?.isIndoor === false) drawWindFlow(ctx, width, groundY, flight.environment.wind, now);
   const originX = Math.max(30, width * .08);
   const worldWidth = Math.max(flight.targetX, flight.landingX, 12) * 1.2;
   const hoopH = flight.targetY > 0 ? flight.targetY : 3.05;

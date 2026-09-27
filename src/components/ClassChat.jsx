@@ -57,10 +57,53 @@ function ActivityDialog({ exercise, onClose, onResult, onAskHint, hintsUsed, onI
   </dialog>;
 }
 
+function ActivityPacketDialog({ activity, onClose, onSolve }) {
+  const { language, t } = useTranslation();
+  const dialogRef = useRef(null);
+  const [revealedCards, setRevealedCards] = useState(() => new Set());
+  const cards = (activity.cards ?? []).map(item => localizeCatalogItem(item, language));
+  const exercises = (activity.exercises ?? []).map(item => localizeCatalogItem(item, language));
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (dialog && !dialog.open) dialog.showModal();
+    return () => { if (dialog?.open) dialog.close(); };
+  }, []);
+  return <dialog ref={dialogRef} className="activity-dialog activity-packet-dialog" aria-label={activity.title} onCancel={event => { event.preventDefault(); onClose(); }}>
+    <div className="activity-dialog-head">
+      <div><span className="panel-eyebrow">{t('chat.activity')}</span><h2>{activity.title}</h2></div>
+      <button type="button" className="btn btn-secondary" onClick={onClose}>{t('common.close')}</button>
+    </div>
+    {activity.description && <p>{activity.description}</p>}
+    <section className="activity-packet-cards">
+      <h3>{t('chat.activityCards', { n: cards.length })}</h3>
+      {cards.map(card => {
+        const open = revealedCards.has(card.id);
+        return <article className="activity-packet-card" key={card.id}>
+          <strong><MathText text={card.frente_es ?? card.front ?? ''} /></strong>
+          {open && <div><MathText text={card.dorso_concepto ?? card.back ?? ''} />{card.formula && <MathText as="small" text={card.formula} />}</div>}
+          <button type="button" className="btn btn-secondary" aria-expanded={open} onClick={() => setRevealedCards(current => {
+            const next = new Set(current);
+            if (next.has(card.id)) next.delete(card.id); else next.add(card.id);
+            return next;
+          })}>{t(open ? 'chat.hideAnswer' : 'chat.showAnswer')}</button>
+        </article>;
+      })}
+    </section>
+    <section className="activity-packet-exercises">
+      <h3>{t('chat.activityExercises', { n: exercises.length })}</h3>
+      {exercises.map(exercise => <article className="activity-packet-exercise" key={exercise.id}>
+        <MathText as="p" text={exercise.question} />
+        <button type="button" className="btn btn-primary" onClick={() => onSolve(exercise)}>{t('chat.solveActivity')}</button>
+      </article>)}
+    </section>
+  </dialog>;
+}
+
 function MessageContent({ message, onOpenLesson, onOpenActivity }) {
   const { kind, body, payload } = message;
   // La actividad viaja sin traducir; cada alumno la ve en su idioma.
   const { language, t } = useTranslation();
+  const packet = kind === 'activity' ? payload?.activity : null;
   const activity = kind === 'activity' && payload?.exercise ? localizeCatalogItem(payload.exercise, language) : null;
   return <>
     {kind === 'image' && (payload?.dataUrl
@@ -71,6 +114,11 @@ function MessageContent({ message, onOpenLesson, onOpenActivity }) {
       <strong>{payload?.lesson?.title}</strong>
       <small>{t('chat.slides', { n: payload?.lesson?.slides?.length ?? 0 })}</small>
       <button type="button" className="btn btn-primary" onClick={() => onOpenLesson(payload)}>{t('chat.openLesson')}</button>
+    </div>}
+    {packet && <div className="chat-attachment">
+      <span className="panel-eyebrow">{t('chat.activity')}</span><strong>{packet.title}</strong>
+      <small>{t('chat.activityPacketCounts', { cards: packet.cards?.length ?? 0, exercises: packet.exercises?.length ?? 0 })}</small>
+      <button type="button" className="btn btn-primary" onClick={() => onOpenActivityPacket(packet)}>{t('chat.openActivity')}</button>
     </div>}
     {activity && <div className="chat-attachment">
       <span className="panel-eyebrow">{t('chat.activity')}</span>
@@ -316,7 +364,9 @@ export default function ClassChat({ user, classPackage, exercises, concepts, onE
                 {!mine && <Avatar id={sender?.avatar} size={30} />}
                 <div className="class-chat-bubble">
                   {!mine && conversation === GROUP && <span className="class-chat-sender">{sender?.display_name ?? t('chat.someone')}{sender?.role === 'maestro' ? t('chat.teacherTag') : ''}</span>}
-                  <MessageContent message={message} onOpenLesson={setOpenLesson} onOpenActivity={setOpenActivity} />
+                  <MessageContent message={message} onOpenLesson={setOpenLesson}
+                    onOpenActivity={exercise => setOpenActivity({ type: 'exercise', value: exercise })}
+                    onOpenActivityPacket={activity => setOpenActivity({ type: 'packet', value: activity })} />
                   <time dateTime={message.created_at}>{formatTime(message.created_at)}</time>
                 </div>
               </li>;
@@ -332,6 +382,7 @@ export default function ClassChat({ user, classPackage, exercises, concepts, onE
     </div>
 
     {openLesson && <Presenter lesson={openLesson.lesson} exercises={lessonExercises} concepts={concepts} onExit={() => setOpenLesson(null)} />}
-    {openActivity && <ActivityDialog exercise={openActivity} onClose={() => setOpenActivity(null)} onResult={onExerciseResult} onAskHint={onAskHint} hintsUsed={hintsUsed} onIncrementHint={onIncrementHint} />}
+    {openActivity?.type === 'packet' && <ActivityPacketDialog activity={openActivity.value} onClose={() => setOpenActivity(null)} onSolve={exercise => setOpenActivity({ type: 'exercise', value: exercise })} />}
+    {openActivity?.type === 'exercise' && <ActivityDialog exercise={openActivity.value} onClose={() => setOpenActivity(null)} onResult={onExerciseResult} onAskHint={onAskHint} hintsUsed={hintsUsed} onIncrementHint={onIncrementHint} />}
   </section>;
 }

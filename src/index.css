@@ -1112,7 +1112,7 @@ button, input, select, textarea { max-width: 100%; }
 /* ---------- Aula docente simplificada ---------- */
 .teacher-hub { display: grid; gap: 16px; }
 .teacher-hub > [hidden] { display: none; }
-.teacher-tool-picker { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.teacher-tool-picker { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 10px; }
 .teacher-tool-picker > button { min-height: 82px; display: grid; align-content: center; gap: 5px; padding: 14px 16px; border: 1px solid var(--c-line); border-radius: var(--radius); background: var(--c-surface); color: var(--c-ink); text-align: left; cursor: pointer; transition: border-color var(--motion-fast), background var(--motion-fast), transform var(--motion-fast); }
 .teacher-tool-picker > button:hover { transform: translateY(-1px); border-color: var(--c-primary); }
 .teacher-tool-picker > button.is-active { border-color: var(--c-primary); background: var(--c-primary-soft); box-shadow: inset 0 0 0 1px var(--c-primary); }
@@ -1142,6 +1142,31 @@ button, input, select, textarea { max-width: 100%; }
 .class-code-result .btn { justify-self: start; }
 .teacher-roster-details > p { margin: 0 0 10px; }
 .teacher-roster-details .card { padding: 12px; box-shadow: none; }
+.teacher-analytics-picker { display: flex; align-items: end; flex-wrap: wrap; gap: 10px; }
+.teacher-analytics-picker .teacher-field { flex: 1 1 260px; }
+.teacher-activity-form { display: grid; gap: 12px; }
+.teacher-activity-section-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.teacher-activity-section-head h3, .teacher-saved-activities > h3 { margin: 0; font-size: 16px; }
+.teacher-activity-picker, .teacher-activity-new-card { padding: 11px 13px; border: 1px solid var(--c-line); border-radius: 13px; background: var(--c-surface); }
+.teacher-activity-picker > summary, .teacher-activity-new-card > summary { display: flex; justify-content: space-between; align-items: center; gap: 10px; cursor: pointer; color: var(--c-primary-deep); font-size: 13px; font-weight: 750; }
+.teacher-activity-picker > summary > span { display: grid; place-items: center; min-width: 26px; min-height: 26px; padding: 2px 7px; border-radius: 999px; background: var(--c-primary-soft); }
+.teacher-activity-picker[open] > summary, .teacher-activity-new-card[open] > summary { margin-bottom: 10px; }
+.teacher-activity-search { margin: 0 0 8px; }
+.teacher-activity-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 6px; max-height: 280px; overflow: auto; margin: 0; padding: 0 4px 0 0; list-style: none; }
+.teacher-activity-options > li { min-width: 0; }
+.teacher-activity-options label { display: flex; align-items: flex-start; gap: 8px; height: 100%; padding: 9px 10px; border: 1px solid var(--c-line); border-radius: 10px; background: var(--c-bg); font-size: 12px; line-height: 1.4; cursor: pointer; }
+.teacher-activity-options input { flex: none; margin-top: 2px; accent-color: var(--c-primary); }
+.teacher-activity-options label:has(input:checked) { border-color: var(--c-primary); background: var(--c-primary-soft); }
+.teacher-activity-new-card { display: grid; gap: 9px; }
+.teacher-activity-new-card .teacher-field { margin: 0; }
+.teacher-saved-activities { display: grid; gap: 10px; margin-top: 8px; }
+.teacher-activity-list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.teacher-activity-list > li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--c-line); border-radius: 13px; background: var(--c-surface); }
+.teacher-activity-list > li > div:first-child { display: grid; gap: 4px; min-width: 0; }
+.teacher-activity-list small { color: var(--c-muted); }
+.teacher-activity-list p { margin: 0; color: var(--c-ink-soft); font-size: 13px; }
+.teacher-activity-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+.teacher-activity-list .lesson-share-panel { grid-column: 1 / -1; }
 
 /* ---------- Ejercicios propios guiados ---------- */
 .custom-exercise-form { gap: 16px; }
@@ -1356,8 +1381,11 @@ button, input, select, textarea { max-width: 100%; }
 .student-class-note { max-width: 58ch; margin-top: 14px; }
 
 @media (max-width: 700px) {
-  .teacher-tool-picker { grid-template-columns: 1fr; }
-  .teacher-tool-picker > button { min-height: 64px; }
+  .teacher-tool-picker { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .teacher-tool-picker > button { min-height: 76px; padding: 10px; }
+  .teacher-tool-picker > button strong { font-size: 13px; }
+  .teacher-tool-picker > button span { font-size: 11px; }
+  .teacher-activity-list > li { grid-template-columns: 1fr; }
   .projector-controls { grid-template-columns: 1fr; }
   .projector-metrics { gap: 6px; }
   .projector-metrics span { padding: 8px 5px; font-size: 10px; }
@@ -1684,6 +1712,14 @@ button, input, select, textarea { max-width: 100%; }
 .activity-dialog::backdrop { background: rgba(20, 16, 12, .55); }
 .activity-dialog-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
 .activity-dialog-head h2 { margin: 0; }
+.activity-packet-dialog { overflow-y: auto; }
+.activity-packet-cards, .activity-packet-exercises { display: grid; gap: 8px; margin-top: 14px; }
+.activity-packet-cards h3, .activity-packet-exercises h3 { margin: 0; font-size: 16px; }
+.activity-packet-card, .activity-packet-exercise { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--c-line); border-radius: 12px; background: var(--c-surface); }
+.activity-packet-card > div { color: var(--c-ink-soft); line-height: 1.5; }
+.activity-packet-card > div small { display: block; margin-top: 6px; }
+.activity-packet-card .btn, .activity-packet-exercise .btn { justify-self: start; }
+.activity-packet-exercise p { margin: 0; }
 @media (max-width: 760px) {
   .class-chat { grid-template-columns: 1fr; min-height: 0; }
   .class-chat-sidebar { border-right: 0; }

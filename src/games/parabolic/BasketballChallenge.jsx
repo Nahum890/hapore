@@ -87,8 +87,8 @@ export default function BasketballChallenge({ langKey = 'gn-jopara', onProgress 
       targetX: level.distance,
       targetY: level.hoopHeight,
       y0: level.releaseHeight,
-      wind: 0,
-      temperature: 21,
+      wind: effectiveWind,
+      temperature,
     });
     planned.hasUserSpeed = hasValidSpeed;
     planned.userSpeed = hasValidSpeed ? numCurrentSpeed : null;
@@ -189,22 +189,26 @@ export default function BasketballChallenge({ langKey = 'gn-jopara', onProgress 
     observer.observe(canvas);
     resize();
 
-    if (phase === 'flying') {
+    const windIsAnimated = Math.abs(Number(flight.environment?.wind) || 0) > 0.05
+      && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (phase === 'flying' || windIsAnimated) {
       const durationMs = Math.min(3500, Math.max(1800, flight.duration * 750));
       const tick = (now) => {
-        if (startedAt === null) startedAt = now;
-        progressRef.current = Math.min(1, (now - startedAt) / durationMs);
+        if (phase === 'flying') {
+          if (startedAt === null) startedAt = now;
+          progressRef.current = Math.min(1, (now - startedAt) / durationMs);
+        }
         draw(now);
-        if (progressRef.current < 1) {
+        if ((phase === 'flying' && progressRef.current < 1) || (phase !== 'flying' && windIsAnimated)) {
           frameId = requestAnimationFrame(tick);
-        } else {
+        } else if (phase === 'flying') {
           setPhase('result');
         }
       };
       frameId = requestAnimationFrame(tick);
     } else {
       progressRef.current = phase === 'result' ? 1 : 0;
-      draw();
+      draw(performance.now());
     }
 
     return () => {

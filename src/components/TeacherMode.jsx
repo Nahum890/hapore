@@ -1,9 +1,9 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 const LessonStudio = lazy(() => import('./LessonStudio.jsx'));
+import TeacherActivityStudio from './TeacherActivityStudio.jsx';
 import { encodeClassConfig, decodeClassConfig } from '../utils/classCode.js';
 import { exercises, flashcards as flashcardsData, quizBank } from '../data/catalogs.js';
 import { getCustomExercises } from '../utils/customExercises.js';
-import { createCustomFlashcard, deleteCustomFlashcard, getCustomFlashcards } from '../utils/customFlashcards.js';
 import CustomExerciseForm from './CustomExerciseForm.jsx';
 import StudentRoster from './StudentRoster.jsx';
 import ClassDashboard from './ClassDashboard.jsx';
@@ -14,7 +14,7 @@ import { useTranslation } from '../i18n/LanguageProvider.jsx';
 
 // Situaciones de práctica (nombres visibles en messages.js: scenario.<id>).
 const SUBTEMAS = ['dron', 'basketball', 'wall'];
-const TOOLS = ['grupo', 'ejercicios', 'clase'];
+const TOOLS = ['grupo', 'actividad', 'analisis', 'ejercicios', 'clase'];
 
 export function validClassCode(text) {
   const code = String(text ?? '').trim().toUpperCase();
@@ -41,49 +41,6 @@ function cloudMemberToStudent(member) {
     topicStats: member.topic_stats ?? {},
     lastSync: member.last_sync ?? null,
   };
-}
-
-function CustomCardForm({ onCreated }) {
-  const { t } = useTranslation();
-  const [front, setFront] = useState('');
-  const [back, setBack] = useState('');
-  const [formula, setFormula] = useState('');
-  const [error, setError] = useState('');
-  // No es un <form>: vive dentro del formulario de la clase y los formularios
-  // anidados son HTML inválido (el navegador terminaba enviando la página).
-  const save = () => {
-    try {
-      const card = createCustomFlashcard({ front, back, formula });
-      setFront(''); setBack(''); setFormula(''); setError('');
-      onCreated(card);
-    } catch (failure) { setError(failure.message); }
-  };
-  const onEnter = event => { if (event.key === 'Enter') { event.preventDefault(); save(); } };
-  return <div className="teacher-block custom-card-form" role="group" aria-label={t('teacher.newCard')} onKeyDown={event => { if (event.target.tagName === 'INPUT') onEnter(event); }}>
-    <h4>{t('teacher.newCard')}</h4>
-    <label className="teacher-field">{t('teacher.front')}<input className="quiz-input" value={front} onChange={event => setFront(event.target.value)} maxLength={300} /></label>
-    <label className="teacher-field">{t('teacher.back')}<textarea className="quiz-input" rows={2} value={back} onChange={event => setBack(event.target.value)} maxLength={600} /></label>
-    <label className="teacher-field">{t('teacher.formula')}<input className="quiz-input" value={formula} onChange={event => setFormula(event.target.value)} maxLength={160} /></label>
-    {error && <p className="field-error" role="alert">{error}</p>}
-    <button type="button" className="btn btn-secondary" onClick={save}>{t('teacher.saveCard')}</button>
-  </div>;
-}
-
-function CardPicker({ cards, selected, onChange, customIds, onDeleteCustom }) {
-  const { t } = useTranslation();
-  const toggle = id => onChange(selected.includes(id) ? selected.filter(item => item !== id) : [...selected, id]);
-  return <fieldset className="card-picker"><legend>{t('teacher.cardsPick', { n: selected.length, total: cards.length })}</legend>
-    <div className="card-picker-actions">
-      <button type="button" className="btn btn-secondary" onClick={() => onChange(cards.map(card => card.id))}>{t('teacher.all')}</button>
-      <button type="button" className="btn btn-secondary" onClick={() => onChange([])}>{t('teacher.none')}</button>
-    </div>
-    <ul className="card-picker-list">{cards.map(card => <li key={card.id}>
-      <label><input type="checkbox" checked={selected.includes(card.id)} onChange={() => toggle(card.id)} />
-        <span><strong>{card.frente_es ?? card.front}</strong>{customIds.has(card.id) && <em className="chip">{t('teacher.own')}</em>}<small>{card.dorso_concepto ?? card.back}</small></span>
-      </label>
-      {customIds.has(card.id) && <button type="button" className="card-picker-delete" aria-label={t('teacher.deleteCard', { name: card.frente_es })} onClick={() => onDeleteCustom(card.id)}>✕</button>}
-    </li>)}</ul>
-  </fieldset>;
 }
 
 function CloudClassList({ refreshKey }) {
@@ -115,48 +72,73 @@ function CloudClassList({ refreshKey }) {
           ? <span className="cloud-class-delete"><button type="button" className="btn btn-danger" onClick={async () => { try { await deleteCloudClass(item.id); } catch (failure) { setError(failure.message); } setConfirmId(null); load(); }}>{t('teacher.confirmDelete')}</button><button type="button" className="btn btn-secondary" onClick={() => setConfirmId(null)}>{t('common.cancel')}</button></span>
           : <button type="button" className="btn btn-secondary" onClick={() => setConfirmId(item.id)}>{t('teacher.deleteClass')}</button>}
       </header>
-      {item.class_members?.length
-        ? <ClassDashboard students={item.class_members.map(cloudMemberToStudent)} totalExercises={Number(item.config?.ejercicios) || 0} />
-        : <p className="field-help">{t('teacher.noStudentsYet')}</p>}
+      <p className="field-help">{t('teacher.groupMemberCount', { n: item.class_members?.length ?? 0 })}</p>
     </article>)}
   </section>;
 }
 
-function TopicButtons({ selected, onToggle }) {
+function TeacherAnalytics({ active, exercises: allExercises }) {
   const { t } = useTranslation();
-  return <div className="teacher-topic-options">{SUBTEMAS.map(id => <button key={id} type="button" aria-pressed={selected.includes(id)} className={selected.includes(id) ? 'is-selected' : ''} onClick={() => onToggle(id)}>{t(`scenario.${id}`)}</button>)}</div>;
+  const [groups, setGroups] = useState(null);
+  const [selectedId, setSelectedId] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const load = useCallback(async () => {
+    if (!isCloudConfigured()) return;
+    setLoading(true); setError('');
+    try {
+      const found = await listTeacherClasses();
+      setGroups(found);
+      setSelectedId(current => found.some(item => item.id === current) ? current : found[0]?.id ?? '');
+    } catch (failure) { setError(failure.offline ? 'offline' : failure.message); }
+    finally { setLoading(false); }
+  }, []);
+  useEffect(() => { if (active) load(); }, [active, load]);
+  useEffect(() => {
+    if (!active) return undefined;
+    window.addEventListener('online', load);
+    return () => window.removeEventListener('online', load);
+  }, [active, load]);
+
+  if (!isCloudConfigured()) return <section className="card teacher-tool-panel"><h2>{t('teacher.analysisTitle')}</h2><p className="field-help">{t('teacher.analysisNeedsCloud')}</p></section>;
+  const selected = groups?.find(item => item.id === selectedId);
+  return <section className="card teacher-tool-panel teacher-analytics" aria-label={t('teacher.analysisTitle')}>
+    <span className="panel-eyebrow">{t('teacher.analysisEyebrow')}</span><h2>{t('teacher.analysisTitle')}</h2>
+    <p className="teacher-note">{t('teacher.analysisLead')}</p>
+    <div className="teacher-analytics-picker">
+      <label className="teacher-field">{t('teacher.analysisGroup')}<select className="quiz-input" value={selectedId} onChange={event => setSelectedId(event.target.value)} disabled={loading || !groups?.length}>
+        {!groups?.length && <option value="">{loading ? t('common.loading') : t('teacher.noClasses')}</option>}
+        {groups?.map(group => <option key={group.id} value={group.id}>{group.title} · {group.code}</option>)}
+      </select></label>
+      <button type="button" className="btn btn-secondary" onClick={load} disabled={loading}>{t(loading ? 'teacher.refreshing' : 'teacher.refresh')}</button>
+    </div>
+    {error && <p className="field-error" role="alert">{error === 'offline' ? t('teacher.listOffline') : t('teacher.listError', { msg: error })}</p>}
+    {!loading && groups?.length === 0 && <p className="field-help">{t('teacher.noClasses')}</p>}
+    {selected && (selected.class_members?.length
+      ? <ClassDashboard students={selected.class_members.map(cloudMemberToStudent)} totalExercises={Number(selected.config?.ejercicios) || 0} exercises={allExercises} />
+      : <p className="field-help">{t('teacher.noStudentsYet')}</p>)}
+  </section>;
 }
 
-function CloudClassSetup({ teacher, allExercises, customExercises }) {
+function CloudClassSetup({ teacher }) {
   const { t } = useTranslation();
-  const [customCards, setCustomCards] = useState(getCustomFlashcards);
-  const allCards = useMemo(() => [...flashcardsData, ...customCards], [customCards]);
-  const customIds = useMemo(() => new Set(customCards.map(card => card.id)), [customCards]);
   const [title, setTitle] = useState('');
-  const [subtopics, setSubtopics] = useState(SUBTEMAS);
-  const [selectedCards, setSelectedCards] = useState(() => flashcardsData.map(card => card.id));
-  const [selectedExercises, setSelectedExercises] = useState(() => customExercises.map(item => item.id));
-  const [exerciseCount, setExerciseCount] = useState(3);
   const [busy, setBusy] = useState(false);
   const [created, setCreated] = useState(null);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const pool = allExercises.filter(item => subtopics.includes(item.scenario) && (!item.custom || selectedExercises.includes(item.id)));
-  const valid = subtopics.length > 0 && selectedCards.length >= 5 && Number(exerciseCount) >= 1 && Number(exerciseCount) <= pool.length && title.trim().length > 0;
-
-  const toggleTopic = id => setSubtopics(current => current.includes(id) ? current.filter(item => item !== id) : [...current, id]);
-  const toggleExercise = id => setSelectedExercises(current => current.includes(id) ? current.filter(item => item !== id) : [...current, id]);
-
   const submit = async event => {
     event.preventDefault();
-    if (!valid || busy) return;
+    if (!title.trim() || busy) return;
     setBusy(true); setError(''); setCopied(false);
     try {
-      const cards = allCards.filter(card => selectedCards.includes(card.id));
-      const sharedExercises = customExercises.filter(item => selectedExercises.includes(item.id) && subtopics.includes(item.scenario));
-      const content = buildClassContent({ config: { subtemas: subtopics, ejercicios: Number(exerciseCount) }, cards, exercises: sharedExercises });
+      const content = buildClassContent({
+        config: { subtemas: SUBTEMAS, ejercicios: Math.min(10, exercises.length), flashcards: flashcardsData.length },
+        cards: flashcardsData,
+        exercises: [],
+      });
       const result = await createCloudClass({ title: title.trim(), teacherName: teacher.name, teacherAvatar: teacher.avatar, teacherPhone: teacher.phone, teacherEmail: teacher.email, content });
       setCreated(result);
       setRefreshKey(value => value + 1);
@@ -172,28 +154,9 @@ function CloudClassSetup({ teacher, allExercises, customExercises }) {
   return <>
     <form className="teacher-block class-setup-form" onSubmit={submit}>
       <label className="teacher-field">{t('teacher.s1')}<input className="quiz-input" value={title} onChange={event => { setTitle(event.target.value); setCreated(null); }} maxLength={80} /></label>
-      <details className="class-group-options">
-        <summary>{t('teacher.groupOptions')}</summary>
-        <div className="class-group-options-body">
-          <fieldset className="teacher-topic-picker"><legend>{t('teacher.s2')}</legend>
-            <TopicButtons selected={subtopics} onToggle={toggleTopic} />
-          </fieldset>
-          <div className="class-setup-step"><h4>{t('teacher.s3')}</h4>
-            <CardPicker cards={allCards} selected={selectedCards} onChange={ids => { setSelectedCards(ids); setCreated(null); }} customIds={customIds} onDeleteCustom={id => { deleteCustomFlashcard(id); setCustomCards(getCustomFlashcards()); setSelectedCards(current => current.filter(item => item !== id)); }} />
-            <CustomCardForm onCreated={card => { setCustomCards(getCustomFlashcards()); setSelectedCards(current => [...current, card.id]); }} />
-            {selectedCards.length < 5 && <p className="field-error">{t('teacher.min5')}</p>}
-          </div>
-          <div className="class-setup-step"><h4>{t('teacher.s4')}</h4>
-            <label className="teacher-field">{t('teacher.exerciseCount', { n: pool.length })}<input className="quiz-input" type="number" min="1" max={Math.max(1, pool.length)} step="1" value={exerciseCount} onChange={event => setExerciseCount(event.target.value)} /></label>
-            {customExercises.length > 0 && <fieldset className="card-picker"><legend>{t('teacher.includeOwn')}</legend>
-              <ul className="card-picker-list">{customExercises.map(item => <li key={item.id}><label><input type="checkbox" checked={selectedExercises.includes(item.id)} onChange={() => toggleExercise(item.id)} /><span><strong>{item.question}</strong><small>{t(`scenario.${item.scenario}`)}{!subtopics.includes(item.scenario) ? t('teacher.notChosen') : ''}</small></span></label></li>)}</ul>
-            </fieldset>}
-          </div>
-        </div>
-      </details>
       {!title.trim() && <p className="field-help">{t('teacher.nameHelp')}</p>}
       {error && <p className="teacher-error" role="alert">{error}</p>}
-      {!created && <button type="submit" className="btn btn-primary" disabled={!valid || busy}>{t(busy ? 'teacher.creating' : 'teacher.s5')}</button>}
+      {!created && <button type="submit" className="btn btn-primary" disabled={!title.trim() || busy}>{t(busy ? 'teacher.creating' : 'teacher.s5')}</button>}
       {created && <div className="class-code-result" role="status">
         <span className="panel-eyebrow">{t('teacher.ready')}</span>
         <p className="class-code-display">{t('teacher.classCode')} <strong>{created.code}</strong></p>
@@ -206,7 +169,7 @@ function CloudClassSetup({ teacher, allExercises, customExercises }) {
   </>;
 }
 
-function ClassSetup({ allExercises, customExercises, teacher, classConfig, onLeaveClass }) {
+function ClassSetup({ allExercises, teacher, classConfig, onLeaveClass }) {
   const { t } = useTranslation();
   const cloud = isCloudConfigured();
   return <section className="card teacher-tool-panel" aria-label={t('teacher.shareLabel')}>
@@ -214,7 +177,7 @@ function ClassSetup({ allExercises, customExercises, teacher, classConfig, onLea
     <h2>{t(cloud ? 'teacher.createGroup' : 'teacher.sharePractice')}</h2>
     <p className="teacher-note">{t(cloud ? 'teacher.shareCloudText' : 'teacher.shareLocalText')}</p>
     {cloud
-      ? <CloudClassSetup teacher={teacher} allExercises={allExercises} customExercises={customExercises} />
+      ? <CloudClassSetup teacher={teacher} />
       : <>
         <p className="field-help cloud-missing">{t('teacher.cloudMissing')}</p>
         {classConfig ? <div className="teacher-block">
@@ -247,7 +210,9 @@ export default function TeacherMode({ classConfig, onJoinClass, teacher }) {
       })}
     </div>
 
-    <div hidden={tool !== 'grupo'}><ClassSetup allExercises={allExercises} customExercises={customExercises} teacher={teacher} classConfig={classConfig} onLeaveClass={() => onJoinClass?.(null)} /></div>
+    <div hidden={tool !== 'grupo'}><ClassSetup allExercises={allExercises} teacher={teacher} classConfig={classConfig} onLeaveClass={() => onJoinClass?.(null)} /></div>
+    <div hidden={tool !== 'actividad'}><TeacherActivityStudio exercises={allExercises} /></div>
+    <div hidden={tool !== 'analisis'}><TeacherAnalytics active={tool === 'analisis'} exercises={allExercises} /></div>
     <section hidden={tool !== 'ejercicios'} className="card teacher-tool-panel" aria-label={t('teacher.ownLabel')}>
       <span className="panel-eyebrow">{t('teacher.ownEyebrow')}</span><h2>{t('teacher.ownTitle')}</h2>
       <p className="teacher-note">{t('teacher.ownText')}</p>

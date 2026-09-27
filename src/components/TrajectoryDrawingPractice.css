@@ -20,19 +20,22 @@
 .drawing-graph-wrap { min-width: 0; padding: 12px; border: 1px solid var(--c-line); border-radius: 16px; background: var(--c-surface); }
 .drawing-current-task { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 5px 12px; min-height: 27px; margin: 0 5px 4px; color: var(--c-muted); font-size: 13px; }
 .drawing-current-task strong { color: var(--c-ink); }
-.drawing-graph { display: block; width: 100%; height: auto; max-height: 70vh; touch-action: manipulation; cursor: crosshair; user-select: none; -webkit-user-select: none; }
+.drawing-graph { display: block; width: 100%; height: auto; max-height: 70vh; touch-action: none; cursor: crosshair; user-select: none; -webkit-user-select: none; }
 .drawing-plot { fill: #fbfdff; }
 .drawing-gridline { stroke: #dce6ef; stroke-width: 1; }
 .drawing-axis { stroke: #516579; stroke-width: 1.7; }
 .drawing-tick { fill: #627487; font-size: 12px; }
 .drawing-axis-label { fill: #34485d; font-size: 12px; font-weight: 750; }
 .drawing-guide-line { stroke: #e89119; stroke-width: 2; stroke-dasharray: 6 5; pointer-events: none; }
+.drawing-ideal-path { fill: none; stroke: #15966e; stroke-width: 3.5; stroke-dasharray: 9 6; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
 .drawing-hint-line { stroke: #14816b; stroke-width: 2.5; stroke-dasharray: 7 5; pointer-events: none; }
 .drawing-student-path { fill: none; stroke: #1d5bd8; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
-.drawing-reference { stroke: white; stroke-width: 2; pointer-events: none; }
-.drawing-reference-start { fill: #1d5bd8; }
-.drawing-reference-apex { fill: #7047eb; }
-.drawing-reference-finish { fill: #059669; }
+.drawing-reference { pointer-events: none; }
+.drawing-reference circle { stroke: white; stroke-width: 2; }
+.drawing-reference text { fill: #34485d; stroke: white; stroke-width: 4px; paint-order: stroke; font-size: 12px; font-weight: 800; }
+.drawing-reference-start circle { fill: #1d5bd8; }
+.drawing-reference-apex circle { fill: #7047eb; }
+.drawing-reference-finish circle { fill: #059669; }
 .drawing-marked-point { fill: #d97706; stroke: white; stroke-width: 2; pointer-events: none; }
 /* Franja táctil alrededor de la línea guía y marca del último intento. */
 .drawing-guide-band { fill: rgba(232, 145, 25, .10); pointer-events: none; }
@@ -47,6 +50,7 @@
 .drawing-legend .drawing-legend-apex { background: #7047eb; }
 .drawing-legend .drawing-legend-finish { background: #059669; }
 .drawing-legend .drawing-legend-student { background: #d97706; }
+.drawing-legend .drawing-legend-ideal { background: #15966e; }
 .drawing-help { padding: 16px; border: 1px solid var(--c-line); border-radius: 16px; background: var(--c-paper); }
 .drawing-help h3 { margin: 0 0 8px; font-size: 16px; }
 .drawing-help p { margin: 0 0 12px; color: var(--c-ink-soft); font-size: 13px; line-height: 1.5; }
@@ -74,6 +78,6 @@
      viewBox para seguir legibles (~11 px reales en un teléfono de 360 px). */
   .drawing-tick { font-size: 20px; }
   .drawing-axis-label { font-size: 20px; }
-  .drawing-guide-label { font-size: 20px; }
+  .drawing-reference text { font-size: 19px; }
   .drawing-current-task { font-size: 14px; }
 }
