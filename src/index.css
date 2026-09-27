@@ -650,11 +650,11 @@ button, input, select, textarea { max-width: 100%; }
 .tutor-workbench-tabs button { min-height: 42px; padding: 7px 6px; border: 0; border-radius: 10px; background: transparent; color: var(--c-ink-soft); font: inherit; font-size: 12px; font-weight: 750; cursor: pointer; }
 .tutor-workbench-tabs button.is-active { background: var(--c-surface); color: var(--c-primary-deep); box-shadow: var(--shadow-sm); }
 .tutor-workbench-explore { display: grid; gap: 12px; }
-.tutor-workbench-controls { display: grid; grid-template-columns: 1fr 1fr auto; align-items: end; gap: 12px; }
+.tutor-workbench-controls { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: 12px; }
 .tutor-workbench-controls > label:not(.tutor-workbench-compare) { display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; color: var(--c-ink-soft); font-size: 12px; font-weight: 700; }
 .tutor-workbench-controls output { color: var(--c-primary-deep); font-variant-numeric: tabular-nums; }
 .tutor-workbench-controls input[type="range"] { grid-column: 1 / -1; width: 100%; accent-color: var(--brand-blue); }
-.tutor-workbench-compare { display: flex; align-items: center; gap: 7px; min-height: 42px; color: var(--c-ink-soft); font-size: 12px; font-weight: 700; }
+.tutor-workbench-compare { grid-column: 1 / -1; display: flex; align-items: center; gap: 7px; min-height: 42px; color: var(--c-ink-soft); font-size: 12px; font-weight: 700; }
 .tutor-workbench-compare input { width: 18px; height: 18px; accent-color: var(--brand-blue); }
 .tutor-graph-wrap { min-width: 0; padding: 6px 8px 4px; border: 1px solid var(--c-line); border-radius: 14px; background: #fbfdff; }
 .tutor-trajectory-graph { display: block; width: 100%; height: auto; max-height: 230px; overflow: visible; }

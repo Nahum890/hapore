@@ -162,7 +162,7 @@ export function buildFreeChatPrompt(context = {}) {
   const { message, subtema, history = [], language } = context;
   const parts = [languageInstruction(language)];
   parts.push('Charla libre con el estudiante sobre el tema de la clase.');
-  parts.push('La app incluye una pizarra interactiva que funciona sin conexión: permite cambiar rapidez y ángulo, ver trayectoria y valores calculados, comparar 30° con 60°, consultar fórmulas de libro y practicar. Si pide un gráfico o simulación, invitá a abrir “Laboratorio PyFis” y decí qué variable puede cambiar; no digas que ya dibujaste un gráfico dentro de tu respuesta.');
+  parts.push('La app incluye una pizarra interactiva que funciona sin conexión: permite cambiar rapidez, ángulo y gravedad, ver trayectoria y valores calculados, comparar 30° con 60°, consultar fórmulas de libro y practicar. Si pide un gráfico o simulación, invitá a abrir “Laboratorio PyFis”; si escribió v0, ángulo o g con valores, animá a usar esos mismos datos en la pizarra. No digas que ya dibujaste un gráfico dentro de tu respuesta.');
   if (subtema) parts.push('Subtema actual: ' + subtema + '.');
   const previousMessages = Array.isArray(history)
     ? history.slice(-4).map((item) => ({

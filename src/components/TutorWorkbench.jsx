@@ -15,10 +15,10 @@ function format(value, language) {
   return Number(value).toLocaleString(language === 'es' ? 'es-PY' : 'es-PY', { maximumFractionDigits: 1 });
 }
 
-function TrajectoryGraph({ speed, angle, compare, language, t }) {
+function TrajectoryGraph({ speed, angle, gravity, compare, language, t }) {
   const result = useMemo(() => {
     const angles = compare ? [30, 60] : [angle];
-    const launches = angles.map(value => ({ angle: value, launch: createLaunch(speed, value), color: compare ? PALETTE[angles.indexOf(value)] : PALETTE[0] }));
+    const launches = angles.map(value => ({ angle: value, launch: createLaunch(speed, value, { gravity }), color: compare ? PALETTE[angles.indexOf(value)] : PALETTE[0] }));
     const metrics = launches.map(item => ({ ...item, distance: range(item.launch), height: maxHeight(item.launch), duration: timeOfFlight(item.launch) }));
     const maxX = Math.max(...metrics.map(item => item.distance), 1) * 1.08;
     const maxY = Math.max(...metrics.map(item => item.height), 1) * 1.14;
@@ -32,12 +32,12 @@ function TrajectoryGraph({ speed, angle, compare, language, t }) {
       return { ...item, coordinates };
     });
     return { maxX, maxY, paths };
-  }, [speed, angle, compare]);
+  }, [speed, angle, gravity, compare]);
 
   return <div className="tutor-graph-wrap">
-    <svg className="tutor-trajectory-graph" viewBox="0 0 360 190" role="img" aria-label={t('free.graphDescription', { speed, angle: compare ? '30 y 60' : angle })}>
+    <svg className="tutor-trajectory-graph" viewBox="0 0 360 190" role="img" aria-label={t('free.graphDescription', { speed, angle: compare ? '30 y 60' : angle, gravity })}>
       <title>{t('free.graphTitle')}</title>
-      <desc>{t('free.graphDescription', { speed, angle: compare ? '30 y 60' : angle })}</desc>
+      <desc>{t('free.graphDescription', { speed, angle: compare ? '30 y 60' : angle, gravity })}</desc>
       {[0, 0.5, 1].map((fraction, index) => <g key={`grid-${index}`}>
         <line x1="34" y1={156 - fraction * 126} x2="344" y2={156 - fraction * 126} className="tutor-graph-grid" />
         <text x="29" y={160 - fraction * 126} textAnchor="end" className="tutor-graph-tick">{format(result.maxY * fraction, language)}</text>
@@ -63,18 +63,29 @@ export default function TutorWorkbench({ lastPrompt = '', onInsertPrompt }) {
   const [expanded, setExpanded] = useState(false);
   const [speed, setSpeed] = useState(20);
   const [angle, setAngle] = useState(50);
+  const [gravity, setGravity] = useState(9.8);
   const [compare, setCompare] = useState(false);
   const [practiceChoice, setPracticeChoice] = useState('');
   const [practiceChecked, setPracticeChecked] = useState(false);
-  const launch = useMemo(() => createLaunch(speed, angle), [speed, angle]);
+  const launch = useMemo(() => createLaunch(speed, angle, { gravity }), [speed, angle, gravity]);
   const metrics = useMemo(() => ({ distance: range(launch), height: maxHeight(launch), duration: timeOfFlight(launch) }), [launch]);
   const velocity = useMemo(() => ({ x: launch.vx, y: launch.vy }), [launch]);
 
   useEffect(() => {
     const prompt = lastPrompt.toLocaleLowerCase();
-    if (!/(gr[aá]fic|trayectoria|simul|f[oó]rmula|alcance|practic|ejemplo|rapidez inicial|[áa]ngulo)/u.test(prompt)) return;
+    const number = raw => Number(String(raw).replace(',', '.'));
+    const speedMatch = prompt.match(/(?:v0|v₀|rapidez(?: inicial)?|velocidad inicial)\s*(?:=|:)?\s*(\d+(?:[.,]\d+)?)/u);
+    const angleMatch = prompt.match(/(?:[áa]ngulo)(?:\s+de\s+lanzamiento)?\s*(?:=|:)?\s*(\d+(?:[.,]\d+)?)\s*(?:°|grados?)/u);
+    const gravityMatch = prompt.match(/\bg\s*(?:=|:)\s*(\d+(?:[.,]\d+)?)/u);
+    if (speedMatch && number(speedMatch[1]) > 0 && number(speedMatch[1]) <= 100) setSpeed(number(speedMatch[1]));
+    if (angleMatch && number(angleMatch[1]) >= 5 && number(angleMatch[1]) <= 85) setAngle(number(angleMatch[1]));
+    if (gravityMatch && number(gravityMatch[1]) >= 1 && number(gravityMatch[1]) <= 20) setGravity(number(gravityMatch[1]));
+    const comparisonRequested = /(?:30\s*°?\s*(?:y|e|\/|vs\.?|contra)\s*60|compar(?:ar|a|aci[oó]n)|embojoja)/u.test(prompt);
+    if (comparisonRequested) setCompare(true);
+    else if (angleMatch) setCompare(false);
+    if (!/(gr[aá]fic|trayectoria|simul|f[oó]rmula|alcance|practic|ejemplo|rapidez inicial|[áa]ngulo|gravedad|v0)/u.test(prompt)) return;
     setExpanded(true);
-    setTab(/practic/u.test(prompt) ? 'practice' : /ejemplo/u.test(prompt) ? 'example' : /f[oó]rmula/u.test(prompt) ? 'formulas' : 'graph');
+    setTab(/practic|ñeha|ñ[aá]e/u.test(prompt) ? 'practice' : /ejemplo|techapyr/u.test(prompt) ? 'example' : /f[oó]rmula/u.test(prompt) ? 'formulas' : 'graph');
   }, [lastPrompt]);
 
   const insertFormula = formula => {
@@ -105,9 +116,10 @@ export default function TutorWorkbench({ lastPrompt = '', onInsertPrompt }) {
         <div className="tutor-workbench-controls">
           <label>{t('free.speed')} <output>{speed} m/s</output><input type="range" min="8" max="32" step="1" value={speed} onChange={event => setSpeed(Number(event.target.value))} aria-label={t('free.speed')} /></label>
           <label>{t('free.angle')} <output>{angle}°</output><input type="range" min="10" max="80" step="1" value={angle} onChange={event => setAngle(Number(event.target.value))} aria-label={t('free.angle')} disabled={compare} /></label>
+          <label>{t('free.gravity')} <output>{format(gravity, language)} m/s²</output><input type="range" min="1" max="20" step="0.1" value={gravity} onChange={event => setGravity(Number(event.target.value))} aria-label={t('free.gravity')} /></label>
           <label className="tutor-workbench-compare"><input type="checkbox" checked={compare} onChange={event => setCompare(event.target.checked)} />{t('free.compareAngles')}</label>
         </div>
-        <TrajectoryGraph speed={speed} angle={angle} compare={compare} language={language} t={t} />
+        <TrajectoryGraph speed={speed} angle={angle} gravity={gravity} compare={compare} language={language} t={t} />
         {!compare && <div className="tutor-workbench-metrics" aria-live="polite">
           <span><small>{t('free.range')}</small><strong>{format(metrics.distance, language)} m</strong></span>
           <span><small>{t('free.maxHeight')}</small><strong>{format(metrics.height, language)} m</strong></span>
@@ -124,7 +136,7 @@ export default function TutorWorkbench({ lastPrompt = '', onInsertPrompt }) {
       </div>}
 
       {tab === 'example' && <div className="tutor-workbench-example" role="tabpanel">
-        <p>{t('free.exampleLead', { speed, angle })}</p>
+        <p>{t('free.exampleLead', { speed, angle, gravity: format(gravity, language) })}</p>
         <div className="tutor-example-steps">
           <div><small>{t('free.exampleComponents')}</small><Formula text={`vx = v0 * cos(ángulo) = ${speed} * cos(${angle}°); vy = v0 * sen(ángulo) = ${speed} * sen(${angle}°)`} /></div>
           <div><small>{t('free.exampleValues')}</small><strong>vx = {format(velocity.x, language)} m/s · vy = {format(velocity.y, language)} m/s</strong></div>
