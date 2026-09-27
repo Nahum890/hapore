@@ -20,6 +20,7 @@ export function toTextbookMarked(input) {
     return `${fn}${square} ${arg}`;
   });
   text = text.replace(word('ángulo_max'), 'θ_{máx}');
+  text = text.replace(word('y_max'), 'y_{máx}');
   text = text.replace(/(\d)\s*\*\s*ángulo(?![\p{L}\d_])/gu, '$1θ');
   // Variables con subíndice.
   text = text.replace(/\bv0x\b/g, 'v_{0x}').replace(/\bv0y\b/g, 'v_{0y}').replace(/\bv0\b/g, 'v_{0}');

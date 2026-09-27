@@ -624,6 +624,7 @@ button, input, select, textarea { max-width: 100%; }
 .chat-tutor-bubble { align-self: flex-start; background: var(--c-surface); color: var(--c-ink); border: 1px solid var(--c-line); border-bottom-left-radius: 6px; }
 .chat-alumno-bubble { align-self: flex-end; background: var(--c-sky); color: #fff; border-bottom-right-radius: 6px; }
 .chat-correct { align-self: flex-start; background: var(--c-primary-soft); color: var(--c-primary-deep); border: 1px solid #b9e0d4; border-bottom-left-radius: 6px; }
+.chat-partial { align-self: flex-start; background: #fff8e9; color: #62470e; border: 1px solid #efd89e; border-bottom-left-radius: 6px; }
 .chat-incorrect { align-self: flex-start; background: var(--c-sun-soft); color: #6d4506; border: 1px solid #f1dca6; border-bottom-left-radius: 6px; }
 .chat-streaming { white-space: pre-wrap; }
 .chats-input-area { display: flex; flex-direction: column; gap: 8px; }
@@ -634,6 +635,65 @@ button, input, select, textarea { max-width: 100%; }
 .chat-history summary { font-size: 13px; font-weight: 750; color: var(--c-ink-soft); cursor: pointer; }
 .chat-history-list { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto; }
 .chat-history-item { font-size: 13px; color: var(--c-ink-soft); border: 1px solid var(--c-line); border-radius: 12px; padding: 8px 12px; background: var(--c-paper); }
+.tutor-workbench { overflow: hidden; border: 1px solid var(--c-line); border-radius: 18px; background: var(--c-surface); box-shadow: var(--shadow-sm); }
+.tutor-workbench > summary { display: flex; align-items: center; gap: 12px; min-height: 76px; padding: 12px 14px; cursor: pointer; list-style: none; }
+.tutor-workbench > summary::-webkit-details-marker { display: none; }
+.tutor-workbench > summary::after { content: '＋'; margin-left: auto; color: var(--c-primary); font-size: 21px; font-weight: 700; }
+.tutor-workbench[open] > summary::after { content: '−'; }
+.tutor-workbench-mark { display: grid; place-items: center; flex: none; width: 46px; height: 46px; border-radius: 14px; background: var(--brand-violet-soft); color: var(--brand-violet-deep); font-family: Georgia, serif; font-size: 17px; font-weight: 800; }
+.tutor-workbench-heading { display: grid; min-width: 0; gap: 2px; }
+.tutor-workbench-heading strong { color: var(--c-ink); font-size: 15px; }
+.tutor-workbench-heading small { color: var(--c-muted); font-size: 12px; }
+.tutor-workbench-offline { flex: none; padding: 5px 8px; border-radius: 999px; background: var(--success-soft); color: var(--success-deep); font-size: 11px; font-weight: 750; }
+.tutor-workbench-body { display: grid; gap: 14px; padding: 0 14px 16px; border-top: 1px solid var(--c-line); }
+.tutor-workbench-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; padding: 5px; border-radius: 13px; background: var(--c-paper); }
+.tutor-workbench-tabs button { min-height: 42px; padding: 7px 6px; border: 0; border-radius: 10px; background: transparent; color: var(--c-ink-soft); font: inherit; font-size: 12px; font-weight: 750; cursor: pointer; }
+.tutor-workbench-tabs button.is-active { background: var(--c-surface); color: var(--c-primary-deep); box-shadow: var(--shadow-sm); }
+.tutor-workbench-explore { display: grid; gap: 12px; }
+.tutor-workbench-controls { display: grid; grid-template-columns: 1fr 1fr auto; align-items: end; gap: 12px; }
+.tutor-workbench-controls > label:not(.tutor-workbench-compare) { display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; color: var(--c-ink-soft); font-size: 12px; font-weight: 700; }
+.tutor-workbench-controls output { color: var(--c-primary-deep); font-variant-numeric: tabular-nums; }
+.tutor-workbench-controls input[type="range"] { grid-column: 1 / -1; width: 100%; accent-color: var(--brand-blue); }
+.tutor-workbench-compare { display: flex; align-items: center; gap: 7px; min-height: 42px; color: var(--c-ink-soft); font-size: 12px; font-weight: 700; }
+.tutor-workbench-compare input { width: 18px; height: 18px; accent-color: var(--brand-blue); }
+.tutor-graph-wrap { min-width: 0; padding: 6px 8px 4px; border: 1px solid var(--c-line); border-radius: 14px; background: #fbfdff; }
+.tutor-trajectory-graph { display: block; width: 100%; height: auto; max-height: 230px; overflow: visible; }
+.tutor-graph-grid { stroke: #dfe7f2; stroke-dasharray: 3 4; stroke-width: 1; }
+.tutor-graph-axis { stroke: #64748b; stroke-width: 1.2; }
+.tutor-graph-tick { fill: #64748b; font-size: 9px; }
+.tutor-graph-label { fill: var(--c-ink-soft); font-size: 10px; font-weight: 700; }
+.tutor-graph-legend { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px 18px; color: var(--c-ink-soft); font-size: 12px; }
+.tutor-graph-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.tutor-graph-legend i { width: 12px; height: 4px; border-radius: 3px; }
+.tutor-compare-values { display: grid; gap: 5px; margin-top: 7px; color: var(--c-ink-soft); font-size: 11px; line-height: 1.4; }
+.tutor-workbench-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.tutor-workbench-metrics > span { display: grid; gap: 3px; padding: 9px 10px; border-radius: 12px; background: var(--c-paper); }
+.tutor-workbench-metrics small { color: var(--c-muted); font-size: 11px; }
+.tutor-workbench-metrics strong { color: var(--c-ink); font-size: 14px; font-variant-numeric: tabular-nums; }
+.tutor-workbench-note { margin: 0; color: var(--c-ink-soft); font-size: 13px; line-height: 1.5; }
+.tutor-formula-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.tutor-formula-card { display: grid; align-content: start; gap: 9px; min-width: 0; padding: 12px; border: 1px solid var(--c-line); border-radius: 14px; background: var(--c-surface); }
+.tutor-formula-card p { margin: 0; color: var(--c-ink-soft); font-size: 12px; font-weight: 700; }
+.tutor-formula-card .math-formula { min-height: 34px; color: var(--c-primary-deep); font-size: 15px; }
+.tutor-formula-card .btn { width: 100%; min-height: 40px; padding: 7px 9px; font-size: 12px; }
+.tutor-workbench-example { display: grid; gap: 12px; }
+.tutor-workbench-example > p { margin: 0; color: var(--c-ink); font-size: 14px; font-weight: 700; line-height: 1.5; }
+.tutor-example-steps { display: grid; gap: 8px; }
+.tutor-example-steps > div { display: grid; gap: 5px; padding: 10px 12px; border: 1px solid var(--c-line); border-radius: 12px; background: var(--c-paper); }
+.tutor-example-steps small { color: var(--c-muted); font-size: 11px; font-weight: 750; }
+.tutor-example-steps strong { color: var(--c-primary-deep); font-size: 13px; line-height: 1.5; font-variant-numeric: tabular-nums; }
+.tutor-example-steps .math-formula { color: var(--c-ink); font-size: 14px; }
+.tutor-workbench-example > .btn { justify-self: start; min-height: 44px; }
+.tutor-workbench-practice { display: grid; gap: 12px; }
+.tutor-workbench-practice > p { margin: 0; color: var(--c-ink); font-size: 15px; font-weight: 700; line-height: 1.5; }
+.tutor-practice-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.tutor-practice-options button { min-height: 48px; padding: 8px; border: 1px solid var(--c-line); border-radius: 12px; background: var(--c-surface); color: var(--c-ink); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.tutor-practice-options button.is-selected { border-color: var(--c-primary); background: var(--c-primary-soft); color: var(--c-primary-deep); }
+.tutor-workbench-practice > .btn { justify-self: start; min-height: 44px; }
+.tutor-practice-feedback { margin: 0; padding: 10px 12px; border: 1px solid #efd89e; border-radius: 12px; background: #fff8e9; color: #62470e; font-size: 13px; line-height: 1.5; }
+.tutor-practice-feedback.is-correct { border-color: #b9e0d4; background: var(--success-soft); color: var(--success-deep); }
+.tutor-workbench-sources { display: flex; flex-wrap: wrap; gap: 5px 12px; padding-top: 10px; border-top: 1px solid var(--c-line); color: var(--c-muted); font-size: 10.5px; }
+.tutor-workbench-sources a { color: var(--c-primary-deep); text-decoration: underline; text-underline-offset: 2px; }
 .quiz-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .quiz-justification { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
 .quiz-justification-label { margin: 0; font-size: 14px; font-weight: 700; }
@@ -1295,6 +1355,9 @@ button, input, select, textarea { max-width: 100%; }
 
 /* ---------- Notación de libro (fórmulas) ---------- */
 .math-formula { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 0 .15em; font-family: 'Cambria Math', 'STIX Two Math', 'Times New Roman', serif; font-size: 1.08em; letter-spacing: 0; }
+.math-text-line { white-space: pre-wrap; }
+.math-text-formula-line { white-space: normal; }
+.math-text-formula { margin: 0 .12em; color: var(--c-primary-deep); }
 .math-inline { white-space: pre-wrap; }
 .math-fraction { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 .15em; line-height: 1.15; }
 .math-num { padding: 0 .25em .1em; border-bottom: .08em solid currentColor; }
@@ -2677,4 +2740,19 @@ button, input, select, textarea { max-width: 100%; }
 @media (max-width: 760px) {
   .hint-reply-row { flex-direction: column; align-items: stretch; }
   .btn-icon { width: 40px; height: 40px; }
+}
+@media (max-width: 560px) {
+  .tutor-workbench > summary { gap: 9px; padding: 10px; }
+  .tutor-workbench-mark { width: 40px; height: 40px; }
+  .tutor-workbench-heading strong { font-size: 14px; }
+  .tutor-workbench-heading small { max-width: 175px; font-size: 11px; }
+  .tutor-workbench-offline { max-width: 88px; white-space: normal; text-align: center; font-size: 10px; }
+  .tutor-workbench-body { padding-inline: 10px; }
+  .tutor-workbench-controls { grid-template-columns: 1fr 1fr; }
+  .tutor-workbench-compare { grid-column: 1 / -1; }
+  .tutor-formula-grid { grid-template-columns: 1fr; }
+  .tutor-workbench-metrics { gap: 5px; }
+  .tutor-workbench-metrics > span { padding: 8px 6px; }
+  .tutor-workbench-metrics small { font-size: 10px; }
+  .tutor-workbench-metrics strong { font-size: 12px; }
 }

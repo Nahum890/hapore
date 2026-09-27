@@ -32,6 +32,7 @@ import { getCustomExercises } from './utils/customExercises.js';
 import { joinClass, leaveClass } from './utils/classroom.js';
 import ProfileSettings from './components/ProfileSettings.jsx';
 import { Formula, MathText } from './components/MathText.jsx';
+import TutorWorkbench from './components/TutorWorkbench.jsx';
 const ClassChat = lazy(() => import('./components/ClassChat.jsx'));
 import { isCloudConfigured } from './cloud/cloudClient.js';
 import { downloadClass, flushProgress, getClassPackage, getPendingProgress, leaveCloudClass, progressSnapshot, queueProgress, syncMyProfile } from './cloud/classCloud.js';
@@ -308,11 +309,13 @@ function FreeChatView({ quiz }) {
   const logRef = useAutoScroll([quiz.charlaLog.length, quiz.streamText, quiz.busy]);
   const galleryRef = useRef(null);
   const cameraRef = useRef(null);
+  const composerRef = useRef(null);
   const [photoError, setPhotoError] = useState('');
   const [photoBusy, setPhotoBusy] = useState(false);
   const recognition = useSpeechRecognition();
   const speech = useSpeechSynthesis();
   const freeHistory = quiz.history.filter(session => session.tipo === 'chat-libre');
+  const latestStudentPrompt = [...quiz.charlaLog].reverse().find(message => message.role === 'alumno')?.text ?? '';
 
   const pickPhoto = async event => {
     const file = event.target.files?.[0];
@@ -348,6 +351,10 @@ function FreeChatView({ quiz }) {
       {quiz.busy && !quiz.streamText && <TypingBubble />}
       {quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-streaming" aria-live="off"><MathText text={quiz.streamText} /></div>}
     </div>
+    <TutorWorkbench lastPrompt={latestStudentPrompt} onInsertPrompt={text => {
+      quiz.setCharlaText(text);
+      requestAnimationFrame(() => composerRef.current?.focus());
+    }} />
     {quiz.charlaImage && <div className="chat-photo-preview"><img src={quiz.charlaImage} alt={t('free.photoReady')} /><button type="button" className="btn btn-text" onClick={() => quiz.setCharlaImage(null)}>{t('free.removePhoto')}</button></div>}
     {photoError && <p className="field-error" role="alert">{photoError}</p>}
     {recognition.error && <p className="field-error" role="alert">{t(recognition.error)}</p>}
@@ -365,7 +372,7 @@ function FreeChatView({ quiz }) {
       {recognition.supported && <button type="button" className={'btn btn-icon chat-mic-button' + (recognition.listening ? ' is-listening' : '')} title={t('free.voice')} aria-label={t(recognition.listening ? 'free.listening' : 'free.voice')} onClick={toggleMic} disabled={blocked}>
         <Icon name="mic" size={20} />
       </button>}
-      <input className="quiz-input" type="text" inputMode="text" autoComplete="off" aria-label={t('free.inputLabel')} placeholder={quiz.charlaLeft > 0 ? t(recognition.listening ? 'free.listening' : 'free.placeholder') : t('free.limitReached')} value={quiz.charlaText} onChange={event => quiz.setCharlaText(event.target.value)} disabled={blocked} />
+      <input ref={composerRef} className="quiz-input" type="text" inputMode="text" autoComplete="off" aria-label={t('free.inputLabel')} placeholder={quiz.charlaLeft > 0 ? t(recognition.listening ? 'free.listening' : 'free.placeholder') : t('free.limitReached')} value={quiz.charlaText} onChange={event => quiz.setCharlaText(event.target.value)} disabled={blocked} />
       <button type="submit" className="btn btn-primary" disabled={blocked || (!quiz.charlaText.trim() && !quiz.charlaImage)}>{quiz.busy ? t('tutor.typing') : t('common.send')}</button>
     </form>
     {recognition.supported && <p className="field-help chat-voice-note">{t('free.voiceNote')}</p>}
@@ -443,7 +450,7 @@ function ChatsView({ quiz, mode, onModeChange, onCardConsolidated, onNavigate })
             <div key={`quiz-${position}`} className="chat-entry">
               <div className="chat-bubble chat-tutor-bubble"><MathText text={entry.statement} /></div>
               <div className="chat-bubble chat-alumno-bubble">{t('quiz.you', { text: entry.answerKey ? t(entry.answerKey) + (entry.justification ? ` — ${entry.justification}` : '') : entry.studentText })}</div>
-              <div className={`chat-bubble ${entry.tutor?.correct ? 'chat-correct' : 'chat-incorrect'}`} role="status">
+              <div className={`chat-bubble ${entry.tutor?.correct ? 'chat-correct' : entry.tutor?.partial ? 'chat-partial' : 'chat-incorrect'}`} role="status">
                 <MathText text={entry.tutor?.message} />
                 <SourceLabel entry={entry.tutor} />
               </div>

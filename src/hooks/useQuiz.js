@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { quizBank as quizBankData, localizeCatalogItem } from '../data/catalogs.js';
-import { buildQuiz, buildQuizFeedback, matchAnswer, matchText, shuffle } from '../ai/quizEngine.js';
+import { buildQuiz, buildQuizFeedback, evaluateQuizContext, matchAnswer, matchQuizJustification, shuffle } from '../ai/quizEngine.js';
 import { readJSON, writeJSON, STORAGE_KEYS } from '../utils/storage.js';
 import { createAIProvider } from '../ai/AIProvider.js';
 import { getTutorQuota, DAILY_TUTOR_LIMIT } from '../ai/tutorQuota.js';
@@ -289,12 +289,13 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
       setBusy(true);
       setStreamText('');
       try {
-        let local = { correct: false, close: false, score: 0, coincidentes: [] };
+        let local = { correct: false, close: false, partial: false, score: 0, coincidentes: [], faltantes: [] };
         if (question.tipo === 'abierta') {
-          local = matchAnswer(question, justificacion ?? '');
+          local = matchAnswer(question, justificacion ?? '', { language });
         } else {
-          local = matchText(justificacion ?? '', question.explicacion ?? '');
+          local = matchQuizJustification(question, justificacion ?? '', { language });
         }
+        const optionCorrect = question.tipo !== 'vf' || Boolean(marcadoVerdadero) === Boolean(question.esVerdadero);
         const verdict = question.tipo === 'vf'
           ? marcadoVerdadero
             ? Boolean(question.esVerdadero)
@@ -307,8 +308,10 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
           tema: question.tema,
           respuestaAlumno: question.tipo === 'abierta' ? (justificacion ?? '') : null,
           esCorrecta: verdict,
-          esCercana: local.close,
+          esCercana: !verdict && optionCorrect && local.close,
+          esParcial: !verdict && optionCorrect && local.partial,
           coincidentes: local.coincidentes,
+          faltantes: local.faltantes,
           esVerdadero: question.tipo === 'vf' ? Boolean(question.esVerdadero) : undefined,
           marcadoVerdadero: question.tipo === 'vf' ? Boolean(marcadoVerdadero) : undefined,
           justificacion: justificacion ?? null,
@@ -317,16 +320,16 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
           explicacion: question.explicacion ?? '',
           explicacionJopara: question.explicacionJopara ?? '',
           language,
-          onToken: (text) => {
-            if (generation === generationRef.current) setStreamText(text);
-          },
         };
-        let response;
-        try {
-          response = await providerRef.current.evaluateQuizAnswer(feedbackContext);
-        } catch {
-          response = { message: buildQuizFeedback(feedbackContext), source: 'local-fallback', available: true };
-        }
+        // La corrección y su explicación salen de la misma rúbrica local en
+        // línea y sin conexión. Gemini no puede cambiar un veredicto por una
+        // diferencia de idioma ni repetir el saludo en cada pregunta.
+        const response = {
+          message: buildQuizFeedback(feedbackContext),
+          source: 'rules',
+          available: true,
+          ...evaluateQuizContext(feedbackContext),
+        };
         if (generation !== generationRef.current) return;
         const answerKey = question.tipo === 'abierta' ? null : marcadoVerdadero ? 'common.true' : 'common.false';
         const entry = {
@@ -342,7 +345,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
             question.tipo === 'abierta'
               ? (justificacion ?? '')
               : `${translate(language, answerKey)}${justificacion ? ` — ${justificacion}` : ''}`,
-          tutor: { ...response, correct: verdict },
+          tutor: { ...response, correct: verdict, partial: Boolean(feedbackContext.esParcial) },
         };
         const nextChat = [...chat, entry];
         setChat(nextChat);
