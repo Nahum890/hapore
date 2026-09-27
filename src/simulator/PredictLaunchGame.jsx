@@ -8,7 +8,9 @@ import { useTranslation } from '../i18n/LanguageProvider.jsx';
 import ParabolicGames from '../games/parabolic/ParabolicGames.jsx';
 import './PredictLaunchGame.css';
 
-// Minijuego "predecí → lanzá → observá → corregí". Reutiliza el mismo motor
+// Pestaña "Desafíos de Física": primero los desafíos completos (básquet con
+// tablero, tiro libre, blanco…) y, como segunda opción, el minijuego
+// "predecí → lanzá → observá → corregí". Reutiliza el mismo motor
 // físico (flightPlan/planFlight) y el mismo canvas (projectileRenderer) que el
 // simulador ligado a los ejercicios. La pregunta es siempre "¿a cuántos metros
 // cae?", así que solo se usan escenas donde se sale y se llega al suelo.
@@ -36,7 +38,7 @@ function newRound() {
 
 export default function PredictLaunchGame() {
   const { t, language } = useTranslation();
-  const [activeMode, setActiveMode] = useState('predict'); // 'predict' | 'challenges'
+  const [activeMode, setActiveMode] = useState('challenges'); // 'challenges' | 'predict'
   const [round, setRound] = useState(newRound);
   const [prediction, setPrediction] = useState('');
   const [phase, setPhase] = useState('predicting'); // predicting -> flying -> result
@@ -117,8 +119,8 @@ export default function PredictLaunchGame() {
   return (
     <div className="predict-game-wrapper">
       <div className="predict-mode-switch" role="tablist" aria-label={t('game.modeLabel')}>
-        <button type="button" role="tab" aria-selected={activeMode === 'predict'} className={activeMode === 'predict' ? 'is-active' : ''} onClick={() => setActiveMode('predict')}>{t('game.title')}</button>
         <button type="button" role="tab" aria-selected={activeMode === 'challenges'} className={activeMode === 'challenges' ? 'is-active' : ''} onClick={() => setActiveMode('challenges')}>{t('game.challenges')}</button>
+        <button type="button" role="tab" aria-selected={activeMode === 'predict'} className={activeMode === 'predict' ? 'is-active' : ''} onClick={() => setActiveMode('predict')}>{t('game.title')}</button>
       </div>
 
       {activeMode === 'challenges' ? (

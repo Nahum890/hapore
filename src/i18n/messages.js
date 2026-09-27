@@ -79,7 +79,7 @@ const messages = {
     'reco.review': 'Ehecha jey pe explicación ha eñeha’ã jey.', 'reco.next': 'Reresolvéma ko paso. Eñeha’ã pe desafío oúva.', 'reco.done': 'Reresolvepa umi ejercicio oĩva. Ikatu rehecha jey reipotávo.',
 
     'practice.tabsLabel': 'Mba’éichapa reñeha’ãse', 'practice.exercises': 'Ejercicio', 'practice.drawing': 'Ehai parábola',
-    'practice.game': 'Minijuego: ere ha emombo', 'practice.lab': 'Laboratorio',
+    'practice.game': 'Desafío Física rehegua', 'practice.lab': 'Laboratorio',
     'practice.topicEyebrow': 'MOVIMIENTO PARABÓLICO', 'practice.pickTitle': 'Eiporavo peteĩ situación',
     'practice.pickText': 'Pe cálculo ha’e peteĩchagua; okambia contexto ha escena simulador-pe.', 'practice.pickLabel': 'Eiporavo situación reñeha’ã hag̃ua',
     'practice.nextExercise': 'Ejercicio oúva',
@@ -355,7 +355,7 @@ const messages = {
     'reco.review': 'Revisá la explicación y volvé a probar.', 'reco.next': 'Ya resolviste este paso. Probá el siguiente desafío.', 'reco.done': 'Completaste los ejercicios disponibles. Podés repasar cuando quieras.',
 
     'practice.tabsLabel': 'Modo de práctica', 'practice.exercises': 'Ejercicios', 'practice.drawing': 'Dibujar parábolas',
-    'practice.game': 'Minijuego: Predecí y lanzá', 'practice.lab': 'Laboratorio',
+    'practice.game': 'Desafíos de Física', 'practice.lab': 'Laboratorio',
     'practice.topicEyebrow': 'MOVIMIENTO PARABÓLICO', 'practice.pickTitle': 'Elegí una situación',
     'practice.pickText': 'El cálculo es siempre el mismo; cambia el contexto y la escena del simulador.', 'practice.pickLabel': 'Elegir situación de práctica',
     'practice.nextExercise': 'Siguiente ejercicio',

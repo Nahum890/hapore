@@ -138,11 +138,25 @@ export const GAMES_I18N = {
     bballSpeedLabel: 'Rapidez de tiro (v₀ m/s):',
     bballFireBtn: '🏀 Emombo balón',
     bballNextBtn: 'Ambue nivel',
-    bballSwish: '¡CANASTA PERFECTA! Rehecha porã pe tiro ({speed} m/s, {angle}°). Pe balón ohasa aro {hoopH} m-pe ho\'ávo ({ballY} m). ¡Limpio!',
-    bballRimHit: '¡Enceste con aro! Pe balón ojepota aro rembe\'ýpe ha oike canasta-pe.',
+    bballSwish: '¡CANASTA PERFECTA! Rehecha porã pe tiro ({speed} m/s, {angle}°). Pe balón ohasa aro {hoopH} m-pe ho\'ávo ({ballY} m). ¡Limpio! (+3 PTS)',
+    bballBankIn: '¡TABLERAZO HA ADENTRO! Pe balón oñembota tablero-pe ha ho\'a aro ryepýpe ({speed} m/s, {angle}°). ¡2 PUNTOS!',
+    bballRimHit: '¡Enceste con aro! Pe balón ojepota aro rembe\'ýpe ha oike canasta-pe. ¡2 PUNTOS!',
+    bballBankMiss: 'Rebote en tablero: Pe balón oñembota tablero-pe pero osẽ aro-gui ({ballY} m).',
+    bballRimMiss: 'Rebote en el aro: Pe balón ojepota aro rembe\'ýpe ha ho\'a okape.',
     bballAscending: 'Tiro fallado: Pe balón og̃uahẽ aro-pe ojupi jave gueteri (subiendo). Ndaikatúi oike guype guive.',
     bballShort: 'Tiro corto: Pe balón noñembo\'y porãi térã opyta yvýpe aro mboyve ({ballY} m).',
     bballHigh: 'Tiro pasado: Pe balón ohasa yvateiterei aro ári ({ballY} m).',
+    bballShotClockViolation: '⏰ ¡VIOLACIÓN DE 24 SEGUNDOS! Opáma pe tiempo de posesión aro mboyve. ¡Eha\'ã jey pya\'eve!',
+    bballTacticsTitle: '📋 Pizarra táctica del DT (Cálculo Físico):',
+    bballTacticsHint: 'Consejo: vx = v₀ · cos(θ). Pe balón tekotevẽ og̃uahẽ aro-pe ho\'ávo (descendente) y = 3.05 m-pe.',
+    bballSpeedPlaceholder: 'Ehai ne rapidez calculada v₀ (m/s)...',
+    bballCalcBoardTitle: '📐 Pizarra de Cálculo Físico: Emongu’e ne cálculo',
+    bballCalcBoardDesc: 'Eipuru pe fórmula parabólica ehupyty hag̃ua pe aro 3.05 m-pe:',
+    bballVerifyBtn: '🧪 Ehecha ne cálculo',
+    bballApplyBtn: '📥 Cargar en el tiro y probar',
+    bballValidCalc: '✅ ¡Cálculo porãite! Pe balón og̃uahẽta aro 3.05 m-pe. ¡Emombo ko\'ág̃a!',
+    bballShortCalc: '⚠️ Pe rapidez michĩve: pe balón opytáta aro mboyve. Embohetave v₀.',
+    bballHighCalc: '⚠️ Pe rapidez tuichave: ohasáta yvateiterei aro ári. Emboguejymi v₀.',
     bballPhysicsNote: 'Física en Cancha Techada: Ndoguerekóigui yvytu ha temperatura templada rupive, pe básquetbol oiko movimiento parabólico ideal reheve exacto.',
     // Tiro Libre
     fkTitle: 'Reto: Tiro Libre sobre la Barrera (Estilo Roberto Carlos)',
@@ -208,11 +222,25 @@ export const GAMES_I18N = {
     bballSpeedLabel: 'Rapidez inicial (v₀ m/s):',
     bballFireBtn: '🏀 Lanzar balón',
     bballNextBtn: 'Siguiente nivel',
-    bballSwish: '¡CANASTA LIMPIA (SWISH)! Calculaste perfecto ({speed} m/s, {angle}°). El balón cruzó el aro a {ballY} m (altura 3.05 m) en trayectoria descendente.',
-    bballRimHit: '¡Canasta! El balón tocó el aro y entró limpiamente a la red.',
+    bballSwish: '¡CANASTA LIMPIA (SWISH)! Calculaste perfecto ({speed} m/s, {angle}°). El balón cruzó el aro a {ballY} m (altura 3.05 m) en trayectoria descendente. (+3 PTS)',
+    bballBankIn: '¡TABLERAZO Y ADENTRO! El balón rebotó en el recuadro del tablero y entró limpio a la red ({speed} m/s, {angle}°). ¡2 PUNTOS!',
+    bballRimHit: '¡Canasta con aro! El balón tocó el aro y cayó dentro de la red. ¡2 PUNTOS!',
+    bballBankMiss: 'Rebote en el tablero: El balón impactó contra el tablero pero picó fuera del aro ({ballY} m).',
+    bballRimMiss: 'Rebote en el aro: El balón pegó en el aro y salió despedido a la cancha.',
     bballAscending: 'Tiro rechazado: El balón llegó a la altura del aro en trayectoria ascendente (subiendo). Físicamente no puede encestar desde abajo.',
     bballShort: 'Tiro corto: El balón no alcanzó la altura requerida al llegar al aro ({ballY} m vs 3.05 m).',
     bballHigh: 'Tiro largo: El balón superó por mucho el tablero y aro ({ballY} m vs 3.05 m).',
+    bballShotClockViolation: '⏰ ¡VIOLACIÓN DE 24 SEGUNDOS! Se agotó el tiempo de posesión antes de lanzar. ¡Intentá de nuevo!',
+    bballTacticsTitle: '📋 Pizarra táctica del DT (Cálculo Físico):',
+    bballTacticsHint: 'Consejo: vx = v₀ · cos(θ). El balón debe llegar con velocidad descendente (vy < 0) a y = 3.05 m.',
+    bballSpeedPlaceholder: 'Calculá e ingresá tu rapidez v₀ (m/s)...',
+    bballCalcBoardTitle: '📐 Pizarra de Cálculo Físico: Tu cálculo genuino',
+    bballCalcBoardDesc: 'Resolvé con la fórmula cinemática del movimiento parabólico para embocar en el aro a 3.05 m:',
+    bballVerifyBtn: '🧪 Verificar mi cálculo',
+    bballApplyBtn: '📥 Cargar en el tiro y probar',
+    bballValidCalc: '✅ ¡Cálculo físicamente válido! El balón llegará a la altura del aro (3.05 m) en trayectoria descendente. ¡Lanzalo!',
+    bballShortCalc: '⚠️ Con esa rapidez el tiro queda corto (altura < 3.00 m al llegar al aro). Aumentá un poco v₀.',
+    bballHighCalc: '⚠️ Con esa rapidez el tiro se pasa por encima del aro y tablero. Reducí un poco v₀.',
     bballPhysicsNote: 'Física en Cancha Techada: Al ser un espacio cerrado sin ráfagas de viento y con temperatura templada, el básquetbol reproduce fielmente el modelo parabólico ideal sin resistencia del aire.',
     // Tiro Libre
     fkTitle: 'Reto: Tiro Libre sobre la Barrera (Estilo Roberto Carlos)',
@@ -298,30 +326,66 @@ export function evaluateBasketballShot({
   const heightAtHoop = timeToHoop <= duration ? posAtHoop.y : 0;
   const diffY = heightAtHoop - hoopHeight;
 
+  // Evaluación de tablero (a distance + 0.18 m)
+  const bbDist = distance + 0.18;
+  const timeToBb = bbDist / (launch.vx + numWind * 0.04);
+  const posAtBb = timeToBb <= duration ? positionAt(launch, timeToBb) : null;
+  const heightAtBb = posAtBb ? posAtBb.y : 0;
+
   let result = 'miss';
   let score = 0;
+  let collision = null;
 
-  // Condiciones de enceste
   if (timeToHoop > duration) {
     result = 'short';
     score = 0;
   } else if (!isDescending) {
     result = 'ascending';
     score = 15;
-  } else if (Math.abs(diffY) <= 0.14) {
-    // Enceste limpio (swish)
+  } else if (Math.abs(diffY) <= 0.15) {
+    // 1. Canasta limpia directa (Swish)
     result = 'swish';
     score = 100;
-  } else if (Math.abs(diffY) <= 0.32) {
-    // Enceste con aro
-    result = 'rim-in';
-    score = 75;
-  } else if (diffY < -0.32) {
-    result = 'short';
-    score = 25;
+  } else if (timeToBb <= duration && heightAtBb >= 2.85 && heightAtBb <= 3.98) {
+    // 2. Colisión con tablero
+    const vyImpact = launch.vy - gravity * timeToBb;
+    const vxImpact = launch.vx + numWind * 0.04;
+    const vxReb = -0.42 * vxImpact;
+    const vyReb = 0.52 * vyImpact;
+    const tToHoopReb = 0.18 / Math.abs(vxReb);
+    const yAtHoopReb = heightAtBb + vyReb * tToHoopReb - 0.5 * gravity * tToHoopReb * tToHoopReb;
+
+    collision = { type: 'backboard', x: bbDist, y: heightAtBb };
+
+    if (heightAtBb >= 3.05 && heightAtBb <= 3.52 && yAtHoopReb >= 2.90 && yAtHoopReb <= 3.35) {
+      result = 'bank-in';
+      score = 90;
+    } else {
+      result = 'bank-miss';
+      score = 40;
+    }
   } else {
-    result = 'high';
-    score = 25;
+    // 3. Evaluar aro o fallo
+    const rfX = distance - 0.225;
+    const timeToRf = rfX / (launch.vx + numWind * 0.04);
+    const posAtRf = timeToRf <= duration ? positionAt(launch, timeToRf) : null;
+    const heightAtRf = posAtRf ? posAtRf.y : 0;
+
+    if (Math.abs(diffY) <= 0.32) {
+      result = 'rim-in';
+      score = 75;
+      collision = { type: 'rim', x: rfX, y: heightAtRf };
+    } else if (timeToRf <= duration && Math.abs(heightAtRf - hoopHeight) <= 0.22) {
+      result = 'rim-miss';
+      score = 35;
+      collision = { type: 'rim', x: rfX, y: heightAtRf };
+    } else if (diffY < -0.32) {
+      result = 'short';
+      score = 25;
+    } else {
+      result = 'high';
+      score = 25;
+    }
   }
 
   const basePoints = evaluateTrajectory(launch, { step: duration / 75 });
@@ -344,6 +408,7 @@ export function evaluateBasketballShot({
     isDescending,
     result,
     score,
+    collision,
     points,
     environment: { wind: numWind, isIndoor: numWind === 0 },
   };

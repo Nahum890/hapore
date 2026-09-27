@@ -12,26 +12,28 @@ export default function FreeKickChallenge({ langKey = 'gn-jopara', onProgress })
   const [levelIndex, setLevelIndex] = useState(0);
   const level = FREEKICK_LEVELS[levelIndex];
 
-  const [speed, setSpeed] = useState(String(level.idealSpeed));
+  const [speed, setSpeed] = useState('');
   const [angle, setAngle] = useState(String(level.suggestedAngle));
   const [phase, setPhase] = useState('idle'); // 'idle' | 'flying' | 'result'
   const [evalResult, setEvalResult] = useState(null);
+  const [activeFlight, setActiveFlight] = useState(null);
 
   const canvasRef = useRef(null);
   const progressRef = useRef(0);
 
   useEffect(() => {
-    setSpeed(String(level.idealSpeed));
+    setSpeed('');
     setAngle(String(level.suggestedAngle));
     setPhase('idle');
     setEvalResult(null);
+    setActiveFlight(null);
     progressRef.current = 0;
   }, [levelIndex, level]);
 
-  const flight = useMemo(() => {
+  const idleFlight = useMemo(() => {
     const planned = planFlight({
-      speed: Number(speed) || 20,
-      angle: Number(angle) || 25,
+      speed: level.idealSpeed,
+      angle: level.suggestedAngle,
       gravity: level.gravity,
       targetX: level.distance,
       targetY: level.goalHeight,
@@ -40,7 +42,28 @@ export default function FreeKickChallenge({ langKey = 'gn-jopara', onProgress })
     });
     planned.isFreeKick = true;
     return planned;
-  }, [speed, angle, level]);
+  }, [level]);
+
+  const flight = (phase !== 'idle' && activeFlight) ? activeFlight : idleFlight;
+
+  const resetToIdleIfActive = () => {
+    if (phase !== 'idle') {
+      setPhase('idle');
+      setEvalResult(null);
+      setActiveFlight(null);
+      progressRef.current = 0;
+    }
+  };
+
+  const handleAngleChange = (e) => {
+    setAngle(e.target.value);
+    resetToIdleIfActive();
+  };
+
+  const handleSpeedChange = (e) => {
+    setSpeed(e.target.value);
+    resetToIdleIfActive();
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -109,15 +132,34 @@ export default function FreeKickChallenge({ langKey = 'gn-jopara', onProgress })
 
   const handleKick = (e) => {
     e?.preventDefault();
+    const numSpeed = Number(String(speed).replace(',', '.'));
+    const numAngle = Number(angle);
+    if (isNaN(numSpeed) || numSpeed <= 0 || isNaN(numAngle) || numAngle <= 0 || phase === 'flying') {
+      return;
+    }
+
     const evaluation = evaluateFreeKickShot({
-      speed,
-      angleDeg: angle,
+      speed: numSpeed,
+      angleDeg: numAngle,
       distance: level.distance,
       barrierDistance: level.barrierDistance,
       barrierHeight: level.barrierHeight,
       goalHeight: level.goalHeight,
       gravity: level.gravity,
     });
+
+    const shotFlight = planFlight({
+      speed: numSpeed,
+      angle: numAngle,
+      gravity: level.gravity,
+      targetX: level.distance,
+      targetY: level.goalHeight,
+      y0: 0,
+      obstacle: { x: level.barrierDistance, height: level.barrierHeight, isFreeKick: true },
+    });
+    shotFlight.isFreeKick = true;
+
+    setActiveFlight(shotFlight);
     setEvalResult(evaluation);
     progressRef.current = 0;
     setPhase('flying');
@@ -134,6 +176,10 @@ export default function FreeKickChallenge({ langKey = 'gn-jopara', onProgress })
   const handleNext = () => {
     setLevelIndex((prev) => (prev + 1) % FREEKICK_LEVELS.length);
   };
+
+  const numSpeed = Number(String(speed).replace(',', '.'));
+  const numAngle = Number(angle);
+  const canKick = phase !== 'flying' && speed.trim().length > 0 && !isNaN(numSpeed) && numSpeed > 0 && !isNaN(numAngle) && numAngle > 0;
 
   return (
     <div className="pgame-challenge-card" aria-label={t.fkTitle}>
@@ -187,7 +233,8 @@ export default function FreeKickChallenge({ langKey = 'gn-jopara', onProgress })
               max="60"
               step="1"
               value={angle}
-              onChange={(e) => setAngle(e.target.value)}
+              onChange={handleAngleChange}
+              disabled={phase === 'flying'}
               className="pgame-number-input"
             />
             <span className="pgame-input-unit">°</span>
@@ -201,8 +248,10 @@ export default function FreeKickChallenge({ langKey = 'gn-jopara', onProgress })
               id="fk-speed"
               type="text"
               inputMode="decimal"
+              placeholder={langKey === 'gn-jopara' ? 'Ehai ne rapidez v₀...' : 'Calculá e ingresá v₀...'}
               value={speed}
-              onChange={(e) => setSpeed(e.target.value)}
+              onChange={handleSpeedChange}
+              disabled={phase === 'flying'}
               className="pgame-number-input"
             />
             <span className="pgame-input-unit">m/s</span>
@@ -213,7 +262,7 @@ export default function FreeKickChallenge({ langKey = 'gn-jopara', onProgress })
           <button
             type="submit"
             className="btn btn-primary pgame-btn-fire"
-            disabled={phase === 'flying'}
+            disabled={!canKick}
           >
             {t.fkFireBtn}
           </button>
