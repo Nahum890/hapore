@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from '../i18n/LanguageProvider.jsx';
 
 function VisualExplorar() {
+  const { t } = useTranslation();
   return (
     <svg viewBox="0 0 320 120" width="320" height="120" aria-hidden="true" focusable="false">
       <defs>
@@ -31,18 +33,19 @@ function VisualExplorar() {
       {/* Escenarios insignias */}
       <g transform="translate(140, 22)">
         <rect x="-34" y="-12" width="68" height="20" rx="10" fill="#eff4fe" stroke="#bfdbfe" />
-        <text x="0" y="2" textAnchor="middle" fill="#123ea1" fontSize="10.5" fontWeight="800">Parábola</text>
+        <text x="0" y="2" textAnchor="middle" fill="#123ea1" fontSize="10.5" fontWeight="800">{t('onb.v.parabola')}</text>
       </g>
       <g transform="translate(250, 96)">
         <circle cx="0" cy="0" r="7" fill="#e11d48" />
         <circle cx="0" cy="0" r="3" fill="#ffffff" />
-        <text x="0" y="18" textAnchor="middle" fill="#9f1239" fontSize="10" fontWeight="750">Diana / Meta</text>
+        <text x="0" y="18" textAnchor="middle" fill="#9f1239" fontSize="10" fontWeight="750">{t('onb.v.target')}</text>
       </g>
     </svg>
   );
 }
 
 function VisualResolver() {
+  const { t } = useTranslation();
   return (
     <svg viewBox="0 0 320 120" width="320" height="120" aria-hidden="true" focusable="false">
       <defs>
@@ -66,7 +69,7 @@ function VisualResolver() {
       {/* Gravedad indicación */}
       <g transform="translate(230, 36)">
         <rect x="-10" y="-12" width="86" height="52" rx="10" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1.5" />
-        <text x="33" y="4" textAnchor="middle" fill="#0f172a" fontSize="11" fontWeight="800">Gravedad (g)</text>
+        <text x="33" y="4" textAnchor="middle" fill="#0f172a" fontSize="11" fontWeight="800">{t('onb.v.gravity')}</text>
         <line x1="33" y1="10" x2="33" y2="28" stroke="#e11d48" strokeWidth="2" markerEnd="url(#onb-arrow-coral)" />
         <text x="33" y="36" textAnchor="middle" fill="#64748b" fontSize="9.5" fontWeight="700">9,8 m/s²</text>
       </g>
@@ -75,6 +78,7 @@ function VisualResolver() {
 }
 
 function VisualRecibirAyuda() {
+  const { t } = useTranslation();
   return (
     <svg viewBox="0 0 320 120" width="320" height="120" aria-hidden="true" focusable="false">
       {/* Globo de diálogo del tutor */}
@@ -85,14 +89,12 @@ function VisualRecibirAyuda() {
         {/* Header del tutor */}
         <circle cx="20" cy="18" r="8" fill="#7047eb" />
         <text x="20" y="22" textAnchor="middle" fill="#ffffff" fontSize="10" fontWeight="900">IA</text>
-        <text x="36" y="22" fill="#4f25c2" fontSize="12" fontWeight="850">Tutor PyFis · Jopara / Castellano</text>
-        <text x="14" y="46" fill="#0f172a" fontSize="12" fontWeight="600">
-          ¿Mba'éichapa? Eipuru sen(θ) pe componente vertical-pe.
-        </text>
+        <text x="36" y="22" fill="#4f25c2" fontSize="12" fontWeight="850">{t('onb.v.tutor')}</text>
+        <text x="14" y="46" fill="#0f172a" fontSize="12" fontWeight="600">{t('onb.v.tutorMsg')}</text>
       </g>
       {/* 4 Pistas progresivas */}
       <g transform="translate(18, 92)">
-        {['Pista 1: Eje', 'Pista 2: Fórmula', 'Pista 3: Datos', 'Pista 4: Paso'].map((label, idx) => (
+        {t('onb.v.hints').split('|').map((label, idx) => (
           <g key={idx} transform={`translate(${idx * 72}, 0)`}>
             <rect x="0" y="0" width="66" height="22" rx="7" fill={idx === 0 ? '#1d5bd8' : '#ffffff'} stroke={idx === 0 ? '#123ea1' : '#cbd5e1'} strokeWidth="1.2" />
             <text x="33" y="15" textAnchor="middle" fill={idx === 0 ? '#ffffff' : '#475569'} fontSize="9.5" fontWeight={idx === 0 ? '800' : '700'}>
@@ -106,6 +108,7 @@ function VisualRecibirAyuda() {
 }
 
 function VisualVisualizar() {
+  const { t } = useTranslation();
   return (
     <svg viewBox="0 0 320 120" width="320" height="120" aria-hidden="true" focusable="false">
       {/* Suelo */}
@@ -115,7 +118,7 @@ function VisualVisualizar() {
       <text x="194" y="99" fill="#94a3b8" fontSize="10" fontWeight="700">30°</text>
       {/* Curva 60° (misma distancia que 30°, simetría) */}
       <path d="M 24 102 Q 100 12 190 102" fill="none" stroke="#cbd5e1" strokeWidth="1.8" strokeDasharray="3 3" />
-      <text x="100" y="16" textAnchor="middle" fill="#64748b" fontSize="10" fontWeight="700">60° (simetría)</text>
+      <text x="100" y="16" textAnchor="middle" fill="#64748b" fontSize="10" fontWeight="700">{t('onb.v.symmetry')}</text>
       {/* Curva 45° (Alcance Máximo Óptimo) */}
       <path d="M 24 102 Q 140 22 270 102" fill="none" stroke="#1d5bd8" strokeWidth="3" />
       {/* Punto ápice Hmax */}
@@ -125,13 +128,15 @@ function VisualVisualizar() {
       <g transform="translate(270, 102)">
         <circle cx="0" cy="0" r="6" fill="#059669" />
         <circle cx="0" cy="0" r="2.5" fill="#ffffff" />
-        <text x="0" y="-10" textAnchor="middle" fill="#065f46" fontSize="10.5" fontWeight="900">45° Alcance Máx</text>
+        <text x="0" y="-10" textAnchor="middle" fill="#065f46" fontSize="10.5" fontWeight="900">{t('onb.v.maxRange')}</text>
       </g>
     </svg>
   );
 }
 
 function VisualContinuar({ role }) {
+  const { t } = useTranslation();
+  const teacher = role === 'maestro';
   return (
     <svg viewBox="0 0 320 120" width="320" height="120" aria-hidden="true" focusable="false">
       {/* Mbarete XP Card */}
@@ -146,15 +151,15 @@ function VisualContinuar({ role }) {
       <g transform="translate(162, 18)">
         <rect x="0" y="0" width="140" height="84" rx="14" fill="#eff4fe" stroke="#bfdbfe" strokeWidth="1.5" />
         <text x="14" y="24" fill="#123ea1" fontSize="11" fontWeight="900">
-          {role === 'maestro' ? 'AULA DOCENTE' : 'TARJETAS Y AULA'}
+          {t(teacher ? 'onb.v.cardTeacher' : 'onb.v.cardStudent')}
         </text>
         <text x="14" y="48" fill="#1d5bd8" fontSize="16" fontWeight="850">
-          {role === 'maestro' ? 'Proyector 4K' : 'Mazo Balística'}
+          {t(teacher ? 'onb.v.cardTeacherSub' : 'onb.v.cardStudentSub')}
         </text>
         <g transform="translate(14, 58)">
           <rect x="0" y="0" width="112" height="18" rx="6" fill="#1d5bd8" />
           <text x="56" y="13" textAnchor="middle" fill="#ffffff" fontSize="9.5" fontWeight="800">
-            {role === 'maestro' ? 'Código de clase' : '¡Progreso guardado!'}
+            {t(teacher ? 'onb.v.cardTeacherBtn' : 'onb.v.cardStudentBtn')}
           </text>
         </g>
       </g>
@@ -162,48 +167,8 @@ function VisualContinuar({ role }) {
   );
 }
 
-const STEPS = [
-  {
-    number: '01',
-    label: 'Explorar',
-    title: 'Explorá escenarios de tiro parabólico',
-    description:
-      'Elegí entre situaciones reales: dron de rescate en Alto Paraná, lanzamiento en básquetbol o tiro sobre paredón. Observá los datos iniciales de velocidad (v0), ángulo (θ) y gravedad.',
-    tip: 'Las condiciones de lanzamiento determinan toda la cinemática del movimiento.',
-  },
-  {
-    number: '02',
-    label: 'Resolver',
-    title: 'Descomponé y calculá paso a paso',
-    description:
-      'Separá el vuelo en dos componentes independientes: avance horizontal constante (vx = v0 · cos θ) y aceleración vertical gravitatoria (vy = v0 · sen θ - g·t). Escribí tu resultado con coma o punto.',
-    tip: 'Equivocarse también es aprender: la confianza Mbarete XP solo sube, nunca baja.',
-  },
-  {
-    number: '03',
-    label: 'Recibir ayuda',
-    title: 'Tutor pedagógico y pistas socráticas',
-    description:
-      'Si tenés dudas, activá las 4 pistas progresivas (fórmula, sustitución, desarrollo) o consultale al tutor inteligente en Jopara o Castellano. Te orienta paso a paso sin darte la respuesta directa.',
-    tip: 'El tutor pedagógico funciona con IA y también en modo 100% offline sin internet.',
-  },
-  {
-    number: '04',
-    label: 'Visualizar',
-    title: 'Comprobá con la simulación interactiva',
-    description:
-      'Al tocar “Comprobar con el simulador”, se genera la parábola física real calculada punto a punto. Mirá la altura máxima alcanzada, el impacto en la diana y experimentá por qué 45° brinda el alcance máximo.',
-    tip: 'El simulador no revela el resultado hasta finalizar la comprobación animada.',
-  },
-  {
-    number: '05',
-    label: 'Continuar',
-    title: 'Sumá Mbarete XP y dominá la física',
-    description:
-      'Consolidá conceptos clave con tarjetas didácticas de repaso espaciado, ganá XP por cada actividad completada y sincronizá tu progreso en el aula con el código de tu docente.',
-    tip: 'Todo tu progreso se guarda localmente en el dispositivo para estudiar sin conexión.',
-  },
-];
+// Textos en messages.js (onb.s<n>.*); el paso 5 cambia para el docente (onb.t5.*).
+const STEPS = ['01', '02', '03', '04', '05'].map((number, index) => ({ number, key: `onb.s${index + 1}` }));
 
 export default function Onboarding({ open, onDismiss, onStart, role = 'alumno' }) {
   const dialogRef = useRef(null);
@@ -237,16 +202,16 @@ export default function Onboarding({ open, onDismiss, onStart, role = 'alumno' }
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [open, step]);
 
-  const current = step === 4 && role === 'maestro'
-    ? {
-        number: '05',
-        label: 'Continuar',
-        title: 'Prepará tu clase y proyectá',
-        description:
-          'En Aula podés seleccionar ejercicios por situación, preparar diapositivas interactivas para proyectar en clase, compartir el código de clase de 6 letras y descargar la ficha de aula en PDF.',
-        tip: 'Tus alumnos ingresan el código desde cualquier dispositivo móvil o computadora.',
-      }
-    : STEPS[step];
+  const { t } = useTranslation();
+  const base = STEPS[step];
+  const textKey = step === 4 && role === 'maestro' ? 'onb.t5' : base.key;
+  const current = {
+    number: base.number,
+    label: t(`${base.key}.label`),
+    title: t(`${textKey}.title`),
+    description: t(`${textKey}.text`),
+    tip: t(`${textKey}.tip`),
+  };
   return (
     <dialog
       ref={dialogRef}
@@ -263,18 +228,18 @@ export default function Onboarding({ open, onDismiss, onStart, role = 'alumno' }
     >
       <div className="onboarding-shell">
         <div className="onboarding-top">
-          <span className="onboarding-brand">PyFis IA · Movimiento Parabólico · Guía rápida</span>
-          <button type="button" className="onboarding-close" aria-label="Cerrar guía rápida" onClick={onDismiss}>
+          <span className="onboarding-brand">{t('onb.brand')}</span>
+          <button type="button" className="onboarding-close" aria-label={t('onb.close')} onClick={onDismiss}>
             ×
           </button>
         </div>
         <p className="onboarding-progress-label">
-          Paso {step + 1} de {STEPS.length} · {current.label}
+          {t('onb.progress', { n: step + 1, total: STEPS.length, label: current.label })}
         </p>
         <div
           className="onboarding-progress"
           role="progressbar"
-          aria-label="Progreso de la guía"
+          aria-label={t('onb.progressLabel')}
           aria-valuenow={step + 1}
           aria-valuemin={1}
           aria-valuemax={STEPS.length}
@@ -298,13 +263,13 @@ export default function Onboarding({ open, onDismiss, onStart, role = 'alumno' }
           </div>
           <p>{current.description}</p>
           <div className="onboarding-tip">
-            <strong>Consejo pedagógico</strong>
+            <strong>{t('onb.tip')}</strong>
             <span>{current.tip}</span>
           </div>
         </article>
         <div className="onboarding-actions">
           <button type="button" className="onboarding-skip" onClick={onDismiss}>
-            Omitir guía
+            {t('onb.skip')}
           </button>
           <div className="onboarding-steps">
             {step > 0 && (
@@ -313,7 +278,7 @@ export default function Onboarding({ open, onDismiss, onStart, role = 'alumno' }
                 className="btn btn-secondary"
                 onClick={() => setStep(value => value - 1)}
               >
-                Anterior
+                {t('common.previous')}
               </button>
             )}
             {step < STEPS.length - 1 ? (
@@ -322,11 +287,11 @@ export default function Onboarding({ open, onDismiss, onStart, role = 'alumno' }
                 className="btn btn-primary"
                 onClick={() => setStep(value => value + 1)}
               >
-                Siguiente
+                {t('common.next')}
               </button>
             ) : (
               <button type="button" className="btn btn-primary" onClick={onStart}>
-                Empezar a practicar
+                {t('onb.start')}
               </button>
             )}
           </div>

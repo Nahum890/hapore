@@ -44,6 +44,11 @@ create table if not exists public.class_members (
   joined_at timestamptz not null default now(),
   primary key (class_id, student_id)
 );
+-- Panel docente: ejercicios distintos resueltos y aciertos por tema
+-- ({ "componentes": { "attempts": 4, "correct": 3 }, ... }). Los sube el alumno.
+alter table public.class_members add column if not exists solved integer not null default 0 check (solved >= 0);
+alter table public.class_members add column if not exists topic_stats jsonb not null default '{}'::jsonb
+  check (jsonb_typeof(topic_stats) = 'object' and pg_column_size(topic_stats) <= 4000);
 alter table public.class_members add column if not exists phone text check (char_length(phone) <= 24);
 alter table public.class_members add column if not exists email text check (char_length(email) <= 120);
 
@@ -64,6 +69,13 @@ create index if not exists messages_class_id_idx on public.messages (class_id, i
 alter table public.classes enable row level security;
 alter table public.class_members enable row level security;
 alter table public.messages enable row level security;
+
+-- Permisos explícitos: así funciona aunque el proyecto se haya creado con
+-- "Automatically expose new tables" desactivado. Quién ve o cambia cada fila
+-- lo siguen decidiendo las políticas RLS de abajo.
+grant usage on schema public to authenticated;
+grant select, insert, update, delete on public.classes, public.class_members, public.messages to authenticated;
+grant usage, select on all sequences in schema public to authenticated;
 
 -- Funciones auxiliares "security definer": consultan las tablas sin pasar por
 -- RLS, así las políticas de classes y class_members no se llaman entre sí

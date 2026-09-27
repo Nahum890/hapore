@@ -73,7 +73,7 @@ const server = http.createServer(async (req, res) => {
     const p = params(url);
     if (req.method === 'GET') {
       const own = classes.filter(item => item.teacher_id === uid && (!p.teacher_id || p.teacher_id === uid));
-      return send(res, 200, own.map(item => ({ id: item.id, code: item.code, title: item.title, created_at: item.created_at, class_members: members.filter(m => m.class_id === item.id) })));
+      return send(res, 200, own.map(item => ({ id: item.id, code: item.code, title: item.title, created_at: item.created_at, config: item.content?.config ?? null, class_members: members.filter(m => m.class_id === item.id) })));
     }
     if (req.method === 'DELETE') {
       const index = classes.findIndex(item => item.id === p.id && item.teacher_id === uid);

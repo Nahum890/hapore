@@ -104,7 +104,7 @@ function drone(ctx, x, y, size, rotorPhase, flying, carrying) {
   }
   ctx.restore();
 }
-function drawDrone(ctx, { width, height, flight, progress, phase, now, verdict }) {
+function drawDrone(ctx, { width, height, flight, progress, phase, now, verdict, hideTarget, guessX, guessLabel }) {
   const groundY = height - Math.max(34, height * .13);
   farmBackdrop(ctx, width, height, groundY);
   const originX = Math.max(34, width * .07);
@@ -117,7 +117,8 @@ function drawDrone(ctx, { width, height, flight, progress, phase, now, verdict }
   // El color de la zona refleja si la respuesta escrita fue correcta, no si
   // el dibujo geométrico "cayó cerca": ambas cosas pueden diferir cuando la
   // trayectoria mostrada no depende del número que escribió el estudiante.
-  deliveryTarget(ctx, targetPoint.x, groundY, phase === 'landed' && verdict === true);
+  if (!hideTarget) deliveryTarget(ctx, targetPoint.x, groundY, phase === 'landed' && verdict === true);
+  if (Number.isFinite(guessX) && phase === 'landed') guessMarker(ctx, originX + guessX * scale, groundY, width, guessLabel);
   if (phase !== 'idle') trajectory(ctx, points, Math.round(progress * (points.length - 1)) + 1, C.orange, false);
   ctx.fillStyle = 'rgba(30,65,54,.2)'; ctx.beginPath(); ctx.ellipse(current.x, groundY - 3, 14, 4, 0, 0, Math.PI * 2); ctx.fill();
   drone(ctx, current.x, Math.min(current.y - 29, groundY - 30), Math.max(20, Math.min(26, width * .05)), now * .045, phase === 'flying', phase !== 'landed');
@@ -514,7 +515,7 @@ function soccerBall(ctx, x, y, radius, spin) {
   ctx.restore();
 }
 
-function drawWall(ctx, { width, height, flight, progress, phase, now, verdict }) {
+function drawWall(ctx, { width, height, flight, progress, phase, now, verdict, hideTarget, guessX, guessLabel }) {
   const isFreeKick = Boolean(flight.isFreeKick || flight.obstacle?.isFreeKick);
   const groundY = height - Math.max(30, height * .12);
 
@@ -538,9 +539,10 @@ function drawWall(ctx, { width, height, flight, progress, phase, now, verdict })
     soccerGoal(ctx, targetPoint.x, groundY, scale, phase === 'landed' && flight.clearsObstacle && (flight.landingX >= flight.targetX - 2));
     soccerWallBarrier(ctx, obstacleX, groundY, scale, obstacle.height || 1.8);
   } else {
-    landingSpot(ctx, targetPoint.x, groundY, phase === 'landed' && verdict === true);
+    if (!hideTarget) landingSpot(ctx, targetPoint.x, groundY, phase === 'landed' && verdict === true);
     wall(ctx, obstacleX, groundY, scale, obstacle.height, phase === 'landed' ? flight.clearsObstacle : null);
   }
+  if (Number.isFinite(guessX) && phase === 'landed') guessMarker(ctx, originX + guessX * scale, groundY, width, guessLabel);
 
   if (phase !== 'idle') trajectory(ctx, points, Math.round(progress * (points.length - 1)) + 1, isFreeKick ? '#e53e3e' : '#2f7d5e', false);
   kid(ctx, originX - 6, groundY, Math.max(28, Math.min(36, width * .075)), phase === 'flying' && progress < 0.15);
@@ -561,9 +563,21 @@ function drawWall(ctx, { width, height, flight, progress, phase, now, verdict })
   label(ctx, 8, 24, explainerText, isFreeKick ? '#c53030' : '#256a4a');
 }
 
-export function drawScene(ctx, { width, height, flight, progress = 0, phase = 'idle', now = 0, scenario = 'dron', verdict = null }) {
+// Marca vertical con la predicción del alumno (minijuego "Predecí y lanzá").
+function guessMarker(ctx, x, groundY, width, text) {
+  const px = Math.max(10, Math.min(width - 10, x));
+  ctx.save();
+  ctx.strokeStyle = '#7047eb'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
+  ctx.beginPath(); ctx.moveTo(px, groundY); ctx.lineTo(px, groundY - 46); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#7047eb'; ctx.font = '800 11px system-ui, sans-serif'; ctx.textAlign = px > width - 40 ? 'right' : 'center';
+  ctx.fillText(text, px, groundY - 50);
+  ctx.restore();
+}
+
+export function drawScene(ctx, { width, height, flight, progress = 0, phase = 'idle', now = 0, scenario = 'dron', verdict = null, hideTarget = false, guessX = null, guessLabel = '' }) {
   if (!(width > 0 && height > 0) || !flight) return;
-  const args = { width, height, flight, progress, phase, now, verdict };
+  const args = { width, height, flight, progress, phase, now, verdict, hideTarget, guessX, guessLabel };
   if (scenario === 'basketball') return drawBasketball(ctx, args);
   if (scenario === 'wall' || scenario === 'roberto-carlos') return drawWall(ctx, args);
   return drawDrone(ctx, args);

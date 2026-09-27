@@ -71,7 +71,7 @@
     "byErrorType": {
       "confunde_velocidades": {
         "nivel_1": {
-          "jopara": ["¡Emañami! ¿Opavave pe velocidad-pa oho pe dirección ojeruréva-pe, térã ha'e la velocidad completa?", "Emañami ne respuesta rehe: ¿pe valor ha'e la velocidad inicial completa, térã peteĩ parte año?"],
+          "jopara": ["¡Emañami! ¿La velocidad completa-pa oho pe dirección ojeruréva-pe, térã peteĩ parte año?", "Emañami ne respuesta rehe: ¿pe valor ha'e la velocidad inicial completa, térã peteĩ parte año?"],
           "es": ["Mirá tu respuesta: ¿es la velocidad inicial completa o solo la parte que piden?", "Fijate si usaste el valor total de v0 en vez de una de sus componentes."]
         },
         "nivel_2": {
@@ -89,11 +89,11 @@
       },
       "confunde_componentes": {
         "nivel_1": {
-          "jopara": ["¡Emañami pe velocidad rehe! ¿Opavave la velocidad-pa oho horizontalmente, térã oñemboja'o?", "Emañami: pe proyectil oho yvate ha tenonde al mismo tiempo, ndaha'éi peteĩ dirección año."],
+          "jopara": ["¡Emañami pe velocidad rehe! ¿La velocidad completa-pa oho horizontalmente, térã oñemboja'o?", "Emañami: pe proyectil oho yvate ha tenonde al mismo tiempo, ndaha'éi peteĩ dirección año."],
           "es": ["Mirá la velocidad: ¿va toda hacia adelante, o se reparte en dos direcciones?", "El proyectil avanza y sube al mismo tiempo: no es una sola dirección."]
         },
         "nivel_2": {
-          "jopara": ["Pe velocidad oñemboja'o dos partes-pe: horizontal (tenonde) ha vertical (yvate). Cada parte oiko peteĩ función trigonométrica reheve.", "Ani reipuru pe mismo función mokõive componente-pe: horizontal ha vertical ndaha'éi peteĩcha."],
+          "jopara": ["Pe velocidad oñemboja'o dos partes-pe: horizontal (tenonde) ha vertical (yvate). Cada parte oipuru peteĩ función trigonométrica.", "Ani reipuru pe mismo función mokõive componente-pe: horizontal ha vertical ndaha'éi peteĩcha."],
           "es": ["La velocidad se separa en dos partes: horizontal (adelante) y vertical (arriba). Cada una usa una función distinta.", "No uses la misma función para las dos componentes: horizontal y vertical no son lo mismo."]
         },
         "nivel_3": {

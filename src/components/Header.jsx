@@ -49,7 +49,7 @@ export default function Header({ user, onHome, onLogout, onOpenSettings }) {
             className="user-chip"
             type="button"
             onClick={onOpenSettings}
-            aria-label={'Configuración de ' + user.name}
+            aria-label={`${t('header.settings')}: ${user.name}`}
             title={user.name + ' (' + (user.role === 'maestro' ? t('header.teacher') : t('header.student')) + ')'}
           >
             {user.avatar ? (

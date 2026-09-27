@@ -15,7 +15,7 @@
     "tema": "Movimiento Parabólico",
     "tipo": "abierta",
     "pregunta": "¿Por qué la componente horizontal de la velocidad no cambia durante el vuelo?",
-    "preguntaJopara": "¿Mba'érepa pe componente horizontal velocidad rehegua ndoambuéi vuelo pukukue?",
+    "preguntaJopara": "¿Mba'érepa pe componente horizontal velocidad rehegua ndoambuéi vuelo pukukue-pe?",
     "respuesta": "Porque ignorando el aire no hay fuerza horizontal: la única fuerza es la gravedad, que actúa hacia abajo.",
     "respuestaJopara": "Ndairévi aire: pe fuerza oiko gravedad rehe, ogo'êvo ape yvýpe.",
     "claves": ["aire", "fuerza", "horizontal", "gravedad"],
@@ -28,7 +28,7 @@
     "pregunta": "¿Qué le ocurre a la velocidad vertical durante la subida del proyectil?",
     "preguntaJopara": "¿Mba'épa oiko velocidad vertical rehe proyectil ojupi aja?",
     "respuesta": "Disminuye hasta llegar a cero en la altura máxima, porque la gravedad la frena.",
-    "respuestaJopara": "Pe gravedad omboy chupe: vy oguepe'ẽ ha oiko cero-pe pe altura máxima-pe.",
+    "respuestaJopara": "Pe gravedad ombombegue chupe: vy opyta cero-pe pe altura máxima-pe.",
     "claves": ["disminuye", "cero", "altura", "gravedad", "frena"],
     "explicacion": "Al subir, la gravedad frena la componente vertical hasta que vale cero en el punto más alto; después la acelera hacia abajo."
   },
@@ -50,7 +50,7 @@
     "pregunta": "¿Qué pasa con la velocidad horizontal en la altura máxima?",
     "preguntaJopara": "¿Mba'épa oiko velocidad horizontal rehe altura máxima-pe?",
     "respuesta": "Sigue igual: la componente horizontal no cambia, por eso el proyectil sigue avanzando hacia adelante.",
-    "respuestaJopara": "Opavave la vx: nomanba, upévo el proyectil oho gueteri lape.",
+    "respuestaJopara": "Vx opyta upeichagua: ndokambiái, upévare pe proyectil oho gueteri tenonde gotyo.",
     "claves": ["horizontal", "cambia", "avanza", "sigue"],
     "explicacion": "En la altura máxima solo la velocidad vertical vale cero; la horizontal (vx = v0 * cos(ángulo)) sigue constante."
   },
@@ -70,20 +70,20 @@
     "tema": "Movimiento Parabólico",
     "tipo": "vf",
     "enunciado": "En el movimiento parabólico, la componente horizontal de la velocidad permanece constante durante todo el vuelo.",
-    "enunciadoJopara": "Movimiento parabólico-pe, componente horizontal velocidad rehegua opyta constante vuelo pukukue.",
+    "enunciadoJopara": "Movimiento parabólico-pe, componente horizontal velocidad rehegua opyta constante vuelo pukukue-pe.",
     "esVerdadero": true,
     "explicacion": "Si ignoramos el aire, no hay fuerza horizontal: vx = v0 * cos(ángulo) y no cambia.",
-    "explicacionJopara": "Ndairévi aire: pe vx nomanba oikope pe vuelo pukukuepe."
+    "explicacionJopara": "Ndaipóri aire rehe: pe vx ndokambiái vuelo pukukue-pe."
   },
   {
     "id": "q-mp-08",
     "tema": "Movimiento Parabólico",
     "tipo": "vf",
     "enunciado": "En la altura máxima, la velocidad vertical del proyectil vale cero.",
-    "enunciadoJopara": "Pe altura máxima-pe, velocidad vertical proyectil rehegua oiko cero.",
+    "enunciadoJopara": "Pe altura máxima-pe, velocidad vertical proyectil rehegua opyta cero-pe.",
     "esVerdadero": true,
     "explicacion": "Ahí la subida se frena por completo por efecto de la gravedad; luego empieza a caer.",
-    "explicacionJopara": "Pe gravedad omboty la subida: vy oiko cero-pe upépe."
+    "explicacionJopara": "Pe gravedad ombombegue la subida: vy opyta cero-pe upépe."
   },
   {
     "id": "q-mp-09",
@@ -93,7 +93,7 @@
     "enunciadoJopara": "Pe gravedad omboacelera movimiento horizontal proyectil rehegua.",
     "esVerdadero": false,
     "explicacion": "La gravedad actúa solo hacia abajo (vertical); el movimiento horizontal mantiene velocidad constante.",
-    "explicacionJopara": "Pe gravedad oiko ape yvýpe; pe horizontal oiko constante."
+    "explicacionJopara": "Pe gravedad oho ape yvý gotyo año; pe horizontal opyta constante."
   },
   {
     "id": "q-mp-10",
@@ -113,7 +113,7 @@
     "enunciadoJopara": "Ángulo de lanzamiento tuichavévo, alcance tuichave tapia.",
     "esVerdadero": false,
     "explicacion": "El alcance máximo se logra a 45 grados: ángulos muy altos reducen la componente horizontal y el proyectil cae antes.",
-    "explicacionJopara": "45 grado-pe pe alcance oiko máximo: ángulo yvateiteréi-pe, vx oñemombyry ha ho'a mboyve."
+    "explicacionJopara": "45 grado-pe pe alcance og̃uahẽ hína máximo-pe: ángulo yvateiterei ramo, vx omichĩve ha proyectil ho'a mboyve."
   },
   {
     "id": "q-mp-12",

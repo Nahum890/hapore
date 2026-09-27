@@ -13,10 +13,10 @@
     "id": "fc-02",
     "topic": "Movimiento Parabólico",
     "frente_es": "¿La componente horizontal (vx) cambia durante el vuelo?",
-    "frente_jopara": "¿Oho pa'e la velocidad horizontal (vx) pe vuelo pukukuepe?",
+    "frente_jopara": "¿Oho pa'e la velocidad horizontal (vx) vuelo pukukue-pe?",
     "dorso_concepto": "No. Si ignoramos el aire, vx permanece constante; solo cambia la velocidad vertical por efecto de la gravedad.",
     "formula": "vx = v0 * cos(ángulo)",
-    "front": "¿La componente horizontal (vx) cambia durante el vuelo?\n¿Oho pa'e la velocidad horizontal (vx) pe vuelo pukukuepe?",
+    "front": "¿La componente horizontal (vx) cambia durante el vuelo?\n¿Oho pa'e la velocidad horizontal (vx) vuelo pukukue-pe?",
     "back": "No. Si ignoramos el aire, vx permanece constante; solo cambia la velocidad vertical por efecto de la gravedad."
   },
   {

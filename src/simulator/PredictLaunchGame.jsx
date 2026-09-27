@@ -6,21 +6,18 @@ import { validateAnswer } from '../physics/physicsValidator.js';
 import { isNumericAnswer } from '../components/ExerciseCard.jsx';
 import { useTranslation } from '../i18n/LanguageProvider.jsx';
 import ParabolicGames from '../games/parabolic/ParabolicGames.jsx';
+import './PredictLaunchGame.css';
 
-// Minijuego "predecí → lanzá → observá → corregí" y suite completa de desafíos
-// de Movimiento Parabólico.
-// Reutiliza el mismo motor físico (flightPlan/planFlight) y el mismo canvas
-// (projectileRenderer/drawScene) que el simulador ligado a los ejercicios.
+// Minijuego "predecí → lanzá → observá → corregí". Reutiliza el mismo motor
+// físico (flightPlan/planFlight) y el mismo canvas (projectileRenderer) que el
+// simulador ligado a los ejercicios. La pregunta es siempre "¿a cuántos metros
+// cae?", así que solo se usan escenas donde se sale y se llega al suelo.
 const SCENARIOS = [
-  { id: 'dron', label: 'Dron', obstacle: null, targetY: 0, y0: 0 },
-  { id: 'basketball', label: 'Básquetbol (Aro 3.05 m)', obstacle: null, targetY: 3.05, y0: 1.8 },
-  { id: 'roberto-carlos', label: 'Tiro libre (Estilo Roberto Carlos)', obstacle: { x: 9.15, height: 1.8, isFreeKick: true }, targetY: 2.44, y0: 0 },
-  { id: 'wall', label: 'Pelota sobre el paredón', obstacle: { x: 8, height: 1.5 }, targetY: 0, y0: 0 },
+  { id: 'dron', obstacle: null },
+  { id: 'wall', obstacle: { x: 8, height: 1.5 } },
 ];
 // La predicción es una estimación antes de ver el resultado, no una respuesta
-// de examen: se usa una tolerancia más amplia que la de los ejercicios
-// calificados (1%), justificada porque acá se evalúa el criterio del alumno
-// sobre el orden de magnitud del alcance, no un cálculo exacto.
+// de examen: tolerancia más amplia (12 %) que la de los ejercicios (1 %).
 const GUESS_TOLERANCE = 0.12;
 
 function randomBetween(min, max) {
@@ -28,9 +25,8 @@ function randomBetween(min, max) {
 }
 
 function newRound() {
-  const scenario = SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)];
   return {
-    scenario,
+    scenario: SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)],
     v0: randomBetween(14, 26),
     angle: randomBetween(25, 65),
     gravity: 9.8,
@@ -47,24 +43,22 @@ export default function PredictLaunchGame() {
   const canvasRef = useRef(null);
   const progressRef = useRef(0);
 
-  const flight = useMemo(
-    () =>
-      planFlight({
-        speed: round.v0,
-        angle: round.angle,
-        gravity: round.gravity,
-        targetX: 9999,
-        targetY: round.scenario.targetY || 0,
-        y0: round.scenario.y0 || 0,
-        obstacle: round.scenario.obstacle,
-      }),
-    [round],
-  );
+  // Causa del dibujo roto: antes se pasaba targetX = 9999 y el renderizador
+  // escalaba la escena a ~11 km, así que la parábola quedaba como un punto
+  // pegado al borde. Ahora el "objetivo" es el propio punto de caída: la
+  // escena se ajusta al vuelo real y la marca de llegada se oculta hasta que
+  // el proyectil aterriza, para no delatar la respuesta.
+  const flight = useMemo(() => {
+    const base = { speed: round.v0, angle: round.angle, gravity: round.gravity, targetY: 0, y0: 0, obstacle: round.scenario.obstacle };
+    const probe = planFlight({ ...base, targetX: 10 });
+    return planFlight({ ...base, targetX: probe.landingX });
+  }, [round]);
 
   const result = useMemo(() => {
     if (phase !== 'result') return null;
     return validateAnswer(flight.landingX, prediction, { tolerance: GUESS_TOLERANCE, unit: 'm' });
   }, [phase, flight.landingX, prediction]);
+  const guessX = result ? Number(result.student) : null;
 
   useEffect(() => {
     if (activeMode !== 'predict') return undefined;
@@ -80,6 +74,7 @@ export default function PredictLaunchGame() {
         width, height, flight, progress: progressRef.current,
         phase: phase === 'flying' ? 'flying' : phase === 'result' ? 'landed' : 'idle',
         now: 0, scenario: round.scenario.id, verdict: result ? result.correct : null,
+        hideTarget: phase !== 'result', guessX, guessLabel: t('game.guessMark'),
       });
     };
     const resize = () => {
@@ -110,94 +105,64 @@ export default function PredictLaunchGame() {
       draw();
     }
     return () => { cancelAnimationFrame(frameId); observer.disconnect(); };
-  }, [flight, phase, round.scenario.id, result, activeMode]);
+  }, [flight, phase, round.scenario.id, result, activeMode, guessX, t]);
 
   const canLaunch = isNumericAnswer(prediction);
   const launch = () => { if (canLaunch) setPhase('flying'); };
   const retry = () => { setRound(newRound()); setPrediction(''); progressRef.current = 0; setPhase('predicting'); };
 
   const feedbackKey = !result ? null : result.correct ? 'game.correct' : result.reason === 'out-of-tolerance' && result.diff <= result.toleranceAbs * 2 ? 'game.close' : 'game.incorrect';
+  const scenarioName = t(`scenario.${round.scenario.id}`);
 
   return (
-    <div className="predict-game-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      {/* Selector de modo: Predecí y Lanzá vs Desafíos Completos */}
-      <div style={{ display: 'flex', gap: '0.5rem', background: '#f1f5f9', padding: '0.35rem', borderRadius: '0.65rem' }}>
-        <button
-          type="button"
-          style={{
-            flex: '1 1 auto',
-            padding: '0.5rem 1rem',
-            border: 'none',
-            borderRadius: '0.5rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-            background: activeMode === 'predict' ? '#ffffff' : 'transparent',
-            color: activeMode === 'predict' ? '#0f172a' : '#64748b',
-            boxShadow: activeMode === 'predict' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-          }}
-          onClick={() => setActiveMode('predict')}
-        >
-          🎲 {t('game.title')}
-        </button>
-        <button
-          type="button"
-          style={{
-            flex: '1 1 auto',
-            padding: '0.5rem 1rem',
-            border: 'none',
-            borderRadius: '0.5rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-            background: activeMode === 'challenges' ? '#ffffff' : 'transparent',
-            color: activeMode === 'challenges' ? '#0f172a' : '#64748b',
-            boxShadow: activeMode === 'challenges' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-          }}
-          onClick={() => setActiveMode('challenges')}
-        >
-          🏆 Desafíos de Física (Básquetbol 3.05 m / Roberto Carlos)
-        </button>
+    <div className="predict-game-wrapper">
+      <div className="predict-mode-switch" role="tablist" aria-label={t('game.modeLabel')}>
+        <button type="button" role="tab" aria-selected={activeMode === 'predict'} className={activeMode === 'predict' ? 'is-active' : ''} onClick={() => setActiveMode('predict')}>{t('game.title')}</button>
+        <button type="button" role="tab" aria-selected={activeMode === 'challenges'} className={activeMode === 'challenges' ? 'is-active' : ''} onClick={() => setActiveMode('challenges')}>{t('game.challenges')}</button>
       </div>
 
       {activeMode === 'challenges' ? (
         <ParabolicGames language={language} />
       ) : (
         <section className="card predict-game" aria-label={t('game.title')}>
-          <h2>{t('game.title')}</h2>
-          <p className="teacher-note">{t('game.intro')}</p>
+          <header className="predict-head">
+            <h2>{t('game.title')}</h2>
+            <p>{t('game.intro')}</p>
+          </header>
+          <ol className="predict-steps" aria-hidden="true">
+            <li className={phase === 'predicting' ? 'is-current' : ''}>{t('game.step1')}</li>
+            <li className={phase === 'predicting' ? 'is-current' : ''}>{t('game.step2')}</li>
+            <li className={phase !== 'predicting' ? 'is-current' : ''}>{t('game.step3')}</li>
+          </ol>
           <div className="values-chips">
-            <span className="chip chip-data"><small>Velocidad inicial</small><strong>{round.v0} m/s</strong></span>
-            <span className="chip chip-data"><small>Ángulo</small><strong>{round.angle}°</strong></span>
-            <span className="chip chip-data"><small>Gravedad</small><strong>{round.gravity} m/s²</strong></span>
-            <span className="chip chip-topic">{round.scenario.label}</span>
+            <span className="chip chip-data"><small>{t('value.v0')}</small><strong>{round.v0} m/s</strong></span>
+            <span className="chip chip-data"><small>{t('value.angle')}</small><strong>{round.angle}°</strong></span>
+            <span className="chip chip-data"><small>{t('value.gravity')}</small><strong>{round.gravity} m/s²</strong></span>
+            <span className="chip chip-topic">{scenarioName}</span>
           </div>
-          <canvas ref={canvasRef} className="simulator-canvas" role="img" aria-label={`${round.scenario.label}. ${phase === 'result' ? `El recorrido termina a ${formatMeasure(flight.landingX)} metros.` : 'La trayectoria aparecerá al lanzar.'}`}>
-            Simulación del minijuego.
-          </canvas>
+          <div className="predict-canvas-frame">
+            <canvas ref={canvasRef} className="simulator-canvas predict-canvas" role="img" aria-label={`${scenarioName}. ${phase === 'result' ? t('game.canvasEnd', { x: formatMeasure(flight.landingX) }) : t('game.canvasWaiting')}`} />
+          </div>
           {phase === 'predicting' && (
-            <form className="quiz-justification" onSubmit={event => { event.preventDefault(); launch(); }}>
-              <label className="answer-label" htmlFor="predict-guess">{t('game.predictLabel')} (m)</label>
-              <input id="predict-guess" className="quiz-input" type="text" inputMode="decimal" autoComplete="off" value={prediction} onChange={event => setPrediction(event.target.value)} placeholder="Escribí un número" />
-              <button type="submit" className="btn btn-primary" disabled={!canLaunch}>{t('game.launch')}</button>
+            <form className="predict-form" onSubmit={event => { event.preventDefault(); launch(); }}>
+              <label htmlFor="predict-guess">{t('game.predictLabel')}</label>
+              <div className="predict-input-row">
+                <input id="predict-guess" className="quiz-input" type="text" inputMode="decimal" autoComplete="off" value={prediction} onChange={event => setPrediction(event.target.value)} placeholder={t('game.placeholder')} />
+                <span className="predict-unit">m</span>
+                <button type="submit" className="btn btn-primary" disabled={!canLaunch}>{t('game.launch')}</button>
+              </div>
             </form>
           )}
-          {phase === 'flying' && <p className="simulator-status" role="status">…</p>}
+          {phase === 'flying' && <p className="simulator-status" role="status">{t('game.flying')}</p>}
           {phase === 'result' && result && (
-            <div className={'feedback ' + (result.correct ? 'correct' : 'incorrect')} role="status">
+            <div className={'feedback predict-feedback ' + (result.correct ? 'correct' : 'incorrect')} role="status">
               <strong>{t(feedbackKey)}</strong>
               <span>{t('game.yourGuess')}: {formatMeasure(result.student)} m · {t('game.result')} {formatMeasure(result.expected)} m.</span>
+              {round.scenario.obstacle && <span>{t(flight.clearsObstacle ? 'game.cleared' : 'game.notCleared')}</span>}
               <button type="button" className="btn btn-secondary" onClick={retry}>{t('game.retry')}</button>
             </div>
           )}
-          {round.scenario.obstacle && phase === 'result' && (
-            <p className="teacher-note">
-              {round.scenario.id === 'roberto-carlos'
-                ? (flight.clearsObstacle ? 'Superó la barrera defensiva de 1.80 m a 9.15 m.' : 'No superó la barrera de 1.80 m.')
-                : (flight.clearsObstacle ? 'Superó el paredón.' : 'No llegó a superar el paredón.')}
-            </p>
-          )}
-          <p className="simulator-explainer">
-            Movimiento parabólico ideal, sin resistencia del aire: {language === 'es' ? 'la predicción se compara con el cálculo, no con una medición real.' : 'ojejoja ne predicción cálculo reheve, ndaha\'éi medición real reheve.'}
-          </p>
+          <p className="simulator-explainer">{t('game.explainer')}</p>
         </section>
       )}
     </div>

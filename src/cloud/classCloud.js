@@ -1,5 +1,7 @@
 import { rpc, rest, isCloudConfigured } from './cloudClient.js';
 import { readJSON, writeJSON, removeKey } from '../utils/storage.js';
+import { topicStats } from '../pedagogy/progression.js';
+import { exercises as catalogExercises } from '../data/catalogs.js';
 
 // Paquete de clase que descarga el alumno: queda en su perfil local para
 // practicar sin internet. Pendiente de subida: la última foto del avance que
@@ -37,9 +39,20 @@ export async function createCloudClass({ title, teacherName, teacherAvatar, teac
   return row;
 }
 
+const MEMBER_COLUMNS = 'student_id,display_name,avatar,xp,level,attempts,correct,confidence,cards_consolidated,last_sync,joined_at,phone,email';
+// Columnas del panel docente (topic_stats, solved). Si la base todavía no
+// tiene la migración, PostgREST responde 400 y se usa la consulta anterior,
+// así la lista de alumnos nunca deja de funcionar.
+const isMissingColumn = error => error?.status === 400 || /column|PGRST20/i.test(String(error?.message ?? ''));
+
 export async function listTeacherClasses() {
-  const select = 'id,code,title,created_at,class_members(student_id,display_name,avatar,xp,level,attempts,correct,confidence,cards_consolidated,last_sync,joined_at,phone,email)';
-  return rest(session => `classes?select=${select}&teacher_id=eq.${session.userId}&order=created_at.desc`);
+  const query = members => rest(session => `classes?select=id,code,title,created_at,config:content->config,class_members(${members})&teacher_id=eq.${session.userId}&order=created_at.desc`);
+  try {
+    return await query(`${MEMBER_COLUMNS},topic_stats,solved`);
+  } catch (error) {
+    if (!isMissingColumn(error)) throw error;
+    return query(MEMBER_COLUMNS);
+  }
 }
 
 export async function deleteCloudClass(id) {
@@ -105,8 +118,13 @@ export function progressSnapshot(learning) {
     correct: log.filter(item => item?.correct).length,
     confidence: Math.max(0, Math.min(100, Math.round(Number(learning?.confidence) || 0))),
     cards_consolidated: cards.filter(item => item?.consolidated).length,
+    // Para el panel docente: ejercicios distintos resueltos y aciertos por tema.
+    solved: new Set(log.filter(item => item?.correct && item.exerciseId).map(item => item.exerciseId)).size,
+    topic_stats: topicStats(log, [...catalogExercises, ...(getClassPackage()?.content?.exercises ?? [])]),
   };
 }
+
+const PANEL_FIELDS = ['solved', 'topic_stats'];
 
 export function queueProgress(snapshot) {
   const pkg = getClassPackage();
@@ -124,12 +142,19 @@ export function getPendingProgress() {
 export async function flushProgress() {
   const pending = getPendingProgress();
   if (!pending || !isCloudConfigured()) return { status: pending ? 'pending' : 'idle' };
+  const send = stats => rest(session => `class_members?class_id=eq.${pending.classId}&student_id=eq.${session.userId}`, {
+    method: 'PATCH',
+    body: { ...stats, last_sync: new Date().toISOString() },
+    headers: { Prefer: 'return=minimal' },
+  });
   try {
-    await rest(session => `class_members?class_id=eq.${pending.classId}&student_id=eq.${session.userId}`, {
-      method: 'PATCH',
-      body: { ...pending.stats, last_sync: new Date().toISOString() },
-      headers: { Prefer: 'return=minimal' },
-    });
+    try {
+      await send(pending.stats);
+    } catch (error) {
+      // Base sin la migración del panel docente: se sube lo de siempre.
+      if (error.offline || !isMissingColumn(error)) throw error;
+      await send(Object.fromEntries(Object.entries(pending.stats).filter(([key]) => !PANEL_FIELDS.includes(key))));
+    }
     if (getPendingProgress()?.at === pending.at) removeKey(PENDING_KEY);
     return { status: 'synced', at: new Date().toISOString() };
   } catch (error) {

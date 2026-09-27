@@ -5,12 +5,11 @@ import { readJSON, writeJSON, STORAGE_KEYS } from '../utils/storage.js';
 import { createAIProvider } from '../ai/AIProvider.js';
 import { getTutorQuota, DAILY_TUTOR_LIMIT } from '../ai/tutorQuota.js';
 import { useTranslation } from '../i18n/LanguageProvider.jsx';
+import { translate } from '../i18n/messages.js';
 
 export const QUIZ_MIN_QUANTITY = 5;
 export const QUIZ_MAX_QUANTITY = 50;
 export const FREE_CHAT_EXCHANGES = DAILY_TUTOR_LIMIT;
-
-const QUIZ_CLOSING = '¿Oime gueteri mba\'e reikuaaséva? Eporandu chéve.';
 
 function quizStatement(question) {
   if (!question) return '';
@@ -18,30 +17,37 @@ function quizStatement(question) {
   return question.pregunta;
 }
 
-function buildClosingMessage(entries) {
+// El cierre guarda solo los números; el texto se arma al mostrarlo, así
+// cambia de idioma igual que el resto de la interfaz.
+function closingStats(entries) {
   const byTopic = new Map();
   for (const entry of entries) {
-    if (!entry?.tema) continue;
+    if (!entry?.tema || entry.closing) continue;
     const stats = byTopic.get(entry.tema) ?? { correct: 0, total: 0 };
     stats.total += 1;
     if (entry.tutor?.correct) stats.correct += 1;
     byTopic.set(entry.tema, stats);
   }
-  const total = entries.length;
-  const acertadas = entries.filter((entry) => entry.tutor?.correct).length;
-  const balance = [...byTopic.entries()]
-    .map(([tema, stats]) => `${tema}: ${stats.correct} de ${stats.total}`)
-    .join(' · ');
-  return `¡Ikatu! Terminaste el cuestionario: ${acertadas} de ${total} acertadas.${
-    balance ? ` Temas dominados — ${balance}.` : ''
-  } ${QUIZ_CLOSING}`;
+  const answered = entries.filter(entry => !entry.closing);
+  return {
+    correct: answered.filter(entry => entry.tutor?.correct).length,
+    total: answered.length,
+    topics: [...byTopic.entries()].map(([tema, stats]) => ({ tema, ...stats })),
+  };
 }
 
-function formatMessages(chatEntries, charlaEntries) {
+export function buildClosingMessage(stats, language = 'es') {
+  const topics = stats.topics.length > 1
+    ? translate(language, 'quiz.closingTopics', { list: stats.topics.map(item => `${item.tema} ${item.correct}/${item.total}`).join(' · ') })
+    : '';
+  return `${translate(language, 'quiz.closing', { c: stats.correct, t: stats.total })}${topics} ${translate(language, 'quiz.closingAsk')}`;
+}
+
+function formatMessages(chatEntries, charlaEntries, language) {
   const mensajes = [];
   for (const entry of chatEntries ?? []) {
     if (entry?.closing) {
-      mensajes.push({ role: 'tutor', text: entry.message });
+      mensajes.push({ role: 'tutor', text: entry.message ?? buildClosingMessage(entry.stats, language) });
       continue;
     }
     mensajes.push({ role: 'tutor', text: entry?.statement ?? '' });
@@ -64,6 +70,8 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
     providerRef.current = createAIProvider();
   }
   const { language } = useTranslation();
+  const languageRef = useRef(language);
+  languageRef.current = language;
   // Se localiza acá (no en el JSON fuente) para que cambiar de idioma en
   // pleno cuestionario solo cambie los textos, sin tocar id/tipo/respuesta.
   const quizBank = useMemo(() => quizBankData.map(item => localizeCatalogItem(item, language)), [language]);
@@ -189,7 +197,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
   const persistCurrent = useCallback((chatEntries, charlaEntries, tema) => {
     const id = sessionRef.current;
     if (!id) return;
-    const mensajes = formatMessages(chatEntries, charlaEntries);
+    const mensajes = formatMessages(chatEntries, charlaEntries, languageRef.current);
     const now = new Date().toISOString();
     const entry = {
       id,
@@ -221,8 +229,11 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
     });
   }, []);
 
-  const startQuiz = useCallback(() => {
-    const quizQuestions = buildQuiz(quizBank, quantity);
+  // `fixedIds`: repetir solo esas preguntas (por ejemplo, las que salieron mal).
+  const startQuiz = useCallback((fixedIds = null) => {
+    const quizQuestions = Array.isArray(fixedIds) && fixedIds.length
+      ? shuffle(quizBank.filter(question => fixedIds.includes(question.id)))
+      : buildQuiz(quizBank, quantity || QUIZ_MIN_QUANTITY);
     if (!quizQuestions.length) return;
     generationRef.current += 1;
     requestLock.current = false;
@@ -317,16 +328,20 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
           response = { message: buildQuizFeedback(feedbackContext), source: 'local-fallback', available: true };
         }
         if (generation !== generationRef.current) return;
+        const answerKey = question.tipo === 'abierta' ? null : marcadoVerdadero ? 'common.true' : 'common.false';
         const entry = {
+          id: question.id,
           statement: quizStatement(question),
           tipo: question.tipo,
           tema: question.tema,
+          // answerKey/justification permiten mostrar "Verdadero/Falso" en el
+          // idioma activo; studentText queda para el historial guardado.
+          answerKey,
+          justification: question.tipo === 'abierta' ? null : (justificacion || null),
           studentText:
             question.tipo === 'abierta'
               ? (justificacion ?? '')
-              : marcadoVerdadero
-                ? 'Verdadero'
-                : `Falso${justificacion ? ` — ${justificacion}` : ''}`,
+              : `${translate(language, answerKey)}${justificacion ? ` — ${justificacion}` : ''}`,
           tutor: { ...response, correct: verdict },
         };
         const nextChat = [...chat, entry];
@@ -375,8 +390,8 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
     setAnswered(false);
     const next = questionIndex + 1;
     if (next >= questions.length) {
-      const closing = buildClosingMessage(chat);
-      const nextChat = [...chat, { closing: true, message: closing }];
+      if (chat.some(entry => entry.closing)) { setStep('charla'); return; }
+      const nextChat = [...chat, { closing: true, stats: closingStats(chat) }];
       setChat(nextChat);
       persistCurrent(nextChat, [], questions.map((item) => item.tema).filter((tema, index, all) => all.indexOf(tema) === index).join(', '));
       setStep('charla');
@@ -393,7 +408,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
     const generation = generationRef.current;
     setBusy(true);
     setStreamText('');
-    const displayText = text || (language === 'es' ? 'Ayuda con esta foto del ejercicio' : 'Epytyvõ ko ta\'ãnga ejercicio-gua reheve');
+    const displayText = text || translate(language, 'quiz.photoHelp');
     // La imagen viaja en el mensaje que se muestra (para la miniatura), pero
     // nunca en lo que se guarda en el historial de conversaciones.
     const nextLog = [...charlaLog, { role: 'alumno', text: displayText, image }];
@@ -415,7 +430,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
         });
         if (typeof response?.message !== 'string' || !response.message.trim()) throw new Error('Respuesta vacía');
       } catch {
-        response = { message: 'No pude completar la consulta. Volvé a intentarlo cuando el tutor esté disponible.', available: false, source: null };
+        response = { message: translate(language, 'quiz.fallbackError'), available: false, source: null };
       }
       if (generation !== generationRef.current) return;
       const finalLog = [...nextLog, { role: 'tutor', text: response.message, source: response.source ?? null, reason: response.reason ?? null, available: response.available !== false }];
@@ -453,6 +468,15 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
   const finish = useCallback(() => {
     setStep('fin');
   }, []);
+
+  // Fin del cuestionario: seguir con preguntas nuevas o repetir solo las
+  // que salieron mal, sin volver a pasar por el mazo de tarjetas.
+  const answeredEntries = chat.filter(entry => !entry.closing);
+  const score = answeredEntries.filter(entry => entry.tutor?.correct).length;
+  const mistakeIds = [...new Set(answeredEntries.filter(entry => !entry.tutor?.correct && entry.id).map(entry => entry.id))];
+  const practiceAgain = useCallback(() => startQuiz(), [startQuiz]);
+  const retryMistakes = useCallback(() => startQuiz(mistakeIds), [startQuiz, mistakeIds.join('|')]); // eslint-disable-line react-hooks/exhaustive-deps
+  const closingText = useCallback(entry => entry.message ?? buildClosingMessage(entry.stats, language), [language]);
 
   const restart = useCallback(() => {
     generationRef.current += 1;
@@ -515,6 +539,11 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
     newFreeConversation,
     openFreeConversation,
     finish,
+    score,
+    mistakeCount: mistakeIds.length,
+    practiceAgain,
+    retryMistakes,
+    closingText,
     history,
     maxAvailable,
     repasoAvailable,

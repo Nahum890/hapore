@@ -118,14 +118,25 @@ export function createApiChatHandler(apiKey, primaryModel, options = {}) {
   const quotaUrl = String(options.supabaseUrl ?? '').replace(/\/+$/, '');
   const quotaKey = options.supabaseAnonKey ?? '';
   const fallbackQuota = options.consumeQuota ?? createInstanceQuota();
-  const models = [...new Set([primaryModel || 'gemini-3.6-flash', FALLBACK_MODEL])];
+  const models = [...new Set([primaryModel || 'gemini-3.8-flash', FALLBACK_MODEL])];
   const textFrom = data => data?.candidates?.[0]?.content?.parts?.filter(part => !part.thought).map(part => part.text).filter(Boolean).join('') ?? '';
 
+  // CORS opcional (solo si la app se sirve desde otro origen, p. ej. un APK
+  // con los archivos empaquetados). Sin CORS_ORIGINS, solo mismo origen.
+  const corsOrigins = String(options.corsOrigins ?? '').split(',').map(item => item.trim()).filter(Boolean);
+  const corsHeadersFor = req => {
+    const origin = req.headers?.origin;
+    if (!origin || !corsOrigins.length || !(corsOrigins.includes('*') || corsOrigins.includes(origin))) return {};
+    return { 'Access-Control-Allow-Origin': origin, 'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept', 'Access-Control-Allow-Methods': 'POST, OPTIONS', Vary: 'Origin' };
+  };
+
   return async function handle(req, res) {
+    const cors = corsHeadersFor(req);
     const json = (status, value, headers = {}) => {
-      res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', ...headers });
+      res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', ...cors, ...headers });
       res.end(JSON.stringify(value));
     };
+    if (req.method === 'OPTIONS' && Object.keys(cors).length) { res.writeHead(204, cors); res.end(); return; }
     if (req.method !== 'POST') { json(405, { error: 'Método no permitido.' }, { Allow: 'POST' }); return; }
     if (!apiKey) { json(503, { error: 'Tutor online sin configurar.' }); return; }
 
@@ -193,7 +204,7 @@ export function createApiChatHandler(apiKey, primaryModel, options = {}) {
         if (!text) { json(502, { error: 'Gemini devolvió una respuesta vacía.' }); return; }
         json(200, { text }); return;
       }
-      res.writeHead(200, { 'Content-Type': 'text/event-stream; charset=utf-8', 'Cache-Control': 'no-cache, no-transform', 'X-Accel-Buffering': 'no' });
+      res.writeHead(200, { 'Content-Type': 'text/event-stream; charset=utf-8', 'Cache-Control': 'no-cache, no-transform', 'X-Accel-Buffering': 'no', ...cors });
       res.flushHeaders?.();
       let buffer = '', fullText = '';
       const decoder = new TextDecoder();

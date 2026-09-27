@@ -30,7 +30,8 @@ export function useSpeechRecognition() {
       if (text.trim()) onResult(text.trim());
     };
     recognition.onerror = event => {
-      setError(event?.error === 'not-allowed' ? 'Se necesita permiso para usar el micrófono.' : 'No se pudo escuchar bien. Probá de nuevo.');
+      // Clave de traducción; el componente la muestra en el idioma activo.
+      setError(event?.error === 'not-allowed' ? 'free.micPermission' : 'free.micFailed');
     };
     recognition.onend = () => { setListening(false); recognitionRef.current = null; };
     recognitionRef.current = recognition;

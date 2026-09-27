@@ -36,7 +36,7 @@ const run = async (handler, body, headers) => {
 
 test('el endpoint limita contexto y conserva idioma, sin reenviar campos ajenos', async () => {
   let geminiRequest;
-  const handler = createApiChatHandler('secret-key', 'gemini-3.6-flash', {
+  const handler = createApiChatHandler('secret-key', 'gemini-3.8-flash', {
     consumeQuota: () => true,
     fetch: async (url, options) => {
       geminiRequest = { url, options };
@@ -57,7 +57,7 @@ test('el endpoint limita contexto y conserva idioma, sin reenviar campos ajenos'
 
 test('el límite persistente de Supabase bloquea antes de llamar a Gemini', async () => {
   let geminiCalls = 0;
-  const handler = createApiChatHandler('secret-key', 'gemini-3.6-flash', {
+  const handler = createApiChatHandler('secret-key', 'gemini-3.8-flash', {
     supabaseUrl: 'https://school.supabase.co',
     supabaseAnonKey: 'public-anon-key',
     fetch: async url => {
@@ -75,7 +75,7 @@ test('el límite persistente de Supabase bloquea antes de llamar a Gemini', asyn
 
 test('el endpoint rechaza consultas cuando el control de cuota deniega el acceso', async () => {
   let modelCalled = false;
-  const handler = createApiChatHandler('secret-key', 'gemini-3.6-flash', {
+  const handler = createApiChatHandler('secret-key', 'gemini-3.8-flash', {
     consumeQuota: () => false,
     fetch: async () => { modelCalled = true; return globalThis.Response.json({}); },
   });

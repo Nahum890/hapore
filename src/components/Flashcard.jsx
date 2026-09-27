@@ -3,7 +3,7 @@ import { Formula, MathText } from './MathText.jsx';
 import { useTranslation } from '../i18n/LanguageProvider.jsx';
 
 export default function Flashcard({ flashcard, consolidated, onConsolidate, onReviewLater }) {
-  const { language } = useTranslation();
+  const { t } = useTranslation();
   const [flipped, setFlipped] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const timer = useRef(null), locked = useRef(false), answerRef = useRef(null);
@@ -33,74 +33,34 @@ export default function Flashcard({ flashcard, consolidated, onConsolidate, onRe
   return (
     <section
       className={'card flashcard deck-card-enter ' + (leaving ? 'deck-card-leave' : '')}
-      aria-label={'Tarjeta de repaso: ' + front}
+      aria-label={t('flashcard.label', { front })}
       aria-busy={leaving}
     >
       <div className={'flashcard-inner ' + (flipped ? 'is-flipped' : '')}>
         <div className="flashcard-face flashcard-front" aria-hidden={flipped} inert={flipped ? '' : undefined}>
           <div>
-            <p className="flashcard-topic">{flashcard?.topic || 'Movimiento Parabólico'}</p>
-            <h3 className="flashcard-text">
-              <MathText text={front} />
-              {language !== 'es' && (
-                <small className="bilingual-es" lang="es">
-                  {' '}Jopara · borrador sin revisión lingüística
-                </small>
-              )}
-            </h3>
+            <p className="flashcard-topic">{flashcard?.topic || t('flashcard.defaultTopic')}</p>
+            <h3 className="flashcard-text"><MathText text={front} /></h3>
           </div>
-          <button
-            type="button"
-            className="btn btn-secondary"
-            tabIndex={flipped ? -1 : 0}
-            onClick={() => setFlipped(true)}
-            aria-expanded={flipped}
-          >
-            Mostrar respuesta
+          <button type="button" className="btn btn-secondary" tabIndex={flipped ? -1 : 0} onClick={() => setFlipped(true)} aria-expanded={flipped}>
+            {t('flashcard.show')}
           </button>
         </div>
         <div className="flashcard-face flashcard-back" aria-hidden={!flipped} inert={!flipped ? '' : undefined}>
           <div ref={answerRef} tabIndex={-1} className="flashcard-answer" aria-live="polite">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <p className="flashcard-topic">{flashcard?.topic || 'Respuesta'}</p>
-              <button
-                type="button"
-                className="btn btn-sm btn-light"
-                tabIndex={flipped ? 0 : -1}
-                onClick={() => setFlipped(false)}
-                aria-label="Volver al frente de la tarjeta"
-                style={{ padding: '2px 8px', fontSize: '11px', minHeight: '28px' }}
-              >
-                ↺ Ver pregunta
+            <div className="flashcard-back-head">
+              <p className="flashcard-topic">{flashcard?.topic || t('flashcard.answer')}</p>
+              <button type="button" className="btn btn-sm btn-light flashcard-flip-back" tabIndex={flipped ? 0 : -1} onClick={() => setFlipped(false)} aria-label={t('flashcard.backLabel')}>
+                {t('flashcard.back')}
               </button>
             </div>
             <MathText as="p" className="flashcard-text" text={flashcard?.dorso_concepto ?? flashcard?.back ?? ''} />
-            {flashcard?.formula && (
-              <p className="flashcard-formula">
-                <Formula text={flashcard.formula} />
-              </p>
-            )}
-            {consolidated && <span className="chip chip-consolidated">Consolidada</span>}
+            {flashcard?.formula && <p className="flashcard-formula"><Formula text={flashcard.formula} /></p>}
+            {consolidated && <span className="chip chip-consolidated">{t('flashcard.consolidated')}</span>}
           </div>
           <div className="flashcard-actions">
-            <button
-              type="button"
-              className="btn btn-primary"
-              tabIndex={flipped ? 0 : -1}
-              disabled={leaving}
-              onClick={() => advance(onConsolidate)}
-            >
-              ¡Aikuaa porãma! (Lo tengo claro)
-            </button>
-            <button
-              type="button"
-              className="btn btn-secondary"
-              tabIndex={flipped ? 0 : -1}
-              disabled={leaving}
-              onClick={() => advance(onReviewLater)}
-            >
-              Ahecha jey pota (Repasar luego)
-            </button>
+            <button type="button" className="btn btn-primary" tabIndex={flipped ? 0 : -1} disabled={leaving} onClick={() => advance(onConsolidate)}>{t('flashcard.know')}</button>
+            <button type="button" className="btn btn-secondary" tabIndex={flipped ? 0 : -1} disabled={leaving} onClick={() => advance(onReviewLater)}>{t('flashcard.later')}</button>
           </div>
         </div>
       </div>

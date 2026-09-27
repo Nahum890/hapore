@@ -41,16 +41,16 @@ export function recommendExercise(exercises = [], currentId, log = []) {
   if (recent.every(entry => !entry.correct)) {
     const easier = exercises.find(item => item.topic === current.topic && (RANK[item.difficulty] ?? 0) < (RANK[current.difficulty] ?? 0));
     return easier
-      ? { exercise: easier, reason: 'Este tema se vuelve más claro si repasás primero una base.' }
-      : { exercise: current, reason: 'Podés reintentar sin perder puntos. Pedí una pista si la necesitás.' };
+      ? { exercise: easier, reason: 'Este tema se vuelve más claro si repasás primero una base.', reasonKey: 'reco.easier' }
+      : { exercise: current, reason: 'Podés reintentar sin perder puntos. Pedí una pista si la necesitás.', reasonKey: 'reco.retrySame' };
   }
-  if (!recent.at(-1).correct) return { exercise: current, reason: 'Revisá la explicación y volvé a probar.' };
+  if (!recent.at(-1).correct) return { exercise: current, reason: 'Revisá la explicación y volvé a probar.', reasonKey: 'reco.review' };
   const mastered = new Set(log.filter(entry => entry.correct).map(entry => entry.exerciseId));
   const next = exercises.find(item => item.topic === current.topic && !mastered.has(item.id) && item.id !== currentId && (RANK[item.difficulty] ?? 0) >= (RANK[current.difficulty] ?? 0))
     ?? exercises.find(item => !mastered.has(item.id) && item.id !== currentId);
   return next
-    ? { exercise: next, reason: 'Ya resolviste este paso. Probá el siguiente desafío.' }
-    : { exercise: current, reason: 'Completaste los ejercicios disponibles. Podés repasar cuando quieras.' };
+    ? { exercise: next, reason: 'Ya resolviste este paso. Probá el siguiente desafío.', reasonKey: 'reco.next' }
+    : { exercise: current, reason: 'Completaste los ejercicios disponibles. Podés repasar cuando quieras.', reasonKey: 'reco.done' };
 }
 
 /** El error más repetido del alumno (mínimo 2 veces para no reaccionar a un
@@ -78,6 +78,52 @@ export function practiceRecommendation(exercises = [], log = []) {
   if (!exercise) return null;
   return { exercise, pattern, reason: `Practicá esto: ${pattern.label.toLowerCase()}.` };
 }
+
+// Temas del panel docente: agrupan los conceptos de los ejercicios (los
+// ejercicios de ángulos complementarios usan el concepto "alcance" pero se
+// reconocen por tener angleA/angleB en sus datos).
+export const DASHBOARD_TOPICS = ['componentes', 'tiempo', 'altura', 'alcance', 'angulos'];
+const CONCEPT_TOPIC = {
+  'componente-horizontal': 'componentes', 'componente-vertical': 'componentes',
+  'tiempo-de-vuelo': 'tiempo', 'altura-maxima': 'altura', alcance: 'alcance', 'angulo-optimo': 'angulos',
+};
+
+export function topicForExercise(exercise, concept) {
+  if (exercise?.values && ('angleA' in exercise.values || 'angleB' in exercise.values)) return 'angulos';
+  if (exercise?.unit === '°') return 'angulos';
+  return CONCEPT_TOPIC[exercise?.expectedConcept ?? concept] ?? null;
+}
+
+/** Intentos y aciertos por tema a partir del historial de un alumno. Los
+ * intentos viejos sin `expectedConcept` se resuelven con el catálogo. */
+export function topicStats(log = [], exercises = []) {
+  const byId = new Map(exercises.map(item => [item.id, item]));
+  const stats = {};
+  for (const entry of log) {
+    if (!entry?.exerciseId) continue;
+    const topic = topicForExercise(byId.get(entry.exerciseId), entry.expectedConcept);
+    if (!topic) continue;
+    stats[topic] ??= { attempts: 0, correct: 0 };
+    stats[topic].attempts += 1;
+    if (entry.correct) stats[topic].correct += 1;
+  }
+  return stats;
+}
+
+/** Suma las estadísticas por tema de varios alumnos (valores ya agregados). */
+export function mergeTopicStats(list = []) {
+  const total = {};
+  for (const stats of list) {
+    for (const [topic, value] of Object.entries(stats ?? {})) {
+      total[topic] ??= { attempts: 0, correct: 0 };
+      total[topic].attempts += Number(value?.attempts) || 0;
+      total[topic].correct += Number(value?.correct) || 0;
+    }
+  }
+  return total;
+}
+
+export const percent = (correct, attempts) => (attempts > 0 ? Math.round((100 * correct) / attempts) : null);
 
 /** Dificultades más comunes de un grupo de alumnos, combinadas (sin exponer
  * quién se equivocó), para que el docente sepa qué reforzar en clase. */

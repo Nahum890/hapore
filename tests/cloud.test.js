@@ -67,7 +67,7 @@ test('el avance sin conexión queda pendiente y se sube al volver internet', asy
   configureCloud({ fetch: server.fetch });
   const learning = { xp: 125, level: { level: 2 }, attempts: 4, confidence: 40, attemptLog: [{ correct: true }, { correct: false }, { correct: true }], flashcardState: { a: { consolidated: true }, b: { consolidated: false } } };
   const snapshot = progressSnapshot(learning);
-  assert.deepEqual(snapshot, { xp: 125, level: 2, attempts: 4, correct: 2, confidence: 40, cards_consolidated: 1 });
+  assert.deepEqual(snapshot, { xp: 125, level: 2, attempts: 4, correct: 2, confidence: 40, cards_consolidated: 1, solved: 0, topic_stats: {} });
 
   queueProgress(snapshot);
   const offline = await useOnline(false, () => flushProgress());

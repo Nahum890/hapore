@@ -95,6 +95,8 @@ Si se configura Supabase (ver [`supabase/README.md`](supabase/README.md)), el do
 
 ## Instalación y ejecución
 
+**Para una presentación o demo:** doble clic en `start.bat` (o `npm run start:all`). Para publicar la app, convertirla en APK y usarla en varios teléfonos con datos móviles, seguí [docs/PRESENTACION.md](docs/PRESENTACION.md).
+
 ```bash
 npm install
 npm run dev

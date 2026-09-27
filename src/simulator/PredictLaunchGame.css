@@ -1,0 +1,26 @@
+/* Minijuego "Predecí y lanzá": sin estilos en línea, responsive. */
+.predict-game-wrapper { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.predict-mode-switch { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; padding: 5px; border-radius: 14px; background: var(--c-paper, #f1f5f9); }
+.predict-mode-switch button { min-height: 44px; padding: 8px 10px; border: 0; border-radius: 10px; background: transparent; color: var(--c-muted, #64748b); font: inherit; font-weight: 800; font-size: 14px; line-height: 1.2; cursor: pointer; }
+.predict-mode-switch button.is-active { background: var(--c-surface, #fff); color: var(--c-ink, #0f172a); box-shadow: 0 1px 3px rgba(0, 0, 0, .12); }
+.predict-game { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.predict-head h2 { margin: 0 0 4px; }
+.predict-head p { margin: 0; color: var(--c-ink-soft, #475569); }
+.predict-steps { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.predict-steps li { padding: 5px 10px; border-radius: 999px; background: var(--c-paper, #f1f5f9); color: var(--c-muted, #64748b); font-size: 12.5px; font-weight: 700; }
+.predict-steps li.is-current { background: var(--brand-blue-soft, #dbeafe); color: var(--brand-blue-deep, #123ea1); }
+/* El canvas vive en un marco con relación fija: la escena nunca se estira ni desborda. */
+.predict-canvas-frame { position: relative; width: 100%; min-width: 0; }
+.predict-canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; }
+.predict-form { display: grid; gap: 6px; }
+.predict-form label { font-weight: 800; font-size: 14px; }
+.predict-input-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.predict-input-row .quiz-input { flex: 1; min-width: 0; }
+.predict-unit { font-weight: 800; color: var(--c-muted, #64748b); }
+.predict-feedback { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+@media (max-width: 560px) {
+  .predict-canvas { aspect-ratio: 4 / 3; }
+  .predict-input-row { flex-wrap: wrap; }
+  .predict-input-row .btn { flex: 1 1 100%; }
+  .predict-mode-switch button { font-size: 13px; }
+}

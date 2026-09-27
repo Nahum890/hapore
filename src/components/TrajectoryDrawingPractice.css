@@ -20,7 +20,7 @@
 .drawing-graph-wrap { min-width: 0; padding: 12px; border: 1px solid var(--c-line); border-radius: 16px; background: var(--c-surface); }
 .drawing-current-task { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 5px 12px; min-height: 27px; margin: 0 5px 4px; color: var(--c-muted); font-size: 13px; }
 .drawing-current-task strong { color: var(--c-ink); }
-.drawing-graph { display: block; width: 100%; height: auto; touch-action: manipulation; cursor: crosshair; }
+.drawing-graph { display: block; width: 100%; height: auto; max-height: 70vh; touch-action: manipulation; cursor: crosshair; user-select: none; -webkit-user-select: none; }
 .drawing-plot { fill: #fbfdff; }
 .drawing-gridline { stroke: #dce6ef; stroke-width: 1; }
 .drawing-axis { stroke: #516579; stroke-width: 1.7; }
@@ -34,6 +34,13 @@
 .drawing-reference-apex { fill: #7047eb; }
 .drawing-reference-finish { fill: #059669; }
 .drawing-marked-point { fill: #d97706; stroke: white; stroke-width: 2; pointer-events: none; }
+/* Franja táctil alrededor de la línea guía y marca del último intento. */
+.drawing-guide-band { fill: rgba(232, 145, 25, .10); pointer-events: none; }
+.drawing-guide-label { fill: #b86a0b; font-size: 13px; font-weight: 800; pointer-events: none; }
+.drawing-miss-point { fill: none; stroke: #dc2626; stroke-width: 3; stroke-dasharray: 4 3; pointer-events: none; }
+.drawing-graph.is-complete { cursor: default; }
+.drawing-graph.is-complete .drawing-student-path { stroke-width: 4.5; }
+.drawing-legend .drawing-legend-miss { background: transparent; border: 2px dashed #dc2626; box-sizing: border-box; }
 .drawing-legend { display: flex; flex-wrap: wrap; gap: 8px 14px; padding: 2px 4px 0; color: var(--c-muted); font-size: 11px; }
 .drawing-legend span { display: inline-flex; align-items: center; gap: 5px; }
 .drawing-legend i { width: 10px; height: 10px; border-radius: 50%; background: #1d5bd8; }
@@ -63,6 +70,10 @@
   .drawing-steps li { padding: 9px 11px; }
   .drawing-steps small { font-size: 12px; }
   .drawing-graph-wrap { padding: 6px 3px; }
-  .drawing-tick { font-size: 13px; }
-  .drawing-axis-label { font-size: 14px; }
+  /* El SVG se achica con la pantalla: las letras se agrandan en unidades del
+     viewBox para seguir legibles (~11 px reales en un teléfono de 360 px). */
+  .drawing-tick { font-size: 20px; }
+  .drawing-axis-label { font-size: 20px; }
+  .drawing-guide-label { font-size: 20px; }
+  .drawing-current-task { font-size: 14px; }
 }

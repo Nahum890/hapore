@@ -13,7 +13,7 @@ export function apiChatPlugin(apiKey, primaryModel, options = {}) {
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const apiKey = env.GEMINI_API_KEY ?? '';
-  const primaryModel = env.GEMINI_MODEL ?? 'gemini-3.6-flash';
+  const primaryModel = env.GEMINI_MODEL ?? 'gemini-3.8-flash';
 
   return {
     plugins: [
@@ -33,6 +33,13 @@ export default defineConfig(({ mode }) => {
           // ficha PDF podía fallar la primera vez que se generaba sin conexión.
           globPatterns: ['**/*.{js,css,html,svg,png,webmanifest,json,ttf,woff,woff2}'],
           navigateFallback: '/index.html',
+          // El tutor online nunca debe responderse con el index.html cacheado.
+          navigateFallbackDenylist: [/^\/api\//],
+          // Una versión nueva reemplaza a la anterior apenas se instala: evita
+          // quedar con un service worker viejo en los teléfonos de la demo.
+          cleanupOutdatedCaches: true,
+          clientsClaim: true,
+          skipWaiting: true,
         },
       }),
     ],
