@@ -452,6 +452,144 @@
   line-height: 1.45;
 }
 
+/* ---------- Pulido visual de los simuladores (solo estilos) ---------- */
+
+/* Tarjetas de elección con ícono y color por desafío */
+.pgame-challenge-option {
+  position: relative;
+  overflow: hidden;
+  border-top: 4px solid var(--pgame-accent, #1d5bd8);
+}
+.pgame-challenge-option:nth-child(1) { --pgame-accent: #ea580c; --pgame-soft: #fff7ed; --pgame-icon: '🏀'; }
+.pgame-challenge-option:nth-child(2) { --pgame-accent: #16a34a; --pgame-soft: #f0fdf4; --pgame-icon: '⚽'; }
+.pgame-challenge-option:nth-child(3) { --pgame-accent: #2563eb; --pgame-soft: #eff6ff; --pgame-icon: '📐'; }
+.pgame-challenge-option::after {
+  content: var(--pgame-icon, '');
+  position: absolute;
+  top: 0.7rem;
+  right: 0.8rem;
+  font-size: 2.1rem;
+  line-height: 1;
+  opacity: 0.9;
+  filter: drop-shadow(0 3px 5px rgba(15, 23, 42, 0.15));
+}
+.pgame-challenge-option .pgame-option-kicker {
+  background: var(--pgame-soft, #eff4fe);
+  color: var(--pgame-accent, #123ea1);
+}
+.pgame-challenge-option:hover {
+  border-color: var(--pgame-accent, #1d5bd8);
+  border-top-color: var(--pgame-accent, #1d5bd8);
+}
+
+/* Marco del simulador: bordes suaves, sombra y un brillo sutil arriba */
+.pgame-canvas-wrapper {
+  max-height: 420px;
+  border-radius: 1rem;
+  box-shadow:
+    0 0 0 1px rgba(15, 23, 42, 0.08),
+    0 12px 28px -12px rgba(15, 23, 42, 0.45);
+}
+.pgame-canvas-wrapper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+/* Datos del reto */
+.pgame-chip {
+  position: relative;
+  padding: 0.45rem 0.8rem 0.45rem 0.95rem;
+  background: #ffffff;
+  border-radius: 0.65rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+.pgame-chip::before {
+  content: '';
+  position: absolute;
+  left: 0.35rem;
+  top: 0.45rem;
+  bottom: 0.45rem;
+  width: 3px;
+  border-radius: 3px;
+  background: #1d5bd8;
+  opacity: 0.55;
+}
+.pgame-chip small {
+  letter-spacing: 0.03em;
+}
+
+/* Panel de controles */
+.pgame-controls-form {
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  border-radius: 0.9rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+.pgame-number-input {
+  border-radius: 0.55rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.pgame-number-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+}
+.pgame-step-btn {
+  border-radius: 0.55rem;
+}
+.pgame-btn-fire:not(:disabled) {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  box-shadow: 0 6px 16px -6px rgba(37, 99, 235, 0.65);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.pgame-btn-fire:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px -8px rgba(37, 99, 235, 0.7);
+}
+.pgame-btn-fire:not(:disabled):active {
+  transform: translateY(0);
+}
+
+/* Resultado */
+.pgame-feedback {
+  border-radius: 0.9rem;
+  border-left-width: 5px !important;
+  box-shadow: 0 4px 14px -8px rgba(15, 23, 42, 0.25);
+  animation: pgame-pop 0.28s ease-out;
+}
+.pgame-feedback.is-success { border-left-color: #16a34a !important; }
+.pgame-feedback.is-fail { border-left-color: #dc2626 !important; }
+.pgame-feedback > strong::before {
+  margin-right: 0.35rem;
+}
+.pgame-feedback.is-success > strong::before { content: '✅'; }
+.pgame-feedback.is-fail > strong::before { content: '🔁'; }
+.pgame-calc-breakdown {
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+@keyframes pgame-pop {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+.pgame-level-badge {
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+}
+.pgame-question-highlight {
+  border-radius: 0 0.65rem 0.65rem 0;
+  background: linear-gradient(90deg, #eff6ff, #f8fafc);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pgame-feedback { animation: none; }
+  .pgame-btn-fire:not(:disabled),
+  .pgame-challenge-option { transition: none; }
+}
+
 /* Celular: menos relleno, pestañas de a dos y escena más alta (4:3) para
    que la parábola no quede aplastada. */
 @media (max-width: 560px) {
