@@ -1,7 +1,7 @@
 {
   "name": "pyfis-ia",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "PyFis IA: PWA educativa offline para aprender Física de 3.º curso mediante aprendizaje interactivo.",
   "scripts": {

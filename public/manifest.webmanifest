@@ -2,7 +2,7 @@
   "id": "/",
   "name": "PyFis IA",
   "short_name": "PyFis IA",
-  "description": "PWA educativa offline para aprender Física de 3.º curso (Movimiento Parabólico) mediante simulación interactiva y tutor inteligente.",
+  "description": "PyFis IA Demo 1.0 — app educativa para aprender Física de 3.º curso (Movimiento Parabólico) con simulación interactiva y tutor inteligente, en español y Jopara. Hecha por Kyre’y-devs.",
   "lang": "es",
   "start_url": "/",
   "scope": "/",

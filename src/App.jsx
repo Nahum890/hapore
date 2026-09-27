@@ -37,6 +37,7 @@ import TutorWorkbench from './components/TutorWorkbench.jsx';
 import ChatWidget from './components/ChatWidget.jsx';
 import { parseWidgetTags } from './ai/chatTools.js';
 import { startTeacherSync } from './cloud/teacherContent.js';
+import { APP_VERSION_LABEL } from './version.js';
 const ClassChat = lazy(() => import('./components/ClassChat.jsx'));
 import { isCloudConfigured } from './cloud/cloudClient.js';
 import { downloadClass, flushProgress, getClassPackage, getPendingProgress, leaveCloudClass, progressSnapshot, queueProgress, syncMyProfile } from './cloud/classCloud.js';
@@ -783,7 +784,7 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
             onReview={() => navigate('tarjetas')}
           />)}
       </main>{activeTab !== 'chats' && <aside className="app-sidebar" aria-label={t('home.progressAside')}><ConfidenceBar xp={learning.xp} level={learning.level} confidence={learning.confidence} /><TutorCard tutor={tutor} /></aside>}</div>
-      <footer className="app-credit">{t('credit.madeBy')} <strong>Kyre’y-devs</strong> · PyFis IA</footer>
+      <footer className="app-credit">{t('credit.madeBy')} <strong>Kyre’y-devs</strong> · PyFis IA · <span className="app-version">{APP_VERSION_LABEL}</span></footer>
       <Onboarding open={showGuide} onDismiss={dismissGuide} onStart={startPracticing} role={user.role} />
       <ProfileSettings open={showSettings || missingContact} required={missingContact} user={user} onClose={() => setShowSettings(false)} onSaved={handleProfileSaved} />
       <NotificationsCenter open={showNotifications} onClose={() => setShowNotifications(false)} onOpenMessages={() => navigate('mensajes')} messageNotifications={notifications.messageNotifications} upcomingMeetings={notifications.upcomingMeetings} />

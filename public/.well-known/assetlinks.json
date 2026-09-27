@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.kyreydevs.pyfisia",
+      "sha256_cert_fingerprints": [
+        "18:6A:F9:67:B9:0F:E6:BF:6D:D7:33:6B:3A:26:B2:E2:FB:DC:23:4E:D9:16:A8:46:95:62:C5:EE:73:90:22:48"
+      ]
+    }
+  }
+]
