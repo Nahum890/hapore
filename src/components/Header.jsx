@@ -45,25 +45,18 @@ export default function Header({ user, onHome, onLogout, onOpenSettings, onOpenN
             <span className="connection-text">{online ? t('header.online') : t('header.offline')}</span>
           </span>
           <LanguageSelector />
-          <button
-            className="user-chip"
-            type="button"
-            onClick={onOpenSettings}
-            aria-label={`${t('header.settings')}: ${user.name}`}
+          {/* Solo muestra quién está conectado: la configuración se abre con
+              el botón del engranaje de al lado (antes ambos hacían lo mismo). */}
+          <div
+            className="user-chip is-static"
             title={user.name + ' (' + (user.role === 'maestro' ? t('header.teacher') : t('header.student')) + ')'}
           >
-            {user.avatar ? (
-              <Avatar id={user.avatar} size={32} />
-            ) : (
-              <span className="user-avatar" aria-hidden="true">
-                {user.name.charAt(0).toUpperCase()}
-              </span>
-            )}
+            <Avatar id={user.avatar} name={user.name} size={32} />
             <span className="user-chip-text">
               <strong>{user.name}</strong>
               <small>{user.role === 'maestro' ? t('header.teacher') : t('header.student')}</small>
             </span>
-          </button>
+          </div>
           <button type="button" className="header-action-button" onClick={onOpenSettings} aria-label={t('header.openSettings')} title={t('header.openSettings')}>
             <Icon name="settings" size={19} />
           </button>

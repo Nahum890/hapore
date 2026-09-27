@@ -4,6 +4,7 @@ import ContactLinks from './ContactLinks.jsx';
 import { MathText } from './MathText.jsx';
 import { useTranslation } from '../i18n/LanguageProvider.jsx';
 import { DASHBOARD_TOPICS, commonDifficulties, mergeTopicStats, percent } from '../pedagogy/progression.js';
+import { allFlags, getFlagState } from '../pedagogy/flags.js';
 import './ClassDashboard.css';
 
 const formatWhen = iso => { if (!iso) return null; try { return new Date(iso).toLocaleString('es-PY', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch { return null; } };
@@ -14,15 +15,29 @@ function Bar({ value, tone }) {
 
 const toneFor = value => (value === null ? null : value >= 75 ? 'good' : value >= 60 ? 'ok' : 'low');
 
+// Banderas a mostrar: las de tema siempre; las propias del docente si están
+// definidas o si algún alumno ya tiene datos con ellas.
+function flagsFor(stats) {
+  const flags = allFlags(getFlagState());
+  const known = new Set(flags.map(flag => flag.id));
+  const extra = Object.keys(stats ?? {}).filter(id => !known.has(id)).map(id => ({ id, color: '#64748b', name: id }));
+  return [...flags, ...extra];
+}
+function useFlagLabel() {
+  const { t } = useTranslation();
+  return flag => (flag.builtin ? t(`dash.topic.${flag.id}`) : flag.name);
+}
+
 function TopicBars({ stats }) {
   const { t } = useTranslation();
-  const rows = DASHBOARD_TOPICS.map(topic => {
-    const item = stats[topic] ?? { attempts: 0, correct: 0 };
-    return { topic, ...item, pct: percent(item.correct, item.attempts) };
-  });
+  const labelOf = useFlagLabel();
+  const rows = flagsFor(stats).map(flag => {
+    const item = stats[flag.id] ?? { attempts: 0, correct: 0 };
+    return { topic: flag.id, flag, ...item, pct: percent(item.correct, item.attempts) };
+  }).filter(row => row.flag.builtin || row.attempts > 0 || !DASHBOARD_TOPICS.includes(row.topic));
   return <ul className="dash-topics">
     {rows.map(row => <li key={row.topic}>
-      <div className="dash-topic-head"><strong>{t(`dash.topic.${row.topic}`)}</strong><span>{row.pct === null ? t('dash.noTopicData') : `${row.pct}%`}</span></div>
+      <div className="dash-topic-head"><strong><span className="dash-flag" style={{ color: row.flag.color }} aria-hidden="true">⚑</span>{labelOf(row.flag)}</strong><span>{row.pct === null ? t('dash.noTopicData') : `${row.pct}%`}</span></div>
       <Bar value={row.pct} tone={toneFor(row.pct)} />
       {row.attempts > 0 && <small>{t('dash.attemptsTopic', { c: row.correct, a: row.attempts })}</small>}
     </li>)}
@@ -37,7 +52,7 @@ function StudentDetail({ student, exercises, onBack }) {
   return <div className="dash-detail">
     <button type="button" className="btn btn-text dash-back" onClick={onBack}>{t('dash.back')}</button>
     <div className="dash-detail-head">
-      <Avatar id={student.avatar} size={52} />
+      <Avatar id={student.avatar} name={student.name} size={52} />
       <div>
         <h3>{student.name}</h3>
         <p>{t('dash.xp', { n: student.xp ?? 0, l: student.level ?? 1 })} · {t('dash.confidence', { n: student.confidence ?? 0 })}</p>
@@ -74,6 +89,7 @@ function StudentDetail({ student, exercises, onBack }) {
  */
 export default function ClassDashboard({ students, totalExercises = 0, exercises = [] }) {
   const { t } = useTranslation();
+  const labelOf = useFlagLabel();
   const [selectedId, setSelectedId] = useState(null);
   const selected = students.find(item => item.id === selectedId);
 
@@ -86,7 +102,7 @@ export default function ClassDashboard({ students, totalExercises = 0, exercises
       ? Math.round((100 * students.reduce((sum, item) => sum + Math.min(1, (item.solved ?? 0) / totalExercises), 0)) / students.length)
       : null;
     const topics = mergeTopicStats(students.map(item => item.topicStats));
-    const ranked = DASHBOARD_TOPICS.map(topic => ({ topic, pct: percent(topics[topic]?.correct ?? 0, topics[topic]?.attempts ?? 0) })).filter(item => item.pct !== null);
+    const ranked = flagsFor(topics).map(flag => ({ topic: flag.id, flag, pct: percent(topics[flag.id]?.correct ?? 0, topics[flag.id]?.attempts ?? 0) })).filter(item => item.pct !== null);
     const sorted = [...ranked].sort((a, b) => b.pct - a.pct);
     const logs = students.filter(item => item.log).map(item => item.log);
     return {
@@ -112,9 +128,9 @@ export default function ClassDashboard({ students, totalExercises = 0, exercises
 
     {summary.attempts === 0 ? <p className="field-help">{t('dash.noData')}</p> : <>
       <div className="dash-highlights">
-        {summary.best && <div className="dash-highlight is-good"><span>{t('dash.best')}</span><strong>{t(`dash.topic.${summary.best.topic}`)} · {summary.best.pct}%</strong></div>}
-        {summary.worst && <div className="dash-highlight is-low"><span>{t('dash.worst')}</span><strong>{t(`dash.topic.${summary.worst.topic}`)} · {summary.worst.pct}%</strong></div>}
-        <div className="dash-highlight"><span>{t('dash.reinforce')}</span><strong>{summary.reinforce.length ? summary.reinforce.map(item => t(`dash.topic.${item.topic}`)).join(', ') : t('dash.reinforceNone')}</strong></div>
+        {summary.best && <div className="dash-highlight is-good"><span>{t('dash.best')}</span><strong>{labelOf(summary.best.flag)} · {summary.best.pct}%</strong></div>}
+        {summary.worst && <div className="dash-highlight is-low"><span>{t('dash.worst')}</span><strong>{labelOf(summary.worst.flag)} · {summary.worst.pct}%</strong></div>}
+        <div className="dash-highlight"><span>{t('dash.reinforce')}</span><strong>{summary.reinforce.length ? summary.reinforce.map(item => labelOf(item.flag)).join(', ') : t('dash.reinforceNone')}</strong></div>
       </div>
       <h4>{t('dash.byTopic')}</h4>
       <p className="field-help">{t('dash.byTopicLead')}</p>
@@ -133,7 +149,7 @@ export default function ClassDashboard({ students, totalExercises = 0, exercises
         {students.map(student => {
           const pct = percent(student.correct, student.attempts);
           return <li key={student.id}><button type="button" className="dash-student" onClick={() => setSelectedId(student.id)}>
-            <Avatar id={student.avatar} size={36} />
+            <Avatar id={student.avatar} name={student.name} size={36} />
             <span className="dash-student-name"><strong>{student.name}</strong><small>{t('dash.xp', { n: student.xp ?? 0, l: student.level ?? 1 })}</small></span>
             <span className="dash-student-score"><Bar value={pct} tone={toneFor(pct)} /><small>{pct === null ? '—' : `${pct}%`}</small></span>
           </button></li>;

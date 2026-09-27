@@ -189,7 +189,7 @@ export default function TargetChallenge({ langKey = 'gn-jopara', onProgress }) {
           ref={canvasRef}
           className="pgame-canvas"
           role="img"
-          aria-label="Simulación de tiro al blanco con rapidez calculada"
+          aria-label={langKey === 'es' ? 'Simulación de tiro al blanco con rapidez calculada' : 'Tiro al blanco simulación rapidez ojecalculáva reheve'}
         />
       </div>
 
@@ -246,7 +246,7 @@ export default function TargetChallenge({ langKey = 'gn-jopara', onProgress }) {
           </strong>
 
           <div className="pgame-calc-breakdown">
-            <p><strong>Fórmula analítica de examen:</strong></p>
+            <p><strong>{langKey === 'es' ? 'Fórmula analítica de examen:' : 'Fórmula analítica examen-pe g̃uarã:'}</strong></p>
             <code>v₀ = √( (R · g) / sin(2θ) ) = √( ({level.distance} · {level.gravity}) / sin({level.angleDeg * 2}°) ) ≈ {level.exactSpeed} m/s</code>
           </div>
         </div>

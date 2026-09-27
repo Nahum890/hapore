@@ -251,7 +251,8 @@ export function validateContact({ phone, email }) {
   return { phone: cleanPhone, email: cleanEmail };
 }
 
-const PRESET_AVATARS = ['sol', 'rio', 'selva', 'tierra', 'cielo'];
+// Mismos ids que AVATAR_OPTIONS en components/Avatars.jsx. Vacío = solo la inicial.
+const PRESET_AVATARS = ['sol', 'rio', 'selva', 'tierra', 'cielo', 'yaguarete', 'guacamayo', 'tatu', 'cohete', 'atomo', 'pelota', 'dron'];
 const MAX_PHOTO_CHARS = 200_000;
 
 function validAvatar(avatar) {

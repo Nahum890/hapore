@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { drawScene } from './projectileRenderer.js';
 import { formatMeasure, sceneForExercise, scenarioOf } from './exerciseSimulation.js';
 import { useTranslation } from '../i18n/LanguageProvider.jsx';
+import Trajectory3D from './Trajectory3D.jsx';
+import '../components/ChatWidget.css';
 
 const SCENE_TEXT = { dron: 'sim.dronText', basketball: 'sim.basketballText', wall: 'sim.wallText' };
 const SCENE_LABEL = { dron: 'scenario.dron', basketball: 'scenario.basketball', wall: 'sim.wallLabel' };
@@ -19,6 +21,7 @@ export default function CanvasSimulator({ mission, submission }) {
   // respuesta escrita fue correcta, no si la trayectoria geométrica "cayó cerca".
   const verdictRef = useRef(null);
   const [phase, setPhase] = useState('idle');
+  const [view, setView] = useState('2d');
   const scene = useMemo(() => sceneForExercise(exercise, currentSubmission?.answer), [exercise, currentSubmission?.answer]);
 
   useEffect(() => { progressRef.current = 0; setPhase('idle'); }, [exercise?.id]);
@@ -86,7 +89,11 @@ export default function CanvasSimulator({ mission, submission }) {
 
   return <section ref={sectionRef} className="card simulator-card" aria-label={t('sim.exerciseAria', { id: exercise?.id ?? '' })}>
     <div className="simulator-heading"><div><h2>{t('sim.heading')}</h2><p className="simulator-status">{t(SCENE_TEXT[scenario])}</p></div><span className="simulator-target">{t(SCENE_LABEL[scenario])}</span></div>
-    <canvas ref={canvasRef} className="simulator-canvas" role="img" aria-label={`${t(SCENE_ARIA[scenario])}. ${phase === 'landed' ? t('sim.canvasEnd', { x: formatMeasure(scene.flight?.landingX) }) : t('sim.canvasWaiting')}`}>{t('sim.canvasFallback')}</canvas>
+    <div className="chatw-toggle simulator-view-toggle" role="group" aria-label={t('chatw.viewLabel')}>
+      {['2d', '3d'].map(item => <button key={item} type="button" className={view === item ? 'is-active' : ''} aria-pressed={view === item} onClick={() => setView(item)}>{t(`chatw.view.${item}`)}</button>)}
+    </div>
+    {view === '3d' && scene.flight && <Trajectory3D key={`${exercise?.id}-${currentSubmission?.id ?? 'idle'}`} series={[{ points: scene.flight.points, label: t(SCENE_LABEL[scenario]), color: isCorrect || !currentSubmission ? '#1d5bd8' : '#d97706' }]} />}
+    <canvas hidden={view === '3d'} ref={canvasRef} className="simulator-canvas" role="img" aria-label={`${t(SCENE_ARIA[scenario])}. ${phase === 'landed' ? t('sim.canvasEnd', { x: formatMeasure(scene.flight?.landingX) }) : t('sim.canvasWaiting')}`}>{t('sim.canvasFallback')}</canvas>
     {!currentSubmission ? <p className="simulator-result">{t('sim.enterAnswer')}</p>
       : <div className={'simulator-check-result' + (phase === 'landed' ? (isCorrect ? ' is-hit' : ' is-miss') : '')} role="status" aria-live="polite">
         {phase === 'flying' ? <p>{t('sim.checking')}</p> : <>

@@ -5,6 +5,7 @@ import { getLevel } from '../utils/gamification.js';
 import { topicStats } from '../pedagogy/progression.js';
 import { exercises as catalogExercises } from '../data/catalogs.js';
 import { getCustomExercises } from '../utils/customExercises.js';
+import { getFlagState, withFlags } from '../pedagogy/flags.js';
 import ClassDashboard from './ClassDashboard.jsx';
 import { useTranslation } from '../i18n/LanguageProvider.jsx';
 
@@ -35,7 +36,8 @@ function studentFromProfile(entry, exercises) {
 
 export default function StudentRoster({ teacherId, totalExercises }) {
   const { t } = useTranslation();
-  const exercises = [...catalogExercises, ...getCustomExercises()];
+  // Con las banderitas del docente aplicadas: las estadísticas se agrupan por bandera.
+  const exercises = withFlags([...catalogExercises, ...getCustomExercises()], getFlagState().byExercise);
   const students = getRosterForTeacher(teacherId).map(entry => studentFromProfile(entry, exercises)).filter(Boolean);
   return (
     <section className="card" aria-label={t('dash.list')}>

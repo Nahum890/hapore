@@ -300,7 +300,7 @@ export default function ComplementaryChallenge({ langKey = 'gn-jopara', onProgre
           ref={canvasRef}
           className="pgame-canvas"
           role="img"
-          aria-label="Comparación de trayectorias complementarias"
+          aria-label={langKey === 'es' ? 'Comparación de trayectorias complementarias' : 'Trayectoria complementaria ñembojoja'}
         />
       </div>
 

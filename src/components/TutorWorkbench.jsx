@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createLaunch, evaluateTrajectory, maxHeight, range, timeOfFlight } from '../physics/projectileMotion.js';
+import Trajectory3D, { seriesFromLaunch } from '../simulator/Trajectory3D.jsx';
 import { Formula } from './MathText.jsx';
 import { useTranslation } from '../i18n/LanguageProvider.jsx';
 
@@ -15,10 +16,10 @@ function format(value, language) {
   return Number(value).toLocaleString(language === 'es' ? 'es-PY' : 'es-PY', { maximumFractionDigits: 1 });
 }
 
-function TrajectoryGraph({ speed, angle, gravity, compare, language, t }) {
+function TrajectoryGraph({ speed, angle, gravity, height = 0, compare, language, t }) {
   const result = useMemo(() => {
     const angles = compare ? [30, 60] : [angle];
-    const launches = angles.map(value => ({ angle: value, launch: createLaunch(speed, value, { gravity }), color: compare ? PALETTE[angles.indexOf(value)] : PALETTE[0] }));
+    const launches = angles.map(value => ({ angle: value, launch: createLaunch(speed, value, { gravity, y0: height }), color: compare ? PALETTE[angles.indexOf(value)] : PALETTE[0] }));
     const metrics = launches.map(item => ({ ...item, distance: range(item.launch), height: maxHeight(item.launch), duration: timeOfFlight(item.launch) }));
     const maxX = Math.max(...metrics.map(item => item.distance), 1) * 1.08;
     const maxY = Math.max(...metrics.map(item => item.height), 1) * 1.14;
@@ -32,7 +33,7 @@ function TrajectoryGraph({ speed, angle, gravity, compare, language, t }) {
       return { ...item, coordinates };
     });
     return { maxX, maxY, paths };
-  }, [speed, angle, gravity, compare]);
+  }, [speed, angle, gravity, height, compare]);
 
   return <div className="tutor-graph-wrap">
     <svg className="tutor-trajectory-graph" viewBox="0 0 360 190" role="img" aria-label={t('free.graphDescription', { speed, angle: compare ? '30 y 60' : angle, gravity })}>
@@ -57,40 +58,41 @@ function TrajectoryGraph({ speed, angle, gravity, compare, language, t }) {
   </div>;
 }
 
-export default function TutorWorkbench({ lastPrompt = '', onInsertPrompt }) {
+export default function TutorWorkbench({ preset = null, onInsertPrompt }) {
   const { t, language } = useTranslation();
+  const rootRef = useRef(null);
   const [tab, setTab] = useState('graph');
   const [expanded, setExpanded] = useState(false);
   const [speed, setSpeed] = useState(20);
   const [angle, setAngle] = useState(50);
   const [gravity, setGravity] = useState(9.8);
+  const [height, setHeight] = useState(0);
   const [compare, setCompare] = useState(false);
   const [practiceChoice, setPracticeChoice] = useState('');
   const [practiceChecked, setPracticeChecked] = useState(false);
-  const launch = useMemo(() => createLaunch(speed, angle, { gravity }), [speed, angle, gravity]);
+  const launch = useMemo(() => createLaunch(speed, angle, { gravity, y0: height }), [speed, angle, gravity, height]);
   const metrics = useMemo(() => ({ distance: range(launch), height: maxHeight(launch), duration: timeOfFlight(launch) }), [launch]);
   const velocity = useMemo(() => ({ x: launch.vx, y: launch.vy }), [launch]);
 
+  // Se abre únicamente cuando una herramienta del chat pide "Abrir en el
+  // Laboratorio", con sus mismos datos (antes se abría por palabras sueltas
+  // del mensaje y muchas veces no tenía relación con lo pedido).
   useEffect(() => {
-    const prompt = lastPrompt.toLocaleLowerCase();
-    const workbenchRequested = /(gr[aá]fic|trayectoria|simul|f[oó]rmula|alcance|practic|ejemplo|rapidez inicial|[áa]ngulo|gravedad|v0)/u.test(prompt);
-    if (!workbenchRequested) {
-      setExpanded(false);
-      return;
-    }
-    const number = raw => Number(String(raw).replace(',', '.'));
-    const speedMatch = prompt.match(/(?:v0|v₀|rapidez(?: inicial)?|velocidad inicial)\s*(?:=|:)?\s*(\d+(?:[.,]\d+)?)/u);
-    const angleMatch = prompt.match(/(?:[áa]ngulo)(?:\s+de\s+lanzamiento)?\s*(?:=|:)?\s*(\d+(?:[.,]\d+)?)\s*(?:°|grados?)/u);
-    const gravityMatch = prompt.match(/\bg\s*(?:=|:)\s*(\d+(?:[.,]\d+)?)/u);
-    if (speedMatch && number(speedMatch[1]) > 0 && number(speedMatch[1]) <= 100) setSpeed(number(speedMatch[1]));
-    if (angleMatch && number(angleMatch[1]) >= 5 && number(angleMatch[1]) <= 85) setAngle(number(angleMatch[1]));
-    if (gravityMatch && number(gravityMatch[1]) >= 1 && number(gravityMatch[1]) <= 20) setGravity(number(gravityMatch[1]));
-    const comparisonRequested = /(?:30\s*°?\s*(?:y|e|\/|vs\.?|contra)\s*60|compar(?:ar|a|aci[oó]n)|embojoja)/u.test(prompt);
-    if (comparisonRequested) setCompare(true);
-    else if (angleMatch) setCompare(false);
+    if (!preset) return;
+    const clamp = (value, min, max, fallback) => (Number.isFinite(Number(value)) ? Math.min(max, Math.max(min, Number(value))) : fallback);
+    setSpeed(clamp(preset.v0, 1, 60, 20));
+    setAngle(clamp(preset.angle, 0, 85, 45));
+    setGravity(clamp(preset.g, 1, 25, 9.8));
+    setHeight(clamp(preset.h0, 0, 50, 0));
+    setCompare(false);
+    setTab('graph');
     setExpanded(true);
-    setTab(/practic|ñeha|ñ[aá]e/u.test(prompt) ? 'practice' : /ejemplo|techapyr/u.test(prompt) ? 'example' : /f[oó]rmula/u.test(prompt) ? 'formulas' : 'graph');
-  }, [lastPrompt]);
+    requestAnimationFrame(() => rootRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }));
+  }, [preset?.key]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const askSolve = () => onInsertPrompt(language === 'es'
+    ? `Resolvé paso a paso: v0 = ${speed} m/s, ángulo ${angle}°, g = ${gravity} m/s²${height ? `, desde ${height} m de altura` : ''}. ¿Cuál es el alcance, la altura máxima y el tiempo de vuelo?`
+    : `Eresolve paso a paso: v0 = ${speed} m/s, ángulo ${angle}°, g = ${gravity} m/s²${height ? `, desde ${height} m de altura` : ''}. ¿Mboýpa alcance, altura máxima ha tiempo de vuelo?`);
 
   const insertFormula = formula => {
     const topic = {
@@ -105,7 +107,7 @@ export default function TutorWorkbench({ lastPrompt = '', onInsertPrompt }) {
     onInsertPrompt(question);
   };
 
-  return <details className="tutor-workbench" open={expanded} onToggle={event => setExpanded(event.currentTarget.open)}>
+  return <details ref={rootRef} className="tutor-workbench" open={expanded} onToggle={event => setExpanded(event.currentTarget.open)}>
     <summary onClick={event => { event.preventDefault(); setExpanded(value => !value); }}>
       <span className="tutor-workbench-mark" aria-hidden="true">y(x)</span>
       <span className="tutor-workbench-heading"><strong>{t('free.workbenchTitle')}</strong><small>{t('free.workbenchLead')}</small></span>
@@ -113,17 +115,23 @@ export default function TutorWorkbench({ lastPrompt = '', onInsertPrompt }) {
     </summary>
     <div className="tutor-workbench-body">
       <div className="tutor-workbench-tabs" role="tablist" aria-label={t('free.workbenchTitle')}>
-        {['graph', 'formulas', 'example', 'practice'].map(item => <button key={item} type="button" role="tab" aria-selected={tab === item} className={tab === item ? 'is-active' : ''} onClick={() => setTab(item)}>{t(`free.workbench.${item}`)}</button>)}
+        {['graph', '3d', 'formulas', 'example', 'practice'].map(item => <button key={item} type="button" role="tab" aria-selected={tab === item} className={tab === item ? 'is-active' : ''} onClick={() => setTab(item)}>{t(`free.workbench.${item}`)}</button>)}
       </div>
 
-      {tab === 'graph' && <div className="tutor-workbench-explore" role="tabpanel">
+      {(tab === 'graph' || tab === '3d') && <div className="tutor-workbench-explore" role="tabpanel">
         <div className="tutor-workbench-controls">
-          <label>{t('free.speed')} <output>{speed} m/s</output><input type="range" min="8" max="32" step="1" value={speed} onChange={event => setSpeed(Number(event.target.value))} aria-label={t('free.speed')} /></label>
-          <label>{t('free.angle')} <output>{angle}°</output><input type="range" min="10" max="80" step="1" value={angle} onChange={event => setAngle(Number(event.target.value))} aria-label={t('free.angle')} disabled={compare} /></label>
-          <label>{t('free.gravity')} <output>{format(gravity, language)} m/s²</output><input type="range" min="1" max="20" step="0.1" value={gravity} onChange={event => setGravity(Number(event.target.value))} aria-label={t('free.gravity')} /></label>
+          <label>{t('free.speed')} <output>{format(speed, language)} m/s</output><input type="range" min="1" max="60" step="0.5" value={speed} onChange={event => setSpeed(Number(event.target.value))} aria-label={t('free.speed')} /></label>
+          <label>{t('free.angle')} <output>{format(angle, language)}°</output><input type="range" min="0" max="85" step="1" value={angle} onChange={event => setAngle(Number(event.target.value))} aria-label={t('free.angle')} disabled={compare} /></label>
+          <label>{t('free.gravity')} <output>{format(gravity, language)} m/s²</output><input type="range" min="1" max="25" step="0.01" value={gravity} onChange={event => setGravity(Number(event.target.value))} aria-label={t('free.gravity')} /></label>
+          <label>{t('chatw.height')} <output>{format(height, language)} m</output><input type="range" min="0" max="50" step="0.5" value={height} onChange={event => setHeight(Number(event.target.value))} aria-label={t('chatw.height')} /></label>
           <label className="tutor-workbench-compare"><input type="checkbox" checked={compare} onChange={event => setCompare(event.target.checked)} />{t('free.compareAngles')}</label>
         </div>
-        <TrajectoryGraph speed={speed} angle={angle} gravity={gravity} compare={compare} language={language} t={t} />
+        {tab === '3d'
+          ? <Trajectory3D series={compare
+            ? [seriesFromLaunch({ v0: speed, angle: 30, g: gravity, h0: height }, '30°', PALETTE[0]), seriesFromLaunch({ v0: speed, angle: 60, g: gravity, h0: height }, '60°', PALETTE[1])]
+            : [seriesFromLaunch({ v0: speed, angle, g: gravity, h0: height }, `${angle}°`)]} compact />
+          : <TrajectoryGraph speed={speed} angle={angle} gravity={gravity} height={height} compare={compare} language={language} t={t} />}
+        <button type="button" className="btn btn-primary tutor-workbench-solve" onClick={askSolve}>{t('chatw.solveInChat')}</button>
         {!compare && <div className="tutor-workbench-metrics" aria-live="polite">
           <span><small>{t('free.range')}</small><strong>{format(metrics.distance, language)} m</strong></span>
           <span><small>{t('free.maxHeight')}</small><strong>{format(metrics.height, language)} m</strong></span>

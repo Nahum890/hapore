@@ -4,6 +4,8 @@ import Icon from './Icon.jsx';
 import { readJSON, writeJSON } from '../utils/storage.js';
 import { useTranslation } from '../i18n/LanguageProvider.jsx';
 import { localizeTheoryModule } from '../data/theoryJopara.js';
+import Trajectory3D, { seriesFromLaunch } from '../simulator/Trajectory3D.jsx';
+import './ChatWidget.css';
 
 const STORAGE_KEY = 'guarania:theoryProgress:parabolic';
 
@@ -368,6 +370,7 @@ export default function TheorySection() {
   const [labAngle, setLabAngle] = useState(45);
   const [labSpeed, setLabSpeed] = useState(20);
   const [labGravity, setLabGravity] = useState(9.8);
+  const [labView, setLabView] = useState('2d');
 
   const localizedModules = useMemo(() => MODULES.map(module => localizeTheoryModule(module, language)), [language]);
   const activeModuleIndex = localizedModules.findIndex(m => m.id === activeModuleId);
@@ -654,8 +657,12 @@ export default function TheorySection() {
                 </button>
               </div>
 
-              {/* Gráfico SVG de la curva en tiempo real */}
-              <div className="theory-canvas-box" aria-hidden="true">
+              {/* Gráfico de la curva en tiempo real: 2D o 3D */}
+              <div className="chatw-toggle theory-view-toggle" role="group" aria-label={t('chatw.viewLabel')}>
+                {['2d', '3d'].map(item => <button key={item} type="button" className={labView === item ? 'is-active' : ''} aria-pressed={labView === item} onClick={() => setLabView(item)}>{t(`chatw.view.${item}`)}</button>)}
+              </div>
+              {labView === '3d' && <Trajectory3D series={[seriesFromLaunch({ v0: labSpeed, angle: labAngle, g: labGravity }, `${labAngle}°`)]} compact />}
+              <div className="theory-canvas-box" aria-hidden="true" hidden={labView === '3d'}>
                 <svg viewBox="0 0 400 180" className="theory-trajectory-svg">
                   {/* Cuadrícula técnica de fondo */}
                   <line x1="30" y1="150" x2="370" y2="150" stroke="#cbd5e1" strokeWidth="2" />

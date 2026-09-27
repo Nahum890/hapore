@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { changePassword, updateProfile } from '../auth/localAccounts.js';
 import { getOnlineConsent, setOnlineConsent, subscribeOnlineConsent } from '../ai/onlineConsent.js';
-import Avatar, { AVATAR_OPTIONS, isPhotoAvatar } from './Avatars.jsx';
+import Avatar, { AVATAR_OPTIONS, LETTER_AVATAR, isPhotoAvatar } from './Avatars.jsx';
 import { imageFileToDataUrl } from '../utils/imageData.js';
 import { useTranslation } from '../i18n/LanguageProvider.jsx';
 import { localizeError } from '../i18n/messages.js';
@@ -14,7 +14,7 @@ export default function ProfileSettings({ open, user, onClose, onSaved, required
   const fileRef = useRef(null);
   const [phone, setPhone] = useState(user?.phone ?? '');
   const [email, setEmail] = useState(user?.email ?? '');
-  const [avatar, setAvatar] = useState(user?.avatar ?? AVATAR_OPTIONS[0]);
+  const [avatar, setAvatar] = useState(user?.avatar ?? LETTER_AVATAR);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
   const [loadingPhoto, setLoadingPhoto] = useState(false);
@@ -34,7 +34,7 @@ export default function ProfileSettings({ open, user, onClose, onSaved, required
     const dialog = dialogRef.current;
     if (!dialog) return undefined;
     if (open && !dialog.open) {
-      setPhone(user?.phone ?? ''); setEmail(user?.email ?? ''); setAvatar(user?.avatar ?? AVATAR_OPTIONS[0]);
+      setPhone(user?.phone ?? ''); setEmail(user?.email ?? ''); setAvatar(user?.avatar ?? LETTER_AVATAR);
       setSaved(false); setError('');
       setCurrentPassword(''); setNewPassword(''); setConfirmPassword(''); setPasswordStatus(''); setPasswordError('');
       setGeminiError('');
@@ -110,6 +110,10 @@ export default function ProfileSettings({ open, user, onClose, onSaved, required
                   <Avatar id={avatar} size={52} />
                 </label>
               )}
+              <label className={'avatar-option' + (!avatar ? ' is-selected' : '')} title={t('settings.letterOnly')}>
+                <input type="radio" name="avatar" value="" checked={!avatar} onChange={() => setAvatar(LETTER_AVATAR)} aria-label={t('settings.letterOnly')} />
+                <Avatar id={null} name={user?.name} size={52} />
+              </label>
               {AVATAR_OPTIONS.map(id => (
                 <label key={id} className={'avatar-option' + (avatar === id ? ' is-selected' : '')}>
                   <input type="radio" name="avatar" value={id} checked={avatar === id} onChange={() => setAvatar(id)} />

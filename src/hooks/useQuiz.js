@@ -6,6 +6,7 @@ import { createAIProvider } from '../ai/AIProvider.js';
 import { getTutorQuota, DAILY_TUTOR_LIMIT } from '../ai/tutorQuota.js';
 import { useTranslation } from '../i18n/LanguageProvider.jsx';
 import { translate } from '../i18n/messages.js';
+import { parseWidgetTags, widgetForMessage } from '../ai/chatTools.js';
 
 export const QUIZ_MIN_QUANTITY = 5;
 export const QUIZ_MAX_QUANTITY = 50;
@@ -443,7 +444,14 @@ export function useQuiz(flashcards, { onMoveToQuiz, onQuizAnswer, classConfig, i
         response = { message: translate(language, 'quiz.fallbackError'), available: false, source: null };
       }
       if (generation !== generationRef.current) return;
-      const finalLog = [...nextLog, { role: 'tutor', text: response.message, source: response.source ?? null, reason: response.reason ?? null, available: response.available !== false }];
+      // Herramientas del chat: la IA puede pedir una con [[simular …]] y, si
+      // no, se agrega la que corresponde a lo que pidió el estudiante
+      // (cuaderno, gráfico paso a paso, simulación 2D/3D, práctica…).
+      const tagged = parseWidgetTags(response.message, language);
+      const widget = response.widget
+        ?? tagged.widget
+        ?? (response.available !== false && !image ? widgetForMessage(displayText, charlaLog, language) : null);
+      const finalLog = [...nextLog, { role: 'tutor', text: tagged.text || response.message, source: response.source ?? null, reason: response.reason ?? null, available: response.available !== false, ...(widget ? { widget } : {}) }];
       setCharlaLog(finalLog);
       persistFreeConversation(finalLog.map(({ image: _drop, ...rest }) => rest));
       setTutorQuota(getTutorQuota());
@@ -475,6 +483,26 @@ export function useQuiz(flashcards, { onMoveToQuiz, onQuizAnswer, classConfig, i
     setCharlaText('');
     setStreamText('');
     setBusy(false);
+  }, []);
+
+  // Borra una conversación del chat libre del historial guardado. Si es la
+  // que está abierta, se empieza una nueva en blanco.
+  const deleteFreeConversation = useCallback((id) => {
+    if (!id || requestLock.current) return;
+    setHistory(prev => {
+      const next = prev.filter(item => item.id !== id);
+      writeJSON(STORAGE_KEYS.CHAT_HISTORY, next);
+      return next;
+    });
+    if (freeSessionRef.current === id) {
+      generationRef.current += 1;
+      freeSessionRef.current = null;
+      setFreeSessionId(null);
+      setCharlaLog([]);
+      setCharlaText('');
+      setCharlaImage(null);
+      setStreamText('');
+    }
   }, []);
 
   const finish = useCallback(() => {
@@ -551,6 +579,7 @@ export function useQuiz(flashcards, { onMoveToQuiz, onQuizAnswer, classConfig, i
     askFreeQuestion,
     newFreeConversation,
     openFreeConversation,
+    deleteFreeConversation,
     finish,
     score,
     mistakeCount: mistakeIds.length,

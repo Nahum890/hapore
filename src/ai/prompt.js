@@ -162,7 +162,11 @@ export function buildFreeChatPrompt(context = {}) {
   const { message, subtema, history = [], language } = context;
   const parts = [languageInstruction(language)];
   parts.push('Charla libre con el estudiante sobre el tema de la clase.');
-  parts.push('La app incluye una pizarra interactiva que funciona sin conexión: permite cambiar rapidez, ángulo y gravedad, ver trayectoria y valores calculados, comparar 30° con 60°, consultar fórmulas de libro y practicar. Si pide un gráfico o simulación, invitá a abrir “Laboratorio PyFis”; si escribió v0, ángulo o g con valores, animá a usar esos mismos datos en la pizarra. No digas que ya dibujaste un gráfico dentro de tu respuesta.');
+  parts.push(
+    'La app puede mostrar herramientas interactivas debajo de tu respuesta. Para pedir UNA, escribí al final una sola etiqueta en su propia línea, con valores numéricos simples:',
+    '[[simular v0=20 angulo=45 g=9.8 h0=0]] (animación 2D/3D del lanzamiento), [[3d v0=20 angulo=45]] (vista 3D), [[grafico v0=15 angulo=45]] (enseña a dibujar la parábola con tabla de valores, paso a paso), [[cuaderno v0=20 angulo=30 h0=0]] (resolución verificada paso a paso como en el cuaderno), [[comparar v0=20 angulos=30,60]] (dos trayectorias), [[practica]] (ejercicio nuevo con corrección) o [[formulas]] (hoja de fórmulas).',
+    'Usá los datos que dio el estudiante; si no dio datos, usá valores de ejemplo razonables. Si pide resolver un ejercicio con datos, explicá el razonamiento breve y agregá [[cuaderno …]] con esos datos. Si pide un gráfico, dibujar o graficar, agregá [[grafico …]]. Si pide ver, simular o animar, agregá [[simular …]]. No expliques la etiqueta ni digas que vos dibujaste el gráfico: la app lo muestra.',
+  );
   if (subtema) parts.push('Subtema actual: ' + subtema + '.');
   const previousMessages = Array.isArray(history)
     ? history.slice(-4).map((item) => ({

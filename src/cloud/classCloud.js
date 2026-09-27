@@ -1,6 +1,7 @@
 import { rpc, rest, isCloudConfigured } from './cloudClient.js';
 import { readJSON, writeJSON, removeKey } from '../utils/storage.js';
 import { topicStats } from '../pedagogy/progression.js';
+import { withFlags } from '../pedagogy/flags.js';
 import { exercises as catalogExercises } from '../data/catalogs.js';
 
 // Paquete de clase que descarga el alumno: queda en su perfil local para
@@ -17,9 +18,12 @@ export function normalizeCloudCode(text) {
 
 /** Contenido que el docente comparte. Las tarjetas y ejercicios viajan
  * completos para que el alumno los tenga aunque no existan en su navegador. */
-export function buildClassContent({ config, cards, exercises }) {
+export function buildClassContent({ config, cards, exercises, flags = null }) {
   return {
     version: 1,
+    // Banderitas del docente: con esto el progreso del alumno se agrupa igual
+    // que en el panel del docente (temas y banderas propias).
+    ...(flags ? { flags: { defs: flags.defs ?? [], byExercise: flags.byExercise ?? {} } } : {}),
     config: { subtemas: config.subtemas, ejercicios: Number(config.ejercicios), flashcards: cards.length },
     cards: cards.map(card => ({
       id: card.id, topic: card.topic ?? 'Movimiento Parabólico', frente_es: card.frente_es ?? card.front ?? '',
@@ -120,7 +124,7 @@ export function progressSnapshot(learning) {
     cards_consolidated: cards.filter(item => item?.consolidated).length,
     // Para el panel docente: ejercicios distintos resueltos y aciertos por tema.
     solved: new Set(log.filter(item => item?.correct && item.exerciseId).map(item => item.exerciseId)).size,
-    topic_stats: topicStats(log, [...catalogExercises, ...(getClassPackage()?.content?.exercises ?? [])]),
+    topic_stats: topicStats(log, withFlags([...catalogExercises, ...(getClassPackage()?.content?.exercises ?? [])], getClassPackage()?.content?.flags?.byExercise ?? {})),
   };
 }
 

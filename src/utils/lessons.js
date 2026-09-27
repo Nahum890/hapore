@@ -1,4 +1,5 @@
 import { readJSON, writeJSON } from './storage.js';
+import { queueTeacherSync } from '../cloud/teacherSyncQueue.js';
 
 // Clases armadas por el docente, tipo presentación: una lista ordenada de
 // diapositivas que se editan antes y se proyectan después. Se guardan en el
@@ -97,11 +98,19 @@ export function saveLesson(lesson) {
   const index = list.findIndex(item => item.id === lesson.id);
   const next = index === -1 ? [...list, updated] : list.map(item => (item.id === lesson.id ? updated : item));
   writeJSON(LESSONS_KEY, next);
+  queueTeacherSync('lesson', updated);
   return updated;
 }
 
 export function deleteLesson(id) {
   writeJSON(LESSONS_KEY, getLessons().filter(item => item.id !== id));
+  queueTeacherSync('lesson', { id }, true);
+}
+
+/** Reemplaza la lista local con lo recuperado de Supabase (sin volver a subirlo). */
+export function replaceLessons(list) {
+  writeJSON(LESSONS_KEY, Array.isArray(list) ? list : []);
+  try { window.dispatchEvent(new Event('lessons-changed')); } catch { /* SSR/tests */ }
 }
 
 export function duplicateLesson(id) {

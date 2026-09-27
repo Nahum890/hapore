@@ -218,7 +218,7 @@ export default function FreeKickChallenge({ langKey = 'gn-jopara', onProgress })
           ref={canvasRef}
           className="pgame-canvas"
           role="img"
-          aria-label="Simulación de tiro libre sobre barrera FIFA hacia el arco"
+          aria-label={langKey === 'es' ? 'Simulación de tiro libre sobre la barrera hacia el arco' : 'Tiro libre simulación barrera ári arco gotyo'}
         />
       </div>
 

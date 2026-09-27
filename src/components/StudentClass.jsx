@@ -12,7 +12,7 @@ function LocalTeacherCard({ studentId }) {
   const teacher = link?.teacherId ? getAccountById(link.teacherId) : null;
   if (!teacher) return null;
   return <div className="teacher-card">
-    <Avatar id={teacher.avatar} size={48} />
+    <Avatar id={teacher.avatar} name={teacher.name} size={48} />
     <div><h3>{teacher.name}</h3><p>@{teacher.username}</p><ContactLinks person={teacher} /></div>
   </div>;
 }
@@ -74,7 +74,7 @@ export default function StudentClass({ classConfig, onJoinClass, studentId, clas
       <span className="panel-eyebrow">{t('class.eyebrow')} · {classPackage.code}</span>
       <h2 id="student-class-title">{classPackage.title}</h2>
       <div className="teacher-card">
-        <Avatar id={classPackage.teacherAvatar} size={48} />
+        <Avatar id={classPackage.teacherAvatar} name={classPackage.teacherName} size={48} />
         <div><h3>{classPackage.teacherName}</h3><p>{t('class.yourTeacher')}</p><ContactLinks person={{ phone: classPackage.teacherPhone, email: classPackage.teacherEmail }} /></div>
       </div>
       <p className="sync-status is-synced">{t('class.downloaded')}</p>

@@ -337,7 +337,7 @@ export default function ClassChat({ user, classPackage, exercises, concepts, onE
           {unread[GROUP] > 0 && <span className="class-chat-badge" aria-label={t('chat.unread', { n: unread[GROUP] })}>{unread[GROUP]}</span>}
         </button></li>
         {others.map(person => <li key={person.user_id}><button type="button" className={'class-chat-item' + (conversation === person.user_id && showThread ? ' is-active' : '')} onClick={() => openConversation(person.user_id)}>
-          <Avatar id={person.avatar} size={36} />
+          <Avatar id={person.avatar} name={person.display_name} size={36} />
           <span className="class-chat-name"><strong>{person.display_name}</strong><small>{roleLabel(person)}</small></span>
           {unread[person.user_id] > 0 && <span className="class-chat-badge" aria-label={t('chat.unread', { n: unread[person.user_id] })}>{unread[person.user_id]}</span>}
         </button></li>)}
@@ -352,7 +352,7 @@ export default function ClassChat({ user, classPackage, exercises, concepts, onE
         : <>
           <header className="class-chat-thread-head">
             <button type="button" className="btn btn-secondary class-chat-back" onClick={() => setShowThread(false)}>← {t('common.back')}</button>
-            {partner ? <><Avatar id={partner.avatar} size={40} /><div><strong>{partner.display_name}</strong><small>{roleLabel(partner)}</small><ContactLinks person={partner} /></div></>
+            {partner ? <><Avatar id={partner.avatar} name={partner.display_name} size={40} /><div><strong>{partner.display_name}</strong><small>{roleLabel(partner)}</small><ContactLinks person={partner} /></div></>
               : <div><strong>{t('chat.group')}</strong><small>{t('chat.people', { n: others.length + 1 })}{teacher ? t('chat.teacherExtras') : ''}</small></div>}
           </header>
           <ol className="class-chat-messages" ref={threadRef} aria-live="polite">
@@ -361,7 +361,7 @@ export default function ClassChat({ user, classPackage, exercises, concepts, onE
               const mine = message.sender_id === myId;
               const sender = people.get(message.sender_id);
               return <li key={message.id} className={'class-chat-message' + (mine ? ' is-mine' : '')}>
-                {!mine && <Avatar id={sender?.avatar} size={30} />}
+                {!mine && <Avatar id={sender?.avatar} name={sender?.display_name} size={30} />}
                 <div className="class-chat-bubble">
                   {!mine && conversation === GROUP && <span className="class-chat-sender">{sender?.display_name ?? t('chat.someone')}{sender?.role === 'maestro' ? t('chat.teacherTag') : ''}</span>}
                   <MessageContent message={message} onOpenLesson={setOpenLesson}

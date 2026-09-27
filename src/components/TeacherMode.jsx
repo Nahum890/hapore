@@ -4,6 +4,8 @@ import TeacherActivityStudio from './TeacherActivityStudio.jsx';
 import { encodeClassConfig, decodeClassConfig } from '../utils/classCode.js';
 import { exercises, flashcards as flashcardsData, quizBank } from '../data/catalogs.js';
 import { getCustomExercises } from '../utils/customExercises.js';
+import ExerciseFlags from './ExerciseFlags.jsx';
+import { getFlagState, withFlags } from '../pedagogy/flags.js';
 import CustomExerciseForm from './CustomExerciseForm.jsx';
 import TeacherMeetings from './TeacherMeetings.jsx';
 import StudentRoster from './StudentRoster.jsx';
@@ -138,7 +140,9 @@ function CloudClassSetup({ teacher }) {
       const content = buildClassContent({
         config: { subtemas: SUBTEMAS, ejercicios: Math.min(10, exercises.length), flashcards: flashcardsData.length },
         cards: flashcardsData,
-        exercises: [],
+        // Ejercicios propios del docente (con su banderita) viajan con la clase.
+        exercises: withFlags(getCustomExercises(), getFlagState().byExercise),
+        flags: getFlagState(),
       });
       const result = await createCloudClass({ title: title.trim(), teacherName: teacher.name, teacherAvatar: teacher.avatar, teacherPhone: teacher.phone, teacherEmail: teacher.email, content });
       setCreated(result);
@@ -220,6 +224,7 @@ export default function TeacherMode({ classConfig, onJoinClass, teacher }) {
       <span className="panel-eyebrow">{t('teacher.ownEyebrow')}</span><h2>{t('teacher.ownTitle')}</h2>
       <p className="teacher-note">{t('teacher.ownText')}</p>
       <CustomExerciseForm exercises={customExercises} onChange={refreshCustomExercises} />
+      <ExerciseFlags exercises={allExercises} />
     </section>
     <div hidden={tool !== 'clase'}><Suspense fallback={<p className="teacher-note">{t('teacher.lessonsLoading')}</p>}>
       <LessonStudio exercises={allExercises} onCreateGroup={() => setTool('grupo')} />

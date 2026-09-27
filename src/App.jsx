@@ -16,7 +16,6 @@ import CanvasSimulator from './simulator/CanvasSimulator.jsx';
 import PredictLaunchGame from './simulator/PredictLaunchGame.jsx';
 import TrajectoryDrawingPractice from './components/TrajectoryDrawingPractice.jsx';
 import ExplorationLab from './simulator/ExplorationLab.jsx';
-import AIPrivacyNotice from './components/AIPrivacyNotice.jsx';
 import { useSpeechRecognition, useSpeechSynthesis } from './hooks/useSpeech.js';
 import { imageFileToDataUrl } from './utils/imageData.js';
 import {
@@ -35,6 +34,9 @@ import NotificationsCenter from './components/NotificationsCenter.jsx';
 import useClassNotifications from './hooks/useClassNotifications.js';
 import { Formula, MathText } from './components/MathText.jsx';
 import TutorWorkbench from './components/TutorWorkbench.jsx';
+import ChatWidget from './components/ChatWidget.jsx';
+import { parseWidgetTags } from './ai/chatTools.js';
+import { startTeacherSync } from './cloud/teacherContent.js';
 const ClassChat = lazy(() => import('./components/ClassChat.jsx'));
 import { isCloudConfigured } from './cloud/cloudClient.js';
 import { downloadClass, flushProgress, getClassPackage, getPendingProgress, leaveCloudClass, progressSnapshot, queueProgress, syncMyProfile } from './cloud/classCloud.js';
@@ -312,7 +314,14 @@ function FreeChatView({ quiz }) {
   const freeHistory = quiz.history
     .filter(session => session.tipo === 'chat-libre')
     .sort((a, b) => new Date(b.hora ?? b.fecha).getTime() - new Date(a.hora ?? a.fecha).getTime());
-  const latestStudentPrompt = [...quiz.charlaLog].reverse().find(message => message.role === 'alumno')?.text ?? '';
+  // El Laboratorio PyFis ya no se abre solo por palabras sueltas: se abre
+  // con los datos exactos de una herramienta del chat ("Abrir en el Laboratorio").
+  const [labPreset, setLabPreset] = useState(null);
+  const openLab = params => setLabPreset({ ...params, key: Date.now() });
+  const insertPrompt = text => {
+    quiz.setCharlaText(text);
+    requestAnimationFrame(() => composerRef.current?.focus());
+  };
   const startNewConversation = () => { quiz.newFreeConversation(); speech.stop(); };
 
   const pickPhoto = async event => {
@@ -337,9 +346,15 @@ function FreeChatView({ quiz }) {
         <div className="free-chat-history-heading"><h2>{t('free.historyOpen')}</h2><button type="button" aria-label={t('free.historyClose')} onClick={() => setHistoryOpen(false)}>×</button></div>
         <button type="button" className="btn btn-primary free-chat-history-new" onClick={() => { startNewConversation(); setHistoryOpen(false); }} disabled={quiz.busy}>{t('free.new')}</button>
         {freeHistory.length ? <nav className="free-chat-history-list" aria-label={t('free.historyOpen')}>
-          {freeHistory.map(session => <button type="button" key={session.id} className={'free-chat-history-item' + (quiz.freeSessionId === session.id ? ' is-active' : '')} aria-current={quiz.freeSessionId === session.id ? 'page' : undefined} onClick={() => { quiz.openFreeConversation(session); speech.stop(); setHistoryOpen(false); }} disabled={quiz.busy}>
-            <strong>{session.tema}</strong><small>{session.fecha} · {session.mensajes?.length ?? 0} {t('quiz.messages')}</small>
-          </button>)}
+          {freeHistory.map(session => <div key={session.id} className="free-chat-history-row">
+            <button type="button" className={'free-chat-history-item' + (quiz.freeSessionId === session.id ? ' is-active' : '')} aria-current={quiz.freeSessionId === session.id ? 'page' : undefined} onClick={() => { quiz.openFreeConversation(session); speech.stop(); setHistoryOpen(false); }} disabled={quiz.busy}>
+              <strong>{session.tema}</strong><small>{session.fecha} · {session.mensajes?.length ?? 0} {t('quiz.messages')}</small>
+            </button>
+            <button type="button" className="free-chat-history-delete" aria-label={t('free.deleteChat', { name: session.tema })} title={t('free.deleteChat', { name: session.tema })} disabled={quiz.busy}
+              onClick={() => { if (window.confirm(t('free.deleteConfirm', { name: session.tema }))) { if (quiz.freeSessionId === session.id) speech.stop(); quiz.deleteFreeConversation(session.id); } }}>
+              <span aria-hidden="true">🗑</span>
+            </button>
+          </div>)}
         </nav> : <p className="free-chat-history-empty">{t('free.historyEmpty')}</p>}
       </aside>
     </>}
@@ -349,24 +364,25 @@ function FreeChatView({ quiz }) {
           <button type="button" className="btn btn-secondary free-chat-history-toggle" aria-expanded={historyOpen} onClick={() => setHistoryOpen(value => !value)}><span aria-hidden="true">☰</span>{t('free.historyOpen')}</button>
           <div><h2>{t('free.title')}</h2><p>{t('free.lead')}</p></div>
         </div>
-        <div className="free-chat-heading-actions"><span className="chip">{t('free.quota', { n: quiz.charlaLeft })}</span><button type="button" className="btn btn-secondary chat-new-button" onClick={startNewConversation} disabled={quiz.busy}>{t('free.new')}</button></div>
+        <div className="free-chat-heading-actions"><button type="button" className="btn btn-secondary chat-new-button" onClick={startNewConversation} disabled={quiz.busy}>{t('free.new')}</button></div>
       </header>
       <div className="chats-scroll free-chat-scroll" ref={logRef} aria-live="polite">
         {!quiz.charlaLog.length && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble">{t('free.welcome')}</div>}
         {quiz.charlaLog.map((message, position) => <div key={message.id ?? 'free-' + position} className={'chat-bubble ' + (message.role === 'alumno' ? 'chat-alumno-bubble' : 'chat-tutor-bubble')}>
           {message.image && <img className="chat-attached-photo" src={message.image} alt={t('free.photoSent')} />}
           <MathText text={message.text} />
+          {message.role !== 'alumno' && message.widget && <ChatWidget widget={message.widget} onOpenLab={openLab} onAsk={insertPrompt} />}
           {message.role !== 'alumno' && <div className="chat-bubble-actions">
             <SourceLabel entry={message} />
             <SpeakerButton text={message.text} id={'free-' + position} speech={speech} />
           </div>}
         </div>)}
         {quiz.busy && !quiz.streamText && <TypingBubble />}
-        {quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-streaming" aria-live="off"><MathText text={quiz.streamText} /></div>}
-        <TutorWorkbench lastPrompt={latestStudentPrompt} onInsertPrompt={text => {
-          quiz.setCharlaText(text);
-          requestAnimationFrame(() => composerRef.current?.focus());
-        }} />
+        {quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-streaming" aria-live="off"><MathText text={parseWidgetTags(quiz.streamText).text} /></div>}
+        {!quiz.charlaLog.length && !quiz.busy && <div className="free-chat-suggestions" aria-label={t('chatw.suggestionsLabel')}>
+          {['chatw.s1', 'chatw.s2', 'chatw.s3', 'chatw.s4', 'chatw.s5', 'chatw.s6'].map(key => <button key={key} type="button" className="free-chat-suggestion" onClick={() => insertPrompt(t(key))}>{t(key)}</button>)}
+        </div>}
+        <TutorWorkbench preset={labPreset} onInsertPrompt={insertPrompt} />
       </div>
       {quiz.charlaImage && <div className="chat-photo-preview"><img src={quiz.charlaImage} alt={t('free.photoReady')} /><button type="button" className="btn btn-text" onClick={() => quiz.setCharlaImage(null)}>{t('free.removePhoto')}</button></div>}
       {photoError && <p className="field-error" role="alert">{photoError}</p>}
@@ -528,6 +544,8 @@ function ChatsView({ quiz }) {
 function LearningApp({ user, onLogout, onUpdateUser }) {
   const { t, language } = useTranslation();
   const [activeTab, setActiveTab] = useState('inicio');
+  // Docente: respaldo en Supabase de sus presentaciones y ejercicios propios.
+  useEffect(() => (user.role === 'maestro' ? startTeacherSync() : undefined), [user.id, user.role]);
   const [practiceMode, setPracticeMode] = useState('ejercicio');
   const [repasoMode, setRepasoMode] = useState('cuestionario');
   const [simulationSubmission, setSimulationSubmission] = useState(null);
@@ -670,7 +688,6 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
         <div className="section-copy"><p className="section-eyebrow">{t(user.role === 'maestro' ? 'section.teacher' : 'section.student')}</p><h2 id="section-title">{t(`section.${sectionKey}.title`)}</h2><p>{t(`section.${sectionKey}.description`)}</p></div>
         <button type="button" className="guide-replay" onClick={() => setShowGuide(true)}><Icon name="help" size={18} />{t('section.guide')}</button>
       </section>}
-      <AIPrivacyNotice />
       <div className={`app-layout${activeTab === 'chats' ? ' is-tutor-page' : ''}`}><main className="app-main">
         {activeTab === 'inicio' && <HomeView user={user} learning={learning} classConfig={classConfig} onNavigate={navigate} onGuide={() => setShowGuide(true)} />}
         {activeTab === 'simulador' && (
@@ -765,7 +782,7 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
             onPractice={() => navigate('simulador')}
             onReview={() => navigate('tarjetas')}
           />)}
-      </main>{activeTab !== 'chats' && <aside className="app-sidebar" aria-label="Tu progreso y ayuda"><ConfidenceBar xp={learning.xp} level={learning.level} confidence={learning.confidence} /><TutorCard tutor={tutor} /></aside>}</div>
+      </main>{activeTab !== 'chats' && <aside className="app-sidebar" aria-label={t('home.progressAside')}><ConfidenceBar xp={learning.xp} level={learning.level} confidence={learning.confidence} /><TutorCard tutor={tutor} /></aside>}</div>
       <Onboarding open={showGuide} onDismiss={dismissGuide} onStart={startPracticing} role={user.role} />
       <ProfileSettings open={showSettings || missingContact} required={missingContact} user={user} onClose={() => setShowSettings(false)} onSaved={handleProfileSaved} />
       <NotificationsCenter open={showNotifications} onClose={() => setShowNotifications(false)} onOpenMessages={() => navigate('mensajes')} messageNotifications={notifications.messageNotifications} upcomingMeetings={notifications.upcomingMeetings} />

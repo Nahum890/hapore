@@ -191,7 +191,7 @@ export default class LocalAIProvider {
     if (typeof text !== 'string' || !text.trim()) throw new Error('Respuesta local vacía');
     const nextQuota = context.tipo === 'charla_libre' ? recordTutorQuery() : getTutorQuota();
     const extras = typeof localResult === 'object' && localResult
-      ? { esHint: localResult.esHint, joparaHint: localResult.joparaHint, subHint: localResult.subHint, followUp: localResult.followUp, knowledgeType: localResult.knowledgeType, socratic: localResult.socratic }
+      ? { esHint: localResult.esHint, joparaHint: localResult.joparaHint, subHint: localResult.subHint, followUp: localResult.followUp, knowledgeType: localResult.knowledgeType, socratic: localResult.socratic, widget: localResult.widget ?? null }
       : {};
     const result = {
       ...extras,

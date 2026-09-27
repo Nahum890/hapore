@@ -89,6 +89,8 @@ const CONCEPT_TOPIC = {
 };
 
 export function topicForExercise(exercise, concept) {
+  // Banderita elegida por el docente (tema o bandera propia, p. ej. "Examen 1").
+  if (typeof exercise?.flag === 'string' && exercise.flag) return exercise.flag;
   if (exercise?.values && ('angleA' in exercise.values || 'angleB' in exercise.values)) return 'angulos';
   if (exercise?.unit === '°') return 'angulos';
   return CONCEPT_TOPIC[exercise?.expectedConcept ?? concept] ?? null;

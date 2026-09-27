@@ -1,6 +1,7 @@
 import concepts from '../data/concepts.json' with { type: 'json' };
 import { createLaunch, maxHeight, timeOfFlight, range } from '../physics/projectileMotion.js';
 import storage from './storage.js';
+import { queueTeacherSync } from '../cloud/teacherSyncQueue.js';
 
 // Los ejercicios que crea el docente se guardan en este dispositivo, sin
 // distinguir por cuenta: la misma lógica que el código de clase (todo local,
@@ -131,9 +132,16 @@ export function createCustomExercise({ scenario, difficulty, question, conceptVa
   const list = readAll();
   list.push(exercise);
   writeAll(list);
+  queueTeacherSync('exercise', exercise);
   return exercise;
 }
 
 export function deleteCustomExercise(id) {
   writeAll(readAll().filter(item => item.id !== id));
+  queueTeacherSync('exercise', { id }, true);
+}
+
+/** Reemplaza la lista local con lo recuperado de Supabase (sin volver a subirlo). */
+export function replaceCustomExercises(list) {
+  writeAll(Array.isArray(list) ? list : []);
 }
