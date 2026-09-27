@@ -14,7 +14,7 @@ import { useTranslation } from '../i18n/LanguageProvider.jsx';
 
 // Situaciones de práctica (nombres visibles en messages.js: scenario.<id>).
 const SUBTEMAS = ['dron', 'basketball', 'wall'];
-const TOOLS = ['clase', 'ejercicios', 'clases'];
+const TOOLS = ['grupo', 'ejercicios', 'clase'];
 
 export function validClassCode(text) {
   const code = String(text ?? '').trim().toUpperCase();
@@ -172,20 +172,25 @@ function CloudClassSetup({ teacher, allExercises, customExercises }) {
   return <>
     <form className="teacher-block class-setup-form" onSubmit={submit}>
       <label className="teacher-field">{t('teacher.s1')}<input className="quiz-input" value={title} onChange={event => { setTitle(event.target.value); setCreated(null); }} maxLength={80} /></label>
-      <fieldset className="teacher-topic-picker"><legend>{t('teacher.s2')}</legend>
-        <TopicButtons selected={subtopics} onToggle={toggleTopic} />
-      </fieldset>
-      <div className="class-setup-step"><h4>{t('teacher.s3')}</h4>
-        <CardPicker cards={allCards} selected={selectedCards} onChange={ids => { setSelectedCards(ids); setCreated(null); }} customIds={customIds} onDeleteCustom={id => { deleteCustomFlashcard(id); setCustomCards(getCustomFlashcards()); setSelectedCards(current => current.filter(item => item !== id)); }} />
-        <CustomCardForm onCreated={card => { setCustomCards(getCustomFlashcards()); setSelectedCards(current => [...current, card.id]); }} />
-        {selectedCards.length < 5 && <p className="field-error">{t('teacher.min5')}</p>}
-      </div>
-      <div className="class-setup-step"><h4>{t('teacher.s4')}</h4>
-        <label className="teacher-field">{t('teacher.exerciseCount', { n: pool.length })}<input className="quiz-input" type="number" min="1" max={Math.max(1, pool.length)} step="1" value={exerciseCount} onChange={event => setExerciseCount(event.target.value)} /></label>
-        {customExercises.length > 0 && <fieldset className="card-picker"><legend>{t('teacher.includeOwn')}</legend>
-          <ul className="card-picker-list">{customExercises.map(item => <li key={item.id}><label><input type="checkbox" checked={selectedExercises.includes(item.id)} onChange={() => toggleExercise(item.id)} /><span><strong>{item.question}</strong><small>{t(`scenario.${item.scenario}`)}{!subtopics.includes(item.scenario) ? t('teacher.notChosen') : ''}</small></span></label></li>)}</ul>
-        </fieldset>}
-      </div>
+      <details className="class-group-options">
+        <summary>{t('teacher.groupOptions')}</summary>
+        <div className="class-group-options-body">
+          <fieldset className="teacher-topic-picker"><legend>{t('teacher.s2')}</legend>
+            <TopicButtons selected={subtopics} onToggle={toggleTopic} />
+          </fieldset>
+          <div className="class-setup-step"><h4>{t('teacher.s3')}</h4>
+            <CardPicker cards={allCards} selected={selectedCards} onChange={ids => { setSelectedCards(ids); setCreated(null); }} customIds={customIds} onDeleteCustom={id => { deleteCustomFlashcard(id); setCustomCards(getCustomFlashcards()); setSelectedCards(current => current.filter(item => item !== id)); }} />
+            <CustomCardForm onCreated={card => { setCustomCards(getCustomFlashcards()); setSelectedCards(current => [...current, card.id]); }} />
+            {selectedCards.length < 5 && <p className="field-error">{t('teacher.min5')}</p>}
+          </div>
+          <div className="class-setup-step"><h4>{t('teacher.s4')}</h4>
+            <label className="teacher-field">{t('teacher.exerciseCount', { n: pool.length })}<input className="quiz-input" type="number" min="1" max={Math.max(1, pool.length)} step="1" value={exerciseCount} onChange={event => setExerciseCount(event.target.value)} /></label>
+            {customExercises.length > 0 && <fieldset className="card-picker"><legend>{t('teacher.includeOwn')}</legend>
+              <ul className="card-picker-list">{customExercises.map(item => <li key={item.id}><label><input type="checkbox" checked={selectedExercises.includes(item.id)} onChange={() => toggleExercise(item.id)} /><span><strong>{item.question}</strong><small>{t(`scenario.${item.scenario}`)}{!subtopics.includes(item.scenario) ? t('teacher.notChosen') : ''}</small></span></label></li>)}</ul>
+            </fieldset>}
+          </div>
+        </div>
+      </details>
       {!title.trim() && <p className="field-help">{t('teacher.nameHelp')}</p>}
       {error && <p className="teacher-error" role="alert">{error}</p>}
       {!created && <button type="submit" className="btn btn-primary" disabled={!valid || busy}>{t(busy ? 'teacher.creating' : 'teacher.s5')}</button>}
@@ -206,7 +211,7 @@ function ClassSetup({ allExercises, customExercises, teacher, classConfig, onLea
   const cloud = isCloudConfigured();
   return <section className="card teacher-tool-panel" aria-label={t('teacher.shareLabel')}>
     <span className="panel-eyebrow">{t('teacher.stepByStep')}</span>
-    <h2>{t(cloud ? 'teacher.shareClass' : 'teacher.sharePractice')}</h2>
+    <h2>{t(cloud ? 'teacher.createGroup' : 'teacher.sharePractice')}</h2>
     <p className="teacher-note">{t(cloud ? 'teacher.shareCloudText' : 'teacher.shareLocalText')}</p>
     {cloud
       ? <CloudClassSetup teacher={teacher} allExercises={allExercises} customExercises={customExercises} />
@@ -226,7 +231,7 @@ function ClassSetup({ allExercises, customExercises, teacher, classConfig, onLea
 
 export default function TeacherMode({ classConfig, onJoinClass, teacher }) {
   const { t } = useTranslation();
-  const [tool, setTool] = useState('clase');
+  const [tool, setTool] = useState('grupo');
   const cloudEnabled = isCloudConfigured();
   const [customExercises, setCustomExercises] = useState(getCustomExercises);
   const refreshCustomExercises = () => setCustomExercises(getCustomExercises());
@@ -235,21 +240,21 @@ export default function TeacherMode({ classConfig, onJoinClass, teacher }) {
   return <section className="teacher-hub" aria-label={t('teacher.hub')}>
     <div className="teacher-tool-picker" role="group" aria-label={t('teacher.pickTool')}>
       {TOOLS.map(id => {
-        const key = id === 'clase' && !cloudEnabled ? 'practice' : id;
+        const key = id === 'grupo' && !cloudEnabled ? 'practice' : id;
         return <button key={id} type="button" className={tool === id ? 'is-active' : ''} aria-pressed={tool === id} onClick={() => setTool(id)}>
           <strong>{t(`teacher.tool.${key}`)}</strong><span>{t(`teacher.tool.${key}Text`)}</span>
         </button>;
       })}
     </div>
 
-    <div hidden={tool !== 'clase'}><ClassSetup allExercises={allExercises} customExercises={customExercises} teacher={teacher} classConfig={classConfig} onLeaveClass={() => onJoinClass?.(null)} /></div>
+    <div hidden={tool !== 'grupo'}><ClassSetup allExercises={allExercises} customExercises={customExercises} teacher={teacher} classConfig={classConfig} onLeaveClass={() => onJoinClass?.(null)} /></div>
     <section hidden={tool !== 'ejercicios'} className="card teacher-tool-panel" aria-label={t('teacher.ownLabel')}>
       <span className="panel-eyebrow">{t('teacher.ownEyebrow')}</span><h2>{t('teacher.ownTitle')}</h2>
       <p className="teacher-note">{t('teacher.ownText')}</p>
       <CustomExerciseForm exercises={customExercises} onChange={refreshCustomExercises} />
     </section>
-    <div hidden={tool !== 'clases'}><Suspense fallback={<p className="teacher-note">{t('teacher.lessonsLoading')}</p>}>
-      <LessonStudio exercises={allExercises} />
+    <div hidden={tool !== 'clase'}><Suspense fallback={<p className="teacher-note">{t('teacher.lessonsLoading')}</p>}>
+      <LessonStudio exercises={allExercises} onCreateGroup={() => setTool('grupo')} />
     </Suspense></div>
   </section>;
 }

@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { concepts as conceptCatalog, exercises as exerciseCatalog, localizeCatalogItem } from '../data/catalogs.js';
 import { useTranslation } from '../i18n/LanguageProvider.jsx';
+import { isCloudConfigured } from '../cloud/cloudClient.js';
+import { listTeacherClasses } from '../cloud/classCloud.js';
+import { lessonPayload, sendMessage } from '../cloud/chatCloud.js';
 import {
   GRAVITY_PRESETS, SLIDE_TYPES, createLesson, createSlide, deleteLesson, duplicateLesson,
   createGuidedLesson, getLessons, launchErrors, moveItem, saveLesson,
@@ -11,10 +14,66 @@ import './Aula.css';
 const typeLabel = type => SLIDE_TYPES.find(item => item.type === type)?.label ?? type;
 const formatDate = iso => { try { return new Date(iso).toLocaleDateString('es-PY', { day: 'numeric', month: 'short', year: 'numeric' }); } catch { return ''; } };
 
-function LessonList({ lessons, onCreate, onCreateGuided, onEdit, onPresent, onDuplicate, onDelete }) {
+function LessonList({ lessons, exercises, onCreate, onCreateGuided, onEdit, onPresent, onDuplicate, onDelete, onCreateGroup }) {
+  const { t } = useTranslation();
   const [title, setTitle] = useState('');
   const [confirmId, setConfirmId] = useState(null);
+  const [shareLessonId, setShareLessonId] = useState(null);
+  const [shareGroups, setShareGroups] = useState([]);
+  const [shareGroupId, setShareGroupId] = useState('');
+  const [shareLoading, setShareLoading] = useState(false);
+  const [shareBusy, setShareBusy] = useState(false);
+  const [shareError, setShareError] = useState('');
+  const [shareStatus, setShareStatus] = useState('');
   const create = event => { event.preventDefault(); onCreate(title); setTitle(''); };
+
+  const loadGroups = async () => {
+    setShareError('');
+    setShareStatus('');
+    if (!isCloudConfigured()) {
+      setShareGroups([]);
+      setShareGroupId('');
+      setShareError(t('teacher.lessonShareNeedsCloud'));
+      return;
+    }
+    setShareLoading(true);
+    try {
+      const groups = await listTeacherClasses();
+      setShareGroups(groups);
+      setShareGroupId(current => groups.some(group => group.id === current) ? current : groups[0]?.id ?? '');
+    } catch (failure) {
+      setShareError(t('teacher.lessonShareError', { msg: failure.message }));
+    } finally {
+      setShareLoading(false);
+    }
+  };
+
+  const openShare = async lesson => {
+    if (shareLessonId === lesson.id) {
+      setShareLessonId(null);
+      return;
+    }
+    setShareLessonId(lesson.id);
+    setShareError('');
+    setShareStatus('');
+    await loadGroups();
+  };
+
+  const sendToGroup = async lesson => {
+    if (!shareGroupId || shareBusy || !lesson.slides.length) return;
+    setShareBusy(true);
+    setShareError('');
+    setShareStatus('');
+    try {
+      await sendMessage({ classId: shareGroupId, kind: 'lesson', payload: lessonPayload(lesson, exercises) });
+      setShareStatus(t('teacher.lessonShareSent', { group: shareGroups.find(group => group.id === shareGroupId)?.title ?? '' }));
+    } catch (failure) {
+      setShareError(t('teacher.lessonShareError', { msg: failure.message }));
+    } finally {
+      setShareBusy(false);
+    }
+  };
+
   return <section className="card teacher-tool-panel lesson-list-panel" aria-labelledby="lesson-list-title">
     <span className="panel-eyebrow">PRESENTACIONES</span>
     <h2 id="lesson-list-title">Mis clases</h2>
@@ -42,10 +101,33 @@ function LessonList({ lessons, onCreate, onCreateGuided, onEdit, onPresent, onDu
             <button type="button" className="btn btn-primary" onClick={() => onPresent(lesson.id, 0)} disabled={!lesson.slides.length}>Proyectar</button>
             <button type="button" className="btn btn-secondary" onClick={() => onEdit(lesson.id)}>Editar</button>
             <button type="button" className="btn btn-secondary" onClick={() => onDuplicate(lesson.id)}>Duplicar</button>
+            <button type="button" className="btn btn-secondary" aria-expanded={shareLessonId === lesson.id} onClick={() => openShare(lesson)} disabled={!lesson.slides.length}>{t('teacher.lessonShare')}</button>
             {confirmId === lesson.id
               ? <><button type="button" className="btn btn-danger" onClick={() => { onDelete(lesson.id); setConfirmId(null); }}>Sí, eliminar</button><button type="button" className="btn btn-secondary" onClick={() => setConfirmId(null)}>Cancelar</button></>
               : <button type="button" className="btn btn-secondary" onClick={() => setConfirmId(lesson.id)}>Eliminar</button>}
           </div>
+          {shareLessonId === lesson.id && <div className="lesson-share-panel">
+            <p>{t('teacher.lessonShareHint')}</p>
+            {shareLoading && <p className="field-help" role="status">{t('common.loading')}</p>}
+            {!shareLoading && shareGroups.length > 0 && <div className="lesson-share-controls">
+              <label className="teacher-field">{t('teacher.lessonShareGroup')}
+                <select className="quiz-input" value={shareGroupId} onChange={event => { setShareGroupId(event.target.value); setShareStatus(''); }}>
+                  {shareGroups.map(group => <option key={group.id} value={group.id}>{group.title} · {group.code}</option>)}
+                </select>
+              </label>
+              <button type="button" className="btn btn-primary" onClick={() => sendToGroup(lesson)} disabled={!shareGroupId || shareBusy}>
+                {t(shareBusy ? 'teacher.lessonShareSending' : 'teacher.lessonShareSend')}
+              </button>
+              <button type="button" className="btn btn-secondary" onClick={loadGroups} disabled={shareBusy}>{t('teacher.lessonShareRefresh')}</button>
+            </div>}
+            {!shareLoading && shareGroups.length === 0 && <div className="lesson-share-empty">
+              <p className="field-help">{isCloudConfigured() ? t('teacher.lessonShareNoGroups') : t('teacher.lessonShareNeedsCloud')}</p>
+              <button type="button" className="btn btn-primary" onClick={onCreateGroup}>{t('teacher.goCreateGroup')}</button>
+              {isCloudConfigured() && <button type="button" className="btn btn-secondary" onClick={loadGroups}>{t('teacher.lessonShareRefresh')}</button>}
+            </div>}
+            {shareError && <p className="field-error" role="alert">{shareError}</p>}
+            {shareStatus && <p className="teacher-share-status" role="status">{shareStatus}</p>}
+          </div>}
         </li>)}
       </ul>}
   </section>;
@@ -238,7 +320,7 @@ export function Presenter({ lesson, startAt = 0, exercises, concepts, onExit }) 
   </div>;
 }
 
-export default function LessonStudio({ exercises: exercisesProp }) {
+export default function LessonStudio({ exercises: exercisesProp, onCreateGroup }) {
   const { language } = useTranslation();
   const exercises = useMemo(() => (exercisesProp ?? exerciseCatalog).map(item => localizeCatalogItem(item, language)), [exercisesProp, language]);
   const concepts = useMemo(() => conceptCatalog.map(item => localizeCatalogItem(item, language)), [language]);
@@ -280,6 +362,8 @@ export default function LessonStudio({ exercises: exercisesProp }) {
         ? <LessonEditor key={editing.id} lesson={editing} exercises={exercises} concepts={concepts} onChange={change} onBack={() => setEditingId(null)} onPresent={at => setPresenting({ id: editing.id, at })} />
         : <LessonList
           lessons={lessons}
+          exercises={exercises}
+          onCreateGroup={onCreateGroup}
           onCreate={create}
           onCreateGuided={createGuided}
           onEdit={setEditingId}
