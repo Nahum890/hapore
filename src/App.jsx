@@ -728,7 +728,7 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
 
         {activeTab === 'tarjetas' && (
           <>
-            <div className="tutor-mode-tabs" role="tablist" aria-label={t('repaso.tabsLabel')}>
+            <div className="tutor-mode-tabs review-mode-tabs" role="tablist" aria-label={t('repaso.tabsLabel')}>
               <button type="button" role="tab" aria-selected={repasoMode === 'tarjetas'} className={repasoMode === 'tarjetas' ? 'is-active' : ''} onClick={() => setRepasoMode('tarjetas')}>{t('repaso.cards')}</button>
               <button type="button" role="tab" aria-selected={repasoMode === 'teoria'} className={repasoMode === 'teoria' ? 'is-active' : ''} onClick={() => setRepasoMode('teoria')}>{t('repaso.theory')}</button>
               <button type="button" role="tab" aria-selected={repasoMode === 'cuestionario'} className={repasoMode === 'cuestionario' ? 'is-active' : ''} onClick={() => setRepasoMode('cuestionario')}>{t('repaso.quiz')}</button>
