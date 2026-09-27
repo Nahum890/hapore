@@ -180,3 +180,81 @@ test('Complementary Challenge: ángulos que suman 90° logran el mismo alcance e
     assert.ok(evalCorrect.diff < 1e-6);
   }
 });
+
+test('Básquetbol: validación de entrada numérica y disparo no prematuro', () => {
+  const level = BASKETBALL_LEVELS[0];
+  // Coma decimal aceptada en evaluación
+  const shotComma = evaluateBasketballShot({
+    speed: '7,68',
+    angleDeg: '52',
+    distance: level.distance,
+    hoopHeight: level.hoopHeight,
+    releaseHeight: level.releaseHeight,
+    gravity: level.gravity,
+    wind: 0,
+  });
+  assert.ok(['swish', 'rim-in'].includes(shotComma.result));
+
+  // planFlight con números procesados
+  const flight = planFlight({
+    speed: Number('7.68'),
+    angle: Number('52'),
+    gravity: level.gravity,
+    targetX: level.distance,
+    targetY: level.hoopHeight,
+    y0: level.releaseHeight,
+    wind: 0,
+    temperature: 21,
+  });
+  assert.ok(flight.points.length > 5);
+  assert.ok(Number.isFinite(flight.landingX));
+  assert.ok(Number.isFinite(flight.peakY));
+});
+
+test('Básquetbol: colisión y rebote físico en el tablero (bank shot / tablerazo)', () => {
+  const level = BASKETBALL_LEVELS[0]; // 4.60 m
+
+  // Tiro que impacta en el recuadro del tablero y entra (bank-in)
+  const bankShotIn = evaluateBasketballShot({
+    speed: 8.0,
+    angleDeg: 52,
+    distance: level.distance,
+    hoopHeight: level.hoopHeight,
+    releaseHeight: level.releaseHeight,
+    gravity: 9.8,
+    wind: 0,
+  });
+  assert.equal(bankShotIn.result, 'bank-in');
+  assert.equal(bankShotIn.collision?.type, 'backboard');
+  assert.ok(bankShotIn.score >= 80);
+
+  // Tiro con exceso de fuerza que pega muy alto en el tablero y sale (bank-miss)
+  const bankShotMiss = evaluateBasketballShot({
+    speed: 8.4,
+    angleDeg: 52,
+    distance: level.distance,
+    hoopHeight: level.hoopHeight,
+    releaseHeight: level.releaseHeight,
+    gravity: 9.8,
+    wind: 0,
+  });
+  assert.equal(bankShotMiss.result, 'bank-miss');
+  assert.equal(bankShotMiss.collision?.type, 'backboard');
+
+  // planFlight genera rebote físico en la trayectoria
+  const bankFlight = planFlight({
+    speed: 8.0,
+    angle: 52,
+    gravity: 9.8,
+    targetX: level.distance,
+    targetY: level.hoopHeight,
+    y0: level.releaseHeight,
+    wind: 0,
+    temperature: 21,
+  });
+  assert.ok(bankFlight.collision);
+  assert.equal(bankFlight.collision.type, 'backboard');
+  assert.equal(bankFlight.bballOutcome, 'bank-in');
+  assert.equal(bankFlight.basketSwish, true);
+  assert.ok(bankFlight.points.length > 50);
+});

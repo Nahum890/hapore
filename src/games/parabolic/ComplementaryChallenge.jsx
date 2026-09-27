@@ -5,6 +5,7 @@ import {
   GAMES_I18N,
 } from './parabolicGamesEngine.js';
 import { toCanvasPoints, toCanvasPoint } from '../../simulator/trajectory.js';
+import { planFlight } from '../../simulator/flightPlan.js';
 
 export default function ComplementaryChallenge({ langKey = 'gn-jopara', onProgress }) {
   const t = GAMES_I18N[langKey] || GAMES_I18N.es;
@@ -24,6 +25,26 @@ export default function ComplementaryChallenge({ langKey = 'gn-jopara', onProgre
     setEvalResult(null);
     progressRef.current = 0;
   }, [levelIndex, level]);
+
+  const basePoints = useMemo(() => {
+    return planFlight({
+      speed: level.speed,
+      angle: level.baseAngle,
+      gravity: level.gravity,
+      targetX: level.range,
+      targetY: 0,
+      y0: 0,
+    }).points;
+  }, [level]);
+
+  const handleAngleChange = (e) => {
+    setAngleInput(e.target.value);
+    if (phase !== 'idle') {
+      setPhase('idle');
+      setEvalResult(null);
+      progressRef.current = 0;
+    }
+  };
 
   // Manejo del dibujo comparativo de ambas parábolas
   useEffect(() => {
@@ -69,9 +90,10 @@ export default function ComplementaryChallenge({ langKey = 'gn-jopara', onProgre
       ctx.textAlign = 'center';
       ctx.fillText(`Meta: ${level.range} m`, targetPt.x, groundY + 16);
 
-      // Curva 1 (Ángulo inicial)
-      if (evalResult?.pointsBase?.length > 1) {
-        const pts1 = toCanvasPoints(evalResult.pointsBase, options);
+      // Curva 1 (Ángulo inicial de referencia)
+      const pointsBase = evalResult?.pointsBase || basePoints;
+      if (pointsBase?.length > 1) {
+        const pts1 = toCanvasPoints(pointsBase, options);
         ctx.strokeStyle = '#2563eb';
         ctx.lineWidth = 3;
         ctx.beginPath();
@@ -79,8 +101,8 @@ export default function ComplementaryChallenge({ langKey = 'gn-jopara', onProgre
         ctx.stroke();
       }
 
-      // Curva 2 (Ángulo propuesto por el usuario)
-      if (evalResult?.pointsUser?.length > 1) {
+      // Curva 2 (Ángulo propuesto por el usuario al lanzar)
+      if (phase !== 'idle' && evalResult?.pointsUser?.length > 1) {
         const pts2 = toCanvasPoints(evalResult.pointsUser, options);
         const count = Math.max(2, Math.round(progressRef.current * pts2.length));
         ctx.strokeStyle = evalResult.isComplementary ? '#16a34a' : '#d97706';
@@ -157,6 +179,9 @@ export default function ComplementaryChallenge({ langKey = 'gn-jopara', onProgre
     setLevelIndex((prev) => (prev + 1) % COMPLEMENTARY_LEVELS.length);
   };
 
+  const numInputAngle = Number(String(angleInput).replace(',', '.'));
+  const canTest = phase !== 'flying' && angleInput.trim().length > 0 && !isNaN(numInputAngle) && numInputAngle > 0 && numInputAngle < 90;
+
   return (
     <div className="pgame-challenge-card" aria-label={t.compTitle}>
       <div className="pgame-badge-row">
@@ -204,7 +229,8 @@ export default function ComplementaryChallenge({ langKey = 'gn-jopara', onProgre
               inputMode="decimal"
               placeholder={t.compInputPlaceholder}
               value={angleInput}
-              onChange={(e) => setAngleInput(e.target.value)}
+              onChange={handleAngleChange}
+              disabled={phase === 'flying'}
               className="pgame-number-input"
             />
             <span className="pgame-input-unit">°</span>
@@ -215,7 +241,7 @@ export default function ComplementaryChallenge({ langKey = 'gn-jopara', onProgre
           <button
             type="submit"
             className="btn btn-primary pgame-btn-fire"
-            disabled={!angleInput.trim() || phase === 'flying'}
+            disabled={!canTest}
           >
             {t.compTestBtn}
           </button>

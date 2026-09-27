@@ -63,23 +63,119 @@ export function planFlight({
   const vyAtTarget = timeToTarget !== null ? launch.vy - safeGravity * timeToTarget : null;
   const isDescending = vyAtTarget !== null && vyAtTarget < 0;
 
-  // Para aro de básquetbol (3.05 m): debe estar descendiendo y cruzar a la altura del aro (±0.35m de margen)
-  const hoopMargin = 0.35;
-  const basketSwish = safeTargetY > 0 && heightAtTarget !== null && isDescending && Math.abs(heightAtTarget - safeTargetY) <= hoopMargin;
+  const isBasketball = safeTargetY === 3.05;
+  let hasCollision = false;
+  let collisionType = null; // 'backboard' | 'rim'
+  let collisionX = 0;
+  let collisionY = 0;
+  let collisionTime = 0;
+  let v_x_reb = 0;
+  let v_y_reb = 0;
+  let bballOutcome = 'miss';
 
-  // Puntos de trayectoria (con leve deriva por viento si se activa en simulación ambiental)
-  const basePoints = evaluateTrajectory(launch, { step: duration / 100 });
-  const points = safeWind === 0 ? basePoints : basePoints.map((pt) => {
-    // Deriva aerodinámica según velocidad del viento (0.04 m/s² por cada m/s de viento)
-    const driftX = 0.5 * (safeWind * 0.04) * (pt.t * pt.t);
-    return { ...pt, x: Math.max(0, pt.x + driftX) };
-  });
+  if (isBasketball) {
+    const bbX = safeTargetX + 0.18;
+    const timeToBb = launch.vx > 0 ? bbX / (launch.vx + safeWind * 0.04) : null;
+    const heightAtBb = timeToBb !== null && timeToBb <= duration ? heightAtX(launch, bbX) : null;
 
-  const hit = safeTargetY > 0 ? basketSwish : Math.abs(error) <= tolerance;
+    if (timeToTarget === null || timeToTarget > duration) {
+      bballOutcome = 'short';
+    } else if (!isDescending) {
+      bballOutcome = 'ascending';
+    } else if (heightAtTarget !== null && Math.abs(heightAtTarget - safeTargetY) <= 0.15) {
+      // 1. Canasta limpia directa (Swish)
+      bballOutcome = 'swish';
+    } else if (timeToBb !== null && timeToBb <= duration && heightAtBb !== null && heightAtBb >= 2.85 && heightAtBb <= 3.98) {
+      // 2. Colisión con tablero (el tiro superó la vertical del aro y choca en el tablero)
+      hasCollision = true;
+      collisionType = 'backboard';
+      collisionTime = timeToBb;
+      collisionX = bbX;
+      collisionY = heightAtBb;
+
+      const vyImpact = launch.vy - safeGravity * timeToBb;
+      const vxImpact = launch.vx + safeWind * 0.04;
+      v_x_reb = -0.42 * vxImpact;
+      v_y_reb = 0.52 * vyImpact;
+
+      const tToHoop = 0.18 / Math.abs(v_x_reb);
+      const yAtHoopReb = collisionY + v_y_reb * tToHoop - 0.5 * safeGravity * tToHoop * tToHoop;
+
+      if (collisionY >= 3.05 && collisionY <= 3.52 && yAtHoopReb >= 2.90 && yAtHoopReb <= 3.35) {
+        bballOutcome = 'bank-in';
+      } else {
+        bballOutcome = 'bank-miss';
+      }
+    } else {
+      // 3. Evaluar aro o fallo
+      const rfX = safeTargetX - 0.225;
+      const timeToRf = launch.vx > 0 ? rfX / (launch.vx + safeWind * 0.04) : null;
+      const heightAtRf = timeToRf !== null && timeToRf <= duration ? heightAtX(launch, rfX) : null;
+
+      if (heightAtTarget !== null && Math.abs(heightAtTarget - safeTargetY) <= 0.32) {
+        bballOutcome = 'rim-in';
+        hasCollision = true;
+        collisionType = 'rim';
+        collisionTime = timeToRf || timeToTarget;
+        collisionX = rfX;
+        collisionY = heightAtRf || safeTargetY;
+        v_x_reb = 0.45 * launch.vx;
+        v_y_reb = -0.8;
+      } else if (heightAtRf !== null && Math.abs(heightAtRf - safeTargetY) <= 0.22) {
+        bballOutcome = 'rim-miss';
+        hasCollision = true;
+        collisionType = 'rim';
+        collisionTime = timeToRf;
+        collisionX = rfX;
+        collisionY = heightAtRf;
+        v_x_reb = -0.3 * launch.vx;
+        v_y_reb = 1.2;
+      } else if (heightAtTarget < safeTargetY - 0.32) {
+        bballOutcome = 'short';
+      } else {
+        bballOutcome = 'high';
+      }
+    }
+  }
+
+  const basketSwish = isBasketball ? (bballOutcome === 'swish' || bballOutcome === 'bank-in' || bballOutcome === 'rim-in') : (safeTargetY > 0 && heightAtTarget !== null && isDescending && Math.abs(heightAtTarget - safeTargetY) <= 0.35);
+  const hit = isBasketball ? basketSwish : Math.abs(error) <= tolerance;
+
+  // Puntos de trayectoria
+  let points = [];
+  let totalDuration = duration;
+
+  if (hasCollision) {
+    const steps1 = 50;
+    for (let i = 0; i <= steps1; i += 1) {
+      const t = (collisionTime * i) / steps1;
+      const pos = positionAt(launch, t);
+      if (safeWind !== 0) pos.x = Math.max(0, pos.x + 0.5 * (safeWind * 0.04) * (t * t));
+      points.push({ x: pos.x, y: pos.y, t });
+    }
+
+    const rebGroundDuration = (v_y_reb + Math.sqrt(Math.max(0, v_y_reb * v_y_reb + 2 * safeGravity * collisionY))) / safeGravity;
+    const tRebMax = Math.min(1.4, Math.max(0.55, rebGroundDuration));
+    totalDuration = collisionTime + tRebMax;
+
+    const steps2 = 35;
+    for (let i = 1; i <= steps2; i += 1) {
+      const tPrime = (tRebMax * i) / steps2;
+      const xReb = Math.max(0, collisionX + v_x_reb * tPrime);
+      const yReb = Math.max(0, collisionY + v_y_reb * tPrime - 0.5 * safeGravity * tPrime * tPrime);
+      points.push({ x: xReb, y: yReb, t: collisionTime + tPrime });
+    }
+  } else {
+    const basePoints = evaluateTrajectory(launch, { step: duration / 100 });
+    points = safeWind === 0 ? basePoints : basePoints.map((pt) => {
+      const driftX = 0.5 * (safeWind * 0.04) * (pt.t * pt.t);
+      return { ...pt, x: Math.max(0, pt.x + driftX) };
+    });
+  }
 
   return {
     launch,
-    duration,
+    duration: totalDuration,
     landingX,
     targetX: safeTargetX,
     targetY: safeTargetY,
@@ -94,18 +190,44 @@ export function planFlight({
     heightAtTarget,
     isDescending,
     basketSwish,
+    collision: hasCollision ? {
+      type: collisionType,
+      x: collisionX,
+      y: collisionY,
+      time: collisionTime,
+      progress: collisionTime / totalDuration,
+      isBasket: basketSwish,
+    } : null,
+    bballOutcome,
     environment: {
       wind: safeWind,
       temperature: safeTemp,
       isIndoor: safeWind === 0,
     },
     positionAt: (progress) => {
-      const t = duration * clamp(progress, 0, 1, 0);
-      const pos = positionAt(launch, t);
-      if (safeWind !== 0) {
-        pos.x = Math.max(0, pos.x + 0.5 * (safeWind * 0.04) * (t * t));
+      const p = clamp(progress, 0, 1, 0);
+      if (!hasCollision) {
+        const t = duration * p;
+        const pos = positionAt(launch, t);
+        if (safeWind !== 0) {
+          pos.x = Math.max(0, pos.x + 0.5 * (safeWind * 0.04) * (t * t));
+        }
+        return pos;
       }
-      return pos;
+      const currentT = totalDuration * p;
+      if (currentT <= collisionTime) {
+        const pos = positionAt(launch, currentT);
+        if (safeWind !== 0) {
+          pos.x = Math.max(0, pos.x + 0.5 * (safeWind * 0.04) * (currentT * currentT));
+        }
+        return pos;
+      }
+      const tPrime = currentT - collisionTime;
+      return {
+        x: Math.max(0, collisionX + v_x_reb * tPrime),
+        y: Math.max(0, collisionY + v_y_reb * tPrime - 0.5 * safeGravity * tPrime * tPrime),
+        t: currentT,
+      };
     },
   };
 }

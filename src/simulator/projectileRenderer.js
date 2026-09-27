@@ -202,7 +202,7 @@ function court(ctx, width, height, groundY, environment) {
   ctx.fillText(envText, width - 22, 25);
 }
 
-function hoopTarget(ctx, x, groundY, scale, hit, hoopHeight = 3.05) {
+function hoopTarget(ctx, x, groundY, scale, hit, hoopHeight = 3.05, collision = null, progress = 1, bballOutcome = null) {
   // Altura física reglamentaria del aro FIBA / NBA: 3.05 metros
   const rimY = groundY - hoopHeight * scale;
   const rimWidth = Math.max(18, 0.45 * scale); // Diámetro reglamentario del aro: 45 cm (0.45 m)
@@ -239,6 +239,22 @@ function hoopTarget(ctx, x, groundY, scale, hit, hoopHeight = 3.05) {
   ctx.lineWidth = 1.5;
   ctx.strokeRect(backboardX, rimY - targetBoxH, backboardW, targetBoxH);
 
+  // Destello de impacto con el tablero
+  if (collision && collision.type === 'backboard' && progress >= (collision.progress || 0.5)) {
+    const impactY = groundY - collision.y * scale;
+    ctx.save();
+    ctx.strokeStyle = collision.isBasket ? '#2ecc71' : '#f39c12';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.arc(backboardX, impactY, 11, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fillStyle = collision.isBasket ? '#2ecc71' : '#e67e22';
+    ctx.font = '700 11px system-ui, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('💥 ¡CLAC! Tablero', backboardX + 8, impactY + 4);
+    ctx.restore();
+  }
+
   // 3. Aro reglamentario (naranja metálico, 45 cm de diámetro interior)
   const rimLeft = backboardX - rimWidth;
   ctx.strokeStyle = hit ? '#2ecc71' : '#e65100';
@@ -248,7 +264,7 @@ function hoopTarget(ctx, x, groundY, scale, hit, hoopHeight = 3.05) {
   ctx.stroke();
 
   // 4. Red blanca colgando debajo del aro (40-45 cm)
-  const netH = Math.max(16, 0.42 * scale);
+  const netH = Math.max(16, (hit ? 0.48 : 0.42) * scale);
   ctx.save();
   ctx.strokeStyle = hit ? '#2ecc71' : 'rgba(255, 255, 255, 0.88)';
   ctx.lineWidth = 1.2;
@@ -270,12 +286,17 @@ function hoopTarget(ctx, x, groundY, scale, hit, hoopHeight = 3.05) {
   ctx.stroke();
   ctx.restore();
 
-  // 5. Destellos de enceste si acertó (swish)
+  // 5. Destellos de enceste si acertó (swish, bank-in, rim-in)
   if (hit) {
     ctx.fillStyle = '#2ecc71';
     ctx.font = '700 12px system-ui, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('¡CANASTA!', rimLeft + rimWidth / 2, rimY - 14);
+    const bannerText = bballOutcome === 'bank-in'
+      ? '¡TABLERAZO Y ADENTRO!'
+      : bballOutcome === 'rim-in'
+        ? '¡ARO Y ADENTRO!'
+        : '¡CANASTA LIMPIA (SWISH)!';
+    ctx.fillText(bannerText, rimLeft + rimWidth / 2, rimY - 14);
   }
 
   // 6. Proyección y marca en el suelo
@@ -355,13 +376,50 @@ function drawBasketball(ctx, { width, height, flight, progress, phase, now, verd
 
   // El aro suspendido a 3.05 m de altura (reglamentario)
   const isHit = phase === 'landed' && (verdict === true || flight.basketSwish || flight.hit);
-  hoopTarget(ctx, targetPoint.x, groundY, scale, isHit, hoopH);
+  hoopTarget(ctx, targetPoint.x, groundY, scale, isHit, hoopH, flight.collision, progress, flight.bballOutcome);
 
   // Trayectoria parabólica
   if (phase !== 'idle') trajectory(ctx, points, Math.round(progress * (points.length - 1)) + 1, '#e65c00', false);
 
-  // Jugador lanzador
-  basketballPlayer(ctx, originX - 6, groundY, Math.max(26, Math.min(36, width * .075)), phase === 'idle');
+  // Jugador lanzador escalado en proporción física exacta con el aro y la cancha
+  const playerSize = Math.max(16, Math.min(52, 1.60 * scale));
+  basketballPlayer(ctx, originX - 6, groundY, playerSize, phase === 'idle');
+
+  // Guía de mira balística interactiva en reposo
+  if (phase === 'idle' && flight.launch) {
+    const launchAngleRad = (flight.launch.angle * Math.PI) / 180;
+    const hasSpeed = Boolean(flight.hasUserSpeed && flight.userSpeed > 0);
+    const speedVal = hasSpeed ? flight.userSpeed : null;
+    const arrowLen = speedVal ? Math.max(28, Math.min(60, speedVal * 3.5)) : 36;
+    const ballOriginX = originX + playerSize * 0.35;
+    const ballOriginY = groundY - (flight.y0 || 1.80) * scale;
+    const endX = ballOriginX + Math.cos(launchAngleRad) * arrowLen;
+    const endY = ballOriginY - Math.sin(launchAngleRad) * arrowLen;
+
+    ctx.save();
+    ctx.strokeStyle = hasSpeed ? 'rgba(230, 81, 0, 0.85)' : 'rgba(71, 85, 105, 0.65)';
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath();
+    ctx.moveTo(ballOriginX, ballOriginY);
+    ctx.lineTo(endX, endY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle = hasSpeed ? '#e65100' : '#64748b';
+    ctx.beginPath();
+    ctx.arc(endX, endY, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.font = '700 10.5px system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = '#1b2a41';
+    ctx.lineWidth = 3;
+    const labelText = speedVal ? `${Math.round(flight.launch.angle)}° · ${speedVal.toFixed(1)} m/s` : `${Math.round(flight.launch.angle)}° (Ingresá v₀)`;
+    ctx.strokeText(labelText, endX + 8, endY + 3);
+    ctx.fillText(labelText, endX + 8, endY + 3);
+    ctx.restore();
+  }
 
   // Balón en vuelo (con diámetro oficial de 24 cm = 0.24 m escalado)
   if (phase !== 'idle') {

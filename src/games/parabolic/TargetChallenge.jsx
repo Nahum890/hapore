@@ -15,6 +15,7 @@ export default function TargetChallenge({ langKey = 'gn-jopara', onProgress }) {
   const [speedInput, setSpeedInput] = useState('');
   const [phase, setPhase] = useState('idle');
   const [evalResult, setEvalResult] = useState(null);
+  const [activeFlight, setActiveFlight] = useState(null);
 
   const canvasRef = useRef(null);
   const progressRef = useRef(0);
@@ -23,21 +24,32 @@ export default function TargetChallenge({ langKey = 'gn-jopara', onProgress }) {
     setSpeedInput('');
     setPhase('idle');
     setEvalResult(null);
+    setActiveFlight(null);
     progressRef.current = 0;
   }, [levelIndex, level]);
 
-  const numSpeed = Number(speedInput.replace(',', '.')) || 0;
-
-  const flight = useMemo(() => {
+  const idleFlight = useMemo(() => {
     return planFlight({
-      speed: numSpeed > 0 ? numSpeed : 15,
+      speed: level.exactSpeed,
       angle: level.angleDeg,
       gravity: level.gravity,
       targetX: level.distance,
       targetY: 0,
       y0: 0,
     });
-  }, [numSpeed, level]);
+  }, [level]);
+
+  const flight = (phase !== 'idle' && activeFlight) ? activeFlight : idleFlight;
+
+  const handleSpeedChange = (e) => {
+    setSpeedInput(e.target.value);
+    if (phase !== 'idle') {
+      setPhase('idle');
+      setEvalResult(null);
+      setActiveFlight(null);
+      progressRef.current = 0;
+    }
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -106,13 +118,27 @@ export default function TargetChallenge({ langKey = 'gn-jopara', onProgress }) {
 
   const handleFire = (e) => {
     e?.preventDefault();
+    const num = Number(String(speedInput).replace(',', '.'));
+    if (isNaN(num) || num <= 0 || phase === 'flying') return;
+
     const evaluation = evaluateTargetShot({
-      speed: speedInput,
+      speed: num,
       angleDeg: level.angleDeg,
       targetDistance: level.distance,
       tolerance: level.tolerance,
       gravity: level.gravity,
     });
+
+    const shotFlight = planFlight({
+      speed: num,
+      angle: level.angleDeg,
+      gravity: level.gravity,
+      targetX: level.distance,
+      targetY: 0,
+      y0: 0,
+    });
+
+    setActiveFlight(shotFlight);
     setEvalResult(evaluation);
     progressRef.current = 0;
     setPhase('flying');
@@ -129,6 +155,9 @@ export default function TargetChallenge({ langKey = 'gn-jopara', onProgress }) {
   const handleNext = () => {
     setLevelIndex((prev) => (prev + 1) % TARGET_LEVELS.length);
   };
+
+  const numInputSpeed = Number(String(speedInput).replace(',', '.'));
+  const canFire = phase !== 'flying' && speedInput.trim().length > 0 && !isNaN(numInputSpeed) && numInputSpeed > 0;
 
   return (
     <div className="pgame-challenge-card" aria-label={t.targetTitle}>
@@ -173,7 +202,8 @@ export default function TargetChallenge({ langKey = 'gn-jopara', onProgress }) {
               inputMode="decimal"
               placeholder={t.targetInputPlaceholder}
               value={speedInput}
-              onChange={(e) => setSpeedInput(e.target.value)}
+              onChange={handleSpeedChange}
+              disabled={phase === 'flying'}
               className="pgame-number-input"
             />
             <span className="pgame-input-unit">m/s</span>
@@ -184,7 +214,7 @@ export default function TargetChallenge({ langKey = 'gn-jopara', onProgress }) {
           <button
             type="submit"
             className="btn btn-primary pgame-btn-fire"
-            disabled={!speedInput.trim() || phase === 'flying'}
+            disabled={!canFire}
           >
             {t.targetFireBtn}
           </button>
