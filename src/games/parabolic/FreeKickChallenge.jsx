@@ -287,21 +287,21 @@ export default function FreeKickChallenge({ langKey = 'gn-jopara', onProgress })
             {evalResult.result === 'blocked' && t.fkBlocked.replace('{barrierY}', evalResult.barrierY)}
             {evalResult.result === 'over-bar' && t.fkOverBar.replace('{goalY}', evalResult.goalY)}
             {evalResult.result === 'ground-short' && t.fkGroundShort}
-            {evalResult.result === 'miss' && 'El tiro no alcanzó el objetivo.'}
+            {evalResult.result === 'miss' && t.fkMiss}
           </strong>
 
           <div className="pgame-calc-breakdown">
-            <p><strong>Comprobación cinemática:</strong></p>
+            <p><strong>{t.fkCalcTitle}</strong></p>
             <ul>
               <li>
-                Paso sobre la barrera (x = 9.15 m):{' '}
+                {t.fkBarrierCheck}{' '}
                 <code>y(9.15 m) = {evalResult.barrierY} m</code>{' '}
-                {evalResult.clearsBarrier ? 'Superó los 1.80 m' : 'Impactó en la barrera (y ≤ 1.80 m)'}
+                {evalResult.clearsBarrier ? t.fkBarrierCleared : t.fkBarrierBlocked}
               </li>
               <li>
-                Llegada al arco (x = {level.distance} m):{' '}
+                {t.fkGoalCheck.replace('{distance}', level.distance)}{' '}
                 <code>y({level.distance} m) = {evalResult.goalY} m</code>{' '}
-                {evalResult.goalY > 0 && evalResult.goalY <= level.goalHeight ? 'Dentro del arco (0 < y ≤ 2.44 m)' : 'Fuera del arco'}
+                {evalResult.goalY > 0 && evalResult.goalY <= level.goalHeight ? t.fkInsideGoal : t.fkOutsideGoal}
               </li>
             </ul>
           </div>

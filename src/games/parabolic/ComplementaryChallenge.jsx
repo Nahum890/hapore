@@ -250,7 +250,7 @@ export default function ComplementaryChallenge({ langKey = 'gn-jopara', onProgre
               className="btn btn-secondary pgame-btn-next"
               onClick={handleNext}
             >
-              Siguiente reto
+              {t.compNextBtn}
             </button>
           )}
         </div>
@@ -269,9 +269,9 @@ export default function ComplementaryChallenge({ langKey = 'gn-jopara', onProgre
           </strong>
 
           <div className="pgame-calc-breakdown">
-            <p><strong>Demostración trigonométrica:</strong></p>
+            <p><strong>{t.compProofTitle}</strong></p>
             <code>sin(2·θ₂) = sin(2·(90° - {level.baseAngle}°)) = sin(180° - {level.baseAngle * 2}°) = sin({level.baseAngle * 2}°)</code>
-            <p>Por lo tanto, ambos ángulos logran exactamente el mismo alcance horizontal <code>R = {level.range} m</code>.</p>
+            <p>{t.compProofConclusion} <code>R = {level.range} m</code>.</p>
           </div>
         </div>
       )}

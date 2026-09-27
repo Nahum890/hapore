@@ -307,23 +307,23 @@ export default function BasketballChallenge({ langKey = 'gn-jopara', onProgress 
   return (
     <div className="pgame-challenge-card" aria-label={t.bballTitle}>
       {/* Marcador dinámico superior con Shot Clock */}
-      <div className="pgame-bball-scoreboard" aria-label="Marcador y reloj de tiro">
-        <div className="pgame-sb-item">
-          <span className="pgame-sb-label">Nivel</span>
-          <span className="pgame-sb-val" style={{ fontSize: '0.95rem', color: '#93c5fd' }}>{level.name}</span>
+      <div className="pgame-bball-scoreboard" aria-label={t.bballScoreboardLabel}>
+        <div className="pgame-sb-item pgame-sb-level">
+          <span className="pgame-sb-label">{t.bballLevelLabel}</span>
+          <span className="pgame-sb-val pgame-sb-level-value">{level.name}</span>
         </div>
         <div className="pgame-sb-item">
           <span className="pgame-sb-label">{t.scoreLabel || 'Puntos'}</span>
           <span className="pgame-sb-val">{totalScore} PTS</span>
         </div>
         <div className="pgame-sb-item">
-          <span className="pgame-sb-label">Racha</span>
+          <span className="pgame-sb-label">{t.bballStreakLabel}</span>
           <span className={`pgame-sb-val ${streak >= 2 ? 'is-hot' : ''}`}>
             {streak > 0 ? `x${streak}` : '0'}
           </span>
         </div>
-        <div className={`pgame-shot-clock ${shotClock <= 5.0 ? 'is-low' : ''}`} title="Shot Clock (24s NBA/FIBA)">
-          <span className="pgame-sb-label" style={{ color: '#e2e8f0' }}>Reloj 24 s:</span>
+        <div className={`pgame-shot-clock ${shotClock <= 5.0 ? 'is-low' : ''}`}>
+          <span className="pgame-sb-label">{t.bballClockLabel}</span>
           <span className="pgame-clock-digits">{shotClock.toFixed(1)}s</span>
         </div>
       </div>
@@ -593,13 +593,13 @@ export default function BasketballChallenge({ langKey = 'gn-jopara', onProgress 
           </strong>
 
           <div className="pgame-calc-breakdown">
-            <p><strong>Cálculo en x = {level.distance} m:</strong></p>
+            <p><strong>{t.bballCalcAtDistance.replace('{distance}', level.distance)}</strong></p>
             <ul>
-              <li>Tiempo de llegada al aro: <code>t = x / vx = {evalResult.timeToHoop?.toFixed(2)} s</code></li>
-              <li>Altura del balón al llegar: <code>y(t) = {evalResult.heightAtHoop} m</code> (Aro reglamentario: <code>3.05 m</code>)</li>
-              <li>Sentido vertical: <code>{evalResult.isDescending ? '⬇️ Descendente (requisito de enceste cumplido)' : '⬆️ Ascendente (imposible encestar desde abajo)'}</code></li>
+              <li>{t.bballTimeToHoop} <code>t = x / vx = {evalResult.timeToHoop?.toFixed(2)} s</code></li>
+              <li>{t.bballBallHeightAtHoop} <code>y(t) = {evalResult.heightAtHoop} m</code> ({t.bballRegulationHoop} <code>{level.hoopHeight.toFixed(2)} m</code>)</li>
+              <li>{t.bballVerticalDirection} <code>{evalResult.isDescending ? `↓ ${t.bballDescending}` : `↑ ${t.bballAscendingDirection}`}</code></li>
               {evalResult.collision?.type === 'backboard' && (
-                <li>Impacto en tablero: <code>h = {evalResult.collision.y.toFixed(2)} m</code> (recuadro de 3.05 a 3.52 m).</li>
+                <li>{t.bballBackboardImpact} <code>h = {evalResult.collision.y.toFixed(2)} m</code> ({t.bballBackboardBox.replace('{min}', level.hoopHeight.toFixed(2)).replace('{max}', (level.hoopHeight + 0.47).toFixed(2))}).</li>
               )}
             </ul>
           </div>

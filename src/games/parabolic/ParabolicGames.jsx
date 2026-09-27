@@ -9,8 +9,7 @@ export default function ParabolicGames({ language = 'gn-jopara', onProgress }) {
   const langKey = language === 'es' ? 'es' : 'gn-jopara';
   const t = GAMES_I18N[langKey] || GAMES_I18N.es;
 
-  const [started, setStarted] = useState(false);
-  const [activeTab, setActiveTab] = useState('bball');
+  const [activeGame, setActiveGame] = useState(null);
   const [totalScore, setTotalScore] = useState(0);
 
   const handleGameProgress = (data) => {
@@ -28,34 +27,54 @@ export default function ParabolicGames({ language = 'gn-jopara', onProgress }) {
         <p className="pgame-subtitle">{t.subtitle}</p>
       </header>
 
-      {!started ? (
-        <div className="pgame-start-card">
-          <div>
-            <h3>{t.startTitle}</h3>
-            <p>{t.startDescription}</p>
+      {!activeGame ? (
+        <>
+          <div className="pgame-selection-heading">
+            <h3>{t.challengeSelectionTitle}</h3>
+            <p>{t.challengeSelectionDescription}</p>
           </div>
-          <button type="button" className="btn btn-primary" onClick={() => setStarted(true)}>
-            {t.startButton}
-          </button>
-        </div>
+          <div className="pgame-challenge-options" role="group" aria-label={t.challengeListLabel}>
+            <article className="pgame-challenge-option">
+              <div>
+                <span className="pgame-option-kicker">01</span>
+                <h3>{t.tabBasketball}</h3>
+                <p>{t.bballChoiceDescription}</p>
+              </div>
+              <button type="button" className="btn btn-primary pgame-option-button" onClick={() => setActiveGame('bball')}>
+                {t.startThisChallenge}
+              </button>
+            </article>
+            <article className="pgame-challenge-option">
+              <div>
+                <span className="pgame-option-kicker">02</span>
+                <h3>{t.tabFreeKick}</h3>
+                <p>{t.fkChoiceDescription}</p>
+              </div>
+              <button type="button" className="btn btn-primary pgame-option-button" onClick={() => setActiveGame('freekick')}>
+                {t.startThisChallenge}
+              </button>
+            </article>
+            <article className="pgame-challenge-option">
+              <div>
+                <span className="pgame-option-kicker">03</span>
+                <h3>{t.tabComplementary}</h3>
+                <p>{t.compChoiceDescription}</p>
+              </div>
+              <button type="button" className="btn btn-primary pgame-option-button" onClick={() => setActiveGame('comp')}>
+                {t.startThisChallenge}
+              </button>
+            </article>
+          </div>
+        </>
       ) : (
         <>
-          <nav className="pgame-tabs" role="tablist" aria-label={t.challengeListLabel}>
-            <button type="button" role="tab" aria-selected={activeTab === 'bball'} className={`pgame-tab-btn ${activeTab === 'bball' ? 'is-active' : ''}`} onClick={() => setActiveTab('bball')}>
-              {t.tabBasketball}
-            </button>
-            <button type="button" role="tab" aria-selected={activeTab === 'freekick'} className={`pgame-tab-btn ${activeTab === 'freekick' ? 'is-active' : ''}`} onClick={() => setActiveTab('freekick')}>
-              {t.tabFreeKick}
-            </button>
-            <button type="button" role="tab" aria-selected={activeTab === 'comp'} className={`pgame-tab-btn ${activeTab === 'comp' ? 'is-active' : ''}`} onClick={() => setActiveTab('comp')}>
-              {t.tabComplementary}
-            </button>
-          </nav>
-
+          <button type="button" className="btn btn-secondary pgame-back-button" onClick={() => setActiveGame(null)}>
+            {t.backToChallenges}
+          </button>
           <div className="pgame-content-area">
-            {activeTab === 'bball' && <BasketballChallenge langKey={langKey} onProgress={handleGameProgress} />}
-            {activeTab === 'freekick' && <FreeKickChallenge langKey={langKey} onProgress={handleGameProgress} />}
-            {activeTab === 'comp' && <ComplementaryChallenge langKey={langKey} onProgress={handleGameProgress} />}
+            {activeGame === 'bball' && <BasketballChallenge langKey={langKey} onProgress={handleGameProgress} />}
+            {activeGame === 'freekick' && <FreeKickChallenge langKey={langKey} onProgress={handleGameProgress} />}
+            {activeGame === 'comp' && <ComplementaryChallenge langKey={langKey} onProgress={handleGameProgress} />}
           </div>
         </>
       )}
