@@ -79,6 +79,40 @@
 .exploration-plot-heading > span { display: flex; align-items: center; gap: 5px; color: var(--texto-suave); font-size: 11px; }
 .exploration-plot-heading i { width: 9px; height: 9px; margin-left: 6px; border-radius: 50%; background: var(--azul-itaipu, #1675a9); }
 .exploration-plot-heading i.is-b { background: var(--naranja-itaipu, #d27628); }
+.exploration-plot-tools { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px 14px; }
+.exploration-plot-tools > span { display: flex; align-items: center; gap: 5px; color: var(--texto-suave); font-size: 11px; }
+.exploration-view-switch { display: inline-flex; gap: 3px; padding: 3px; border: 1px solid var(--borde, #dbe3ea); border-radius: 10px; background: var(--fondo-card, #fff); }
+.exploration-view-switch button { min-height: 32px; padding: 5px 10px; border: 0; border-radius: 7px; background: transparent; color: var(--texto-suave); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.exploration-view-switch button.is-active { background: var(--azul-itaipu, #1675a9); color: #fff; }
+.exploration-3d-note { margin: 8px 0 0; color: var(--texto-suave); font-size: 12px; line-height: 1.45; }
+.exploration-plot-3d svg { min-height: 230px; }
+.exploration-3d-floor { fill: color-mix(in srgb, var(--azul-itaipu, #1675a9) 5%, transparent); stroke: color-mix(in srgb, var(--texto-suave, #667085) 23%, transparent); stroke-width: 1; }
+.exploration-3d-gridline { stroke: color-mix(in srgb, var(--texto-suave, #667085) 22%, transparent); stroke-width: 1; }
+.exploration-3d-heightline { stroke: color-mix(in srgb, var(--texto-suave, #667085) 17%, transparent); stroke-width: 1; stroke-dasharray: 3 5; }
+.exploration-3d-axis { fill: none; stroke-width: 2.2; stroke-linecap: round; }
+.exploration-3d-axis-x { stroke: var(--azul-itaipu, #1675a9); }
+.exploration-3d-axis-y { stroke: var(--naranja-itaipu, #d27628); }
+.exploration-3d-axis-z { stroke: #64748b; }
+.exploration-3d-axis-label { fill: var(--texto, #172033); font-size: 14px; font-weight: 800; }
+.exploration-3d-y-label { fill: var(--naranja-itaipu, #d27628); }
+.exploration-3d-x-label { fill: var(--azul-itaipu, #1675a9); }
+.exploration-3d-z-label { fill: #64748b; }
+.exploration-3d-resultant { stroke: #475569; stroke-width: 1.8; stroke-dasharray: 4 4; opacity: .8; }
+.exploration-3d-component-x { stroke: var(--azul-itaipu, #1675a9); stroke-width: 2.2; }
+.exploration-3d-component-y { stroke: var(--naranja-itaipu, #d27628); stroke-width: 2.2; }
+.exploration-3d-component-label { font-size: 12px; font-weight: 800; }
+.exploration-3d-gravity { stroke: #b45309; stroke-width: 2.2; stroke-linecap: round; }
+.exploration-3d-vector-label { fill: #92400e; font-size: 14px; font-style: italic; font-weight: 800; }
+.exploration-3d-components { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 0 4px; color: var(--texto-suave); font-size: 12px; }
+.exploration-3d-components > span { display: inline-flex; align-items: center; gap: 5px; }
+.exploration-3d-components i { width: 9px; height: 9px; border-radius: 50%; background: var(--azul-itaipu, #1675a9); }
+.exploration-3d-components i.is-y { background: var(--naranja-itaipu, #d27628); }
+.exploration-3d-components strong { color: var(--texto, #172033); font-variant-numeric: tabular-nums; }
+.exploration-3d-gravity-key { color: #92400e; font-weight: 750; }
+.exploration-camera-control { display: grid; gap: 5px; max-width: 320px; margin: 4px 4px 0 auto; color: var(--texto-suave); font-size: 11px; }
+.exploration-camera-control > span { display: flex; justify-content: space-between; gap: 12px; }
+.exploration-camera-control strong { color: var(--azul-itaipu, #1675a9); font-variant-numeric: tabular-nums; }
+.exploration-camera-control input { width: 100%; accent-color: var(--azul-itaipu, #1675a9); }
 .exploration-projectile.exploration-path-a circle:first-child { fill: var(--azul-itaipu, #1675a9); }
 .exploration-projectile.exploration-path-a .exploration-projectile-halo { stroke: var(--azul-itaipu, #1675a9); }
 .exploration-projectile.exploration-path-b circle:first-child { fill: var(--naranja-itaipu, #d27628); }
@@ -110,6 +144,8 @@
   .exploration-mission, .exploration-results { grid-template-columns: minmax(0, 1fr); }
   .exploration-results { gap: 12px; }
   .exploration-three-steps { grid-template-columns: 1fr; }
+  .exploration-plot-heading { align-items: flex-start; }
+  .exploration-plot-tools { justify-content: flex-start; }
 }
 @media (max-width: 480px) {
   .exploration-controls { grid-template-columns: 1fr; }
@@ -119,4 +155,9 @@
   .exploration-comparison > div { grid-template-columns: 1.05fr 1fr 1fr; gap: 5px; padding: 8px 7px; font-size: .8rem; }
   .exploration-metric-comparison p { grid-template-columns: 1fr 1fr; }
   .exploration-metric-comparison p > span { grid-column: 1 / -1; }
+  .exploration-plot-tools { width: 100%; justify-content: space-between; gap: 6px; }
+  .exploration-plot-tools > span { flex-wrap: wrap; }
+  .exploration-plot-3d svg { min-height: 195px; }
+  .exploration-3d-components { gap: 7px 12px; font-size: 11px; }
+  .exploration-camera-control { max-width: none; margin-left: 0; }
 }
