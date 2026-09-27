@@ -189,7 +189,7 @@ export default class LocalAIProvider {
       : await this.fallback.respond(context);
     const text = typeof localResult === 'string' ? localResult : localResult?.message;
     if (typeof text !== 'string' || !text.trim()) throw new Error('Respuesta local vacía');
-    const nextQuota = recordTutorQuery();
+    const nextQuota = context.tipo === 'charla_libre' ? recordTutorQuery() : getTutorQuota();
     const extras = typeof localResult === 'object' && localResult
       ? { esHint: localResult.esHint, joparaHint: localResult.joparaHint, subHint: localResult.subHint, followUp: localResult.followUp, knowledgeType: localResult.knowledgeType, socratic: localResult.socratic }
       : {};
@@ -209,8 +209,9 @@ export default class LocalAIProvider {
     const onToken = context.onToken ?? this.options.onToken;
     const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
     if (context.type === 'welcome' || context.type === 'section') return this.fallback.respond(context);
+    const tracksDailyQuota = context.tipo === 'charla_libre';
     const quota = getTutorQuota();
-    if (quota.remaining <= 0) {
+    if (tracksDailyQuota && quota.remaining <= 0) {
       return { message: tutorQuotaMessage(), source: null, available: false, reason: 'daily-limit', ...quota };
     }
     // Leer una foto necesita un modelo de verdad: el tutor local (por reglas
@@ -248,7 +249,7 @@ export default class LocalAIProvider {
     try {
       const text = await Promise.race([this.online(context, controller.signal, emit), deadline]);
       if (typeof text !== 'string' || !text.trim()) throw new Error('Respuesta vacía');
-      const nextQuota = recordTutorQuery();
+      const nextQuota = tracksDailyQuota ? recordTutorQuery() : getTutorQuota();
       return {
         message: sanitizeMarkup(text),
         source: this.id,

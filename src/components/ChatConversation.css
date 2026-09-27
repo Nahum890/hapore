@@ -48,6 +48,8 @@
 }
 
 .chat-new-button { margin-left: auto; }
+.chat-photo-actions { display: flex; flex: none; gap: 6px; }
+.chat-photo-option { display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; }
 .chats-view .quiz-head { flex-wrap: wrap; }
 .chat-history-button {
   width: 100%;

@@ -7,12 +7,12 @@ export const translationReview = {
 };
 
 // Guía de estilo del Jopara de la app (la misma que sigue el tutor en ai/prompt.js):
-// - términos científicos en español + posposición guaraní: horizontal-pe,
-//   velocidad-pe, tiempo de vuelo-pe, altura máxima-pe;
-// - preguntas de cantidad con "mboy": ¿Mboy metros-pa?, ¿Mboy segundos-pa?;
-// - variables constantes: "ndokambiái"; estados finales: "opyta cero-pe";
-// - prefijos verbales correctos (o-/e-/ja-/re-) y ortografía nasal (g̃, ẽ, ỹ);
-// - nada de palabras inventadas: si no hay una forma segura, queda en español.
+// - mezclar español paraguayo y guaraní cotidiano de forma natural, sin que uno
+//   domine; no usar guaraní purista ni español casi entero con sufijos pegados;
+// - dejar en español los términos científicos conocidos y unirlos con verbos,
+//   conectores o posposiciones guaraníes: velocidad-pe, tiempo de vuelo-pe;
+// - preferir frases cortas con palabras que ayuden a entender el contexto;
+// - usar formas guaraníes confiables y su ortografía nasal (g̃, ẽ, ỹ), sin inventar.
 const messages = {
   'gn-jopara': {
     'brand.tagline': 'Jaaprende Física nde ritmo-pe',
@@ -133,13 +133,13 @@ const messages = {
     'quiz.history': 'Cuestionario ymaguare ({n})', 'quiz.messages': 'mensaje', 'quiz.fallbackError': 'Ndaikatúi ojejapo pe consulta. Eñeha’ã jey PyFis oĩ jave.',
     'quiz.photoHelp': 'Epytyvõ ko ta’anga ejercicio-gua reheve',
 
-    'free.title': 'Chat libre', 'free.lead': 'Eporandu PyFis-pe ndejapói’ỹre tarjeta ni cuestionario. Ikatu ehai, eñe’ẽ térã emondo peteĩ ta’anga ejercicio-gua.',
-    'free.quota': 'Consulta oĩva ko árape: {n}/15', 'free.new': 'Conversación pyahu', 'free.welcome': '¡Mba’éichapa! Che PyFis. Ehai nde porandu, eñe’ẽ térã emondo peteĩ ta’anga nde cuaderno ejercicio-gua.',
+    'free.title': 'Chat libre', 'free.lead': 'Eporandu PyFis-pe nde duda de Física, sin completar tarjetas ni cuestionarios. Ikatu rehai, reñe’ẽ térã eiporavo una foto de tu cuaderno.',
+    'free.quota': 'Consultas libres ko árape: {n}/15', 'free.new': 'Conversación pyahu', 'free.welcome': '¡Mba’éichapa! Che ha’e PyFis. Ehai tu pregunta, eñe’ẽ por voz térã eiporavo una foto de tu cuaderno.',
     'free.photoSent': 'Ta’anga ejercicio-gua oñemondova’ekue PyFis-pe', 'free.photoReady': 'Ta’anga oĩma oñemondo hag̃ua', 'free.removePhoto': 'Enohẽ ta’anga',
-    'free.attach': 'Emoĩ ta’anga ejercicio-gua', 'free.voice': 'Eporandu ñe’ẽ rupive (español)', 'free.listening': 'Ohendu hína…',
-    'free.placeholder': 'Ehai nde porandu…', 'free.limitReached': 'Reg̃uahẽma límite ko árape g̃uarã', 'free.inputLabel': 'Porandu PyFis-pe g̃uarã',
+    'free.attach': 'Eiporavo imagen de tu galería', 'free.camera': 'Ejagarra una foto', 'free.voice': 'Eporandu por voz (español)', 'free.listening': 'Ohendu hína…',
+    'free.placeholder': 'Ehai tu pregunta…', 'free.limitReached': 'Reg̃uahẽma al límite diario', 'free.inputLabel': 'Porandu PyFis-pe g̃uarã',
     'free.voiceNote': 'Ñe’ẽ ohendu español (beta); Jopara-pe ikatu ojavy. Eñeha’ã raẽ peteĩ porandu mbykýpe.',
-    'free.limitNote': 'Reg̃uahẽma 15 consulta ko árape g̃uarã. Conversación pyahu nomoñepyrũ jeýi límite.',
+    'free.limitNote': 'Reipuru 15 consultas libres ko árape. Empezar una conversación nueva ndojapói jeýta nde límite.',
     'free.history': 'Conversación ymaguare ({n})', 'free.listen': 'Ehendu ko respuesta', 'free.stopListen': 'Anive ehendu',
     'free.loading': 'Ojehupi hína mensaje…', 'free.micPermission': 'Tekotevẽ remoneĩ micrófono ojepuru hag̃ua.', 'free.micFailed': 'Ndaikatúi ojehendu porã. Eñeha’ã jey.',
 
@@ -409,10 +409,10 @@ const messages = {
     'quiz.history': 'Historial de cuestionarios ({n})', 'quiz.messages': 'mensajes', 'quiz.fallbackError': 'No pude completar la consulta. Volvé a intentarlo cuando PyFis esté disponible.',
     'quiz.photoHelp': 'Ayuda con esta foto del ejercicio',
 
-    'free.title': 'Chat libre', 'free.lead': 'Preguntale a PyFis sin completar tarjetas ni cuestionarios. Podés escribir, hablar o mandar una foto del ejercicio.',
-    'free.quota': 'Consultas disponibles hoy: {n}/15', 'free.new': 'Nueva conversación', 'free.welcome': '¡Hola! Soy PyFis. Escribí tu pregunta, mandala por voz o adjuntá una foto del ejercicio de tu cuaderno.',
+    'free.title': 'Chat libre', 'free.lead': 'Preguntale a PyFis sin completar tarjetas ni cuestionarios. Podés escribir, hablar o elegir una foto del ejercicio.',
+    'free.quota': 'Consultas libres hoy: {n}/15', 'free.new': 'Nueva conversación', 'free.welcome': '¡Hola! Soy PyFis. Escribí tu pregunta, mandala por voz o elegí una foto del cuaderno.',
     'free.photoSent': 'Foto del ejercicio enviada a PyFis', 'free.photoReady': 'Foto lista para enviar', 'free.removePhoto': 'Quitar foto',
-    'free.attach': 'Adjuntar foto del ejercicio', 'free.voice': 'Preguntar por voz (español)', 'free.listening': 'Escuchando…',
+    'free.attach': 'Elegir de la galería', 'free.camera': 'Tomar foto', 'free.voice': 'Preguntar por voz (español)', 'free.listening': 'Escuchando…',
     'free.placeholder': 'Escribí tu pregunta…', 'free.limitReached': 'Llegaste al límite diario de consultas', 'free.inputLabel': 'Pregunta para PyFis',
     'free.voiceNote': 'La voz reconoce español (beta); en Jopara puede fallar. Probala primero con una pregunta corta.',
     'free.limitNote': 'Alcanzaste las 15 consultas diarias. Iniciar otra conversación no reinicia el límite.',

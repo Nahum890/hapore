@@ -56,9 +56,15 @@ export function useSpeechSynthesis() {
     if (!supported || !text) return;
     window.speechSynthesis.cancel();
     if (speakingId === id) { setSpeakingId(null); return; }
-    const utterance = new SpeechSynthesisUtterance(text);
+    // Android's native voice tends to pause too long at every full stop.
+    // Use a lighter pause between sentences while leaving the displayed text intact.
+    const spokenText = String(text)
+      .replace(/\s+/gu, ' ')
+      .replace(/([A-Za-zÁÉÍÓÚÜÑáéíóúüñ])\.\s+(?=[A-ZÁÉÍÓÚÜÑ¿¡])/gu, '$1, ')
+      .trim();
+    const utterance = new SpeechSynthesisUtterance(spokenText);
     utterance.lang = 'es-PY';
-    utterance.rate = 0.98;
+    utterance.rate = 1.02;
     utterance.onend = () => setSpeakingId(current => (current === id ? null : current));
     utterance.onerror = () => setSpeakingId(current => (current === id ? null : current));
     setSpeakingId(id);

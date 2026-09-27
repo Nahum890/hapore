@@ -306,7 +306,8 @@ function useAutoScroll(deps) {
 function FreeChatView({ quiz }) {
   const { t, language } = useTranslation();
   const logRef = useAutoScroll([quiz.charlaLog.length, quiz.streamText, quiz.busy]);
-  const fileRef = useRef(null);
+  const galleryRef = useRef(null);
+  const cameraRef = useRef(null);
   const [photoError, setPhotoError] = useState('');
   const [photoBusy, setPhotoBusy] = useState(false);
   const recognition = useSpeechRecognition();
@@ -351,10 +352,16 @@ function FreeChatView({ quiz }) {
     {photoError && <p className="field-error" role="alert">{photoError}</p>}
     {recognition.error && <p className="field-error" role="alert">{t(recognition.error)}</p>}
     <form className="chats-input-area" onSubmit={event => { event.preventDefault(); quiz.askFreeQuestion(); }}>
-      <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" hidden onChange={pickPhoto} />
-      <button type="button" className="btn btn-icon chat-photo-button" title={t('free.attach')} aria-label={t('free.attach')} onClick={() => fileRef.current?.click()} disabled={blocked || photoBusy}>
-        <Icon name="image" size={20} />
-      </button>
+      <input ref={galleryRef} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={pickPhoto} />
+      <input ref={cameraRef} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" hidden onChange={pickPhoto} />
+      <div className="chat-photo-actions">
+        <button type="button" className="btn btn-secondary chat-photo-option" title={t('free.attach')} onClick={() => galleryRef.current?.click()} disabled={blocked || photoBusy}>
+          <Icon name="image" size={18} />{t('free.attach')}
+        </button>
+        <button type="button" className="btn btn-secondary chat-photo-option" title={t('free.camera')} onClick={() => cameraRef.current?.click()} disabled={blocked || photoBusy}>
+          <Icon name="camera" size={18} />{t('free.camera')}
+        </button>
+      </div>
       {recognition.supported && <button type="button" className={'btn btn-icon chat-mic-button' + (recognition.listening ? ' is-listening' : '')} title={t('free.voice')} aria-label={t(recognition.listening ? 'free.listening' : 'free.voice')} onClick={toggleMic} disabled={blocked}>
         <Icon name="mic" size={20} />
       </button>}

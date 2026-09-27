@@ -72,6 +72,26 @@ test('el tutor local responde y consume una consulta solo sin conexión', async 
   assert.equal(getTutorQuota().remaining, DAILY_TUTOR_LIMIT - 1);
 });
 
+test('las respuestas del cuestionario no consumen el límite diario del chat libre', async () => {
+  setActiveProfile('quota-test-unlimited-quiz');
+  removeKey(STORAGE_KEYS.TUTOR_USAGE);
+  for (let index = 0; index < DAILY_TUTOR_LIMIT; index += 1) recordTutorQuery();
+  const provider = new LocalAIProvider({
+    fallback: { async respond() { return { message: 'Respuesta del cuestionario', available: true }; } },
+    fetch: async () => { throw new Error('No debe consultar Gemini'); },
+  });
+  const result = await useOnlineState(false, () => provider.respond({
+    tipo: 'evaluacion_cuestionario',
+    message: '¿Por qué cambia la velocidad vertical?',
+    esCorrecta: true,
+  }));
+
+  assert.equal(result.available, true);
+  assert.equal(result.message, 'Respuesta del cuestionario');
+  assert.equal(getTutorQuota().remaining, 0);
+  setActiveProfile(null);
+});
+
 test('el prompt mantiene contexto breve y permite respuestas completas en jopara', () => {
   const prompt = buildFreeChatPrompt({
     message: 'Explicame completo el movimiento parabólico',

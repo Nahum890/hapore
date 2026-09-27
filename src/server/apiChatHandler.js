@@ -95,7 +95,7 @@ function getBearer(req) {
   return typeof value === 'string' && /^Bearer\s+\S+$/i.test(value) ? value.replace(/^Bearer\s+/i, '') : '';
 }
 
-async function consumeSupabaseQuota(req, options, fetchImpl, signal) {
+async function validateSupabaseSession(req, options, fetchImpl, signal) {
   const token = getBearer(req);
   if (!token) return { status: 401, body: { error: 'Se necesita una sesión de usuario válida para el tutor online.' } };
   const headers = { apikey: options.supabaseAnonKey, Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
@@ -103,8 +103,14 @@ async function consumeSupabaseQuota(req, options, fetchImpl, signal) {
   if (!authResponse.ok) return { status: 401, body: { error: 'La sesión de usuario venció. Volvé a conectarte para usar Gemini.' } };
   const authUser = await authResponse.json();
   if (!authUser?.id) return { status: 401, body: { error: 'No se pudo verificar la sesión del tutor.' } };
+  return { headers };
+}
+
+async function consumeSupabaseQuota(req, options, fetchImpl, signal) {
+  const session = await validateSupabaseSession(req, options, fetchImpl, signal);
+  if (session?.status) return session;
   const response = await fetchImpl(`${options.supabaseUrl}/rest/v1/rpc/consume_tutor_query`, {
-    method: 'POST', headers, body: JSON.stringify({ p_usage_date: localDay() }), signal,
+    method: 'POST', headers: session.headers, body: JSON.stringify({ p_usage_date: localDay() }), signal,
   });
   if (!response.ok) return { status: 503, body: { error: 'Falta aplicar la migración de cuota diaria del tutor en Supabase.' } };
   const rows = await response.json();
@@ -170,8 +176,14 @@ export function createApiChatHandler(apiKey, primaryModel, options = {}) {
       if (!context.message) { json(400, { error: 'Escribí una pregunta antes de enviar.' }); return; }
       let quotaError;
       if (quotaUrl && quotaKey) {
-        quotaError = await consumeSupabaseQuota(req, { supabaseUrl: quotaUrl, supabaseAnonKey: quotaKey }, fetchImpl, controller.signal);
-      } else if (!fallbackQuota(requestAddress(req))) {
+        const quotaOptions = { supabaseUrl: quotaUrl, supabaseAnonKey: quotaKey };
+        if (context.tipo === 'charla_libre') {
+          quotaError = await consumeSupabaseQuota(req, quotaOptions, fetchImpl, controller.signal);
+        } else {
+          const session = await validateSupabaseSession(req, quotaOptions, fetchImpl, controller.signal);
+          quotaError = session?.status ? session : null;
+        }
+      } else if (context.tipo === 'charla_libre' && !fallbackQuota(requestAddress(req))) {
         quotaError = { status: 429, body: { error: 'Se alcanzó el límite de consultas de este dispositivo o red.' } };
       }
       if (quotaError) { json(quotaError.status, quotaError.body); return; }

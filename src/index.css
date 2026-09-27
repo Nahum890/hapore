@@ -1553,6 +1553,8 @@ button, input, select, textarea { max-width: 100%; }
   .simulator-canvas { aspect-ratio: 4 / 3; }
   .chats-view form.chats-input-area { flex-direction: column; }
   .chats-view form.chats-input-area .btn { width: 100%; }
+  .chats-view form.chats-input-area .chat-photo-actions { width: 100%; }
+  .chats-view form.chats-input-area .chat-photo-actions .chat-photo-option { width: auto; flex: 1 1 0; }
   .exercise-actions { grid-template-columns: 1fr; }
   .exercise-actions .btn-primary { order: -1; }
   .aula-toolbar { flex-direction: column; align-items: flex-start; }
@@ -1866,6 +1868,7 @@ button, input, select, textarea { max-width: 100%; }
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
+  overflow-x: clip;
   background: var(--surface, #ffffff);
   border-radius: var(--radius-lg, 24px);
   padding: 24px;
@@ -2499,7 +2502,7 @@ button, input, select, textarea { max-width: 100%; }
 
 @media (max-width: 860px) {
   .theory-course-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     width: 100%;
   }
   .theory-course-nav {
@@ -2529,11 +2532,27 @@ button, input, select, textarea { max-width: 100%; }
     padding: 10px;
   }
 
+  .theory-lesson-list > li {
+    min-width: 0;
+    max-width: 100%;
+  }
+
   .theory-lesson-title {
     white-space: normal;
     overflow: visible;
     text-overflow: clip;
     overflow-wrap: anywhere;
+  }
+
+  .theory-course-header,
+  .theory-course-layout,
+  .theory-course-nav,
+  .theory-course-content,
+  .theory-lesson-banner,
+  .theory-block,
+  .theory-formula-card {
+    width: 100%;
+    max-width: 100%;
   }
 
   .theory-lesson-article,
@@ -2545,6 +2564,15 @@ button, input, select, textarea { max-width: 100%; }
 
   .theory-formula-grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .theory-lesson-heading,
+  .theory-lesson-tagline,
+  .theory-body-block p,
+  .theory-objective-block p,
+  .theory-exam-block p,
+  .theory-formula-details {
+    overflow-wrap: anywhere;
   }
 
   .theory-formula-code-box {
