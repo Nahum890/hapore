@@ -73,6 +73,11 @@ export default function TutorWorkbench({ lastPrompt = '', onInsertPrompt }) {
 
   useEffect(() => {
     const prompt = lastPrompt.toLocaleLowerCase();
+    const workbenchRequested = /(gr[aá]fic|trayectoria|simul|f[oó]rmula|alcance|practic|ejemplo|rapidez inicial|[áa]ngulo|gravedad|v0)/u.test(prompt);
+    if (!workbenchRequested) {
+      setExpanded(false);
+      return;
+    }
     const number = raw => Number(String(raw).replace(',', '.'));
     const speedMatch = prompt.match(/(?:v0|v₀|rapidez(?: inicial)?|velocidad inicial)\s*(?:=|:)?\s*(\d+(?:[.,]\d+)?)/u);
     const angleMatch = prompt.match(/(?:[áa]ngulo)(?:\s+de\s+lanzamiento)?\s*(?:=|:)?\s*(\d+(?:[.,]\d+)?)\s*(?:°|grados?)/u);
@@ -83,7 +88,6 @@ export default function TutorWorkbench({ lastPrompt = '', onInsertPrompt }) {
     const comparisonRequested = /(?:30\s*°?\s*(?:y|e|\/|vs\.?|contra)\s*60|compar(?:ar|a|aci[oó]n)|embojoja)/u.test(prompt);
     if (comparisonRequested) setCompare(true);
     else if (angleMatch) setCompare(false);
-    if (!/(gr[aá]fic|trayectoria|simul|f[oó]rmula|alcance|practic|ejemplo|rapidez inicial|[áa]ngulo|gravedad|v0)/u.test(prompt)) return;
     setExpanded(true);
     setTab(/practic|ñeha|ñ[aá]e/u.test(prompt) ? 'practice' : /ejemplo|techapyr/u.test(prompt) ? 'example' : /f[oó]rmula/u.test(prompt) ? 'formulas' : 'graph');
   }, [lastPrompt]);

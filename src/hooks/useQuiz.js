@@ -64,7 +64,7 @@ function formatMessages(chatEntries, charlaEntries, language) {
   return mensajes.filter((message) => message.text);
 }
 
-export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, includeTheory = true } = {}) {
+export function useQuiz(flashcards, { onMoveToQuiz, onQuizAnswer, classConfig, includeTheory = true } = {}) {
   const providerRef = useRef(null);
   if (!providerRef.current) {
     providerRef.current = createAIProvider();
@@ -78,8 +78,8 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
   const localizedFlashcards = useMemo(() => (flashcards ?? []).map(item => localizeCatalogItem(item, language)), [flashcards, language]);
   const sessionRef = useRef(null);
   const freeSessionRef = useRef(null);
-  const onMoveRef = useRef(onMoveToChat);
-  onMoveRef.current = onMoveToChat;
+  const onMoveRef = useRef(onMoveToQuiz);
+  onMoveRef.current = onMoveToQuiz;
 
   const [step, setStep] = useState('cantidad');
   const [quantity, setQuantity] = useState(0);
@@ -100,6 +100,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
   const [charlaLog, setCharlaLog] = useState([]);
   const [tutorQuota, setTutorQuota] = useState(() => getTutorQuota());
   const [charlaText, setCharlaText] = useState('');
+  const [freeSessionId, setFreeSessionId] = useState(null);
   // Foto del ejercicio del cuaderno, todavía sin enviar (data URL). Nunca se
   // guarda en el historial persistido: solo viaja en la consulta al tutor.
   const [charlaImage, setCharlaImage] = useState(null);
@@ -215,7 +216,10 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
   }, []);
 
   const persistFreeConversation = useCallback((messages) => {
-    if (!freeSessionRef.current) freeSessionRef.current = `free-chat-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    if (!freeSessionRef.current) {
+      freeSessionRef.current = `free-chat-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      setFreeSessionId(freeSessionRef.current);
+    }
     const id = freeSessionRef.current;
     const now = new Date().toISOString();
     const firstQuestion = messages.find(message => message.role === 'alumno')?.text ?? '';
@@ -415,7 +419,10 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
     // La imagen viaja en el mensaje que se muestra (para la miniatura), pero
     // nunca en lo que se guarda en el historial de conversaciones.
     const nextLog = [...charlaLog, { role: 'alumno', text: displayText, image }];
-    if (!freeSessionRef.current) freeSessionRef.current = 'free-chat-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+    if (!freeSessionRef.current) {
+      freeSessionRef.current = 'free-chat-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+      setFreeSessionId(freeSessionRef.current);
+    }
     setCharlaLog(nextLog);
     setCharlaText('');
     setCharlaImage(null);
@@ -452,6 +459,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
   const newFreeConversation = useCallback(() => {
     if (requestLock.current) return;
     freeSessionRef.current = null;
+    setFreeSessionId(null);
     setCharlaLog([]);
     setCharlaText('');
     setCharlaImage(null);
@@ -462,6 +470,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
     if (!session || requestLock.current) return;
     generationRef.current += 1;
     freeSessionRef.current = session.id;
+    setFreeSessionId(session.id);
     setCharlaLog(Array.isArray(session.mensajes) ? session.mensajes : []);
     setCharlaText('');
     setStreamText('');
@@ -531,6 +540,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
     busy,
     streamText,
     charlaLog,
+    freeSessionId,
     charlaImage,
     setCharlaImage,
     charlaUsed: tutorQuota.used,

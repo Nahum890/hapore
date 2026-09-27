@@ -175,6 +175,7 @@ button, input, select, textarea { max-width: 100%; }
   gap: 18px;
 }
 .app-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 22px; align-items: start; width: 100%; }
+.app-layout.is-tutor-page { grid-template-columns: minmax(0, 1fr); }
 .app-main { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
 .app-sidebar { display: grid; gap: 16px; position: sticky; top: 92px; }
 
@@ -611,6 +612,31 @@ button, input, select, textarea { max-width: 100%; }
 
 /* ---------- Tutor: cuestionario y chat ---------- */
 .chats-view { display: flex; flex-direction: column; gap: 12px; }
+.tutor-chat-view { width: 100%; }
+.free-chat-shell { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; min-width: 0; }
+.free-chat-shell.has-history { grid-template-columns: minmax(220px, 255px) minmax(0, 1fr); }
+.free-chat-history-panel { display: flex; flex-direction: column; gap: 12px; min-width: 0; min-height: min(72vh, 780px); max-height: min(82vh, 900px); padding: 13px; border: 1px solid var(--c-line); border-radius: 16px; background: var(--c-paper); }
+.free-chat-history-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.free-chat-history-heading h2 { margin: 0; font-size: 15px; }
+.free-chat-history-heading button { display: grid; place-items: center; flex: none; width: 34px; height: 34px; border: 1px solid var(--c-line); border-radius: 10px; background: var(--c-surface); color: var(--c-ink-soft); font-size: 22px; cursor: pointer; }
+.free-chat-history-new { width: 100%; min-height: 42px; }
+.free-chat-history-list { display: grid; align-content: start; gap: 6px; min-height: 0; overflow-y: auto; }
+.free-chat-history-item { display: grid; gap: 4px; width: 100%; min-width: 0; padding: 10px; border: 1px solid transparent; border-radius: 11px; background: transparent; color: var(--c-ink); text-align: left; font: inherit; cursor: pointer; }
+.free-chat-history-item:hover, .free-chat-history-item.is-active { border-color: color-mix(in srgb, var(--c-primary) 30%, transparent); background: var(--c-surface); }
+.free-chat-history-item strong { overflow: hidden; font-size: 12px; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
+.free-chat-history-item small { color: var(--c-muted); font-size: 10px; }
+.free-chat-history-item:disabled { cursor: wait; opacity: .6; }
+.free-chat-history-empty { margin: 0; color: var(--c-muted); font-size: 12px; line-height: 1.5; }
+.free-chat-history-backdrop { display: none; }
+.free-chat-panel { display: flex; flex-direction: column; gap: 12px; min-width: 0; min-height: min(72vh, 780px); }
+.free-chat-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.free-chat-heading-main { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+.free-chat-heading-main > div { min-width: 0; }
+.free-chat-heading h2 { margin: 0; font-size: 19px; }
+.free-chat-heading p { margin: 4px 0 0; color: var(--c-muted); font-size: 13px; line-height: 1.45; }
+.free-chat-history-toggle { flex: none; min-height: 40px; white-space: nowrap; }
+.free-chat-heading-actions { display: flex; align-items: center; justify-content: flex-end; flex: none; gap: 8px; }
+.free-chat-heading-actions .chat-new-button { margin-left: 0; white-space: nowrap; }
 .quiz-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 4px; }
 .quiz-head h2 { margin: 0; font-size: 19px; }
 .chats-scroll {
@@ -619,6 +645,14 @@ button, input, select, textarea { max-width: 100%; }
   background-color: #f6f9fb;
   background-image: radial-gradient(rgba(47,128,193,.12) 1px, transparent 1.2px); background-size: 18px 18px;
 }
+.free-chat-scroll { flex: 1 1 auto; min-height: clamp(320px, 48vh, 520px); max-height: min(68vh, 760px); }
+.free-chat-panel form.chats-input-area { flex-wrap: wrap; }
+.free-chat-panel form.chats-input-area .quiz-input { min-width: 120px; }
+.free-chat-panel form.chats-input-area .chat-photo-actions { flex: none; }
+.free-chat-panel .chat-voice-note, .free-chat-panel > .deck-selector-note { margin: 0; }
+.repaso-quiz-setup, .repaso-quiz-prep, .quiz-session-view { display: grid; gap: 12px; min-width: 0; }
+.repaso-quiz-setup > .deck-selector-note { margin: 0; }
+.repaso-quiz-prep > .quiz-head p { margin: 4px 0 0; color: var(--c-muted); font-size: 14px; }
 .chat-entry { display: flex; flex-direction: column; gap: 8px; }
 .chat-bubble { max-width: 86%; padding: 11px 14px; border-radius: 18px; font-size: 14.5px; line-height: 1.5; box-shadow: var(--shadow-sm); animation: bubble-in var(--motion-normal) var(--ease-out); }
 .chat-tutor-bubble { align-self: flex-start; background: var(--c-surface); color: var(--c-ink); border: 1px solid var(--c-line); border-bottom-left-radius: 6px; }
@@ -1604,6 +1638,12 @@ button, input, select, textarea { max-width: 100%; }
   .app-sidebar { position: static; grid-template-columns: 1fr 1fr; }
 }
 
+@media (max-width: 1179px) {
+  .free-chat-shell.has-history { grid-template-columns: minmax(0, 1fr); }
+  .free-chat-history-backdrop { display: block; position: fixed; z-index: 45; inset: 0; border: 0; background: rgba(15, 23, 42, .28); }
+  .free-chat-history-panel { position: fixed; z-index: 46; top: calc(74px + env(safe-area-inset-top, 0px)); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); left: max(12px, env(safe-area-inset-left, 0px)); width: min(320px, calc(100vw - 24px)); min-height: 0; max-height: none; box-shadow: var(--shadow-lg); }
+}
+
 /* Celular: navegación abajo, al alcance del pulgar, como las apps que ya usan. */
 @media (max-width: 760px) {
   :root { --bottom-nav: 78px; }
@@ -1635,6 +1675,12 @@ button, input, select, textarea { max-width: 100%; }
   .home-class-card { flex-wrap: wrap; }
   .home-class-card .btn { width: 100%; }
   .app-sidebar { grid-template-columns: 1fr; }
+  .free-chat-panel { min-height: 68vh; }
+  .free-chat-heading { align-items: stretch; flex-direction: column; }
+  .free-chat-heading-main { align-items: flex-start; }
+  .free-chat-heading-actions { justify-content: space-between; }
+  .free-chat-heading-actions .chat-new-button { flex: 0 0 auto; width: auto; margin: 0; }
+  .free-chat-scroll { min-height: clamp(300px, 42vh, 420px); max-height: 58vh; }
   .section-intro { padding: 16px; gap: 12px; align-items: flex-start; }
   .section-icon { width: 46px; height: 46px; border-radius: 14px; }
   .guide-replay { position: absolute; right: 12px; top: 12px; min-height: 36px; padding: 5px 10px; font-size: 12px; }
@@ -1666,6 +1712,8 @@ button, input, select, textarea { max-width: 100%; }
   .role-picker { gap: 8px; }
   .role-picker label { padding: 10px; }
   .header-account { gap: 6px; }
+  .free-chat-heading-main { flex-direction: column; gap: 8px; }
+  .free-chat-history-toggle { min-height: 36px; }
   .connection-label { padding: 4px 8px; font-size: 11px; min-height: 34px; }
   .connection-dot { width: 7px; height: 7px; }
   .user-avatar { width: 32px; height: 32px; }

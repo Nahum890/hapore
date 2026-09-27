@@ -182,7 +182,7 @@ function AulaView({ classConfig, onJoinClass, concepts, errors, examples, glossa
   );
 }
 
-function QuizSelector({ quiz }) {
+function QuizSelector({ quiz, onReviewStart }) {
   const { t } = useTranslation();
   // Nunca queda vacío: sin tarjetas, estado vacío explicado; con pocas
   // (menos del mínimo de 5), un único botón con todas las disponibles.
@@ -200,7 +200,7 @@ function QuizSelector({ quiz }) {
       <p className="deck-selector-note">{t('repaso.chooseText', { n: quiz.repasoAvailable })}</p>
       <div className="deck-options">
         {options.map((count) => (
-          <button key={count} type="button" className="btn btn-secondary" onClick={() => quiz.chooseQuantity(count)}>
+          <button key={count} type="button" className="btn btn-secondary" onClick={() => { quiz.chooseQuantity(count); onReviewStart?.(); }}>
             <strong>{count}</strong><span>{label(count)}</span>
           </button>
         ))}
@@ -248,14 +248,6 @@ function RepasoView({ quiz, onCardConsolidated }) {
       )}
     </section>
   );
-}
-
-function TutorModeTabs({ mode, onModeChange, disabled = false }) {
-  const { t } = useTranslation();
-  return <div className="tutor-mode-tabs" role="tablist" aria-label={t('quiz.modeLabel')}>
-    <button type="button" role="tab" id="tutor-tab-quiz" aria-selected={mode === 'cuestionario'} aria-controls="tutor-panel" className={mode === 'cuestionario' ? 'is-active' : ''} onClick={() => onModeChange('cuestionario')} disabled={disabled}>{t('quiz.tab')}</button>
-    <button type="button" role="tab" id="tutor-tab-free" aria-selected={mode === 'libre'} aria-controls="tutor-panel" className={mode === 'libre' ? 'is-active' : ''} onClick={() => onModeChange('libre')} disabled={disabled}>{t('free.tab')}</button>
-  </div>;
 }
 
 function SourceLabel({ entry }) {
@@ -312,10 +304,14 @@ function FreeChatView({ quiz }) {
   const composerRef = useRef(null);
   const [photoError, setPhotoError] = useState('');
   const [photoBusy, setPhotoBusy] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(() => window.matchMedia?.('(min-width: 1180px)')?.matches ?? false);
   const recognition = useSpeechRecognition();
   const speech = useSpeechSynthesis();
-  const freeHistory = quiz.history.filter(session => session.tipo === 'chat-libre');
+  const freeHistory = quiz.history
+    .filter(session => session.tipo === 'chat-libre')
+    .sort((a, b) => new Date(b.hora ?? b.fecha).getTime() - new Date(a.hora ?? a.fecha).getTime());
   const latestStudentPrompt = [...quiz.charlaLog].reverse().find(message => message.role === 'alumno')?.text ?? '';
+  const startNewConversation = () => { quiz.newFreeConversation(); speech.stop(); };
 
   const pickPhoto = async event => {
     const file = event.target.files?.[0];
@@ -332,58 +328,73 @@ function FreeChatView({ quiz }) {
   };
   const blocked = quiz.busy || quiz.charlaLeft <= 0;
 
-  return <div className="tutor-mode-panel" id="tutor-panel" role="tabpanel" aria-labelledby="tutor-tab-free">
-    <div className="quiz-head">
-      <div><h2>{t('free.title')}</h2><p>{t('free.lead')}</p></div>
-      <span className="chip">{t('free.quota', { n: quiz.charlaLeft })}</span>
-      <button type="button" className="btn btn-secondary chat-new-button" onClick={() => { quiz.newFreeConversation(); speech.stop(); }} disabled={quiz.busy}>{t('free.new')}</button>
-    </div>
-    <div className="chats-scroll" ref={logRef} aria-live="polite">
-      {!quiz.charlaLog.length && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble">{t('free.welcome')}</div>}
-      {quiz.charlaLog.map((message, position) => <div key={message.id ?? 'free-' + position} className={'chat-bubble ' + (message.role === 'alumno' ? 'chat-alumno-bubble' : 'chat-tutor-bubble')}>
-        {message.image && <img className="chat-attached-photo" src={message.image} alt={t('free.photoSent')} />}
-        <MathText text={message.text} />
-        {message.role !== 'alumno' && <div className="chat-bubble-actions">
-          <SourceLabel entry={message} />
-          <SpeakerButton text={message.text} id={'free-' + position} speech={speech} />
-        </div>}
-      </div>)}
-      {quiz.busy && !quiz.streamText && <TypingBubble />}
-      {quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-streaming" aria-live="off"><MathText text={quiz.streamText} /></div>}
-    </div>
-    <TutorWorkbench lastPrompt={latestStudentPrompt} onInsertPrompt={text => {
-      quiz.setCharlaText(text);
-      requestAnimationFrame(() => composerRef.current?.focus());
-    }} />
-    {quiz.charlaImage && <div className="chat-photo-preview"><img src={quiz.charlaImage} alt={t('free.photoReady')} /><button type="button" className="btn btn-text" onClick={() => quiz.setCharlaImage(null)}>{t('free.removePhoto')}</button></div>}
-    {photoError && <p className="field-error" role="alert">{photoError}</p>}
-    {recognition.error && <p className="field-error" role="alert">{t(recognition.error)}</p>}
-    <form className="chats-input-area" onSubmit={event => { event.preventDefault(); quiz.askFreeQuestion(); }}>
-      <input ref={galleryRef} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={pickPhoto} />
-      <input ref={cameraRef} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" hidden onChange={pickPhoto} />
-      <div className="chat-photo-actions">
-        <button type="button" className="btn btn-secondary chat-photo-option" title={t('free.attach')} onClick={() => galleryRef.current?.click()} disabled={blocked || photoBusy}>
-          <Icon name="image" size={18} />{t('free.attach')}
-        </button>
-        <button type="button" className="btn btn-secondary chat-photo-option" title={t('free.camera')} onClick={() => cameraRef.current?.click()} disabled={blocked || photoBusy}>
-          <Icon name="camera" size={18} />{t('free.camera')}
-        </button>
+  return <div className={`free-chat-shell${historyOpen ? ' has-history' : ''}`}>
+    {historyOpen && <>
+      <button type="button" className="free-chat-history-backdrop" aria-label={t('free.historyClose')} onClick={() => setHistoryOpen(false)} />
+      <aside className="free-chat-history-panel" aria-label={t('free.historyOpen')}>
+        <div className="free-chat-history-heading"><h2>{t('free.historyOpen')}</h2><button type="button" aria-label={t('free.historyClose')} onClick={() => setHistoryOpen(false)}>×</button></div>
+        <button type="button" className="btn btn-primary free-chat-history-new" onClick={() => { startNewConversation(); setHistoryOpen(false); }} disabled={quiz.busy}>{t('free.new')}</button>
+        {freeHistory.length ? <nav className="free-chat-history-list" aria-label={t('free.historyOpen')}>
+          {freeHistory.map(session => <button type="button" key={session.id} className={'free-chat-history-item' + (quiz.freeSessionId === session.id ? ' is-active' : '')} aria-current={quiz.freeSessionId === session.id ? 'page' : undefined} onClick={() => { quiz.openFreeConversation(session); speech.stop(); setHistoryOpen(false); }} disabled={quiz.busy}>
+            <strong>{session.tema}</strong><small>{session.fecha} · {session.mensajes?.length ?? 0} {t('quiz.messages')}</small>
+          </button>)}
+        </nav> : <p className="free-chat-history-empty">{t('free.historyEmpty')}</p>}
+      </aside>
+    </>}
+    <section className="free-chat-panel" aria-label={t('free.title')}>
+      <header className="free-chat-heading">
+        <div className="free-chat-heading-main">
+          <button type="button" className="btn btn-secondary free-chat-history-toggle" aria-expanded={historyOpen} onClick={() => setHistoryOpen(value => !value)}><span aria-hidden="true">☰</span>{t('free.historyOpen')}</button>
+          <div><h2>{t('free.title')}</h2><p>{t('free.lead')}</p></div>
+        </div>
+        <div className="free-chat-heading-actions"><span className="chip">{t('free.quota', { n: quiz.charlaLeft })}</span><button type="button" className="btn btn-secondary chat-new-button" onClick={startNewConversation} disabled={quiz.busy}>{t('free.new')}</button></div>
+      </header>
+      <div className="chats-scroll free-chat-scroll" ref={logRef} aria-live="polite">
+        {!quiz.charlaLog.length && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble">{t('free.welcome')}</div>}
+        {quiz.charlaLog.map((message, position) => <div key={message.id ?? 'free-' + position} className={'chat-bubble ' + (message.role === 'alumno' ? 'chat-alumno-bubble' : 'chat-tutor-bubble')}>
+          {message.image && <img className="chat-attached-photo" src={message.image} alt={t('free.photoSent')} />}
+          <MathText text={message.text} />
+          {message.role !== 'alumno' && <div className="chat-bubble-actions">
+            <SourceLabel entry={message} />
+            <SpeakerButton text={message.text} id={'free-' + position} speech={speech} />
+          </div>}
+        </div>)}
+        {quiz.busy && !quiz.streamText && <TypingBubble />}
+        {quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-streaming" aria-live="off"><MathText text={quiz.streamText} /></div>}
+        <TutorWorkbench lastPrompt={latestStudentPrompt} onInsertPrompt={text => {
+          quiz.setCharlaText(text);
+          requestAnimationFrame(() => composerRef.current?.focus());
+        }} />
       </div>
-      {recognition.supported && <button type="button" className={'btn btn-icon chat-mic-button' + (recognition.listening ? ' is-listening' : '')} title={t('free.voice')} aria-label={t(recognition.listening ? 'free.listening' : 'free.voice')} onClick={toggleMic} disabled={blocked}>
-        <Icon name="mic" size={20} />
-      </button>}
-      <input ref={composerRef} className="quiz-input" type="text" inputMode="text" autoComplete="off" aria-label={t('free.inputLabel')} placeholder={quiz.charlaLeft > 0 ? t(recognition.listening ? 'free.listening' : 'free.placeholder') : t('free.limitReached')} value={quiz.charlaText} onChange={event => quiz.setCharlaText(event.target.value)} disabled={blocked} />
-      <button type="submit" className="btn btn-primary" disabled={blocked || (!quiz.charlaText.trim() && !quiz.charlaImage)}>{quiz.busy ? t('tutor.typing') : t('common.send')}</button>
-    </form>
-    {recognition.supported && <p className="field-help chat-voice-note">{t('free.voiceNote')}</p>}
-    {quiz.charlaLeft <= 0 && <p className="deck-selector-note">{t('free.limitNote')}</p>}
-    {freeHistory.length > 0 && <details className="chat-history"><summary>{t('free.history', { n: freeHistory.length })}</summary><ul className="chat-history-list">{[...freeHistory].reverse().map(session => <li key={session.id} className="chat-history-item"><button type="button" className="chat-history-button" onClick={() => quiz.openFreeConversation(session)} disabled={quiz.busy}><strong>{session.tema}</strong><br />{session.fecha} · {session.mensajes?.length ?? 0} {t('quiz.messages')}</button></li>)}</ul></details>}
+      {quiz.charlaImage && <div className="chat-photo-preview"><img src={quiz.charlaImage} alt={t('free.photoReady')} /><button type="button" className="btn btn-text" onClick={() => quiz.setCharlaImage(null)}>{t('free.removePhoto')}</button></div>}
+      {photoError && <p className="field-error" role="alert">{photoError}</p>}
+      {recognition.error && <p className="field-error" role="alert">{t(recognition.error)}</p>}
+      <form className="chats-input-area" onSubmit={event => { event.preventDefault(); quiz.askFreeQuestion(); }}>
+        <input ref={galleryRef} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={pickPhoto} />
+        <input ref={cameraRef} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" hidden onChange={pickPhoto} />
+        <div className="chat-photo-actions">
+          <button type="button" className="btn btn-secondary chat-photo-option" title={t('free.attach')} onClick={() => galleryRef.current?.click()} disabled={blocked || photoBusy}>
+            <Icon name="image" size={18} />{t('free.attach')}
+          </button>
+          <button type="button" className="btn btn-secondary chat-photo-option" title={t('free.camera')} onClick={() => cameraRef.current?.click()} disabled={blocked || photoBusy}>
+            <Icon name="camera" size={18} />{t('free.camera')}
+          </button>
+        </div>
+        {recognition.supported && <button type="button" className={'btn btn-icon chat-mic-button' + (recognition.listening ? ' is-listening' : '')} title={t('free.voice')} aria-label={t(recognition.listening ? 'free.listening' : 'free.voice')} onClick={toggleMic} disabled={blocked}>
+          <Icon name="mic" size={20} />
+        </button>}
+        <input ref={composerRef} className="quiz-input" type="text" inputMode="text" autoComplete="off" aria-label={t('free.inputLabel')} placeholder={quiz.charlaLeft > 0 ? t(recognition.listening ? 'free.listening' : 'free.placeholder') : t('free.limitReached')} value={quiz.charlaText} onChange={event => quiz.setCharlaText(event.target.value)} disabled={blocked} />
+        <button type="submit" className="btn btn-primary" disabled={blocked || (!quiz.charlaText.trim() && !quiz.charlaImage)}>{quiz.busy ? t('tutor.typing') : t('common.send')}</button>
+      </form>
+      {recognition.supported && <p className="field-help chat-voice-note">{t('free.voiceNote')}</p>}
+      {quiz.charlaLeft <= 0 && <p className="deck-selector-note">{t('free.limitNote')}</p>}
+    </section>
   </div>;
 }
 
 // Cierre del cuestionario: resumen + opciones claras, en vez de repetir la
 // última pregunta o quedar en un estado ambiguo.
-function QuizEnd({ quiz, onModeChange, onNavigate }) {
+function QuizEnd({ quiz, onNavigate }) {
   const { t } = useTranslation();
   const mistakes = quiz.mistakeCount;
   return <div className="quiz-end" role="status">
@@ -393,35 +404,24 @@ function QuizEnd({ quiz, onModeChange, onNavigate }) {
       <button type="button" className="btn btn-primary" onClick={quiz.practiceAgain}>{t('quiz.again')}</button>
       {mistakes > 0 && <button type="button" className="btn btn-secondary" onClick={quiz.retryMistakes}>{t('quiz.retryMistakes', { n: mistakes })}</button>}
       <button type="button" className="btn btn-secondary" onClick={() => onNavigate('simulador')}>{t('quiz.changeTopic')}</button>
-      <button type="button" className="btn btn-secondary" onClick={() => onModeChange('libre')}>{t('quiz.freeChat')}</button>
+      <button type="button" className="btn btn-secondary" onClick={() => onNavigate('chats')}>{t('quiz.freeChat')}</button>
       <button type="button" className="btn btn-text" onClick={() => onNavigate('inicio')}>{t('quiz.menu')}</button>
     </div>
   </div>;
 }
 
-function ChatsView({ quiz, mode, onModeChange, onCardConsolidated, onNavigate }) {
+function QuizView({ quiz, onNavigate, onCardConsolidated, onReviewStart }) {
   const { t } = useTranslation();
   const logRef = useAutoScroll([quiz.chat.length, quiz.answered, quiz.busy, quiz.streamText, quiz.step]);
 
-  if (mode === 'libre') return <section className="card chats-view" aria-label={t('free.title')}>
-    <TutorModeTabs mode={mode} onModeChange={onModeChange} disabled={quiz.busy} />
-    <FreeChatView quiz={quiz} />
+  if (quiz.step === 'cantidad') return <section className="repaso-quiz-setup" aria-label={t('quiz.title')}>
+    <p className="deck-selector-note">{t('quiz.chooseText')}</p>
+    <QuizSelector quiz={quiz} onReviewStart={onReviewStart} />
   </section>;
 
-  if (quiz.step === 'cantidad') return <section className="card chats-view" aria-label={t('quiz.title')}>
-    <TutorModeTabs mode={mode} onModeChange={onModeChange} disabled={quiz.busy} />
-    <div className="tutor-mode-panel" id="tutor-panel" role="tabpanel" aria-labelledby="tutor-tab-quiz">
-      <p className="deck-selector-note">{t('quiz.chooseText')}</p>
-      <QuizSelector quiz={quiz} />
-    </div>
-  </section>;
-
-  if (quiz.step === 'repaso') return <section className="card chats-view" aria-label={t('quiz.reviewTitle')}>
-    <TutorModeTabs mode={mode} onModeChange={onModeChange} disabled={quiz.busy} />
-    <div className="tutor-mode-panel" id="tutor-panel" role="tabpanel" aria-labelledby="tutor-tab-quiz">
-      <div className="quiz-head"><div><h2>{t('quiz.reviewTitle')}</h2><p>{t('quiz.reviewText')}</p></div></div>
-      <RepasoView quiz={quiz} onCardConsolidated={onCardConsolidated} />
-    </div>
+  if (quiz.step === 'repaso') return <section className="repaso-quiz-prep" aria-label={t('quiz.reviewTitle')}>
+    <div className="quiz-head"><div><h2>{t('quiz.reviewTitle')}</h2><p>{t('quiz.reviewText')}</p></div></div>
+    <RepasoView quiz={quiz} onCardConsolidated={onCardConsolidated} />
   </section>;
 
   const finished = quiz.step === 'charla' || quiz.step === 'fin';
@@ -432,8 +432,7 @@ function ChatsView({ quiz, mode, onModeChange, onCardConsolidated, onNavigate })
   const showCurrent = quiz.step === 'quiz' && quiz.currentQuestion && !quiz.answered;
 
   return (
-    <section className="card chats-view" aria-label={t('quiz.title')}>
-      <TutorModeTabs mode={mode} onModeChange={onModeChange} disabled={quiz.busy} />
+    <section className="quiz-session-view" aria-label={t('quiz.title')}>
       <div className="quiz-head">
         <h2>{t('quiz.title')}</h2>
         {quiz.step === 'quiz' && <>
@@ -501,7 +500,7 @@ function ChatsView({ quiz, mode, onModeChange, onCardConsolidated, onNavigate })
         </div>
       )}
 
-      {finished && <QuizEnd quiz={quiz} onModeChange={onModeChange} onNavigate={onNavigate} />}
+      {finished && <QuizEnd quiz={quiz} onNavigate={onNavigate} />}
 
       {quizHistory.length > 0 && (
         <details className="chat-history">
@@ -519,12 +518,16 @@ function ChatsView({ quiz, mode, onModeChange, onCardConsolidated, onNavigate })
   );
 }
 
+function ChatsView({ quiz }) {
+  const { t } = useTranslation();
+  return <section className="card chats-view tutor-chat-view" aria-label={t('free.title')}><FreeChatView quiz={quiz} /></section>;
+}
+
 function LearningApp({ user, onLogout, onUpdateUser }) {
   const { t, language } = useTranslation();
   const [activeTab, setActiveTab] = useState('inicio');
   const [practiceMode, setPracticeMode] = useState('ejercicio');
-  const [repasoMode, setRepasoMode] = useState('tarjetas');
-  const [tutorMode, setTutorMode] = useState('cuestionario');
+  const [repasoMode, setRepasoMode] = useState('cuestionario');
   const [simulationSubmission, setSimulationSubmission] = useState(null);
   const [showGuide, setShowGuide] = useState(() => !readJSON('guarania:guideSeen:v2', false));
   const [showSettings, setShowSettings] = useState(false);
@@ -569,7 +572,7 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
     learning.onSelectExercise,
   );
   const quiz = useQuiz(deckCards, {
-    onMoveToChat: () => { setTutorMode('cuestionario'); setActiveTab('chats'); },
+    onMoveToQuiz: () => { setRepasoMode('cuestionario'); setActiveTab('tarjetas'); },
     onQuizAnswer: learning.onQuizAnswer,
     classConfig,
     includeTheory: !classPackage,
@@ -622,7 +625,7 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
   };
 
   useEffect(() => {
-    if (activeTab === 'inicio') return;
+    if (activeTab === 'inicio' || activeTab === 'chats') return;
     ask({ type: 'section', section: activeTab, role: user.role, topic: currentExercise?.topic, exerciseId: currentExercise?.id });
   }, [activeTab, currentExercise?.id, ask]);
 
@@ -658,13 +661,13 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
       <nav className="primary-nav" aria-label={t('nav.label')}>
         {SECTIONS.map(item => <button key={item.id} type="button" data-accent={item.accent} className={'primary-nav-item' + (activeTab === item.id ? ' is-active' : '')} aria-current={activeTab === item.id ? 'page' : undefined} onClick={() => navigate(item.id)}><span className="primary-nav-icon"><Icon name={item.icon} size={22} /></span><Bilingual k={'nav.' + item.id} className="primary-nav-label" /></button>)}
       </nav>
-      {activeTab !== 'inicio' && <section className="section-intro" aria-labelledby="section-title">
+      {activeTab !== 'inicio' && activeTab !== 'chats' && <section className="section-intro" aria-labelledby="section-title">
         <span className="section-icon" aria-hidden="true"><Icon name={section.icon} size={28} /></span>
         <div className="section-copy"><p className="section-eyebrow">{t(user.role === 'maestro' ? 'section.teacher' : 'section.student')}</p><h2 id="section-title">{t(`section.${sectionKey}.title`)}</h2><p>{t(`section.${sectionKey}.description`)}</p></div>
         <button type="button" className="guide-replay" onClick={() => setShowGuide(true)}><Icon name="help" size={18} />{t('section.guide')}</button>
       </section>}
       <AIPrivacyNotice />
-      <div className="app-layout"><main className="app-main">
+      <div className={`app-layout${activeTab === 'chats' ? ' is-tutor-page' : ''}`}><main className="app-main">
         {activeTab === 'inicio' && <HomeView user={user} learning={learning} classConfig={classConfig} onNavigate={navigate} onGuide={() => setShowGuide(true)} />}
         {activeTab === 'simulador' && (
           <>
@@ -706,16 +709,19 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
             <div className="tutor-mode-tabs" role="tablist" aria-label={t('repaso.tabsLabel')}>
               <button type="button" role="tab" aria-selected={repasoMode === 'tarjetas'} className={repasoMode === 'tarjetas' ? 'is-active' : ''} onClick={() => setRepasoMode('tarjetas')}>{t('repaso.cards')}</button>
               <button type="button" role="tab" aria-selected={repasoMode === 'teoria'} className={repasoMode === 'teoria' ? 'is-active' : ''} onClick={() => setRepasoMode('teoria')}>{t('repaso.theory')}</button>
+              <button type="button" role="tab" aria-selected={repasoMode === 'cuestionario'} className={repasoMode === 'cuestionario' ? 'is-active' : ''} onClick={() => setRepasoMode('cuestionario')}>{t('repaso.quiz')}</button>
             </div>
 
             {repasoMode === 'teoria' ? (
               <TheorySection />
+            ) : repasoMode === 'cuestionario' ? (
+              <QuizView quiz={quiz} onNavigate={navigate} onCardConsolidated={handleCardConsolidated} onReviewStart={() => setRepasoMode('tarjetas')} />
             ) : quiz.step === 'cantidad' ? (
-              <QuizSelector quiz={quiz} />
+              <section className="card deck-empty"><h2>{t('repaso.cards')}</h2><p className="deck-selector-note">{t('repaso.cardsIntro')}</p><button type="button" className="btn btn-primary" onClick={() => setRepasoMode('cuestionario')}>{t('repaso.goToQuiz')}</button></section>
             ) : quiz.step === 'repaso' ? (
               <RepasoView quiz={quiz} onCardConsolidated={handleCardConsolidated} />
             ) : (
-              <RepasoPhaseNotice quiz={quiz} onContinue={() => { setTutorMode('cuestionario'); navigate('chats'); }} />
+              <RepasoPhaseNotice quiz={quiz} onContinue={() => setRepasoMode('cuestionario')} />
             )}
           </>
         )}
@@ -731,7 +737,7 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
           onIncrementHint={learning.incrementHints}
         /></Suspense>}
 
-        {activeTab === 'chats' && <ChatsView quiz={quiz} mode={tutorMode} onModeChange={setTutorMode} onCardConsolidated={handleCardConsolidated} onNavigate={navigate} />}
+        {activeTab === 'chats' && <ChatsView quiz={quiz} />}
 
         {activeTab === 'aula' && (user.role === 'maestro' ?
           <AulaView
@@ -755,7 +761,7 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
             onPractice={() => navigate('simulador')}
             onReview={() => navigate('tarjetas')}
           />)}
-      </main><aside className="app-sidebar" aria-label="Tu progreso y ayuda"><ConfidenceBar xp={learning.xp} level={learning.level} confidence={learning.confidence} /><TutorCard tutor={tutor} /></aside></div>
+      </main>{activeTab !== 'chats' && <aside className="app-sidebar" aria-label="Tu progreso y ayuda"><ConfidenceBar xp={learning.xp} level={learning.level} confidence={learning.confidence} /><TutorCard tutor={tutor} /></aside>}</div>
       <Onboarding open={showGuide} onDismiss={dismissGuide} onStart={startPracticing} role={user.role} />
       <ProfileSettings open={showSettings || missingContact} required={missingContact} user={user} onClose={() => setShowSettings(false)} onSaved={handleProfileSaved} />
       <CurriculumBadge />
