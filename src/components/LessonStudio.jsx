@@ -25,7 +25,7 @@ function LessonList({ lessons, onCreate, onCreateGuided, onEdit, onPresent, onDu
     </div>
     <form className="lesson-create" onSubmit={create}>
       <label className="teacher-field">Nombre de la nueva clase
-        <input className="quiz-input" value={title} onChange={event => setTitle(event.target.value)} placeholder="Ej.: Tiro parabólico · 3.º B" maxLength={80} />
+        <input className="quiz-input" value={title} onChange={event => setTitle(event.target.value)} maxLength={80} />
       </label>
       <button type="submit" className="btn btn-primary">Crear clase</button>
     </form>
@@ -62,11 +62,11 @@ function SlideEditor({ slide, exercises, concepts, onChange }) {
   const set = patch => onChange({ ...slide, ...patch });
   if (slide.type === 'titulo') return <div className="lesson-slide-form">
     <label className="teacher-field">Título<input className="quiz-input" value={slide.title} onChange={event => set({ title: event.target.value })} maxLength={120} /></label>
-    <label className="teacher-field">Subtítulo (opcional)<textarea className="quiz-input" rows={2} value={slide.subtitle} onChange={event => set({ subtitle: event.target.value })} placeholder="Ej.: Docente, curso, fecha" /></label>
+    <label className="teacher-field">Subtítulo (opcional)<textarea className="quiz-input" rows={2} value={slide.subtitle} onChange={event => set({ subtitle: event.target.value })} /></label>
   </div>;
   if (slide.type === 'texto') return <div className="lesson-slide-form">
     <label className="teacher-field">Título (opcional)<input className="quiz-input" value={slide.title} onChange={event => set({ title: event.target.value })} maxLength={120} /></label>
-    <label className="teacher-field">Contenido<textarea className="quiz-input" rows={7} value={slide.body} onChange={event => set({ body: event.target.value })} placeholder={'Una idea por línea.\n- Empezá cada línea con un guion\n- para que se vea como lista'} /></label>
+    <label className="teacher-field">Contenido<textarea className="quiz-input" rows={7} value={slide.body} onChange={event => set({ body: event.target.value })} /></label>
   </div>;
   if (slide.type === 'concepto') return <div className="lesson-slide-form">
     <label className="teacher-field">Concepto<select className="quiz-input" value={slide.conceptId} onChange={event => set({ conceptId: event.target.value })}>
@@ -85,7 +85,7 @@ function SlideEditor({ slide, exercises, concepts, onChange }) {
     const errors = launchErrors(slide);
     const compareErrors = slide.compare ? launchErrors({ v0: slide.v0B, angle: slide.angleB, gravity: slide.gravity }) : {};
     return <div className="lesson-slide-form">
-      <label className="teacher-field">Título (opcional)<input className="quiz-input" value={slide.title} onChange={event => set({ title: event.target.value })} placeholder="Ej.: ¿Qué pasa si duplicamos la velocidad?" maxLength={120} /></label>
+      <label className="teacher-field">Título (opcional)<input className="quiz-input" value={slide.title} onChange={event => set({ title: event.target.value })} maxLength={120} /></label>
       <p className="field-help">Escribí cualquier valor: no hay topes, solo tienen que tener sentido físico.</p>
       <div className="lesson-values-grid">
         <NumberField label="Velocidad inicial" unit="m/s" value={slide.v0} error={errors.v0} onChange={value => set({ v0: value })} />
@@ -142,7 +142,7 @@ function LessonEditor({ lesson, exercises, concepts, onChange, onBack, onPresent
     <h2 id="lesson-editor-title" className="sr-only">Editar clase</h2>
     <div className="lesson-meta">
       <label className="teacher-field">Nombre de la clase<input className="quiz-input" value={lesson.title} onChange={event => onChange({ ...lesson, title: event.target.value })} maxLength={80} /></label>
-      <label className="teacher-field">Descripción o notas (solo las ves vos)<input className="quiz-input" value={lesson.description} onChange={event => onChange({ ...lesson, description: event.target.value })} placeholder="Ej.: curso, objetivo de la clase" maxLength={200} /></label>
+      <label className="teacher-field">Descripción o notas (solo las ves vos)<input className="quiz-input" value={lesson.description} onChange={event => onChange({ ...lesson, description: event.target.value })} maxLength={200} /></label>
     </div>
 
     <div className="lesson-workspace">

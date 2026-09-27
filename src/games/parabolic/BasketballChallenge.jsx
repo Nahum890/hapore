@@ -319,11 +319,11 @@ export default function BasketballChallenge({ langKey = 'gn-jopara', onProgress 
         <div className="pgame-sb-item">
           <span className="pgame-sb-label">Racha</span>
           <span className={`pgame-sb-val ${streak >= 2 ? 'is-hot' : ''}`}>
-            {streak > 0 ? `🔥 x${streak}` : '0'}
+            {streak > 0 ? `x${streak}` : '0'}
           </span>
         </div>
         <div className={`pgame-shot-clock ${shotClock <= 5.0 ? 'is-low' : ''}`} title="Shot Clock (24s NBA/FIBA)">
-          <span className="pgame-sb-label" style={{ color: '#e2e8f0' }}>⏱️ 24s:</span>
+          <span className="pgame-sb-label" style={{ color: '#e2e8f0' }}>Reloj 24 s:</span>
           <span className="pgame-clock-digits">{shotClock.toFixed(1)}s</span>
         </div>
       </div>
@@ -400,7 +400,7 @@ export default function BasketballChallenge({ langKey = 'gn-jopara', onProgress 
                 {Math.abs(Number(liveCalcCheck.diff)) <= 0.15 && liveCalcCheck.isDes ? (
                   <span style={{ color: '#16a34a' }}>{t.bballValidCalc}</span>
                 ) : Number(liveCalcCheck.diff) > 0.15 && Number(liveCalcCheck.diff) <= 0.45 && liveCalcCheck.isDes ? (
-                  <span style={{ color: '#0284c7' }}>💥 Buen tiro con tablero: impactará a {liveCalcCheck.yHoop} m y rebotará al aro.</span>
+                  <span style={{ color: '#0284c7' }}>Buen tiro con tablero: impactará a {liveCalcCheck.yHoop} m y rebotará al aro.</span>
                 ) : Number(liveCalcCheck.diff) < -0.15 ? (
                   <span style={{ color: '#dc2626' }}>{t.bballShortCalc}</span>
                 ) : (
@@ -533,7 +533,6 @@ export default function BasketballChallenge({ langKey = 'gn-jopara', onProgress 
                 id="bball-speed"
                 type="text"
                 inputMode="decimal"
-                placeholder={t.bballSpeedPlaceholder || 'Calculá e ingresá v₀ (m/s)...'}
                 value={speed}
                 onChange={handleSpeedChange}
                 disabled={phase === 'flying'}

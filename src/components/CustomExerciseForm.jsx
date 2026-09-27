@@ -70,7 +70,7 @@ export default function CustomExerciseForm({ exercises, onChange }) {
     <div className="custom-exercise-stack">
       <form className="teacher-block custom-exercise-form" onSubmit={submit}>
         <div className="custom-exercise-step"><span>1</span><label className="teacher-field">Escribí el enunciado
-          <textarea className="quiz-input" rows={3} value={form.question} onChange={update('question')} placeholder="Ej.: Un dron lanza una pelota a 20 m/s con un ángulo de 30°. ¿Cuál es su velocidad horizontal?" required />
+          <textarea className="quiz-input" rows={3} value={form.question} onChange={update('question')} required />
         </label></div>
         <div className="custom-exercise-step"><span>2</span><label className="teacher-field">¿Qué resultado debe calcular?
           <select value={form.conceptValue} onChange={update('conceptValue')}>
@@ -111,7 +111,7 @@ export default function CustomExerciseForm({ exercises, onChange }) {
           <summary>Pistas opcionales (se generan automáticamente si las dejás vacías)</summary>
           {hints.map((text, index) => (
             <label key={index} className="teacher-field">Pista {index + 1}
-              <textarea className="quiz-input" rows={1} value={text} onChange={updateHint(index)} placeholder={defaultHints[index]} />
+              <textarea className="quiz-input" rows={1} value={text} onChange={updateHint(index)} />
             </label>
           ))}
         </details>

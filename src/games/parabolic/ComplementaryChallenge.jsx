@@ -227,7 +227,6 @@ export default function ComplementaryChallenge({ langKey = 'gn-jopara', onProgre
               id="comp-angle"
               type="text"
               inputMode="decimal"
-              placeholder={t.compInputPlaceholder}
               value={angleInput}
               onChange={handleAngleChange}
               disabled={phase === 'flying'}

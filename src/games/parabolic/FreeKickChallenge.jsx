@@ -248,7 +248,6 @@ export default function FreeKickChallenge({ langKey = 'gn-jopara', onProgress })
               id="fk-speed"
               type="text"
               inputMode="decimal"
-              placeholder={langKey === 'gn-jopara' ? 'Ehai ne rapidez v₀...' : 'Calculá e ingresá v₀...'}
               value={speed}
               onChange={handleSpeedChange}
               disabled={phase === 'flying'}
@@ -297,12 +296,12 @@ export default function FreeKickChallenge({ langKey = 'gn-jopara', onProgress })
               <li>
                 Paso sobre la barrera (x = 9.15 m):{' '}
                 <code>y(9.15 m) = {evalResult.barrierY} m</code>{' '}
-                {evalResult.clearsBarrier ? '✅ Superó los 1.80 m' : '❌ Impactó en la barrera (y ≤ 1.80 m)'}
+                {evalResult.clearsBarrier ? 'Superó los 1.80 m' : 'Impactó en la barrera (y ≤ 1.80 m)'}
               </li>
               <li>
                 Llegada al arco (x = {level.distance} m):{' '}
                 <code>y({level.distance} m) = {evalResult.goalY} m</code>{' '}
-                {evalResult.goalY > 0 && evalResult.goalY <= level.goalHeight ? '✅ Dentro del arco (0 < y ≤ 2.44 m)' : '❌ Fuera del arco'}
+                {evalResult.goalY > 0 && evalResult.goalY <= level.goalHeight ? 'Dentro del arco (0 < y ≤ 2.44 m)' : 'Fuera del arco'}
               </li>
             </ul>
           </div>

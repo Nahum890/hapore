@@ -103,7 +103,7 @@ export default function StudentClass({ classConfig, onJoinClass, studentId, clas
       <button className="btn btn-secondary" type="button" onClick={() => onJoinClass(null)}>{t('class.leave')}</button>
     </> : <>
       <p>{t(cloudEnabled ? 'class.cloudLead' : 'class.localLead')}</p>
-      <form onSubmit={submit} className="student-class-form"><label htmlFor="student-class-code">{t(cloudEnabled ? 'class.cloudCode' : 'class.localCode')}</label><div><input id="student-class-code" className="quiz-input" type="text" autoComplete="off" autoCapitalize="characters" spellCheck={false} maxLength={8} value={code} onChange={event => { setCode(event.target.value.toUpperCase()); setError(''); }} placeholder={cloudEnabled ? 'K7PQ2M' : 'GP10D03'} /><button className="btn btn-primary" type="submit" disabled={!code.trim() || busy}>{busy ? t('common.loading') : t(cloudEnabled ? 'class.download' : 'class.apply')}</button></div>{error && <p role="alert" className="field-error">{error}</p>}</form>
+      <form onSubmit={submit} className="student-class-form"><label htmlFor="student-class-code">{t(cloudEnabled ? 'class.cloudCode' : 'class.localCode')}</label><div><input id="student-class-code" className="quiz-input" type="text" autoComplete="off" autoCapitalize="characters" spellCheck={false} maxLength={8} value={code} onChange={event => { setCode(event.target.value.toUpperCase()); setError(''); }} /><button className="btn btn-primary" type="submit" disabled={!code.trim() || busy}>{busy ? t('common.loading') : t(cloudEnabled ? 'class.download' : 'class.apply')}</button></div>{error && <p role="alert" className="field-error">{error}</p>}</form>
       {!cloudEnabled && <p className="field-help student-class-note">{t('class.localOnly')}</p>}
     </>}
   </section>;

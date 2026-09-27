@@ -61,9 +61,9 @@ function CustomCardForm({ onCreated }) {
   const onEnter = event => { if (event.key === 'Enter') { event.preventDefault(); save(); } };
   return <div className="teacher-block custom-card-form" role="group" aria-label={t('teacher.newCard')} onKeyDown={event => { if (event.target.tagName === 'INPUT') onEnter(event); }}>
     <h4>{t('teacher.newCard')}</h4>
-    <label className="teacher-field">{t('teacher.front')}<input className="quiz-input" value={front} onChange={event => setFront(event.target.value)} maxLength={300} placeholder={t('teacher.frontPh')} /></label>
-    <label className="teacher-field">{t('teacher.back')}<textarea className="quiz-input" rows={2} value={back} onChange={event => setBack(event.target.value)} maxLength={600} placeholder={t('teacher.backPh')} /></label>
-    <label className="teacher-field">{t('teacher.formula')}<input className="quiz-input" value={formula} onChange={event => setFormula(event.target.value)} maxLength={160} placeholder={t('teacher.formulaPh')} /></label>
+    <label className="teacher-field">{t('teacher.front')}<input className="quiz-input" value={front} onChange={event => setFront(event.target.value)} maxLength={300} /></label>
+    <label className="teacher-field">{t('teacher.back')}<textarea className="quiz-input" rows={2} value={back} onChange={event => setBack(event.target.value)} maxLength={600} /></label>
+    <label className="teacher-field">{t('teacher.formula')}<input className="quiz-input" value={formula} onChange={event => setFormula(event.target.value)} maxLength={160} /></label>
     {error && <p className="field-error" role="alert">{error}</p>}
     <button type="button" className="btn btn-secondary" onClick={save}>{t('teacher.saveCard')}</button>
   </div>;
@@ -171,7 +171,7 @@ function CloudClassSetup({ teacher, allExercises, customExercises }) {
 
   return <>
     <form className="teacher-block class-setup-form" onSubmit={submit}>
-      <label className="teacher-field">{t('teacher.s1')}<input className="quiz-input" value={title} onChange={event => { setTitle(event.target.value); setCreated(null); }} maxLength={80} placeholder={t('teacher.s1ph')} /></label>
+      <label className="teacher-field">{t('teacher.s1')}<input className="quiz-input" value={title} onChange={event => { setTitle(event.target.value); setCreated(null); }} maxLength={80} /></label>
       <fieldset className="teacher-topic-picker"><legend>{t('teacher.s2')}</legend>
         <TopicButtons selected={subtopics} onToggle={toggleTopic} />
       </fieldset>

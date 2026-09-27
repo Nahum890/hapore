@@ -92,10 +92,10 @@ export default function ProfileSettings({ open, user, onClose, onSaved, required
             </button>
           </fieldset>
           <label className="teacher-field">{t('settings.phone')}
-            <input className="quiz-input" type="tel" required autoComplete="tel" value={phone} onChange={event => setPhone(event.target.value)} placeholder={t('auth.phonePh')} />
+            <input className="quiz-input" type="tel" required autoComplete="tel" value={phone} onChange={event => setPhone(event.target.value)} />
           </label>
           <label className="teacher-field">{t('settings.email')}
-            <input className="quiz-input" type="email" required autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} placeholder={t('auth.emailPh')} />
+            <input className="quiz-input" type="email" required autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} />
           </label>
           {error && <p className="field-error" role="alert">{localizeError(language, error)}</p>}
           {saved && <p className="field-help" role="status">{t('common.saved')}</p>}

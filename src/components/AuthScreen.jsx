@@ -89,11 +89,11 @@ export default function AuthScreen({ onAuthenticated }) {
                   </label>
                   <label htmlFor="auth-phone">
                     {t('auth.phone')}
-                    <input id="auth-phone" required type="tel" autoComplete="tel" value={phone} onChange={event => setPhone(event.target.value)} placeholder={t('auth.phonePh')} />
+                    <input id="auth-phone" required type="tel" autoComplete="tel" value={phone} onChange={event => setPhone(event.target.value)} />
                   </label>
                   <label htmlFor="auth-email">
                     {t('auth.email')}
-                    <input id="auth-email" required type="email" autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} placeholder={t('auth.emailPh')} />
+                    <input id="auth-email" required type="email" autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} />
                   </label>
                   <p className="auth-field-note">{t('auth.contactNote')}</p>
                 </>

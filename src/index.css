@@ -1863,6 +1863,9 @@ button, input, select, textarea { max-width: 100%; }
   display: flex;
   flex-direction: column;
   gap: 24px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   background: var(--surface, #ffffff);
   border-radius: var(--radius-lg, 24px);
   padding: 24px;
@@ -1948,6 +1951,12 @@ button, input, select, textarea { max-width: 100%; }
   grid-template-columns: 280px 1fr;
   gap: 24px;
   align-items: start;
+  min-width: 0;
+}
+
+.theory-course-layout > * {
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* Navegador lateral de lecciones */
@@ -1961,6 +1970,9 @@ button, input, select, textarea { max-width: 100%; }
   border: 1px solid var(--border);
   position: sticky;
   top: 16px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .theory-nav-title {
@@ -1978,10 +1990,13 @@ button, input, select, textarea { max-width: 100%; }
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
 }
 
 .theory-lesson-item {
   width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -2038,6 +2053,7 @@ button, input, select, textarea { max-width: 100%; }
   display: flex;
   flex-direction: column;
   min-width: 0;
+  flex: 1 1 auto;
 }
 
 .theory-lesson-title {
@@ -2484,9 +2500,57 @@ button, input, select, textarea { max-width: 100%; }
 @media (max-width: 860px) {
   .theory-course-layout {
     grid-template-columns: 1fr;
+    width: 100%;
   }
   .theory-course-nav {
     position: static;
+  }
+}
+
+@media (max-width: 560px) {
+  .theory-course-container {
+    padding: 16px;
+    gap: 18px;
+  }
+
+  .theory-progress-labels {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+  }
+
+  .theory-progress-labels > span:first-child {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .theory-lesson-item {
+    align-items: flex-start;
+    padding: 10px;
+  }
+
+  .theory-lesson-title {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
+  }
+
+  .theory-lesson-article,
+  .theory-block,
+  .theory-lesson-banner,
+  .theory-formula-card {
+    min-width: 0;
+  }
+
+  .theory-formula-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .theory-formula-code-box {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
   }
 }
 
