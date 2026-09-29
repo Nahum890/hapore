@@ -8,6 +8,8 @@ import CustomExerciseForm from './CustomExerciseForm.jsx';
 import StudentRoster from './StudentRoster.jsx';
 import Avatar from './Avatars.jsx';
 import ContactLinks from './ContactLinks.jsx';
+import { aggregateClassDifficulties } from '../pedagogy/errorSummary.js';
+import './TeacherMode.css';
 import { registerClassCode } from '../utils/classroom.js';
 import { isCloudConfigured } from '../cloud/cloudClient.js';
 import { buildClassContent, createCloudClass, deleteCloudClass, listTeacherClasses } from '../cloud/classCloud.js';
@@ -31,6 +33,19 @@ export function validClassCode(text) {
 }
 
 const formatWhen = iso => { if (!iso) return 'todavía no'; try { return new Date(iso).toLocaleString('es-PY', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch { return iso; } };
+
+function CloudChallengeSummary({ members = [] }) {
+  const available = members.some(member => member.error_summary && typeof member.error_summary === 'object');
+  const summary = aggregateClassDifficulties(members);
+  return <section className="class-challenge-summary" aria-label="Resumen agregado de dificultades frecuentes">
+    <h4>Ideas de refuerzo para el grupo</h4>
+    <p>El resumen usa categorías de error repetidas y no ordena ni puntúa a estudiantes.</p>
+    {!available ? <small>Aplicá la migración de Supabase de PyFis para habilitar este resumen.</small>
+      : !summary.ready ? <small>El resumen aparece cuando al menos 3 estudiantes tengan dificultades registradas.</small>
+        : summary.challenges.length === 0 ? <small>Todavía no hay datos suficientes para sugerir una actividad de refuerzo.</small>
+          : <ul>{summary.challenges.map(item => <li key={item.key}><strong>{item.label}</strong><span>{item.count} estudiantes la repitieron</span><small>Actividad sugerida: {item.activity}</small></li>)}</ul>}
+  </section>;
+}
 
 function CustomCardForm({ onCreated }) {
   const [front, setFront] = useState('');
@@ -101,6 +116,7 @@ function CloudClassList({ refreshKey }) {
           ? <span className="cloud-class-delete"><button type="button" className="btn btn-danger" onClick={async () => { try { await deleteCloudClass(item.id); } catch (failure) { setError(failure.message); } setConfirmId(null); load(); }}>Sí, eliminar</button><button type="button" className="btn btn-secondary" onClick={() => setConfirmId(null)}>Cancelar</button></span>
           : <button type="button" className="btn btn-secondary" onClick={() => setConfirmId(item.id)}>Eliminar clase</button>}
       </header>
+      {item.class_members?.length > 0 && <CloudChallengeSummary members={item.class_members} />}
       {item.class_members?.length
         ? <ul className="aula-list roster-list">{item.class_members.map(member => <li key={member.student_id} className="aula-item roster-item">
           <Avatar id={member.avatar} size={40} />

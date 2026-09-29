@@ -70,6 +70,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
   const localizedFlashcards = useMemo(() => (flashcards ?? []).map(item => localizeCatalogItem(item, language)), [flashcards, language]);
   const sessionRef = useRef(null);
   const freeSessionRef = useRef(null);
+  const freeInteractionRef = useRef(null);
   const onMoveRef = useRef(onMoveToChat);
   onMoveRef.current = onMoveToChat;
 
@@ -209,7 +210,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
     const now = new Date().toISOString();
     const firstQuestion = messages.find(message => message.role === 'alumno')?.text ?? '';
     const title = firstQuestion.trim().slice(0, 48) || 'Chat libre';
-    const entry = { id, fecha: now.slice(0, 10), hora: now, tema: title, tipo: 'chat-libre', mensajes: messages };
+    const entry = { id, fecha: now.slice(0, 10), hora: now, tema: title, tipo: 'chat-libre', mensajes: messages, ...(freeInteractionRef.current ? { interaction: freeInteractionRef.current } : {}) };
     setHistory(prev => {
       const exists = prev.some(item => item.id === id);
       const next = exists ? prev.map(item => item.id === id ? entry : item) : [...prev, entry];
@@ -382,9 +383,10 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
     setQuestionIndex(next);
   }, [questionIndex, questions.length, chat, persistCurrent]);
 
-  const askFreeQuestion = useCallback(async () => {
-    const text = charlaText.trim();
+  const askFreeQuestion = useCallback(async (messageOverride) => {
+    const text = String(typeof messageOverride === 'string' ? messageOverride : messageOverride?.message ?? charlaText).trim();
     if (!text || requestLock.current || tutorQuota.remaining <= 0) return;
+    if (messageOverride?.interaction === 'photo-socratic') freeInteractionRef.current = 'photo-socratic';
     requestLock.current = true;
     const generation = generationRef.current;
     setBusy(true);
@@ -400,6 +402,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
           message: text,
           history: charlaLog.slice(-8),
           language,
+          interaction: freeInteractionRef.current,
           onToken: (token) => {
             if (generation === generationRef.current) setStreamText(token);
           },
@@ -425,6 +428,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
   const newFreeConversation = useCallback(() => {
     if (requestLock.current) return;
     freeSessionRef.current = null;
+    freeInteractionRef.current = null;
     setCharlaLog([]);
     setCharlaText('');
     setStreamText('');
@@ -434,6 +438,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
     if (!session || requestLock.current) return;
     generationRef.current += 1;
     freeSessionRef.current = session.id;
+    freeInteractionRef.current = session.interaction === 'photo-socratic' ? 'photo-socratic' : null;
     setCharlaLog(Array.isArray(session.mensajes) ? session.mensajes : []);
     setCharlaText('');
     setStreamText('');

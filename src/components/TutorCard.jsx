@@ -21,12 +21,12 @@ export default function TutorCard({ tutor }) {
             : tutor?.source === 'rules' ? 'Tutor local'
             : tutor?.available === false ? 'Tutor no disponible' : 'Tutor listo';
   return (
-    <section className="card tutor-card" aria-label="Tutor Jopara">
+    <section className="card tutor-card" aria-label="Tutor PyFis">
       <div className="tutor-avatar" aria-hidden="true"><Nanduti size={34} spokes={12} rings={2} /></div>
       <div className="tutor-body">
         <p className="tutor-name">Tutor <span>· Pytyvõhára</span></p>
         <p className="tutor-message" role="status" aria-live="polite"><MathText text={message} /></p>
-        {tutor?.loading && <p className="chat-typing tutor-typing" role="status" aria-live="polite"><span>El tutor está preparando una respuesta</span><span className="chat-typing-dots" aria-hidden="true"><i /><i /><i /></span></p>}
+        {tutor?.loading && <p className="chat-typing tutor-typing" role="status" aria-live="polite"><span>PyFis está escribiendo</span><span className="chat-typing-dots" aria-hidden="true"><i /><i /><i /></span></p>}
         {tutor?.esHint && <MathText as="p" className="tutor-es-hint" text={tutor.esHint} />}
         {tutor?.followUp && <p className="tutor-follow-up">{tutor.followUp}</p>}
         <p className="tutor-source">{source}</p>

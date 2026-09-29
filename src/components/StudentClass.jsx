@@ -71,6 +71,7 @@ export default function StudentClass({ classConfig, onJoinClass, studentId, clas
       <div className="student-class-summary"><span>Ejercicios</span><strong>{content.config.ejercicios}</strong><span>Tarjetas</span><strong>{content.cards.length}</strong></div>
       <ClassActions onPractice={onPractice} onReview={onReview} />
       <SyncStatus syncState={syncState} />
+      <p className="field-help student-class-note">Al sincronizar tu avance también se envían conteos de errores conceptuales predefinidos para que el docente vea dificultades repetidas del grupo. PyFis no le muestra ese resumen como un ranking individual.</p>
       <div className="student-class-footer">
         <button type="button" className="btn btn-secondary" disabled={busy} onClick={async () => { setBusy(true); setError(''); try { await onDownload(classPackage.code); } catch (failure) { setError(failure.offline ? 'Sin conexión: seguís con la versión ya descargada.' : failure.message); } finally { setBusy(false); } }}>{busy ? 'Actualizando…' : 'Actualizar clase'}</button>
         {confirmLeave

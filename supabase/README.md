@@ -7,6 +7,7 @@ Con Supabase:
 - El docente crea una clase con un código de 6 caracteres. Elige las situaciones, las tarjetas que va a compartir (incluidas las que creó) y sus ejercicios propios.
 - El alumno escribe el código y toca **Descargar clase**. Necesita internet solo esa vez; después resuelve y repasa sin conexión.
 - El avance del alumno (XP, nivel, ejercicios correctos, tarjetas dominadas, confianza) se guarda en su dispositivo y se sube solo cuando hay internet.
+- También se sincronizan conteos de categorías de error predefinidas. El docente ve solo dificultades repetidas agregadas para planificar refuerzos; no se muestran como un ranking de alumnos.
 - El docente ve la lista de sus alumnos con su avance y sus datos de contacto en **Aula → Compartir clase → Tus clases y alumnos**. El alumno ve el teléfono y el correo de su docente en **Mi clase**.
 - **Mensajes**: chat grupal de la clase y chats privados alumno ↔ docente y alumno ↔ alumno de la misma clase. El docente además puede enviar imágenes, clases de «Mis clases» (el alumno toca **Abrir clase**) y actividades (el alumno toca **Resolver actividad** y el resultado suma a su avance). Los últimos mensajes quedan guardados para leerlos sin conexión; para enviar hace falta internet.
 
@@ -14,7 +15,7 @@ Con Supabase:
 
 1. Creá un proyecto gratuito en <https://supabase.com>.
 2. En **Authentication → Sign In / Providers**, activá **Allow anonymous sign-ins**.
-3. En **SQL Editor**, pegá todo el contenido de [`schema.sql`](schema.sql) y tocá **Run**. Si ya lo habías ejecutado con una versión anterior, volvé a ejecutarlo: agrega las columnas y tablas nuevas sin borrar datos.
+3. En **SQL Editor**, pegá todo el contenido de [`schema.sql`](schema.sql) y tocá **Run**. Si ya lo habías ejecutado con una versión anterior, volvé a ejecutarlo: agrega las columnas y tablas nuevas sin borrar datos. Para una instalación existente, también podés ejecutar [`migrations/20260926_class_error_summary.sql`](migrations/20260926_class_error_summary.sql) para agregar el campo del resumen de errores.
 4. En **Project Settings → API**, copiá **Project URL** y la clave **anon public**.
 5. En la raíz del proyecto, creá o completá el archivo `.env` con:
 

@@ -17,6 +17,12 @@
 .exploration-plot { min-width: 0; margin: 0; }
 .exploration-plot svg { display: block; width: 100%; min-height: 220px; overflow: visible; }
 .exploration-plot figcaption { color: var(--texto-suave); font-size: .8rem; text-align: center; }
+.exploration-kinematics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 8px; }
+.exploration-time-plot { min-width: 0; margin: 0; padding: 10px; border: 1px solid var(--borde, #dbe3ea); border-radius: 10px; }
+.exploration-time-plot figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 10px; color: var(--texto-principal); font-size: .85rem; }
+.exploration-time-plot figcaption span { color: var(--texto-suave); font-size: .78rem; }
+.exploration-time-plot svg { display: block; width: 100%; min-height: 150px; margin-top: 5px; overflow: visible; }
+.exploration-series-marker { fill: var(--texto-principal, #183147); stroke: white; stroke-width: 1.5; }
 .exploration-gridline line { stroke: color-mix(in srgb, var(--texto-suave, #667085) 18%, transparent); stroke-dasharray: 3 5; }
 .exploration-gridline text { fill: var(--texto-suave, #667085); font-size: 10px; }
 .exploration-axis { stroke: var(--texto-suave, #667085); stroke-width: 1.3; }
@@ -64,6 +70,7 @@
   .exploration-prediction { grid-template-columns: 1fr; align-items: stretch; }
   .exploration-heading { flex-direction: column; }
   .exploration-activity-select { min-width: 100%; }
+  .exploration-kinematics { grid-template-columns: 1fr; }
 }
 @media (max-width: 480px) {
   .exploration-controls { grid-template-columns: 1fr; }

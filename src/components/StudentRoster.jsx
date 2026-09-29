@@ -2,6 +2,7 @@ import { getAccountById } from '../auth/localAccounts.js';
 import { getRosterForTeacher } from '../utils/classroom.js';
 import { readJSONForProfile, STORAGE_KEYS } from '../utils/storage.js';
 import { getLevel } from '../utils/gamification.js';
+import { aggregateClassDifficulties, summarizeErrorCounts } from '../pedagogy/errorSummary.js';
 import Avatar from './Avatars.jsx';
 
 function studentSnapshot(entry) {
@@ -9,7 +10,19 @@ function studentSnapshot(entry) {
   const xp = Number(readJSONForProfile(entry.studentId, STORAGE_KEYS.XP, 0)) || 0;
   const attempts = Number(readJSONForProfile(entry.studentId, STORAGE_KEYS.ATTEMPTS, 0)) || 0;
   const confidence = Number(readJSONForProfile(entry.studentId, STORAGE_KEYS.CONFIDENCE, 0)) || 0;
-  return { entry, account, xp, attempts, confidence, level: getLevel(xp) };
+  const attemptLog = readJSONForProfile(entry.studentId, STORAGE_KEYS.ATTEMPT_LOG, []);
+  return { entry, account, xp, attempts, confidence, level: getLevel(xp), error_summary: summarizeErrorCounts(attemptLog.slice(-30)) };
+}
+
+function ClassChallengeSummary({ roster }) {
+  const summary = aggregateClassDifficulties(roster);
+  return <section className="class-challenge-summary" aria-label="Resumen agregado de dificultades frecuentes">
+    <h3>Ideas de refuerzo para el grupo</h3>
+    <p>Se cuentan dificultades repetidas entre estudiantes, sin mostrar nombres ni ordenarlos por errores.</p>
+    {!summary.ready ? <small>El resumen aparece cuando al menos 3 estudiantes tengan intentos registrados en este dispositivo.</small>
+      : summary.challenges.length === 0 ? <small>Todavía no hay datos suficientes para sugerir una actividad de refuerzo.</small>
+        : <ul>{summary.challenges.map(item => <li key={item.key}><strong>{item.label}</strong><span>{item.count} estudiantes la repitieron</span><small>Actividad sugerida: {item.activity}</small></li>)}</ul>}
+  </section>;
 }
 
 export default function StudentRoster({ teacherId }) {
@@ -24,6 +37,8 @@ export default function StudentRoster({ teacherId }) {
       {roster.length === 0 ? (
         <p className="field-help">Todavía no hay alumnos unidos a tu clase en este dispositivo.</p>
       ) : (
+        <>
+        <ClassChallengeSummary roster={roster} />
         <ul className="aula-list roster-list">
           {roster.map(({ entry, account, xp, attempts, confidence, level }) => (
             <li key={entry.studentId} className="aula-item roster-item">
@@ -40,6 +55,7 @@ export default function StudentRoster({ teacherId }) {
             </li>
           ))}
         </ul>
+        </>
       )}
     </section>
   );
