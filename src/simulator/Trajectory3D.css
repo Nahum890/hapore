@@ -1,0 +1,34 @@
+.traj3d { margin: 0; display: flex; flex-direction: column; gap: 0.5rem; min-width: 0; }
+.traj3d svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 0.9rem;
+  background: linear-gradient(180deg, #f8fbff 0%, #eef6ff 60%, #f7fbf5 100%);
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.08), 0 10px 24px -14px rgba(15, 23, 42, 0.35);
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+}
+.traj3d svg:active { cursor: grabbing; }
+.traj3d-floor { stroke: rgba(14, 116, 144, 0.25); stroke-width: 1; }
+.traj3d-grid { stroke: rgba(14, 116, 144, 0.18); stroke-width: 1; }
+.traj3d-height { stroke: rgba(100, 116, 139, 0.16); stroke-width: 1; stroke-dasharray: 4 5; }
+.traj3d-axis { stroke-width: 2.4; stroke-linecap: round; }
+.traj3d-axis.is-x { stroke: #1675a9; }
+.traj3d-axis.is-y { stroke: #d27628; }
+.traj3d-axis.is-z { stroke: #94a3b8; }
+.traj3d-axis-label { font: 700 12px system-ui, sans-serif; fill: #334155; }
+.traj3d-tick { font: 600 10px system-ui, sans-serif; fill: #64748b; }
+.traj3d-ghost { fill: none; stroke-width: 1.5; stroke-dasharray: 3 6; opacity: 0.35; }
+.traj3d-path { fill: none; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 2px 3px rgba(15, 23, 42, 0.18)); }
+.traj3d-shadow { fill: none; stroke: rgba(15, 23, 42, 0.22); stroke-width: 2.4; stroke-dasharray: 2 4; }
+.traj3d-drop { stroke: rgba(15, 23, 42, 0.25); stroke-width: 1; stroke-dasharray: 2 3; }
+.traj3d-ball-shadow { fill: rgba(15, 23, 42, 0.22); }
+.traj3d-label { font: 700 12px system-ui, sans-serif; }
+.traj3d-clock { font: 800 12px system-ui, sans-serif; fill: #0f172a; }
+.traj3d-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; }
+.traj3d-controls label { flex: 1 1 180px; display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.82rem; color: #334155; }
+.traj3d-controls input[type='range'] { width: 100%; accent-color: #1d5bd8; }
+.traj3d-note { margin: 0; font-size: 0.78rem; color: #64748b; }
+.traj3d.is-compact .traj3d-controls { gap: 0.4rem; }

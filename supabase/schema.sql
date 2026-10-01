@@ -50,6 +50,11 @@ create table if not exists public.class_members (
     and (error_summary - array['confunde_componentes', 'confunde_velocidades', 'olvida_gravedad', 'confunde_altura_alcance', 'angulo_desfasado']::text[]) = '{}'::jsonb
   )
 );
+-- Panel docente: ejercicios distintos resueltos y aciertos por tema
+-- ({ "componentes": { "attempts": 4, "correct": 3 }, ... }). Los sube el alumno.
+alter table public.class_members add column if not exists solved integer not null default 0 check (solved >= 0);
+alter table public.class_members add column if not exists topic_stats jsonb not null default '{}'::jsonb
+  check (jsonb_typeof(topic_stats) = 'object' and pg_column_size(topic_stats) <= 4000);
 alter table public.class_members add column if not exists phone text check (char_length(phone) <= 24);
 alter table public.class_members add column if not exists email text check (char_length(email) <= 120);
 alter table public.class_members add column if not exists error_summary jsonb not null default '{}'::jsonb;
@@ -84,9 +89,30 @@ create table if not exists public.messages (
 );
 create index if not exists messages_class_id_idx on public.messages (class_id, id);
 
+-- Reuniones de Google Meet que se comparten con todos los integrantes del grupo.
+create table if not exists public.class_meetings (
+  id bigint generated always as identity primary key,
+  class_id uuid not null references public.classes (id) on delete cascade,
+  creator_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  title text not null check (char_length(title) between 3 and 100),
+  description text not null default '' check (char_length(description) <= 500),
+  starts_at timestamptz not null,
+  meet_url text not null check (meet_url ~ '^https://meet[.]google[.]com/[A-Za-z0-9-]{6,40}([?][^[:space:]]*)?(#[^[:space:]]*)?$'),
+  created_at timestamptz not null default now()
+);
+create index if not exists class_meetings_class_start_idx on public.class_meetings (class_id, starts_at);
+
 alter table public.classes enable row level security;
 alter table public.class_members enable row level security;
 alter table public.messages enable row level security;
+alter table public.class_meetings enable row level security;
+
+-- Permisos explícitos: así funciona aunque el proyecto se haya creado con
+-- "Automatically expose new tables" desactivado. Quién ve o cambia cada fila
+-- lo siguen decidiendo las políticas RLS de abajo.
+grant usage on schema public to authenticated;
+grant select, insert, update, delete on public.classes, public.class_members, public.messages, public.class_meetings to authenticated;
+grant usage, select on all sequences in schema public to authenticated;
 
 -- Funciones auxiliares "security definer": consultan las tablas sin pasar por
 -- RLS, así las políticas de classes y class_members no se llaman entre sí
@@ -153,6 +179,22 @@ create policy "enviar mensajes en mi clase" on public.messages
 drop policy if exists "borrar mis mensajes" on public.messages;
 create policy "borrar mis mensajes" on public.messages
   for delete using (sender_id = auth.uid() or public.is_class_teacher(class_id));
+
+drop policy if exists "integrantes ven reuniones de su clase" on public.class_meetings;
+create policy "integrantes ven reuniones de su clase" on public.class_meetings
+  for select using (public.is_class_participant(class_id));
+
+drop policy if exists "docente programa reuniones" on public.class_meetings;
+create policy "docente programa reuniones" on public.class_meetings
+  for insert with check (creator_id = auth.uid() and public.is_class_teacher(class_id));
+
+drop policy if exists "docente edita reuniones" on public.class_meetings;
+create policy "docente edita reuniones" on public.class_meetings
+  for update using (public.is_class_teacher(class_id)) with check (creator_id = auth.uid() and public.is_class_teacher(class_id));
+
+drop policy if exists "docente cancela reuniones" on public.class_meetings;
+create policy "docente cancela reuniones" on public.class_meetings
+  for delete using (public.is_class_teacher(class_id));
 
 -- Crear una clase con un código corto y único (sin letras que se confunden: 0/O, 1/I).
 drop function if exists public.create_class(text, text, text, jsonb);
@@ -239,3 +281,22 @@ grant execute on function public.class_directory(uuid) to authenticated;
 grant execute on function public.sync_my_profile(text, text, text, text) to authenticated;
 grant execute on function public.is_class_teacher(uuid, uuid) to authenticated;
 grant execute on function public.is_class_participant(uuid, uuid) to authenticated;
+
+-- Contenido del docente (presentaciones y ejercicios propios): respaldo en la
+-- nube, cada docente ve solo lo suyo. Igual que migrations/20260927_teacher_content.sql.
+create table if not exists public.teacher_content (
+  owner_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  kind text not null check (kind in ('lesson', 'exercise', 'flags')),
+  item_id text not null check (char_length(item_id) between 1 and 120),
+  data jsonb not null default '{}'::jsonb check (jsonb_typeof(data) = 'object' and pg_column_size(data) <= 200000),
+  deleted boolean not null default false,
+  updated_at timestamptz not null default now(),
+  primary key (owner_id, kind, item_id)
+);
+alter table public.teacher_content enable row level security;
+grant select, insert, update, delete on public.teacher_content to authenticated;
+drop policy if exists teacher_content_owner on public.teacher_content;
+create policy teacher_content_owner on public.teacher_content
+  for all to authenticated
+  using (owner_id = auth.uid())
+  with check (owner_id = auth.uid());

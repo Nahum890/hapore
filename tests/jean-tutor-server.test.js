@@ -36,7 +36,7 @@ const run = async (handler, body, headers) => {
 
 test('el endpoint limita contexto y conserva idioma, sin reenviar campos ajenos', async () => {
   let geminiRequest;
-  const handler = createApiChatHandler('secret-key', 'gemini-3.6-flash', {
+  const handler = createApiChatHandler('secret-key', 'gemini-3.8-flash', {
     consumeQuota: () => true,
     fetch: async (url, options) => {
       geminiRequest = { url, options };
@@ -57,7 +57,7 @@ test('el endpoint limita contexto y conserva idioma, sin reenviar campos ajenos'
 
 test('el límite persistente de Supabase bloquea antes de llamar a Gemini', async () => {
   let geminiCalls = 0;
-  const handler = createApiChatHandler('secret-key', 'gemini-3.6-flash', {
+  const handler = createApiChatHandler('secret-key', 'gemini-3.8-flash', {
     supabaseUrl: 'https://school.supabase.co',
     supabaseAnonKey: 'public-anon-key',
     fetch: async url => {
@@ -75,11 +75,35 @@ test('el límite persistente de Supabase bloquea antes de llamar a Gemini', asyn
 
 test('el endpoint rechaza consultas cuando el control de cuota deniega el acceso', async () => {
   let modelCalled = false;
-  const handler = createApiChatHandler('secret-key', 'gemini-3.6-flash', {
+  const handler = createApiChatHandler('secret-key', 'gemini-3.8-flash', {
     consumeQuota: () => false,
     fetch: async () => { modelCalled = true; return globalThis.Response.json({}); },
   });
-  const result = await run(handler, { message: 'Consulta', context: { message: 'Consulta' } });
+  const result = await run(handler, { message: 'Consulta', context: { message: 'Consulta', tipo: 'charla_libre' } });
   assert.equal(result.statusCode, 429);
   assert.equal(modelCalled, false);
+});
+
+test('el cuestionario no consume cuota diaria, pero conserva la validación de sesión', async () => {
+  let quotaCalls = 0;
+  let geminiCalls = 0;
+  const handler = createApiChatHandler('secret-key', 'gemini-3.8-flash', {
+    supabaseUrl: 'https://school.supabase.co',
+    supabaseAnonKey: 'public-anon-key',
+    fetch: async url => {
+      if (url.endsWith('/auth/v1/user')) return globalThis.Response.json({ id: 'verified-user' });
+      if (url.endsWith('/rest/v1/rpc/consume_tutor_query')) { quotaCalls += 1; return globalThis.Response.json([{ allowed: false }]); }
+      geminiCalls += 1;
+      return globalThis.Response.json({ candidates: [{ content: { parts: [{ text: 'Respuesta del cuestionario' }] } }] });
+    },
+  });
+  const result = await run(handler, {
+    message: '¿Por qué?',
+    stream: false,
+    context: { message: '¿Por qué?', tipo: 'evaluacion_cuestionario' },
+  }, { authorization: 'Bearer token-validado' });
+
+  assert.equal(result.statusCode, 200, JSON.stringify(result));
+  assert.equal(quotaCalls, 0);
+  assert.equal(geminiCalls, 1);
 });

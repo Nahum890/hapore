@@ -1,20 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { drawScene } from './projectileRenderer.js';
 import { formatMeasure, sceneForExercise, scenarioOf } from './exerciseSimulation.js';
+import { useTranslation } from '../i18n/LanguageProvider.jsx';
+import Trajectory3D from './Trajectory3D.jsx';
+import '../components/ChatWidget.css';
 
-const SCENE_TEXT = {
-  dron: 'El dron sigue la trayectoria indicada por los datos del ejercicio.',
-  basketball: 'La pelota describe el arco indicado por los datos del lanzamiento.',
-  wall: 'La pelota pasa (o no) por encima del paredón según los datos del lanzamiento.',
-};
-const SCENE_LABEL = { dron: 'Entrega en dron', basketball: 'Básquetbol', wall: 'Sobre el paredón' };
-const SCENE_ARIA = {
-  dron: 'Granja y dron',
-  basketball: 'Cancha de básquetbol',
-  wall: 'Patio con paredón',
-};
+const SCENE_TEXT = { dron: 'sim.dronText', basketball: 'sim.basketballText', wall: 'sim.wallText' };
+const SCENE_LABEL = { dron: 'scenario.dron', basketball: 'scenario.basketball', wall: 'sim.wallLabel' };
+const SCENE_ARIA = { dron: 'sim.dronAria', basketball: 'sim.basketballAria', wall: 'sim.wallAria' };
 
 export default function CanvasSimulator({ mission, submission }) {
+  const { t, language } = useTranslation();
   const exercise = mission?.exercise;
   const currentSubmission = submission?.exerciseId === exercise?.id ? submission : null;
   const scenario = scenarioOf(exercise);
@@ -25,6 +21,7 @@ export default function CanvasSimulator({ mission, submission }) {
   // respuesta escrita fue correcta, no si la trayectoria geométrica "cayó cerca".
   const verdictRef = useRef(null);
   const [phase, setPhase] = useState('idle');
+  const [view, setView] = useState('2d');
   const scene = useMemo(() => sceneForExercise(exercise, currentSubmission?.answer), [exercise, currentSubmission?.answer]);
 
   useEffect(() => { progressRef.current = 0; setPhase('idle'); }, [exercise?.id]);
@@ -46,7 +43,7 @@ export default function CanvasSimulator({ mission, submission }) {
     const draw = (now = 0) => {
       if (!width || !height) return;
       ctx.clearRect(0, 0, width, height);
-      drawScene(ctx, { width, height, flight: scene.flight, progress: progressRef.current, phase, now, scenario, verdict: verdictRef.current });
+      drawScene(ctx, { width, height, flight: scene.flight, progress: progressRef.current, phase, now, scenario, verdict: verdictRef.current, language });
     };
     const resize = () => {
       width = canvas.clientWidth; height = canvas.clientHeight;
@@ -69,7 +66,7 @@ export default function CanvasSimulator({ mission, submission }) {
       frameId = requestAnimationFrame(tick);
     } else { progressRef.current = phase === 'landed' ? 1 : 0; draw(); }
     return () => { cancelAnimationFrame(frameId); observer.disconnect(); };
-  }, [scene.flight, phase, scenario]);
+  }, [scene.flight, phase, scenario, language]);
 
   const replay = () => { if (currentSubmission && phase !== 'flying') { progressRef.current = 0; setPhase('flying'); } };
   const answer = currentSubmission ? formatMeasure(currentSubmission.answer) : '';
@@ -90,23 +87,27 @@ export default function CanvasSimulator({ mission, submission }) {
     ? Math.abs(scene.flight.error)
     : null;
 
-  return <section ref={sectionRef} className="card simulator-card" aria-label={`Simulación del ejercicio ${exercise?.id ?? ''}`}>
-    <div className="simulator-heading"><div><h2>Así se comprueba tu respuesta</h2><p className="simulator-status">{SCENE_TEXT[scenario]}</p></div><span className="simulator-target">{SCENE_LABEL[scenario]}</span></div>
-    <canvas ref={canvasRef} className="simulator-canvas" role="img" aria-label={`${SCENE_ARIA[scenario]} para el ejercicio ${exercise?.id ?? ''}. ${phase === 'landed' ? `El recorrido termina a ${formatMeasure(scene.flight?.landingX)} metros.` : 'La trayectoria aparecerá al comprobar la respuesta.'}`}>Simulación del lanzamiento.</canvas>
-    {!currentSubmission ? <p className="simulator-result">Escribí tu respuesta en el ejercicio de arriba y tocá “Comprobar con el simulador”.</p>
+  return <section ref={sectionRef} className="card simulator-card" aria-label={t('sim.exerciseAria', { id: exercise?.id ?? '' })}>
+    <div className="simulator-heading"><div><h2>{t('sim.heading')}</h2><p className="simulator-status">{t(SCENE_TEXT[scenario])}</p></div><span className="simulator-target">{t(SCENE_LABEL[scenario])}</span></div>
+    <div className="chatw-toggle simulator-view-toggle" role="group" aria-label={t('chatw.viewLabel')}>
+      {['2d', '3d'].map(item => <button key={item} type="button" className={view === item ? 'is-active' : ''} aria-pressed={view === item} onClick={() => setView(item)}>{t(`chatw.view.${item}`)}</button>)}
+    </div>
+    {view === '3d' && scene.flight && <Trajectory3D key={`${exercise?.id}-${currentSubmission?.id ?? 'idle'}`} series={[{ points: scene.flight.points, label: t(SCENE_LABEL[scenario]), color: isCorrect || !currentSubmission ? '#1d5bd8' : '#d97706' }]} />}
+    <canvas hidden={view === '3d'} ref={canvasRef} className="simulator-canvas" role="img" aria-label={`${t(SCENE_ARIA[scenario])}. ${phase === 'landed' ? t('sim.canvasEnd', { x: formatMeasure(scene.flight?.landingX) }) : t('sim.canvasWaiting')}`}>{t('sim.canvasFallback')}</canvas>
+    {!currentSubmission ? <p className="simulator-result">{t('sim.enterAnswer')}</p>
       : <div className={'simulator-check-result' + (phase === 'landed' ? (isCorrect ? ' is-hit' : ' is-miss') : '')} role="status" aria-live="polite">
-        {phase === 'flying' ? <p>Comprobando tu respuesta con la simulación…</p> : <>
-          <p className="simulator-verdict">{isCorrect ? '¡Tu respuesta coincide!' : 'Tu respuesta todavía no coincide.'}</p>
+        {phase === 'flying' ? <p>{t('sim.checking')}</p> : <>
+          <p className="simulator-verdict">{t(isCorrect ? 'sim.match' : 'sim.notMatch')}</p>
           {isCorrect
-            ? <div className="simulator-comparison"><span>Escribiste <strong>{answer} {unit}</strong></span><span>El ejercicio muestra <strong>{measured} {unit}</strong></span></div>
+            ? <div className="simulator-comparison"><span>{t('sim.youWrote')} <strong>{answer} {unit}</strong></span><span>{t('sim.exerciseShows')} <strong>{measured} {unit}</strong></span></div>
             : <p className="simulator-miss-note">{answerDrivesFlight
-                ? <>Escribiste <strong>{answer}{unit ? ` ${unit}` : ''}</strong>{offTarget !== null ? `; con esa respuesta, el lanzamiento hubiera quedado a ${formatMeasure(offTarget)} m de la meta.` : '.'} No te muestro el valor correcto: pedile una pista al tutor o volvé a calcular con los datos de arriba.</>
-                : <>Escribiste <strong>{answer} {unit}</strong>. La escena siempre dibuja el lanzamiento real de este ejercicio para que compares tu cálculo con la trayectoria; no te muestro el valor correcto: pedile una pista al tutor o volvé a calcular con los datos de arriba.</>}</p>}
-          {settled && answerDrivesFlight && <p>Con esa respuesta, el lanzamiento llegó a {formatMeasure(scene.flight.landingX)} m; la meta real está a {formatMeasure(scene.flight.targetX)} m.</p>}
-          {settled && scenario === 'wall' && scene.flight.obstacle && <p>{scene.flight.clearsObstacle ? 'Superó el paredón.' : 'No llegó a superar el paredón: probá con más altura.'}</p>}
+                ? t(offTarget !== null ? 'sim.missDrivenDistance' : 'sim.missDriven', { answer, unit, distance: formatMeasure(offTarget ?? 0) })
+                : t('sim.missOriginal', { answer, unit })}</p>}
+          {settled && answerDrivesFlight && <p>{t('sim.actualAndGoal', { actual: formatMeasure(scene.flight.landingX), target: formatMeasure(scene.flight.targetX) })}</p>}
+          {settled && scenario === 'wall' && scene.flight.obstacle && <p>{t(scene.flight.clearsObstacle ? 'sim.clearedWall' : 'sim.missedWall')}</p>}
         </>}
       </div>}
-    {currentSubmission && <button type="button" className="btn btn-secondary simulator-replay" onClick={replay} disabled={phase === 'flying'}>Repetir simulación</button>}
-    <p className="simulator-explainer">El vuelo se dibuja como movimiento parabólico ideal, sin resistencia del aire, para comparar tu respuesta con la trayectoria calculada.</p>
+    {currentSubmission && <button type="button" className="btn btn-secondary simulator-replay" onClick={replay} disabled={phase === 'flying'}>{t('sim.replay')}</button>}
+    <p className="simulator-explainer">{t('sim.explainer')}</p>
   </section>;
 }

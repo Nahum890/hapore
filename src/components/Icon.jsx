@@ -11,9 +11,14 @@ const PATHS = {
   offline: <><path d="M4 9.5a12 12 0 0 1 16 0" /><path d="M7 12.8a7.5 7.5 0 0 1 10 0" /><path d="M10 16a3 3 0 0 1 4 0" /><circle cx="12" cy="19" r="1" fill="currentColor" stroke="none" /></>,
   help: <><circle cx="12" cy="12" r="8.5" /><path d="M9.6 9.6a2.5 2.5 0 1 1 3.4 2.3c-.7.3-1 .8-1 1.6" /><circle cx="12" cy="16.6" r=".9" fill="currentColor" stroke="none" /></>,
   logout: <><path d="M14 5h4.5v14H14" /><path d="M10 8l-4 4 4 4M6 12h9" /></>,
+  settings: <><circle cx="12" cy="12" r="3" /><path d="m19.4 15 .1.1 1.2 1-1.2 2.1-1.5-.6a7.7 7.7 0 0 1-1.8 1l-.3 1.6h-2.4l-.3-1.6a7.7 7.7 0 0 1-1.8-1l-1.5.6-1.2-2.1 1.2-1a7.7 7.7 0 0 1 0-2l-1.2-1 1.2-2.1 1.5.6a7.7 7.7 0 0 1 1.8-1l.3-1.6h2.4l.3 1.6a7.7 7.7 0 0 1 1.8 1l1.5-.6 1.2 2.1-1.2 1a7.7 7.7 0 0 1 0 2Z" transform="translate(-1.3 -1.3) scale(1.11)" /></>,
+  bell: <><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" /><path d="M10 21h4" /></>,
   ball: <><circle cx="12" cy="12" r="8.5" /><path d="M12 3.5v17M3.5 12h17" /><path d="M5.6 5.6a8.5 8.5 0 0 0 12.8 12.8M18.4 5.6A8.5 8.5 0 0 1 5.6 18.4" /></>,
   people: <><circle cx="9" cy="8.5" r="3" /><path d="M3.5 19a5.5 5.5 0 0 1 11 0" /><circle cx="16.5" cy="9.5" r="2.4" /><path d="M15 14.2a4.5 4.5 0 0 1 5.5 4.3" /></>,
   image: <><rect x="3.5" y="5" width="17" height="14" rx="2" /><circle cx="9" cy="10" r="1.8" /><path d="M4 17l5-4.5 4 3.5 3-2.5 4 3.5" /></>,
+  camera: <><path d="M4 8h3l1.5-2h7L17 8h3a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 20 19H4a1.5 1.5 0 0 1-1.5-1.5v-8A1.5 1.5 0 0 1 4 8Z" /><circle cx="12" cy="13" r="3.2" /></>,
+  mic: <><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5.5 11a6.5 6.5 0 0 0 13 0" /><path d="M12 17.5v3M9 20.5h6" /></>,
+  speaker: <><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z" /><path d="M15.5 9a4.2 4.2 0 0 1 0 6" /><path d="M18 6.5a8 8 0 0 1 0 11" /></>,
   wall: <><path d="M3.5 6h17v12h-17z" /><path d="M3.5 12h17M8.5 6v6M15.5 6v6M6 12v6M12 12v6M18 12v6" /></>,
 };
 

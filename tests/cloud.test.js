@@ -65,9 +65,22 @@ test('el avance sin conexión queda pendiente y se sube al volver internet', asy
   setActiveProfile('cloud-student');
   const server = fakeSupabase();
   configureCloud({ fetch: server.fetch });
-  const learning = { xp: 125, level: { level: 2 }, attempts: 4, confidence: 40, attemptLog: [{ correct: true }, { correct: false }, { correct: true }], flashcardState: { a: { consolidated: true }, b: { consolidated: false } } };
+  const learning = {
+    xp: 125, level: { level: 2 }, attempts: 5, confidence: 40,
+    attemptLog: [
+      { correct: true },
+      { correct: false, errorType: 'confunde_componentes', answerText: 'respuesta privada' },
+      { correct: false, errorType: 'confunde_componentes' },
+      { correct: false, errorType: 'confunde_componentes' },
+      { correct: true },
+    ],
+    flashcardState: { a: { consolidated: true }, b: { consolidated: false } },
+  };
   const snapshot = progressSnapshot(learning);
-  assert.deepEqual(snapshot, { xp: 125, level: 2, attempts: 4, correct: 2, confidence: 40, cards_consolidated: 1 });
+  assert.deepEqual(snapshot, {
+    xp: 125, level: 2, attempts: 5, correct: 2, confidence: 40, cards_consolidated: 1,
+    solved: 0, topic_stats: {}, error_summary: { confunde_componentes: 2 },
+  }, 'solo se comparte una categoría conocida, saturada y sin la respuesta escrita');
 
   queueProgress(snapshot);
   const offline = await useOnline(false, () => flushProgress());
@@ -81,6 +94,8 @@ test('el avance sin conexión queda pendiente y se sube al volver internet', asy
   const patch = server.calls.find(call => call.method === 'PATCH');
   assert.match(patch.path, /class_members\?class_id=eq\.class-1&student_id=eq\.student-uid/);
   assert.equal(patch.body.xp, 125);
+  assert.deepEqual(patch.body.error_summary, { confunde_componentes: 2 });
+  assert.equal('answerText' in patch.body, false);
   assert.ok(patch.body.last_sync);
   setActiveProfile(null);
 });

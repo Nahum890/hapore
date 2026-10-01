@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { configureCloud } from '../src/cloud/cloudClient.js';
 import {
-  GROUP, cacheMessages, conversationOf, getCachedMessages, lessonPayload, markRead, getReadMarks,
+  GROUP, activityPayload, cacheMessages, conversationOf, getCachedMessages, lessonPayload, markRead, getReadMarks,
   mergeMessages, sendMessage, unreadCounts, validateMessage,
 } from '../src/cloud/chatCloud.js';
 import { whatsappLink } from '../src/utils/contact.js';
@@ -38,6 +38,15 @@ test('una clase enviada lleva los ejercicios propios que usa', () => {
   assert.deepEqual(payload.exercises.map(item => item.id), ['custom-1']);
   assert.equal(payload.lesson.slides.length, 2);
   assert.ok(!('createdAt' in payload.lesson));
+});
+
+test('una actividad de grupo incluye tarjetas y ejercicios y valida ambos conjuntos', () => {
+  const payload = activityPayload({ id: 'a1', title: 'Práctica', cards: [{ id: 'c1' }], exercises: [{ id: 'e1' }] });
+  assert.deepEqual(payload.activity.cards.map(item => item.id), ['c1']);
+  assert.deepEqual(payload.activity.exercises.map(item => item.id), ['e1']);
+  assert.equal(validateMessage({ kind: 'activity', payload }).kind, 'activity');
+  assert.throws(() => validateMessage({ kind: 'activity', payload: { activity: { id: 'a2', title: 'Vacía', cards: [], exercises: [] } } }), /tarjetas y ejercicios/);
+  assert.equal(validateMessage({ kind: 'activity', payload: { exercise: { id: 'e1' } } }).kind, 'activity', 'mantiene compatible la actividad individual del chat');
 });
 
 test('enviar un mensaje privado usa la tabla messages con el destinatario', async () => {

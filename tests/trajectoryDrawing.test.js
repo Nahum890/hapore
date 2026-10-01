@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createDrawingChallenge, gradeDrawingPoint } from '../src/utils/trajectoryDrawing.js';
+import { createDrawingChallenge, gradeDrawingPoint, gradeDrawingStroke } from '../src/utils/trajectoryDrawing.js';
+import { heightAtX } from '../src/physics/projectileMotion.js';
 
 test('drawing challenge has reference points and intermediate heights from the projectile engine', () => {
   const challenge = createDrawingChallenge(0);
@@ -31,4 +32,27 @@ test('drawing exercise guides the student when the point is at the wrong height 
   assert.equal(tooLow.heightMatches, false);
   assert.equal(wrongDistance.correct, false);
   assert.equal(wrongDistance.aligned, false);
+});
+
+test('drawing exercise accepts a continuous stroke that follows the projectile arc', () => {
+  const challenge = createDrawingChallenge(0);
+  const stroke = Array.from({ length: 41 }, (_, index) => {
+    const x = (challenge.horizontalRange * index) / 40;
+    return { x, y: heightAtX(challenge.launch, x) };
+  });
+
+  const result = gradeDrawingStroke(challenge, stroke);
+  assert.equal(result.correct, true);
+  assert.equal(result.matches, challenge.points.length);
+});
+
+test('drawing exercise asks the student to restart when the stroke misses the launch or landing point', () => {
+  const challenge = createDrawingChallenge(0);
+  const stroke = Array.from({ length: 21 }, (_, index) => {
+    const x = (challenge.horizontalRange * index) / 20;
+    return { x, y: heightAtX(challenge.launch, x) };
+  });
+
+  assert.equal(gradeDrawingStroke(challenge, stroke.map(point => ({ ...point, x: point.x + 8 }))).reason, 'start');
+  assert.equal(gradeDrawingStroke(challenge, stroke.slice(0, 17)).reason, 'finish');
 });

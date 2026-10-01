@@ -28,6 +28,7 @@ const formatTime = iso => {
 };
 
 function ActivityDialog({ exercise, onClose, onResult, onAskHint, hintsUsed, onIncrementHint }) {
+  const { t } = useTranslation();
   const dialogRef = useRef(null);
   const [submission, setSubmission] = useState(null);
   useEffect(() => {
@@ -36,10 +37,10 @@ function ActivityDialog({ exercise, onClose, onResult, onAskHint, hintsUsed, onI
     return () => { if (dialog?.open) dialog.close(); };
   }, []);
   const mission = useMemo(() => buildMission(exercise, 0, 1), [exercise]);
-  return <dialog ref={dialogRef} className="activity-dialog" aria-label="Actividad de la clase" onCancel={event => { event.preventDefault(); onClose(); }}>
+  return <dialog ref={dialogRef} className="activity-dialog" aria-label={t('chat.activityLabel')} onCancel={event => { event.preventDefault(); onClose(); }}>
     <div className="activity-dialog-head">
-      <div><span className="panel-eyebrow">ACTIVIDAD DE TU DOCENTE</span><h2>Resolvé y comprobá con la simulación</h2></div>
-      <button type="button" className="btn btn-secondary" onClick={onClose}>Cerrar</button>
+      <div><span className="panel-eyebrow">{t('chat.activityEyebrow')}</span><h2>{t('chat.activityTitle')}</h2></div>
+      <button type="button" className="btn btn-secondary" onClick={onClose}>{t('common.close')}</button>
     </div>
     <div className="practice-workspace">
       <ExerciseCard
@@ -56,31 +57,80 @@ function ActivityDialog({ exercise, onClose, onResult, onAskHint, hintsUsed, onI
   </dialog>;
 }
 
+function ActivityPacketDialog({ activity, onClose, onSolve }) {
+  const { language, t } = useTranslation();
+  const dialogRef = useRef(null);
+  const [revealedCards, setRevealedCards] = useState(() => new Set());
+  const cards = (activity.cards ?? []).map(item => localizeCatalogItem(item, language));
+  const exercises = (activity.exercises ?? []).map(item => localizeCatalogItem(item, language));
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (dialog && !dialog.open) dialog.showModal();
+    return () => { if (dialog?.open) dialog.close(); };
+  }, []);
+  return <dialog ref={dialogRef} className="activity-dialog activity-packet-dialog" aria-label={activity.title} onCancel={event => { event.preventDefault(); onClose(); }}>
+    <div className="activity-dialog-head">
+      <div><span className="panel-eyebrow">{t('chat.activity')}</span><h2>{activity.title}</h2></div>
+      <button type="button" className="btn btn-secondary" onClick={onClose}>{t('common.close')}</button>
+    </div>
+    {activity.description && <p>{activity.description}</p>}
+    <section className="activity-packet-cards">
+      <h3>{t('chat.activityCards', { n: cards.length })}</h3>
+      {cards.map(card => {
+        const open = revealedCards.has(card.id);
+        return <article className="activity-packet-card" key={card.id}>
+          <strong><MathText text={card.frente_es ?? card.front ?? ''} /></strong>
+          {open && <div><MathText text={card.dorso_concepto ?? card.back ?? ''} />{card.formula && <MathText as="small" text={card.formula} />}</div>}
+          <button type="button" className="btn btn-secondary" aria-expanded={open} onClick={() => setRevealedCards(current => {
+            const next = new Set(current);
+            if (next.has(card.id)) next.delete(card.id); else next.add(card.id);
+            return next;
+          })}>{t(open ? 'chat.hideAnswer' : 'chat.showAnswer')}</button>
+        </article>;
+      })}
+    </section>
+    <section className="activity-packet-exercises">
+      <h3>{t('chat.activityExercises', { n: exercises.length })}</h3>
+      {exercises.map(exercise => <article className="activity-packet-exercise" key={exercise.id}>
+        <MathText as="p" text={exercise.question} />
+        <button type="button" className="btn btn-primary" onClick={() => onSolve(exercise)}>{t('chat.solveActivity')}</button>
+      </article>)}
+    </section>
+  </dialog>;
+}
+
 function MessageContent({ message, onOpenLesson, onOpenActivity }) {
   const { kind, body, payload } = message;
   // La actividad viaja sin traducir; cada alumno la ve en su idioma.
-  const { language } = useTranslation();
+  const { language, t } = useTranslation();
+  const packet = kind === 'activity' ? payload?.activity : null;
   const activity = kind === 'activity' && payload?.exercise ? localizeCatalogItem(payload.exercise, language) : null;
   return <>
     {kind === 'image' && (payload?.dataUrl
-      ? <a href={payload.dataUrl} target="_blank" rel="noreferrer" className="chat-image-link"><img className="chat-image" src={payload.dataUrl} alt={body || 'Imagen enviada por el docente'} /></a>
-      : <p className="chat-image-missing">Imagen (se ve con conexión)</p>)}
+      ? <a href={payload.dataUrl} target="_blank" rel="noreferrer" className="chat-image-link"><img className="chat-image" src={payload.dataUrl} alt={body || t('chat.imageAlt')} /></a>
+      : <p className="chat-image-missing">{t('chat.imageOffline')}</p>)}
     {kind === 'lesson' && <div className="chat-attachment">
-      <span className="panel-eyebrow">CLASE</span>
+      <span className="panel-eyebrow">{t('chat.lesson')}</span>
       <strong>{payload?.lesson?.title}</strong>
-      <small>{payload?.lesson?.slides?.length ?? 0} {payload?.lesson?.slides?.length === 1 ? 'diapositiva' : 'diapositivas'}</small>
-      <button type="button" className="btn btn-primary" onClick={() => onOpenLesson(payload)}>Abrir clase</button>
+      <small>{t('chat.slides', { n: payload?.lesson?.slides?.length ?? 0 })}</small>
+      <button type="button" className="btn btn-primary" onClick={() => onOpenLesson(payload)}>{t('chat.openLesson')}</button>
+    </div>}
+    {packet && <div className="chat-attachment">
+      <span className="panel-eyebrow">{t('chat.activity')}</span><strong>{packet.title}</strong>
+      <small>{t('chat.activityPacketCounts', { cards: packet.cards?.length ?? 0, exercises: packet.exercises?.length ?? 0 })}</small>
+      <button type="button" className="btn btn-primary" onClick={() => onOpenActivityPacket(packet)}>{t('chat.openActivity')}</button>
     </div>}
     {activity && <div className="chat-attachment">
-      <span className="panel-eyebrow">ACTIVIDAD</span>
+      <span className="panel-eyebrow">{t('chat.activity')}</span>
       <MathText as="strong" text={activity.question} />
-      <button type="button" className="btn btn-primary" onClick={() => onOpenActivity(activity)}>Resolver actividad</button>
+      <button type="button" className="btn btn-primary" onClick={() => onOpenActivity(activity)}>{t('chat.solveActivity')}</button>
     </div>}
     {body && <MathText as="p" className="chat-text" text={body} />}
   </>;
 }
 
 function TeacherAttachments({ exercises, onSend, busy }) {
+  const { t } = useTranslation();
   const fileRef = useRef(null);
   const [mode, setMode] = useState(null);
   const [lessonId, setLessonId] = useState('');
@@ -107,37 +157,40 @@ function TeacherAttachments({ exercises, onSend, busy }) {
   return <div className="chat-teacher-tools">
     <div className="chat-teacher-buttons">
       <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={pickImage} />
-      <button type="button" className="btn btn-secondary" disabled={busy} onClick={() => fileRef.current?.click()}>🖼 Imagen</button>
-      <button type="button" className="btn btn-secondary" aria-pressed={mode === 'lesson'} disabled={busy} onClick={() => setMode(mode === 'lesson' ? null : 'lesson')}>▤ Enviar clase</button>
-      <button type="button" className="btn btn-secondary" aria-pressed={mode === 'activity'} disabled={busy} onClick={() => setMode(mode === 'activity' ? null : 'activity')}>✎ Enviar actividad</button>
+      <button type="button" className="btn btn-secondary" disabled={busy} onClick={() => fileRef.current?.click()}>{t('chat.image')}</button>
+      <button type="button" className="btn btn-secondary" aria-pressed={mode === 'lesson'} disabled={busy} onClick={() => setMode(mode === 'lesson' ? null : 'lesson')}>{t('chat.sendLesson')}</button>
+      <button type="button" className="btn btn-secondary" aria-pressed={mode === 'activity'} disabled={busy} onClick={() => setMode(mode === 'activity' ? null : 'activity')}>{t('chat.sendActivity')}</button>
     </div>
     {mode === 'lesson' && (lessons.length
       ? <div className="chat-teacher-picker">
-        <label className="teacher-field">Clase de “Mis clases”<select className="quiz-input" value={lessonId} onChange={event => setLessonId(event.target.value)}>
-          <option value="">Elegí una clase…</option>
-          {lessons.map(item => <option key={item.id} value={item.id}>{item.title} ({item.slides.length} diapositivas)</option>)}
+        <label className="teacher-field">{t('chat.lessonPick')}<select className="quiz-input" value={lessonId} onChange={event => setLessonId(event.target.value)}>
+          <option value="">{t('chat.lessonPh')}</option>
+          {lessons.map(item => <option key={item.id} value={item.id}>{item.title} ({t('chat.slides', { n: item.slides.length })})</option>)}
         </select></label>
         <button type="button" className="btn btn-primary" disabled={!lessonId || busy} onClick={() => {
           const lesson = lessons.find(item => item.id === lessonId);
           send({ kind: 'lesson', body: '', payload: lessonPayload(lesson, exercises) });
-        }}>Enviar</button>
+        }}>{t('common.send')}</button>
       </div>
-      : <p className="field-help">Todavía no tenés clases con diapositivas. Creá una en Aula → Mis clases.</p>)}
+      : <p className="field-help">{t('chat.noLessons')}</p>)}
     {mode === 'activity' && <div className="chat-teacher-picker">
-      <label className="teacher-field">Ejercicio<select className="quiz-input" value={exerciseId} onChange={event => setExerciseId(event.target.value)}>
-        <option value="">Elegí un ejercicio…</option>
+      <label className="teacher-field">{t('chat.exercise')}<select className="quiz-input" value={exerciseId} onChange={event => setExerciseId(event.target.value)}>
+        <option value="">{t('chat.exercisePh')}</option>
         {exercises.map(item => <option key={item.id} value={item.id}>{item.custom ? '★ ' : ''}{item.question.slice(0, 90)}</option>)}
       </select></label>
       <button type="button" className="btn btn-primary" disabled={!exerciseId || busy} onClick={() => {
         const original = [...catalogExercises, ...getCustomExercises()].find(item => item.id === exerciseId);
         send({ kind: 'activity', body: '', payload: { exercise: original ?? exercises.find(item => item.id === exerciseId) } });
-      }}>Enviar</button>
+      }}>{t('common.send')}</button>
     </div>}
     {error && <p className="field-error" role="alert">{error}</p>}
   </div>;
 }
 
 export default function ClassChat({ user, classPackage, exercises, concepts, onExerciseResult, onAskHint, hintsUsed, onIncrementHint }) {
+  const { t } = useTranslation();
+  const tRef = useRef(t);
+  tRef.current = t;
   const teacher = user.role === 'maestro';
   const cloud = isCloudConfigured();
   const [classes, setClasses] = useState(() => (teacher ? readJSON(TEACHER_CLASSES_KEY, []) : []));
@@ -202,7 +255,7 @@ export default function ClassChat({ user, classPackage, exercises, concepts, onE
         return merged;
       });
     } catch (failure) {
-      setStatus(failure.offline ? 'Sin conexión: ves los últimos mensajes guardados.' : `No se pudieron cargar los mensajes: ${failure.message}`);
+      setStatus(failure.offline ? tRef.current('chat.offlineRead') : tRef.current('chat.loadError', { msg: failure.message }));
     }
   }, [classId, cloud]);
 
@@ -222,7 +275,7 @@ export default function ClassChat({ user, classPackage, exercises, concepts, onE
   const thread = useMemo(() => messages.filter(message => conversationOf(message, myId) === conversation), [messages, myId, conversation]);
   const unread = useMemo(() => unreadCounts(messages, myId, marks), [messages, myId, marks]);
   const partner = conversation === GROUP ? null : people.get(conversation);
-  const roleLabel = person => (person.role === 'maestro' ? 'Docente' : teacher ? 'Alumno/a' : 'Compañero/a de clase');
+  const roleLabel = person => t(person.role === 'maestro' ? 'chat.teacher' : teacher ? 'chat.student' : 'chat.classmate');
 
   useEffect(() => {
     const last = thread.at(-1)?.id;
@@ -245,7 +298,7 @@ export default function ClassChat({ user, classPackage, exercises, concepts, onE
         });
       }
     } catch (failure) {
-      const message = failure.offline ? 'Sin conexión: el mensaje no se envió. Probá cuando vuelva internet.' : failure.message;
+      const message = failure.offline ? t('chat.sendOffline') : failure.message;
       setError(message);
       throw new Error(message);
     } finally { setBusy(false); }
@@ -258,62 +311,62 @@ export default function ClassChat({ user, classPackage, exercises, concepts, onE
   const openConversation = key => { setConversation(key); setShowThread(true); setError(''); };
 
   if (!cloud) return <section className="card class-chat-empty">
-    <h2>Mensajes de la clase</h2>
-    <p>El chat necesita la nube configurada en esta instalación (ver <code>supabase/README.md</code>). Sin eso, cada dispositivo guarda solo sus propios datos.</p>
+    <h2>{t('chat.title')}</h2>
+    <p>{t('chat.noCloud')}</p>
   </section>;
 
   if (!classId) return <section className="card class-chat-empty">
-    <h2>Mensajes de la clase</h2>
-    <p>{teacher
-      ? 'Creá una clase en Aula → Compartir clase. Cuando tus alumnos se unan, podés escribirles acá.'
-      : 'Uní tu cuenta a una clase en “Mi clase” con el código de tu docente para poder chatear con tu docente y tus compañeros.'}</p>
+    <h2>{t('chat.title')}</h2>
+    <p>{t(teacher ? 'chat.noClassTeacher' : 'chat.noClassStudent')}</p>
   </section>;
 
   const lessonExercises = openLesson ? [...exercises, ...(openLesson.exercises ?? [])] : exercises;
   const currentClass = teacher ? classes.find(item => item.id === classId) : { title: classPackage?.title, code: classPackage?.code };
 
-  return <section className="card class-chat" data-view={showThread ? 'thread' : 'list'} aria-label="Mensajes de la clase">
-    <aside className="class-chat-sidebar" aria-label="Conversaciones">
+  return <section className="card class-chat" data-view={showThread ? 'thread' : 'list'} aria-label={t('chat.title')}>
+    <aside className="class-chat-sidebar" aria-label={t('chat.title')}>
       {teacher && classes.length > 1
-        ? <label className="teacher-field">Clase<select className="quiz-input" value={classId} onChange={event => setClassId(event.target.value)}>
+        ? <label className="teacher-field">{t('chat.class')}<select className="quiz-input" value={classId} onChange={event => setClassId(event.target.value)}>
           {classes.map(item => <option key={item.id} value={item.id}>{item.title} · {item.code}</option>)}
         </select></label>
-        : <p className="class-chat-class"><strong>{currentClass?.title}</strong><span>Código {currentClass?.code}</span></p>}
+        : <p className="class-chat-class"><strong>{currentClass?.title}</strong><span>{t('chat.code', { code: currentClass?.code ?? '' })}</span></p>}
       <ul className="class-chat-list">
         <li><button type="button" className={'class-chat-item' + (conversation === GROUP && showThread ? ' is-active' : '')} onClick={() => openConversation(GROUP)}>
           <span className="class-chat-group-icon" aria-hidden="true">👥</span>
-          <span className="class-chat-name"><strong>Chat grupal</strong><small>Toda la clase</small></span>
-          {unread[GROUP] > 0 && <span className="class-chat-badge" aria-label={`${unread[GROUP]} sin leer`}>{unread[GROUP]}</span>}
+          <span className="class-chat-name"><strong>{t('chat.group')}</strong><small>{t('chat.groupSub')}</small></span>
+          {unread[GROUP] > 0 && <span className="class-chat-badge" aria-label={t('chat.unread', { n: unread[GROUP] })}>{unread[GROUP]}</span>}
         </button></li>
         {others.map(person => <li key={person.user_id}><button type="button" className={'class-chat-item' + (conversation === person.user_id && showThread ? ' is-active' : '')} onClick={() => openConversation(person.user_id)}>
-          <Avatar id={person.avatar} size={36} />
+          <Avatar id={person.avatar} name={person.display_name} size={36} />
           <span className="class-chat-name"><strong>{person.display_name}</strong><small>{roleLabel(person)}</small></span>
-          {unread[person.user_id] > 0 && <span className="class-chat-badge" aria-label={`${unread[person.user_id]} sin leer`}>{unread[person.user_id]}</span>}
+          {unread[person.user_id] > 0 && <span className="class-chat-badge" aria-label={t('chat.unread', { n: unread[person.user_id] })}>{unread[person.user_id]}</span>}
         </button></li>)}
       </ul>
-      {!others.length && <p className="field-help">{teacher ? 'Todavía no se unió ningún alumno a esta clase.' : 'Cargando las personas de tu clase…'}</p>}
+      {!others.length && <p className="field-help">{t(teacher ? 'chat.noStudents' : 'chat.loadingPeople')}</p>}
       {status && <p className="field-help" role="status">{status}</p>}
     </aside>
 
     <div className="class-chat-thread">
       {!showThread
-        ? <p className="class-chat-placeholder">Elegí el chat grupal o una persona para empezar a conversar.</p>
+        ? <p className="class-chat-placeholder">{t('chat.pick')}</p>
         : <>
           <header className="class-chat-thread-head">
-            <button type="button" className="btn btn-secondary class-chat-back" onClick={() => setShowThread(false)}>← Volver</button>
-            {partner ? <><Avatar id={partner.avatar} size={40} /><div><strong>{partner.display_name}</strong><small>{roleLabel(partner)}</small><ContactLinks person={partner} /></div></>
-              : <div><strong>Chat grupal</strong><small>{others.length + 1} personas{teacher ? ' · podés enviar imágenes, clases y actividades' : ''}</small></div>}
+            <button type="button" className="btn btn-secondary class-chat-back" onClick={() => setShowThread(false)}>← {t('common.back')}</button>
+            {partner ? <><Avatar id={partner.avatar} name={partner.display_name} size={40} /><div><strong>{partner.display_name}</strong><small>{roleLabel(partner)}</small><ContactLinks person={partner} /></div></>
+              : <div><strong>{t('chat.group')}</strong><small>{t('chat.people', { n: others.length + 1 })}{teacher ? t('chat.teacherExtras') : ''}</small></div>}
           </header>
           <ol className="class-chat-messages" ref={threadRef} aria-live="polite">
-            {!thread.length && <li className="class-chat-placeholder">Todavía no hay mensajes. ¡Escribí el primero!</li>}
+            {!thread.length && <li className="class-chat-placeholder">{t('chat.empty')}</li>}
             {thread.map(message => {
               const mine = message.sender_id === myId;
               const sender = people.get(message.sender_id);
               return <li key={message.id} className={'class-chat-message' + (mine ? ' is-mine' : '')}>
-                {!mine && <Avatar id={sender?.avatar} size={30} />}
+                {!mine && <Avatar id={sender?.avatar} name={sender?.display_name} size={30} />}
                 <div className="class-chat-bubble">
-                  {!mine && conversation === GROUP && <span className="class-chat-sender">{sender?.display_name ?? 'Alguien de la clase'}{sender?.role === 'maestro' ? ' · Docente' : ''}</span>}
-                  <MessageContent message={message} onOpenLesson={setOpenLesson} onOpenActivity={setOpenActivity} />
+                  {!mine && conversation === GROUP && <span className="class-chat-sender">{sender?.display_name ?? t('chat.someone')}{sender?.role === 'maestro' ? t('chat.teacherTag') : ''}</span>}
+                  <MessageContent message={message} onOpenLesson={setOpenLesson}
+                    onOpenActivity={exercise => setOpenActivity({ type: 'exercise', value: exercise })}
+                    onOpenActivityPacket={activity => setOpenActivity({ type: 'packet', value: activity })} />
                   <time dateTime={message.created_at}>{formatTime(message.created_at)}</time>
                 </div>
               </li>;
@@ -321,14 +374,15 @@ export default function ClassChat({ user, classPackage, exercises, concepts, onE
           </ol>
           {teacher && <TeacherAttachments exercises={exercises} busy={busy} onSend={post} />}
           <form className="class-chat-composer" onSubmit={submitText}>
-            <input className="quiz-input" value={text} maxLength={MAX_BODY} onChange={event => setText(event.target.value)} aria-label={partner ? `Mensaje para ${partner.display_name}` : 'Mensaje para toda la clase'} placeholder={partner ? `Escribile a ${partner.display_name.split(' ')[0]}…` : 'Escribí a toda la clase…'} />
-            <button type="submit" className="btn btn-primary" disabled={busy || !text.trim()}>{busy ? 'Enviando…' : 'Enviar'}</button>
+            <input className="quiz-input" value={text} maxLength={MAX_BODY} onChange={event => setText(event.target.value)} aria-label={partner ? t('chat.to', { name: partner.display_name }) : t('chat.toAll')} placeholder={partner ? t('chat.writeTo', { name: partner.display_name.split(' ')[0] }) : t('chat.writeAll')} />
+            <button type="submit" className="btn btn-primary" disabled={busy || !text.trim()}>{busy ? t('common.sending') : t('common.send')}</button>
           </form>
           {error && <p className="field-error" role="alert">{error}</p>}
         </>}
     </div>
 
     {openLesson && <Presenter lesson={openLesson.lesson} exercises={lessonExercises} concepts={concepts} onExit={() => setOpenLesson(null)} />}
-    {openActivity && <ActivityDialog exercise={openActivity} onClose={() => setOpenActivity(null)} onResult={onExerciseResult} onAskHint={onAskHint} hintsUsed={hintsUsed} onIncrementHint={onIncrementHint} />}
+    {openActivity?.type === 'packet' && <ActivityPacketDialog activity={openActivity.value} onClose={() => setOpenActivity(null)} onSolve={exercise => setOpenActivity({ type: 'exercise', value: exercise })} />}
+    {openActivity?.type === 'exercise' && <ActivityDialog exercise={openActivity.value} onClose={() => setOpenActivity(null)} onResult={onExerciseResult} onAskHint={onAskHint} hintsUsed={hintsUsed} onIncrementHint={onIncrementHint} />}
   </section>;
 }

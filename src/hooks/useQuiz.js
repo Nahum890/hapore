@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { quizBank as quizBankData, localizeCatalogItem } from '../data/catalogs.js';
-import { buildQuiz, buildQuizFeedback, matchAnswer, matchText, shuffle } from '../ai/quizEngine.js';
+import { buildQuiz, buildQuizFeedback, evaluateQuizContext, matchAnswer, matchQuizJustification, shuffle } from '../ai/quizEngine.js';
 import { readJSON, writeJSON, STORAGE_KEYS } from '../utils/storage.js';
 import { createAIProvider } from '../ai/AIProvider.js';
 import { getTutorQuota, DAILY_TUTOR_LIMIT } from '../ai/tutorQuota.js';
 import { useTranslation } from '../i18n/LanguageProvider.jsx';
+import { translate } from '../i18n/messages.js';
+import { parseWidgetTags, widgetForMessage } from '../ai/chatTools.js';
 
 export const QUIZ_MIN_QUANTITY = 5;
 export const QUIZ_MAX_QUANTITY = 50;
 export const FREE_CHAT_EXCHANGES = DAILY_TUTOR_LIMIT;
-
-const QUIZ_CLOSING = '¿Oime gueteri mba\'e reikuaaséva? Eporandu chéve.';
 
 function quizStatement(question) {
   if (!question) return '';
@@ -18,30 +18,37 @@ function quizStatement(question) {
   return question.pregunta;
 }
 
-function buildClosingMessage(entries) {
+// El cierre guarda solo los números; el texto se arma al mostrarlo, así
+// cambia de idioma igual que el resto de la interfaz.
+function closingStats(entries) {
   const byTopic = new Map();
   for (const entry of entries) {
-    if (!entry?.tema) continue;
+    if (!entry?.tema || entry.closing) continue;
     const stats = byTopic.get(entry.tema) ?? { correct: 0, total: 0 };
     stats.total += 1;
     if (entry.tutor?.correct) stats.correct += 1;
     byTopic.set(entry.tema, stats);
   }
-  const total = entries.length;
-  const acertadas = entries.filter((entry) => entry.tutor?.correct).length;
-  const balance = [...byTopic.entries()]
-    .map(([tema, stats]) => `${tema}: ${stats.correct} de ${stats.total}`)
-    .join(' · ');
-  return `¡Ikatu! Terminaste el cuestionario: ${acertadas} de ${total} acertadas.${
-    balance ? ` Temas dominados — ${balance}.` : ''
-  } ${QUIZ_CLOSING}`;
+  const answered = entries.filter(entry => !entry.closing);
+  return {
+    correct: answered.filter(entry => entry.tutor?.correct).length,
+    total: answered.length,
+    topics: [...byTopic.entries()].map(([tema, stats]) => ({ tema, ...stats })),
+  };
 }
 
-function formatMessages(chatEntries, charlaEntries) {
+export function buildClosingMessage(stats, language = 'es') {
+  const topics = stats.topics.length > 1
+    ? translate(language, 'quiz.closingTopics', { list: stats.topics.map(item => `${item.tema} ${item.correct}/${item.total}`).join(' · ') })
+    : '';
+  return `${translate(language, 'quiz.closing', { c: stats.correct, t: stats.total })}${topics} ${translate(language, 'quiz.closingAsk')}`;
+}
+
+function formatMessages(chatEntries, charlaEntries, language) {
   const mensajes = [];
   for (const entry of chatEntries ?? []) {
     if (entry?.closing) {
-      mensajes.push({ role: 'tutor', text: entry.message });
+      mensajes.push({ role: 'tutor', text: entry.message ?? buildClosingMessage(entry.stats, language) });
       continue;
     }
     mensajes.push({ role: 'tutor', text: entry?.statement ?? '' });
@@ -58,21 +65,22 @@ function formatMessages(chatEntries, charlaEntries) {
   return mensajes.filter((message) => message.text);
 }
 
-export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, includeTheory = true } = {}) {
+export function useQuiz(flashcards, { onMoveToQuiz, onQuizAnswer, classConfig, includeTheory = true } = {}) {
   const providerRef = useRef(null);
   if (!providerRef.current) {
     providerRef.current = createAIProvider();
   }
   const { language } = useTranslation();
+  const languageRef = useRef(language);
+  languageRef.current = language;
   // Se localiza acá (no en el JSON fuente) para que cambiar de idioma en
   // pleno cuestionario solo cambie los textos, sin tocar id/tipo/respuesta.
   const quizBank = useMemo(() => quizBankData.map(item => localizeCatalogItem(item, language)), [language]);
   const localizedFlashcards = useMemo(() => (flashcards ?? []).map(item => localizeCatalogItem(item, language)), [flashcards, language]);
   const sessionRef = useRef(null);
   const freeSessionRef = useRef(null);
-  const freeInteractionRef = useRef(null);
-  const onMoveRef = useRef(onMoveToChat);
-  onMoveRef.current = onMoveToChat;
+  const onMoveRef = useRef(onMoveToQuiz);
+  onMoveRef.current = onMoveToQuiz;
 
   const [step, setStep] = useState('cantidad');
   const [quantity, setQuantity] = useState(0);
@@ -93,6 +101,10 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
   const [charlaLog, setCharlaLog] = useState([]);
   const [tutorQuota, setTutorQuota] = useState(() => getTutorQuota());
   const [charlaText, setCharlaText] = useState('');
+  const [freeSessionId, setFreeSessionId] = useState(null);
+  // Foto del ejercicio del cuaderno, todavía sin enviar (data URL). Nunca se
+  // guarda en el historial persistido: solo viaja en la consulta al tutor.
+  const [charlaImage, setCharlaImage] = useState(null);
   const [history, setHistory] = useState(() => {
     const stored = readJSON(STORAGE_KEYS.CHAT_HISTORY, []);
     return Array.isArray(stored) ? stored : [];
@@ -187,7 +199,7 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
   const persistCurrent = useCallback((chatEntries, charlaEntries, tema) => {
     const id = sessionRef.current;
     if (!id) return;
-    const mensajes = formatMessages(chatEntries, charlaEntries);
+    const mensajes = formatMessages(chatEntries, charlaEntries, languageRef.current);
     const now = new Date().toISOString();
     const entry = {
       id,
@@ -205,12 +217,15 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
   }, []);
 
   const persistFreeConversation = useCallback((messages) => {
-    if (!freeSessionRef.current) freeSessionRef.current = `free-chat-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    if (!freeSessionRef.current) {
+      freeSessionRef.current = `free-chat-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      setFreeSessionId(freeSessionRef.current);
+    }
     const id = freeSessionRef.current;
     const now = new Date().toISOString();
     const firstQuestion = messages.find(message => message.role === 'alumno')?.text ?? '';
     const title = firstQuestion.trim().slice(0, 48) || 'Chat libre';
-    const entry = { id, fecha: now.slice(0, 10), hora: now, tema: title, tipo: 'chat-libre', mensajes: messages, ...(freeInteractionRef.current ? { interaction: freeInteractionRef.current } : {}) };
+    const entry = { id, fecha: now.slice(0, 10), hora: now, tema: title, tipo: 'chat-libre', mensajes: messages };
     setHistory(prev => {
       const exists = prev.some(item => item.id === id);
       const next = exists ? prev.map(item => item.id === id ? entry : item) : [...prev, entry];
@@ -219,8 +234,11 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
     });
   }, []);
 
-  const startQuiz = useCallback(() => {
-    const quizQuestions = buildQuiz(quizBank, quantity);
+  // `fixedIds`: repetir solo esas preguntas (por ejemplo, las que salieron mal).
+  const startQuiz = useCallback((fixedIds = null) => {
+    const quizQuestions = Array.isArray(fixedIds) && fixedIds.length
+      ? shuffle(quizBank.filter(question => fixedIds.includes(question.id)))
+      : buildQuiz(quizBank, quantity || QUIZ_MIN_QUANTITY);
     if (!quizQuestions.length) return;
     generationRef.current += 1;
     requestLock.current = false;
@@ -276,12 +294,13 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
       setBusy(true);
       setStreamText('');
       try {
-        let local = { correct: false, close: false, score: 0, coincidentes: [] };
+        let local = { correct: false, close: false, partial: false, score: 0, coincidentes: [], faltantes: [] };
         if (question.tipo === 'abierta') {
-          local = matchAnswer(question, justificacion ?? '');
+          local = matchAnswer(question, justificacion ?? '', { language });
         } else {
-          local = matchText(justificacion ?? '', question.explicacion ?? '');
+          local = matchQuizJustification(question, justificacion ?? '', { language });
         }
+        const optionCorrect = question.tipo !== 'vf' || Boolean(marcadoVerdadero) === Boolean(question.esVerdadero);
         const verdict = question.tipo === 'vf'
           ? marcadoVerdadero
             ? Boolean(question.esVerdadero)
@@ -294,8 +313,10 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
           tema: question.tema,
           respuestaAlumno: question.tipo === 'abierta' ? (justificacion ?? '') : null,
           esCorrecta: verdict,
-          esCercana: local.close,
+          esCercana: !verdict && optionCorrect && local.close,
+          esParcial: !verdict && optionCorrect && local.partial,
           coincidentes: local.coincidentes,
+          faltantes: local.faltantes,
           esVerdadero: question.tipo === 'vf' ? Boolean(question.esVerdadero) : undefined,
           marcadoVerdadero: question.tipo === 'vf' ? Boolean(marcadoVerdadero) : undefined,
           justificacion: justificacion ?? null,
@@ -304,28 +325,32 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
           explicacion: question.explicacion ?? '',
           explicacionJopara: question.explicacionJopara ?? '',
           language,
-          onToken: (text) => {
-            if (generation === generationRef.current) setStreamText(text);
-          },
         };
-        let response;
-        try {
-          response = await providerRef.current.evaluateQuizAnswer(feedbackContext);
-        } catch {
-          response = { message: buildQuizFeedback(feedbackContext), source: 'local-fallback', available: true };
-        }
+        // La corrección y su explicación salen de la misma rúbrica local en
+        // línea y sin conexión. Gemini no puede cambiar un veredicto por una
+        // diferencia de idioma ni repetir el saludo en cada pregunta.
+        const response = {
+          message: buildQuizFeedback(feedbackContext),
+          source: 'rules',
+          available: true,
+          ...evaluateQuizContext(feedbackContext),
+        };
         if (generation !== generationRef.current) return;
+        const answerKey = question.tipo === 'abierta' ? null : marcadoVerdadero ? 'common.true' : 'common.false';
         const entry = {
+          id: question.id,
           statement: quizStatement(question),
           tipo: question.tipo,
           tema: question.tema,
+          // answerKey/justification permiten mostrar "Verdadero/Falso" en el
+          // idioma activo; studentText queda para el historial guardado.
+          answerKey,
+          justification: question.tipo === 'abierta' ? null : (justificacion || null),
           studentText:
             question.tipo === 'abierta'
               ? (justificacion ?? '')
-              : marcadoVerdadero
-                ? 'Verdadero'
-                : `Falso${justificacion ? ` — ${justificacion}` : ''}`,
-          tutor: { ...response, correct: verdict },
+              : `${translate(language, answerKey)}${justificacion ? ` — ${justificacion}` : ''}`,
+          tutor: { ...response, correct: verdict, partial: Boolean(feedbackContext.esParcial) },
         };
         const nextChat = [...chat, entry];
         setChat(nextChat);
@@ -373,8 +398,8 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
     setAnswered(false);
     const next = questionIndex + 1;
     if (next >= questions.length) {
-      const closing = buildClosingMessage(chat);
-      const nextChat = [...chat, { closing: true, message: closing }];
+      if (chat.some(entry => entry.closing)) { setStep('charla'); return; }
+      const nextChat = [...chat, { closing: true, stats: closingStats(chat) }];
       setChat(nextChat);
       persistCurrent(nextChat, [], questions.map((item) => item.tema).filter((tema, index, all) => all.indexOf(tema) === index).join(', '));
       setStep('charla');
@@ -383,38 +408,52 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
     setQuestionIndex(next);
   }, [questionIndex, questions.length, chat, persistCurrent]);
 
-  const askFreeQuestion = useCallback(async (messageOverride) => {
-    const text = String(typeof messageOverride === 'string' ? messageOverride : messageOverride?.message ?? charlaText).trim();
-    if (!text || requestLock.current || tutorQuota.remaining <= 0) return;
-    if (messageOverride?.interaction === 'photo-socratic') freeInteractionRef.current = 'photo-socratic';
+  const askFreeQuestion = useCallback(async () => {
+    const text = charlaText.trim();
+    const image = charlaImage;
+    if ((!text && !image) || requestLock.current || tutorQuota.remaining <= 0) return;
     requestLock.current = true;
     const generation = generationRef.current;
     setBusy(true);
     setStreamText('');
-    const nextLog = [...charlaLog, { role: 'alumno', text }];
-    if (!freeSessionRef.current) freeSessionRef.current = 'free-chat-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+    const displayText = text || translate(language, 'quiz.photoHelp');
+    // La imagen viaja en el mensaje que se muestra (para la miniatura), pero
+    // nunca en lo que se guarda en el historial de conversaciones.
+    const nextLog = [...charlaLog, { role: 'alumno', text: displayText, image }];
+    if (!freeSessionRef.current) {
+      freeSessionRef.current = 'free-chat-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+      setFreeSessionId(freeSessionRef.current);
+    }
     setCharlaLog(nextLog);
     setCharlaText('');
+    setCharlaImage(null);
     try {
       let response;
       try {
         response = await providerRef.current.answerFreeQuestion({
-          message: text,
-          history: charlaLog.slice(-8),
+          message: displayText,
+          image,
+          history: charlaLog.slice(-8).map(({ image: _drop, ...rest }) => rest),
           language,
-          interaction: freeInteractionRef.current,
           onToken: (token) => {
             if (generation === generationRef.current) setStreamText(token);
           },
         });
         if (typeof response?.message !== 'string' || !response.message.trim()) throw new Error('Respuesta vacía');
       } catch {
-        response = { message: 'No pude completar la consulta. Volvé a intentarlo cuando el tutor esté disponible.', available: false, source: null };
+        response = { message: translate(language, 'quiz.fallbackError'), available: false, source: null };
       }
       if (generation !== generationRef.current) return;
-      const finalLog = [...nextLog, { role: 'tutor', text: response.message, source: response.source ?? null, reason: response.reason ?? null, available: response.available !== false }];
+      // Herramientas del chat: la IA puede pedir una con [[simular …]] y, si
+      // no, se agrega la que corresponde a lo que pidió el estudiante
+      // (cuaderno, gráfico paso a paso, simulación 2D/3D, práctica…).
+      const tagged = parseWidgetTags(response.message, language);
+      const widget = response.widget
+        ?? tagged.widget
+        ?? (response.available !== false && !image ? widgetForMessage(displayText, charlaLog, language) : null);
+      const finalLog = [...nextLog, { role: 'tutor', text: tagged.text || response.message, source: response.source ?? null, reason: response.reason ?? null, available: response.available !== false, ...(widget ? { widget } : {}) }];
       setCharlaLog(finalLog);
-      persistFreeConversation(finalLog);
+      persistFreeConversation(finalLog.map(({ image: _drop, ...rest }) => rest));
       setTutorQuota(getTutorQuota());
     } finally {
       if (generation === generationRef.current) {
@@ -423,14 +462,15 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
         setBusy(false);
       }
     }
-  }, [charlaText, tutorQuota.remaining, charlaLog, persistFreeConversation, language]);
+  }, [charlaText, charlaImage, tutorQuota.remaining, charlaLog, persistFreeConversation, language]);
 
   const newFreeConversation = useCallback(() => {
     if (requestLock.current) return;
     freeSessionRef.current = null;
-    freeInteractionRef.current = null;
+    setFreeSessionId(null);
     setCharlaLog([]);
     setCharlaText('');
+    setCharlaImage(null);
     setStreamText('');
   }, []);
 
@@ -438,16 +478,45 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
     if (!session || requestLock.current) return;
     generationRef.current += 1;
     freeSessionRef.current = session.id;
-    freeInteractionRef.current = session.interaction === 'photo-socratic' ? 'photo-socratic' : null;
+    setFreeSessionId(session.id);
     setCharlaLog(Array.isArray(session.mensajes) ? session.mensajes : []);
     setCharlaText('');
     setStreamText('');
     setBusy(false);
   }, []);
 
+  // Borra una conversación del chat libre del historial guardado. Si es la
+  // que está abierta, se empieza una nueva en blanco.
+  const deleteFreeConversation = useCallback((id) => {
+    if (!id || requestLock.current) return;
+    setHistory(prev => {
+      const next = prev.filter(item => item.id !== id);
+      writeJSON(STORAGE_KEYS.CHAT_HISTORY, next);
+      return next;
+    });
+    if (freeSessionRef.current === id) {
+      generationRef.current += 1;
+      freeSessionRef.current = null;
+      setFreeSessionId(null);
+      setCharlaLog([]);
+      setCharlaText('');
+      setCharlaImage(null);
+      setStreamText('');
+    }
+  }, []);
+
   const finish = useCallback(() => {
     setStep('fin');
   }, []);
+
+  // Fin del cuestionario: seguir con preguntas nuevas o repetir solo las
+  // que salieron mal, sin volver a pasar por el mazo de tarjetas.
+  const answeredEntries = chat.filter(entry => !entry.closing);
+  const score = answeredEntries.filter(entry => entry.tutor?.correct).length;
+  const mistakeIds = [...new Set(answeredEntries.filter(entry => !entry.tutor?.correct && entry.id).map(entry => entry.id))];
+  const practiceAgain = useCallback(() => startQuiz(), [startQuiz]);
+  const retryMistakes = useCallback(() => startQuiz(mistakeIds), [startQuiz, mistakeIds.join('|')]); // eslint-disable-line react-hooks/exhaustive-deps
+  const closingText = useCallback(entry => entry.message ?? buildClosingMessage(entry.stats, language), [language]);
 
   const restart = useCallback(() => {
     generationRef.current += 1;
@@ -499,6 +568,9 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
     busy,
     streamText,
     charlaLog,
+    freeSessionId,
+    charlaImage,
+    setCharlaImage,
     charlaUsed: tutorQuota.used,
     charlaLeft,
     tutorQuota,
@@ -507,7 +579,13 @@ export function useQuiz(flashcards, { onMoveToChat, onQuizAnswer, classConfig, i
     askFreeQuestion,
     newFreeConversation,
     openFreeConversation,
+    deleteFreeConversation,
     finish,
+    score,
+    mistakeCount: mistakeIds.length,
+    practiceAgain,
+    retryMistakes,
+    closingText,
     history,
     maxAvailable,
     repasoAvailable,

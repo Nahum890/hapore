@@ -2,8 +2,12 @@ import { useState } from 'react';
 import { login, register } from '../auth/localAccounts.js';
 import { BrandMark, LaunchScene } from './Nanduti.jsx';
 import { isCloudConfigured } from '../cloud/cloudClient.js';
+import LanguageSelector from './LanguageSelector.jsx';
+import { useTranslation } from '../i18n/LanguageProvider.jsx';
+import { localizeError } from '../i18n/messages.js';
 
 export default function AuthScreen({ onAuthenticated }) {
+  const { t, language } = useTranslation();
   const [mode, setMode] = useState('login');
   const [role, setRole] = useState('alumno');
   const [name, setName] = useState('');
@@ -25,9 +29,10 @@ export default function AuthScreen({ onAuthenticated }) {
         : await login({ username, password });
       onAuthenticated(account);
     } catch (failure) {
-      setError(failure.message || 'No se pudo acceder. Intentá de nuevo.');
+      setError(failure.message || 'default');
     } finally { setBusy(false); }
   };
+  const errorText = error === 'default' ? t('auth.errDefault') : localizeError(language, error);
 
   return (
     <main className="auth-page">
@@ -36,136 +41,69 @@ export default function AuthScreen({ onAuthenticated }) {
           <div className="auth-brand">
             <BrandMark size={44} />
             <span>PyFis <em>IA</em></span>
+            <span className="auth-language"><LanguageSelector /></span>
           </div>
-          <span className="auth-kicker">Física 3.º curso · Movimiento Parabólico</span>
+          <span className="auth-kicker">{t('auth.kicker')}</span>
           <h1 id="auth-welcome-title">
-            <span className="auth-motto" lang="gn">Ani rekyhyje.</span> Aprendé física paso a paso.
+            <span className="auth-motto" lang="gn">Ani rekyhyje.</span> {t('auth.title')}
           </h1>
-          <p>
-            Practicá tiro parabólico con ejercicios y simulaciones interactivas, repasá con tarjetas didácticas y preguntale al tutor bilingüe cuando necesites ayuda. Equivocarse también es aprender.
-          </p>
+          <p>{t('auth.lead')}</p>
           <div className="auth-preview" aria-hidden="true">
             <LaunchScene />
             <div className="preview-note">
-              <span>Ñaha’ã · Tiro parabólico</span>
-              <strong>Escribí tu respuesta</strong>
-              <small>Comprobá tu cálculo con la simulación física.</small>
+              <span>{t('auth.previewTag')}</span>
+              <strong>{t('auth.previewTitle')}</strong>
+              <small>{t('auth.previewSub')}</small>
             </div>
           </div>
         </section>
-        <section className="auth-panel" aria-label="Acceso a la aplicación">
-          <div className="auth-tabs" role="tablist" aria-label="Acceso a PyFis IA">
-            <button
-              id="tab-login"
-              type="button"
-              role="tab"
-              aria-selected={mode === 'login'}
-              aria-controls="auth-panel-body"
-              className={mode === 'login' ? 'is-active' : ''}
-              onClick={() => changeMode('login')}
-            >
-              Iniciar sesión
-            </button>
-            <button
-              id="tab-register"
-              type="button"
-              role="tab"
-              aria-selected={mode === 'register'}
-              aria-controls="auth-panel-body"
-              className={mode === 'register' ? 'is-active' : ''}
-              onClick={() => changeMode('register')}
-            >
-              Crear cuenta
-            </button>
+        <section className="auth-panel" aria-label={t('auth.panel')}>
+          <div className="auth-tabs" role="tablist" aria-label={t('auth.tabs')}>
+            <button id="tab-login" type="button" role="tab" aria-selected={mode === 'login'} aria-controls="auth-panel-body" className={mode === 'login' ? 'is-active' : ''} onClick={() => changeMode('login')}>{t('auth.login')}</button>
+            <button id="tab-register" type="button" role="tab" aria-selected={mode === 'register'} aria-controls="auth-panel-body" className={mode === 'register' ? 'is-active' : ''} onClick={() => changeMode('register')}>{t('auth.register')}</button>
           </div>
           <div id="auth-panel-body" className="auth-panel-body" role="tabpanel" aria-labelledby={mode === 'login' ? 'tab-login' : 'tab-register'}>
-            <h2>{mode === 'login' ? '¡Qué bueno verte!' : 'Empecemos juntos'}</h2>
-            <p>{mode === 'login' ? 'Ingresá a tu espacio de aprendizaje de física.' : 'Elegí cómo vas a usar PyFis IA.'}</p>
+            <h2>{t(mode === 'login' ? 'auth.welcomeBack' : 'auth.welcomeNew')}</h2>
+            <p>{t(mode === 'login' ? 'auth.loginLead' : 'auth.registerLead')}</p>
             <form className="auth-form" onSubmit={submit}>
               {mode === 'register' && (
                 <>
                   <fieldset className="role-picker">
-                    <legend>Voy a usar la app como</legend>
+                    <legend>{t('auth.roleLegend')}</legend>
                     <label className={role === 'alumno' ? 'is-selected' : ''}>
-                      <input
-                        id="auth-role-alumno"
-                        type="radio"
-                        name="role"
-                        value="alumno"
-                        checked={role === 'alumno'}
-                        onChange={() => setRole('alumno')}
-                      />
+                      <input id="auth-role-alumno" type="radio" name="role" value="alumno" checked={role === 'alumno'} onChange={() => setRole('alumno')} />
                       <span className="role-icon" aria-hidden="true">✎</span>
-                      <strong>Alumno</strong>
-                      <small>Practicar y unirme a una clase</small>
+                      <strong>{t('auth.student')}</strong>
+                      <small>{t('auth.studentSub')}</small>
                     </label>
                     <label className={role === 'maestro' ? 'is-selected' : ''}>
-                      <input
-                        id="auth-role-maestro"
-                        type="radio"
-                        name="role"
-                        value="maestro"
-                        checked={role === 'maestro'}
-                        onChange={() => setRole('maestro')}
-                      />
+                      <input id="auth-role-maestro" type="radio" name="role" value="maestro" checked={role === 'maestro'} onChange={() => setRole('maestro')} />
                       <span className="role-icon" aria-hidden="true">▤</span>
-                      <strong>Maestro</strong>
-                      <small>Preparar clases y usar el proyector</small>
+                      <strong>{t('auth.teacher')}</strong>
+                      <small>{t('auth.teacherSub')}</small>
                     </label>
                   </fieldset>
                   <label htmlFor="auth-name">
-                    Tu nombre
-                    <input
-                      id="auth-name"
-                      required
-                      autoComplete="name"
-                      value={name}
-                      onChange={event => setName(event.target.value)}
-                      placeholder="Nombre y apellido"
-                    />
+                    {t('auth.name')}
+                    <input id="auth-name" required autoComplete="name" value={name} onChange={event => setName(event.target.value)} placeholder={t('auth.namePh')} />
                   </label>
                   <label htmlFor="auth-phone">
-                    Número de teléfono
-                    <input
-                      id="auth-phone"
-                      required
-                      type="tel"
-                      autoComplete="tel"
-                      value={phone}
-                      onChange={event => setPhone(event.target.value)}
-                      placeholder="Ej: 0981 123 456"
-                    />
+                    {t('auth.phone')}
+                    <input id="auth-phone" required type="tel" autoComplete="tel" value={phone} onChange={event => setPhone(event.target.value)} />
                   </label>
                   <label htmlFor="auth-email">
-                    Correo electrónico
-                    <input
-                      id="auth-email"
-                      required
-                      type="email"
-                      autoComplete="email"
-                      value={email}
-                      onChange={event => setEmail(event.target.value)}
-                      placeholder="Ej: nombre@ejemplo.com"
-                    />
+                    {t('auth.email')}
+                    <input id="auth-email" required type="email" autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} />
                   </label>
-                  <p className="auth-field-note">Solo los ven tu docente y tus compañeros de clase, para poder contactarte.</p>
+                  <p className="auth-field-note">{t('auth.contactNote')}</p>
                 </>
               )}
               <label htmlFor="auth-username">
-                Nombre de usuario
-                <input
-                  id="auth-username"
-                  required
-                  minLength={3}
-                  maxLength={24}
-                  autoComplete="username"
-                  value={username}
-                  onChange={event => setUsername(event.target.value)}
-                  placeholder="Tu usuario"
-                />
+                {t('auth.username')}
+                <input id="auth-username" required minLength={3} maxLength={24} autoComplete="username" value={username} onChange={event => setUsername(event.target.value)} placeholder={t('auth.usernamePh')} />
               </label>
               <label htmlFor="auth-password">
-                Contraseña
+                {t('auth.password')}
                 <div className="password-field">
                   <input
                     id="auth-password"
@@ -175,34 +113,21 @@ export default function AuthScreen({ onAuthenticated }) {
                     autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
                     value={password}
                     onChange={event => setPassword(event.target.value)}
-                    placeholder={mode === 'register' ? 'Mínimo 8 caracteres' : 'Tu contraseña'}
-                    aria-invalid={Boolean(error)}
-                    aria-errormessage={error ? 'auth-error-msg' : undefined}
+                    placeholder={t(mode === 'register' ? 'auth.passwordNew' : 'auth.passwordPh')}
+                    aria-invalid={error !== ''}
+                    aria-errormessage={error !== '' ? 'auth-error-msg' : undefined}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(value => !value)}
-                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                    aria-pressed={showPassword}
-                  >
-                    {showPassword ? 'Ocultar' : 'Mostrar'}
+                  <button type="button" onClick={() => setShowPassword(value => !value)} aria-label={t(showPassword ? 'auth.hideLabel' : 'auth.showLabel')} aria-pressed={showPassword}>
+                    {t(showPassword ? 'auth.hide' : 'auth.show')}
                   </button>
                 </div>
               </label>
-              {error && (
-                <p id="auth-error-msg" className="auth-error" role="alert" aria-live="assertive">
-                  {error}
-                </p>
-              )}
+              {error !== '' && <p id="auth-error-msg" className="auth-error" role="alert" aria-live="assertive">{errorText}</p>}
               <button className="btn btn-primary auth-submit" type="submit" disabled={busy}>
-                {busy ? 'Un momento…' : mode === 'register' ? 'Crear mi cuenta' : 'Entrar a PyFis IA'} <span aria-hidden="true">→</span>
+                {busy ? t('auth.busy') : t(mode === 'register' ? 'auth.submitRegister' : 'auth.submitLogin')} <span aria-hidden="true">→</span>
               </button>
             </form>
-            <p className="auth-local-note">
-              {isCloudConfigured()
-                ? 'La cuenta y el progreso se guardan en este dispositivo. Si te unís a una clase, tu avance se envía a tu docente cuando hay internet.'
-                : 'Las cuentas y el progreso se guardan únicamente en este dispositivo. Modo offline 100% disponible.'}
-            </p>
+            <p className="auth-local-note">{t(isCloudConfigured() ? 'auth.noteCloud' : 'auth.noteLocal')}</p>
           </div>
         </section>
       </div>

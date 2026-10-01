@@ -251,7 +251,8 @@ export function validateContact({ phone, email }) {
   return { phone: cleanPhone, email: cleanEmail };
 }
 
-const PRESET_AVATARS = ['sol', 'rio', 'selva', 'tierra', 'cielo'];
+// Mismos ids que AVATAR_OPTIONS en components/Avatars.jsx. Vacío = solo la inicial.
+const PRESET_AVATARS = ['sol', 'rio', 'selva', 'tierra', 'cielo', 'yaguarete', 'guacamayo', 'tatu', 'cohete', 'atomo', 'pelota', 'dron'];
 const MAX_PHOTO_CHARS = 200_000;
 
 function validAvatar(avatar) {
@@ -282,6 +283,27 @@ export function updateProfile(accountId, { phone, email, avatar } = {}) {
   list[index] = next;
   saveAccounts(list);
   return publicAccount(next);
+}
+
+/** Actualiza la clave local verificando primero la actual y guardando un hash
+ * PBKDF2 con una sal nueva. Estas cuentas viven en el dispositivo, no en Auth. */
+export async function changePassword(accountId, { currentPassword, newPassword } = {}) {
+  const saved = accounts();
+  const index = saved.findIndex(item => item.id === accountId);
+  if (index === -1) throw new Error('ACCOUNT_NOT_FOUND');
+  const account = { ...saved[index] };
+  if (!account.salt || !account.passwordHash) throw new Error('PASSWORD_UNAVAILABLE');
+  const candidate = await hashPassword(String(currentPassword ?? ''), account.salt, account.passwordHash);
+  if (candidate !== account.passwordHash) throw new Error('PASSWORD_CURRENT_INVALID');
+  const cleanNewPassword = String(newPassword ?? '');
+  if (cleanNewPassword.length < 8) throw new Error('PASSWORD_TOO_SHORT');
+  const salt = bytesToHex(getSecureRandomBytes(16));
+  account.salt = salt;
+  account.passwordHash = await hashPassword(cleanNewPassword, salt);
+  const next = [...saved];
+  next[index] = account;
+  saveAccounts(next);
+  return true;
 }
 
 /** Cuentas visibles en este dispositivo (sin contraseñas), para que un

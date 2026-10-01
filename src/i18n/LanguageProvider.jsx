@@ -25,7 +25,7 @@ export function LanguageProvider({ children }) {
     window.addEventListener('storage', sync);
     return () => window.removeEventListener('storage', sync);
   }, [language]);
-  const value = useMemo(() => ({ language, setLanguage, t: key => translate(language, key) }), [language, setLanguage]);
+  const value = useMemo(() => ({ language, setLanguage, t: (key, vars) => translate(language, key, vars) }), [language, setLanguage]);
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }
 

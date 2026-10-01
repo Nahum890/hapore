@@ -6,20 +6,29 @@
     "pregunta": "¿Qué es el Movimiento Parabólico?",
     "preguntaJopara": "¿Mba'épa pe movimiento parabólico?",
     "respuesta": "La combinación de un movimiento horizontal con velocidad constante y un movimiento vertical acelerado por la gravedad; su trayectoria es una parábola.",
-    "respuestaJopara": "Peteî movimiento horizontal (constante) ha peteî vertical (gravedad rehegua) joapy; pe trayectoria ha'e peteî parábola.",
+    "respuestaJopara": "Peteĩ movimiento horizontal constante ha peteĩ movimiento vertical acelerado por la gravedad; pe trayectoria ha'e peteĩ parábola.",
     "claves": ["combinacion", "horizontal", "vertical", "gravedad", "parabola"],
-    "explicacion": "El proyectil avanza hacia adelante a velocidad constante mientras la gravedad lo acelera hacia abajo: la unión de los dos movimientos dibuja una parábola."
+    "rubricaRespuesta": [
+      { "id": "horizontal", "labelEs": "movimiento horizontal", "labelJopara": "movimiento horizontal", "any": ["horizontal", "tenonde"] },
+      { "id": "constante", "labelEs": "que la velocidad horizontal permanece constante", "labelJopara": "pe velocidad horizontal ndokambiáiha", "any": ["constante", "ndokambiái", "no cambia", "opýta igual"] },
+      { "id": "vertical", "labelEs": "movimiento vertical", "labelJopara": "movimiento vertical", "any": ["vertical", "yvate"] },
+      { "id": "gravedad-vertical", "labelEs": "que la gravedad acelera el movimiento vertical", "labelJopara": "gravedad omboacelera movimiento vertical", "any": ["vertical acelerado por la gravedad", "vertical con aceleración de gravedad", "gravedad acelera el movimiento vertical", "gravedad acelera la componente vertical", "aceleración en el eje vertical", "gravedad omboacelera movimiento vertical", "gravedad omboacelera componente vertical"] },
+      { "id": "parabola", "labelEs": "la trayectoria parabólica", "labelJopara": "pe trayectoria ha'e parábola", "any": ["parábola", "parabólico", "curva"] }
+    ],
+    "explicacion": "El proyectil avanza hacia adelante a velocidad constante mientras la gravedad lo acelera hacia abajo: la unión de los dos movimientos dibuja una parábola.",
+    "explicacionJopara": "Proyectil oho tenonde gotyo ha pe velocidad horizontal ndokambiái. Gravedad omboacelera componente vertical; mokõive movimiento oñondive ojapo trayectoria parábola."
   },
   {
     "id": "q-mp-02",
     "tema": "Movimiento Parabólico",
     "tipo": "abierta",
     "pregunta": "¿Por qué la componente horizontal de la velocidad no cambia durante el vuelo?",
-    "preguntaJopara": "¿Mba'érepa pe componente horizontal velocidad rehegua ndoambuéi vuelo pukukue?",
+    "preguntaJopara": "¿Mba'érepa pe componente horizontal velocidad rehegua ndoambuéi vuelo pukukue-pe?",
     "respuesta": "Porque ignorando el aire no hay fuerza horizontal: la única fuerza es la gravedad, que actúa hacia abajo.",
     "respuestaJopara": "Ndairévi aire: pe fuerza oiko gravedad rehe, ogo'êvo ape yvýpe.",
     "claves": ["aire", "fuerza", "horizontal", "gravedad"],
-    "explicacion": "La velocidad horizontal vale vx = v0 * cos(ángulo) y, sin resistencia del aire, nada la frena ni la acelera."
+    "explicacion": "La velocidad horizontal vale vx = v0 * cos(ángulo) y, sin resistencia del aire, nada la frena ni la acelera.",
+    "explicacionJopara": "Aire resistencia ndaipóriramo, fuerza horizontal ndaipóri; gravedad oactúa verticalmente año. Upévare pe velocidad horizontal ndokambiái."
   },
   {
     "id": "q-mp-03",
@@ -28,9 +37,10 @@
     "pregunta": "¿Qué le ocurre a la velocidad vertical durante la subida del proyectil?",
     "preguntaJopara": "¿Mba'épa oiko velocidad vertical rehe proyectil ojupi aja?",
     "respuesta": "Disminuye hasta llegar a cero en la altura máxima, porque la gravedad la frena.",
-    "respuestaJopara": "Pe gravedad omboy chupe: vy oguepe'ẽ ha oiko cero-pe pe altura máxima-pe.",
+    "respuestaJopara": "Pe gravedad ombombegue chupe: vy opyta cero-pe pe altura máxima-pe.",
     "claves": ["disminuye", "cero", "altura", "gravedad", "frena"],
-    "explicacion": "Al subir, la gravedad frena la componente vertical hasta que vale cero en el punto más alto; después la acelera hacia abajo."
+    "explicacion": "Al subir, la gravedad frena la componente vertical hasta que vale cero en el punto más alto; después la acelera hacia abajo.",
+    "explicacionJopara": "Ojupi aja, gravedad ombombegue pe velocidad vertical ha ogueraha cero-pe altura máxima-pe; upéi oho yvýpe."
   },
   {
     "id": "q-mp-04",
@@ -41,7 +51,8 @@
     "respuesta": "Una parábola.",
     "respuestaJopara": "Peteî parábola.",
     "claves": ["parabola"],
-    "explicacion": "La unión del avance horizontal constante con la caída acelerada dibuja una parábola."
+    "explicacion": "La unión del avance horizontal constante con la caída acelerada dibuja una parábola.",
+    "explicacionJopara": "Pe avance horizontal constante ha pe movimiento vertical acelerado gravedad reheve ojapo pe trayectoria parábola."
   },
   {
     "id": "q-mp-05",
@@ -50,9 +61,10 @@
     "pregunta": "¿Qué pasa con la velocidad horizontal en la altura máxima?",
     "preguntaJopara": "¿Mba'épa oiko velocidad horizontal rehe altura máxima-pe?",
     "respuesta": "Sigue igual: la componente horizontal no cambia, por eso el proyectil sigue avanzando hacia adelante.",
-    "respuestaJopara": "Opavave la vx: nomanba, upévo el proyectil oho gueteri lape.",
+    "respuestaJopara": "Vx opyta upeichagua: ndokambiái, upévare pe proyectil oho gueteri tenonde gotyo.",
     "claves": ["horizontal", "cambia", "avanza", "sigue"],
-    "explicacion": "En la altura máxima solo la velocidad vertical vale cero; la horizontal (vx = v0 * cos(ángulo)) sigue constante."
+    "explicacion": "En la altura máxima solo la velocidad vertical vale cero; la horizontal (vx = v0 * cos(ángulo)) sigue constante.",
+    "explicacionJopara": "Altura máxima-pe, velocidad vertical opyta cero; horizontal (vx = v0 * cos(ángulo)) ndokambiái ha proyectil oho gueteri tenonde."
   },
   {
     "id": "q-mp-06",
@@ -63,27 +75,28 @@
     "respuesta": "De la velocidad inicial al cuadrado y del ángulo de lanzamiento: R = (v0² * sen(2 * ángulo)) / g.",
     "respuestaJopara": "Pe v0² ha pe ángulo rehe: R = (v0² * sen(2 * ángulo)) / g.",
     "claves": ["velocidad", "angulo", "alcance"],
-    "explicacion": "R = (v0² * sen(2 * ángulo)) / g: a más velocidad y con ángulo cerca de 45 grados, más lejos aterriza."
+    "explicacion": "R = (v0² * sen(2 * ángulo)) / g: a más velocidad y con ángulo cerca de 45 grados, más lejos aterriza.",
+    "explicacionJopara": "Alcance odepende velocidad inicial², ángulo ha gravedad rehe. 45°-pe pe alcance og̃uahẽ máximo-pe, salida ha llegada peteĩ altura-pe ramo."
   },
   {
     "id": "q-mp-07",
     "tema": "Movimiento Parabólico",
     "tipo": "vf",
     "enunciado": "En el movimiento parabólico, la componente horizontal de la velocidad permanece constante durante todo el vuelo.",
-    "enunciadoJopara": "Movimiento parabólico-pe, componente horizontal velocidad rehegua opyta constante vuelo pukukue.",
+    "enunciadoJopara": "Movimiento parabólico-pe, componente horizontal velocidad rehegua opyta constante vuelo pukukue-pe.",
     "esVerdadero": true,
     "explicacion": "Si ignoramos el aire, no hay fuerza horizontal: vx = v0 * cos(ángulo) y no cambia.",
-    "explicacionJopara": "Ndairévi aire: pe vx nomanba oikope pe vuelo pukukuepe."
+    "explicacionJopara": "Ndaipóri aire rehe: pe vx ndokambiái vuelo pukukue-pe."
   },
   {
     "id": "q-mp-08",
     "tema": "Movimiento Parabólico",
     "tipo": "vf",
     "enunciado": "En la altura máxima, la velocidad vertical del proyectil vale cero.",
-    "enunciadoJopara": "Pe altura máxima-pe, velocidad vertical proyectil rehegua oiko cero.",
+    "enunciadoJopara": "Pe altura máxima-pe, velocidad vertical proyectil rehegua opyta cero-pe.",
     "esVerdadero": true,
     "explicacion": "Ahí la subida se frena por completo por efecto de la gravedad; luego empieza a caer.",
-    "explicacionJopara": "Pe gravedad omboty la subida: vy oiko cero-pe upépe."
+    "explicacionJopara": "Pe gravedad ombombegue la subida: vy opyta cero-pe upépe."
   },
   {
     "id": "q-mp-09",
@@ -93,7 +106,12 @@
     "enunciadoJopara": "Pe gravedad omboacelera movimiento horizontal proyectil rehegua.",
     "esVerdadero": false,
     "explicacion": "La gravedad actúa solo hacia abajo (vertical); el movimiento horizontal mantiene velocidad constante.",
-    "explicacionJopara": "Pe gravedad oiko ape yvýpe; pe horizontal oiko constante."
+    "explicacionJopara": "Pe gravedad oho ape yvý gotyo año; pe horizontal opyta constante.",
+    "rubricaJustificacion": [
+      { "id": "gravedad", "labelEs": "menciona la gravedad", "labelJopara": "menciona gravedad", "any": ["gravedad"] },
+      { "id": "vertical", "labelEs": "ubica su efecto en la dirección vertical", "labelJopara": "he'i gravedad ohoha vertical gotyo", "any": ["vertical", "yvate", "abajo", "yvy"] },
+      { "id": "sin-horizontal", "labelEs": "aclara que no acelera la componente horizontal", "labelJopara": "he'i ndaha'éiha pe horizontal", "any": ["noHorizontal"] }
+    ]
   },
   {
     "id": "q-mp-10",
@@ -113,7 +131,7 @@
     "enunciadoJopara": "Ángulo de lanzamiento tuichavévo, alcance tuichave tapia.",
     "esVerdadero": false,
     "explicacion": "El alcance máximo se logra a 45 grados: ángulos muy altos reducen la componente horizontal y el proyectil cae antes.",
-    "explicacionJopara": "45 grado-pe pe alcance oiko máximo: ángulo yvateiteréi-pe, vx oñemombyry ha ho'a mboyve."
+    "explicacionJopara": "45 grado-pe pe alcance og̃uahẽ hína máximo-pe: ángulo yvateiterei ramo, vx omichĩve ha proyectil ho'a mboyve."
   },
   {
     "id": "q-mp-12",

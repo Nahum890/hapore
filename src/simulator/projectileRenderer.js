@@ -31,11 +31,29 @@ function trajectory(ctx, points, count, color, preview) {
   ctx.stroke(); ctx.setLineDash([]);
 }
 function label(ctx, x, y, text, color = C.forest) {
-  ctx.fillStyle = 'rgba(255,255,255,.91)';
+  // La fuente se fija antes de medir: si no, el ancho sale con la fuente
+  // anterior y el texto se sale del recuadro.
+  ctx.save();
+  ctx.font = '700 11px system-ui, sans-serif'; ctx.textAlign = 'left';
   const width = ctx.measureText(text).width + 16;
-  ctx.fillRect(x, y - 16, width, 22);
-  ctx.fillStyle = color; ctx.font = '700 11px system-ui, sans-serif'; ctx.textAlign = 'left';
+  ctx.shadowColor = 'rgba(15,23,42,.18)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 1;
+  roundedRect(ctx, x, y - 15, width, 21, 6, 'rgba(255,255,255,.93)');
+  ctx.shadowColor = 'transparent';
+  ctx.fillStyle = color;
   ctx.fillText(text, x + 8, y);
+  ctx.restore();
+}
+// Etiqueta pequeña tipo "píldora" para marcar medidas dentro de la escena.
+function pill(ctx, x, y, text, { bg = 'rgba(15,23,42,.72)', color = '#f8fafc', align = 'center', size = 10 } = {}) {
+  ctx.save();
+  ctx.font = `700 ${size}px system-ui, sans-serif`;
+  const w = ctx.measureText(text).width + 12;
+  const h = size + 8;
+  const left = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
+  roundedRect(ctx, left, y - h + 4, w, h, h / 2, bg);
+  ctx.fillStyle = color; ctx.textAlign = 'left';
+  ctx.fillText(text, left + 6, y);
+  ctx.restore();
 }
 
 /* ---------- Escenario "dron": entrega rural ---------- */
@@ -76,12 +94,12 @@ function farmBackdrop(ctx, width, height, groundY) {
   for (let x = 12; x < width; x += 32) { ctx.beginPath(); ctx.moveTo(x, groundY - 30); ctx.lineTo(x, groundY - 6); ctx.stroke(); }
   for (const y of [groundY - 23, groundY - 13]) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke(); }
 }
-function deliveryTarget(ctx, x, groundY, hit) {
+function deliveryTarget(ctx, x, groundY, hit, title) {
   ctx.fillStyle = hit ? '#4a9d65' : C.blue;
   ctx.beginPath(); ctx.ellipse(x, groundY - 3, 19, 7, 0, 0, Math.PI * 2); ctx.fill();
   ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(x, groundY - 3, 12, 4, 0, 0, Math.PI * 2); ctx.stroke();
   crate(ctx, x + 22, groundY - 19, 16); crate(ctx, x + 35, groundY - 18, 15); crate(ctx, x + 28, groundY - 35, 16);
-  ctx.fillStyle = C.ink; ctx.font = '700 10px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('ENTREGA', x, groundY - 47);
+  ctx.fillStyle = C.ink; ctx.font = '700 10px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.fillText(title, x, groundY - 47);
 }
 function drone(ctx, x, y, size, rotorPhase, flying, carrying) {
   ctx.save(); ctx.translate(x, y);
@@ -104,7 +122,10 @@ function drone(ctx, x, y, size, rotorPhase, flying, carrying) {
   }
   ctx.restore();
 }
-function drawDrone(ctx, { width, height, flight, progress, phase, now, verdict }) {
+function drawDrone(ctx, { width, height, flight, progress, phase, now, verdict, hideTarget, guessX, guessLabel, language }) {
+  const labels = language === 'es'
+    ? { delivery: 'ENTREGA', start: 'INICIO', ideal: 'Vuelo ideal · sin motor' }
+    : { delivery: 'OG̃UAHẼ', start: 'ÑEPYRŨ', ideal: 'Vuelo ideal · motor’ỹre' };
   const groundY = height - Math.max(34, height * .13);
   farmBackdrop(ctx, width, height, groundY);
   const originX = Math.max(34, width * .07);
@@ -117,17 +138,18 @@ function drawDrone(ctx, { width, height, flight, progress, phase, now, verdict }
   // El color de la zona refleja si la respuesta escrita fue correcta, no si
   // el dibujo geométrico "cayó cerca": ambas cosas pueden diferir cuando la
   // trayectoria mostrada no depende del número que escribió el estudiante.
-  deliveryTarget(ctx, targetPoint.x, groundY, phase === 'landed' && verdict === true);
+  if (!hideTarget) deliveryTarget(ctx, targetPoint.x, groundY, phase === 'landed' && verdict === true, labels.delivery);
+  if (Number.isFinite(guessX) && phase === 'landed') guessMarker(ctx, originX + guessX * scale, groundY, width, guessLabel);
   if (phase !== 'idle') trajectory(ctx, points, Math.round(progress * (points.length - 1)) + 1, C.orange, false);
   ctx.fillStyle = 'rgba(30,65,54,.2)'; ctx.beginPath(); ctx.ellipse(current.x, groundY - 3, 14, 4, 0, 0, Math.PI * 2); ctx.fill();
   drone(ctx, current.x, Math.min(current.y - 29, groundY - 30), Math.max(20, Math.min(26, width * .05)), now * .045, phase === 'flying', phase !== 'landed');
   if (phase === 'landed') crate(ctx, current.x - 8, groundY - 18, 16);
-  label(ctx, Math.max(8, originX - 18), groundY - 70, 'INICIO', C.ink);
-  label(ctx, 8, 24, 'Vuelo ideal · sin motor', C.forest);
+  label(ctx, Math.max(8, originX - 18), groundY - 70, labels.start, C.ink);
+  label(ctx, 8, 24, labels.ideal, C.forest);
 }
 
 /* ---------- Escenario "básquetbol": tiro a la canasta reglamentaria (3.05 m) ---------- */
-function court(ctx, width, height, groundY, environment) {
+function court(ctx, width, height, groundY, environment, language) {
   // Techo y vigas de gimnasio techado con iluminación deportiva
   const gymCeiling = ctx.createLinearGradient(0, 0, 0, groundY);
   gymCeiling.addColorStop(0, '#1c2833');
@@ -145,6 +167,27 @@ function court(ctx, width, height, groundY, environment) {
   }
   ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
   ctx.fillRect(0, groundY * 0.38, width, 6);
+
+  // Gradas del gimnasio con público tenue y una franja institucional
+  const bleacherTop = groundY * 0.5;
+  const bleacherBottom = groundY - 22;
+  if (bleacherBottom - bleacherTop > 24) {
+    ctx.fillStyle = 'rgba(40, 52, 70, 0.55)';
+    ctx.fillRect(0, bleacherTop, width, bleacherBottom - bleacherTop);
+    // Filas de asientos (líneas suaves) en vez de público punto por punto
+    for (let y = bleacherTop + 6, row = 0; y < bleacherBottom - 2; y += 9, row += 1) {
+      ctx.fillStyle = row % 2 ? 'rgba(29, 91, 216, 0.28)' : 'rgba(226, 232, 240, 0.16)';
+      ctx.fillRect(0, y, width, 4);
+    }
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+    for (let x = width * 0.1; x < width; x += width * 0.2) ctx.fillRect(x, bleacherTop, 3, bleacherBottom - bleacherTop); // escaleras
+    const fade = ctx.createLinearGradient(0, bleacherTop, 0, bleacherBottom);
+    fade.addColorStop(0, 'rgba(236, 220, 198, 0)'); fade.addColorStop(1, 'rgba(236, 220, 198, 0.55)');
+    ctx.fillStyle = fade; ctx.fillRect(0, bleacherTop, width, bleacherBottom - bleacherTop);
+  }
+  roundedRect(ctx, 0, groundY - 20, width, 12, 0, 'rgba(29, 91, 216, 0.85)');
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.9)'; ctx.font = '800 8px system-ui, sans-serif'; ctx.textAlign = 'center';
+  for (let x = width * 0.16; x < width; x += width * 0.34) ctx.fillText('PYFIS IA · MOVIMIENTO PARABÓLICO', x, groundY - 11.5);
 
   // Focos de iluminación de cancha con conos de luz suave
   for (const lx of [width * 0.25, width * 0.5, width * 0.75]) {
@@ -190,9 +233,10 @@ function court(ctx, width, height, groundY, environment) {
   // Placa de condiciones ambientales
   const isIndoor = environment?.isIndoor !== false;
   const windVal = environment?.wind || 0;
-  const envText = isIndoor
-    ? '🏀 Gimnasio techado · 21°C · Sin viento (vuelo ideal)'
-    : `🌬️ Cancha exterior · Viento: ${windVal > 0 ? '+' : ''}${windVal} m/s · ${environment?.temperature ?? 21}°C`;
+  const windArrow = windVal > 0 ? ' →' : windVal < 0 ? ' ←' : '';
+  const envText = language === 'es'
+    ? isIndoor ? 'Gimnasio techado · 21 °C · Sin viento' : `Cancha exterior · Viento: ${windVal > 0 ? '+' : ''}${windVal} m/s${windArrow} · ${environment?.temperature ?? 21} °C`
+    : isIndoor ? 'Gimnasio techado · 21 °C · Yvytu’ỹre' : `Cancha okápe · Yvytu: ${windVal > 0 ? '+' : ''}${windVal} m/s${windArrow} · ${environment?.temperature ?? 21} °C`;
   ctx.fillStyle = 'rgba(20, 30, 45, 0.82)';
   const tw = ctx.measureText(envText).width + 20;
   roundedRect(ctx, width - tw - 12, 10, tw, 22, 4, 'rgba(20, 30, 45, 0.82)');
@@ -202,7 +246,41 @@ function court(ctx, width, height, groundY, environment) {
   ctx.fillText(envText, width - 22, 25);
 }
 
-function hoopTarget(ctx, x, groundY, scale, hit, hoopHeight = 3.05, collision = null, progress = 1, bballOutcome = null) {
+// Trazos casi transparentes para que el estudiante perciba hacia dónde sopla
+// el viento sin tapar la cancha ni la trayectoria. En el modelo, +x empuja
+// hacia el aro y -x en sentido contrario.
+function drawWindFlow(ctx, width, groundY, wind, now = 0) {
+  const strength = Math.abs(Number(wind) || 0);
+  if (strength < 0.05) return;
+  const direction = Math.sign(Number(wind));
+  const speed = 16 + Math.min(strength, 8) * 17;
+  const span = width + 90;
+  const travel = (((now / 1000) * speed) % span) * direction;
+  ctx.save();
+  for (let index = 0; index < 7; index += 1) {
+    const x = ((index * span / 7 + travel) % span + span) % span - 45;
+    const y = groundY * (0.18 + (index % 4) * 0.15);
+    const length = 16 + Math.min(strength, 8) * 1.8 + (index % 3) * 5;
+    ctx.globalAlpha = 0.035 + Math.min(strength, 8) * 0.009;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.2;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.quadraticCurveTo(x + direction * length * 0.5, y - 2, x + direction * length, y);
+    ctx.stroke();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(x + direction * length, y, 1.3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function hoopTarget(ctx, x, groundY, scale, hit, hoopHeight = 3.05, collision = null, progress = 1, bballOutcome = null, language = 'gn-jopara') {
+  const labels = language === 'es'
+    ? { impact: 'Impacto en el tablero', bankIn: '¡TABLERO Y ADENTRO!', rimIn: '¡ARO Y ADENTRO!', swish: '¡CANASTA LIMPIA!', hoop: `Aro ${hoopHeight.toFixed(2)} m · Ø 45 cm` }
+    : { impact: 'Ohupyty tablero-pe', bankIn: '¡TABLERO HA OIKE!', rimIn: '¡ARO HA OIKE!', swish: '¡CANASTA PORÃ!', hoop: `Aro · yvate ${hoopHeight.toFixed(2)} m · Ø 45 cm` };
   // Altura física reglamentaria del aro FIBA / NBA: 3.05 metros
   const rimY = groundY - hoopHeight * scale;
   const rimWidth = Math.max(18, 0.45 * scale); // Diámetro reglamentario del aro: 45 cm (0.45 m)
@@ -251,7 +329,7 @@ function hoopTarget(ctx, x, groundY, scale, hit, hoopHeight = 3.05, collision = 
     ctx.fillStyle = collision.isBasket ? '#2ecc71' : '#e67e22';
     ctx.font = '700 11px system-ui, sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText('💥 ¡CLAC! Tablero', backboardX + 8, impactY + 4);
+    ctx.fillText(labels.impact, backboardX + 8, impactY + 4);
     ctx.restore();
   }
 
@@ -288,15 +366,9 @@ function hoopTarget(ctx, x, groundY, scale, hit, hoopHeight = 3.05, collision = 
 
   // 5. Destellos de enceste si acertó (swish, bank-in, rim-in)
   if (hit) {
-    ctx.fillStyle = '#2ecc71';
-    ctx.font = '700 12px system-ui, sans-serif';
-    ctx.textAlign = 'center';
-    const bannerText = bballOutcome === 'bank-in'
-      ? '¡TABLERAZO Y ADENTRO!'
-      : bballOutcome === 'rim-in'
-        ? '¡ARO Y ADENTRO!'
-        : '¡CANASTA LIMPIA (SWISH)!';
-    ctx.fillText(bannerText, rimLeft + rimWidth / 2, rimY - 14);
+    const bannerText = bballOutcome === 'bank-in' ? labels.bankIn : bballOutcome === 'rim-in' ? labels.rimIn : labels.swish;
+    // A la izquierda del aro para no quedar encima del tablero.
+    pill(ctx, rimLeft - 10, rimY - 22, bannerText, { bg: '#16a34a', align: 'right', size: 11 });
   }
 
   // 6. Proyección y marca en el suelo
@@ -305,13 +377,15 @@ function hoopTarget(ctx, x, groundY, scale, hit, hoopHeight = 3.05, collision = 
   ctx.ellipse(x, groundY - 2, 18, 6, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Indicador técnico de altura y diámetro
-  ctx.fillStyle = '#2c3e50';
-  ctx.font = '700 9px system-ui, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('ARO: 3.05 m · Ø 45 cm', rimLeft + rimWidth / 2, rimY + netH + 14);
-
   ctx.restore();
+
+  // Indicador técnico de altura y diámetro, a la izquierda del aro para que
+  // no lo tape el poste. Línea de cota punteada hasta el piso.
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1; ctx.setLineDash([3, 4]);
+  ctx.beginPath(); ctx.moveTo(rimLeft - 4, rimY); ctx.lineTo(rimLeft - 4, groundY - 2); ctx.stroke();
+  ctx.restore();
+  pill(ctx, rimLeft - 10, rimY + 4, labels.hoop, { align: 'right', size: 9.5 });
 }
 
 function basketballPlayer(ctx, x, groundY, size, hasBall) {
@@ -362,9 +436,13 @@ function ball(ctx, x, y, radius, spin) {
   ctx.restore();
 }
 
-function drawBasketball(ctx, { width, height, flight, progress, phase, now, verdict }) {
+function drawBasketball(ctx, { width, height, flight, progress, phase, now, verdict, language }) {
+  const labels = language === 'es'
+    ? { launch: 'Lanzamiento', scene: 'Tiro parabólico · Cancha de básquetbol', enterSpeed: 'Ingresá v₀' }
+    : { launch: 'Ñemombo', scene: 'Ñemombo parabólico · Cancha de básquetbol', enterSpeed: 'Ehai v₀' };
   const groundY = height - Math.max(30, height * .12);
-  court(ctx, width, height, groundY, flight.environment);
+  court(ctx, width, height, groundY, flight.environment, language);
+  if (flight.environment?.isIndoor === false) drawWindFlow(ctx, width, groundY, flight.environment.wind, now);
   const originX = Math.max(30, width * .08);
   const worldWidth = Math.max(flight.targetX, flight.landingX, 12) * 1.2;
   const hoopH = flight.targetY > 0 ? flight.targetY : 3.05;
@@ -376,7 +454,7 @@ function drawBasketball(ctx, { width, height, flight, progress, phase, now, verd
 
   // El aro suspendido a 3.05 m de altura (reglamentario)
   const isHit = phase === 'landed' && (verdict === true || flight.basketSwish || flight.hit);
-  hoopTarget(ctx, targetPoint.x, groundY, scale, isHit, hoopH, flight.collision, progress, flight.bballOutcome);
+  hoopTarget(ctx, targetPoint.x, groundY, scale, isHit, hoopH, flight.collision, progress, flight.bballOutcome, language);
 
   // Trayectoria parabólica
   if (phase !== 'idle') trajectory(ctx, points, Math.round(progress * (points.length - 1)) + 1, '#e65c00', false);
@@ -415,7 +493,7 @@ function drawBasketball(ctx, { width, height, flight, progress, phase, now, verd
     ctx.fillStyle = '#ffffff';
     ctx.strokeStyle = '#1b2a41';
     ctx.lineWidth = 3;
-    const labelText = speedVal ? `${Math.round(flight.launch.angle)}° · ${speedVal.toFixed(1)} m/s` : `${Math.round(flight.launch.angle)}° (Ingresá v₀)`;
+    const labelText = speedVal ? `${Math.round(flight.launch.angle)}° · ${speedVal.toFixed(1)} m/s` : `${Math.round(flight.launch.angle)}° (${labels.enterSpeed})`;
     ctx.strokeText(labelText, endX + 8, endY + 3);
     ctx.fillText(labelText, endX + 8, endY + 3);
     ctx.restore();
@@ -433,109 +511,244 @@ function drawBasketball(ctx, { width, height, flight, progress, phase, now, verd
     ball(ctx, current.x, current.y, ballRadiusPx, now * 0.015);
   }
 
-  label(ctx, Math.max(8, originX - 20), groundY - 65, 'LANZAMIENTO', C.ink);
-  label(ctx, 8, 24, 'Tiro parabólico · Cancha de básquetbol', '#a4501f');
+  pill(ctx, originX - 6, groundY - playerSize * 1.4 - 8, labels.launch, { bg: 'rgba(255,255,255,.92)', color: C.ink });
+  label(ctx, 8, 24, labels.scene, '#a4501f');
 }
 
 /* ---------- Escenario "pared" / "tiro libre" (estilo Roberto Carlos) ---------- */
-function soccerPitch(ctx, width, height, groundY) {
-  // Cielo de estadio al atardecer
+// Colores de la hinchada: pseudoaleatorio pero fijo (no parpadea entre cuadros).
+const CROWD = ['#f6e05e', '#38a169', '#e53e3e', '#3182ce', '#f7fafc', '#ed8936', '#d53f8c', '#2d3748'];
+function crowdColor(col, row) {
+  const n = Math.sin(col * 12.9898 + row * 78.233) * 43758.5453;
+  return CROWD[Math.floor((n - Math.floor(n)) * CROWD.length)];
+}
+
+function floodlight(ctx, x, baseY, topY) {
+  ctx.save();
+  ctx.strokeStyle = '#2d3748'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(x, baseY); ctx.lineTo(x, topY + 10); ctx.stroke();
+  const glow = ctx.createRadialGradient(x, topY, 2, x, topY, 70);
+  glow.addColorStop(0, 'rgba(255,250,220,.55)'); glow.addColorStop(1, 'rgba(255,250,220,0)');
+  ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(x, topY, 70, 0, Math.PI * 2); ctx.fill();
+  roundedRect(ctx, x - 13, topY - 6, 26, 14, 3, '#4a5568');
+  ctx.fillStyle = '#fffbe6';
+  for (let i = 0; i < 3; i += 1) for (let j = 0; j < 2; j += 1) ctx.fillRect(x - 10 + i * 7.5, topY - 4 + j * 6, 5, 4);
+  ctx.restore();
+}
+
+function soccerPitch(ctx, width, height, groundY, language) {
+  // Cielo de estadio al anochecer
   const sky = ctx.createLinearGradient(0, 0, 0, groundY);
-  sky.addColorStop(0, '#1a365d'); sky.addColorStop(0.6, '#3182ce'); sky.addColorStop(1, '#bee3f8');
+  sky.addColorStop(0, '#14264a'); sky.addColorStop(0.55, '#2c5c9c'); sky.addColorStop(1, '#8fc1e8');
   ctx.fillStyle = sky; ctx.fillRect(0, 0, width, height);
-
-  // Graderías de estadio lejanas
-  ctx.fillStyle = '#4a5568';
-  ctx.fillRect(0, groundY - 35, width, 25);
-  for (let s = 10; s < width; s += 24) {
-    ctx.fillStyle = (s / 24) % 2 === 0 ? '#e2e8f0' : '#cbd5e1';
-    ctx.fillRect(s, groundY - 33, 16, 12);
-  }
-
-  // Césped reglamentario con franjas de corte alternadas
-  const grass = ctx.createLinearGradient(0, groundY - 6, 0, height);
-  grass.addColorStop(0, '#38a169'); grass.addColorStop(1, '#22543d');
-  ctx.fillStyle = grass; ctx.fillRect(0, groundY - 6, width, height - groundY + 6);
-
-  for (let x = 0; x < width; x += 40) {
-    ctx.fillStyle = (x / 40) % 2 === 0 ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
-    ctx.fillRect(x, groundY - 6, 40, height - groundY + 6);
-  }
-
-  // Línea de cal del campo
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)'; ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.moveTo(0, groundY - 2); ctx.lineTo(width, groundY - 2); ctx.stroke();
-}
-
-function soccerWallBarrier(ctx, x, groundY, scale, barrierHeight = 1.8) {
-  // Barrera reglamentaria FIFA a 9.15 m compuesta por 3-4 defensores
-  const hPx = Math.max(30, barrierHeight * scale);
-  const wPx = Math.max(22, 1.4 * scale);
-
-  ctx.save();
-  // Defensores con brazos cubriendo el pecho/rostro
-  for (let i = 0; i < 3; i += 1) {
-    const dx = x - wPx / 2 + (i * wPx) / 2.5;
-    // Camiseta azul de Francia (referencia a Francia 1997 vs Brasil)
-    roundedRect(ctx, dx - 5, groundY - hPx * 0.75, 10, hPx * 0.45, 2, '#2b6cb0');
-    // Cabeza
-    ctx.fillStyle = '#e8b48c'; ctx.beginPath(); ctx.arc(dx, groundY - hPx * 0.85, 4, 0, Math.PI * 2); ctx.fill();
-    // Pantalón blanco y piernas
-    ctx.fillStyle = '#ffffff'; roundedRect(ctx, dx - 4, groundY - hPx * 0.32, 8, hPx * 0.32, 1, '#ffffff');
-  }
+  ctx.save(); ctx.globalAlpha = .16;
+  cloud(ctx, width * .2, groundY * .16, Math.max(26, width * .07));
+  cloud(ctx, width * .62, groundY * .1, Math.max(22, width * .055));
   ctx.restore();
 
-  // Etiqueta de la barrera
-  ctx.fillStyle = '#1a202c'; ctx.font = '700 9px system-ui, sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText('BARRERA FIFA: 9.15 m · 1.80 m', x, groundY - hPx - 6);
-}
+  // Tribunas con hinchada (bloques escalonados)
+  const standTop = Math.max(groundY * .34, groundY - 118);
+  const standBottom = groundY - 14;
+  ctx.fillStyle = '#1f2a3d'; ctx.fillRect(0, standTop - 8, width, standBottom - standTop + 8);
+  ctx.fillStyle = '#2b3a55'; ctx.fillRect(0, standTop - 8, width, 5); // techo
+  const cell = 6;
+  for (let y = standTop, row = 0; y < standBottom - 4; y += cell, row += 1) {
+    ctx.fillStyle = row % 4 === 3 ? '#16202f' : '#243249';
+    ctx.fillRect(0, y, width, cell);
+    if (row % 4 === 3) continue; // pasillo
+    ctx.globalAlpha = .5; // hinchada tenue: que resalten los jugadores
+    for (let x = 2, col = 0; x < width; x += cell, col += 1) {
+      ctx.fillStyle = crowdColor(col, row);
+      ctx.fillRect(x, y + 1, 3.2, 3.6);
+    }
+    ctx.globalAlpha = 1;
+  }
+  const standShade = ctx.createLinearGradient(0, standTop, 0, standBottom);
+  standShade.addColorStop(0, 'rgba(10,18,32,.35)'); standShade.addColorStop(1, 'rgba(10,18,32,0)');
+  ctx.fillStyle = standShade; ctx.fillRect(0, standTop, width, standBottom - standTop);
+  floodlight(ctx, width * .06, standTop, standTop - 26);
+  floodlight(ctx, width * .94, standTop, standTop - 26);
 
-function soccerGoal(ctx, x, groundY, scale, hit, goalHeight = 2.44) {
-  // Arco reglamentario FIFA: travesaño a 2.44 m de altura
-  const hPx = Math.max(32, goalHeight * scale);
-  const wPx = Math.max(18, 1.8 * scale);
-
-  ctx.save();
-  // Red del arco
-  ctx.fillStyle = hit ? 'rgba(56, 161, 105, 0.25)' : 'rgba(255, 255, 255, 0.2)';
-  ctx.fillRect(x, groundY - hPx, wPx, hPx);
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)'; ctx.lineWidth = 1;
-  for (let ny = groundY - hPx; ny <= groundY; ny += 6) {
-    ctx.beginPath(); ctx.moveTo(x, ny); ctx.lineTo(x + wPx, ny); ctx.stroke();
+  // Carteles de publicidad al borde del campo
+  const boardY = groundY - 14;
+  for (let x = 0, i = 0; x < width; x += 90, i += 1) {
+    roundedRect(ctx, x + 2, boardY, 86, 10, 2, i % 2 ? '#1d5bd8' : '#e53e3e');
+    ctx.fillStyle = '#ffffff'; ctx.font = '800 7.5px system-ui, sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(i % 2 ? (language === 'es' ? 'FÍSICA 3.º CURSO' : 'FÍSICA 3.º CURSO · PYFIS') : 'PYFIS IA', x + 45, boardY + 7.8);
   }
 
-  // Postes y travesaño blancos reglamentarios
-  ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3.5;
+  // Césped en perspectiva: franjas de corte horizontales que se ensanchan
+  // hacia adelante (más cerca de la cámara).
+  const grass = ctx.createLinearGradient(0, groundY - 4, 0, height);
+  grass.addColorStop(0, '#2f8f55'); grass.addColorStop(1, '#1d6b3c');
+  ctx.fillStyle = grass; ctx.fillRect(0, groundY - 4, width, height - groundY + 4);
+  let y = groundY - 4;
+  for (let band = 0; y < height; band += 1) {
+    const h = 5 + band * 3.2;
+    if (band % 2 === 0) { ctx.fillStyle = 'rgba(255,255,255,.07)'; ctx.fillRect(0, y, width, h); }
+    y += h;
+  }
+  // Viñeta suave de iluminación
+  const vignette = ctx.createLinearGradient(0, groundY, 0, height);
+  vignette.addColorStop(0, 'rgba(255,255,230,.08)'); vignette.addColorStop(1, 'rgba(0,0,0,.18)');
+  ctx.fillStyle = vignette; ctx.fillRect(0, groundY - 4, width, height - groundY + 4);
+
+  // Línea de cal (línea de meta vista de costado)
+  ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(0, groundY - 1); ctx.lineTo(width, groundY - 1); ctx.stroke();
+}
+
+// Área grande (16.5 m) y área chica (5.5 m) dibujadas sobre el césped en
+// perspectiva, más el punto penal (11 m). Solo referencia visual.
+function penaltyArea(ctx, goalX, groundY, height, scale) {
+  const depth = (height - groundY) * .62;
+  const skew = depth * .55;
+  const box = (meters, d) => {
+    const far = goalX - meters * scale;
+    ctx.beginPath();
+    ctx.moveTo(far, groundY);
+    ctx.lineTo(far - skew * d, groundY + depth * d);
+    ctx.lineTo(goalX - skew * d, groundY + depth * d);
+    ctx.lineTo(goalX, groundY);
+    ctx.stroke();
+  };
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = 1.6;
+  box(16.5, 1);
+  box(5.5, .45);
+  ctx.fillStyle = 'rgba(255,255,255,.75)';
+  ctx.beginPath(); ctx.ellipse(goalX - 11 * scale - skew * .5, groundY + depth * .5, 3, 1.6, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+
+function soccerPlayer(ctx, x, groundY, size, { jersey = '#f6e05e', shorts = '#2b6cb0', socks = '#ffffff', number = null, arms = 'down', kicking = false } = {}) {
+  ctx.save(); ctx.translate(x, groundY); ctx.lineCap = 'round';
+  // Sombra
+  ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.beginPath(); ctx.ellipse(0, -1, size * .28, size * .06, 0, 0, Math.PI * 2); ctx.fill();
+  // Piernas (medias) y botines
+  ctx.strokeStyle = socks; ctx.lineWidth = size * .1;
   ctx.beginPath();
-  ctx.moveTo(x, groundY);
-  ctx.lineTo(x, groundY - hPx);
-  ctx.lineTo(x + wPx, groundY - hPx);
-  ctx.lineTo(x + wPx, groundY);
+  ctx.moveTo(-size * .08, -size * .42); ctx.lineTo(-size * .12, -size * .04);
+  if (kicking) { ctx.moveTo(size * .08, -size * .42); ctx.lineTo(size * .3, -size * .2); }
+  else { ctx.moveTo(size * .08, -size * .42); ctx.lineTo(size * .12, -size * .04); }
   ctx.stroke();
-
-  if (hit) {
-    ctx.fillStyle = '#38a169'; ctx.font = '700 12px system-ui, sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText('¡GOLAZO!', x + wPx / 2, groundY - hPx - 8);
+  ctx.fillStyle = '#111827';
+  ctx.beginPath(); ctx.ellipse(-size * .1, -size * .03, size * .07, size * .035, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(kicking ? size * .32 : size * .14, kicking ? -size * .19 : -size * .03, size * .07, size * .035, 0, 0, Math.PI * 2); ctx.fill();
+  // Pantalón
+  roundedRect(ctx, -size * .15, -size * .52, size * .3, size * .14, size * .04, shorts);
+  // Camiseta
+  roundedRect(ctx, -size * .17, -size * .88, size * .34, size * .4, size * .08, jersey);
+  if (number) {
+    ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.font = `800 ${Math.max(7, Math.round(size * .17))}px system-ui, sans-serif`; ctx.textAlign = 'center';
+    ctx.fillText(number, 0, -size * .63);
   }
-
-  ctx.fillStyle = '#2d3748'; ctx.font = '700 9px system-ui, sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText('ARCO: 2.44 m', x + wPx / 2, groundY - hPx + 16);
+  // Brazos
+  ctx.strokeStyle = '#e8b48c'; ctx.lineWidth = size * .075;
+  ctx.beginPath();
+  if (arms === 'cover') { // barrera: brazos cruzados delante
+    ctx.moveTo(-size * .16, -size * .8); ctx.lineTo(size * .1, -size * .58);
+    ctx.moveTo(size * .16, -size * .8); ctx.lineTo(-size * .1, -size * .58);
+  } else {
+    ctx.moveTo(-size * .17, -size * .82); ctx.lineTo(-size * .3, -size * .58);
+    ctx.moveTo(size * .17, -size * .82); ctx.lineTo(size * .32, -size * .62);
+  }
+  ctx.stroke();
+  // Cabeza y pelo
+  ctx.fillStyle = '#e8b48c'; ctx.beginPath(); ctx.arc(0, -size * 1, size * .12, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#2d1b10'; ctx.beginPath(); ctx.arc(0, -size * 1.03, size * .12, Math.PI, 0); ctx.fill();
   ctx.restore();
+}
+
+function soccerWallBarrier(ctx, x, groundY, scale, barrierHeight = 1.8, language = 'gn-jopara') {
+  // Barrera reglamentaria FIFA a 9.15 m: cuatro defensores de 1.80 m.
+  const size = Math.max(30, barrierHeight * scale);
+  const gap = Math.max(7, size * .26);
+  for (let i = 0; i < 4; i += 1) {
+    soccerPlayer(ctx, x + (i - 1.5) * gap, groundY, size, { jersey: '#2b6cb0', shorts: '#ffffff', socks: '#e53e3e', arms: 'cover' });
+  }
+  pill(ctx, x, groundY - size * 1.15 - 8, language === 'es'
+    ? `Barrera · 9,15 m · ${barrierHeight.toFixed(2)} m`
+    : `Barrera · 9,15 m · yvate ${barrierHeight.toFixed(2)} m`, { size: 9.5 });
+}
+
+function soccerGoal(ctx, x, groundY, scale, hit, goalHeight = 2.44, language = 'gn-jopara') {
+  // Arco reglamentario FIFA: travesaño a 2.44 m, con profundidad de red.
+  const hPx = Math.max(32, goalHeight * scale);
+  const depth = Math.max(18, 1.8 * scale);
+  const backTop = groundY - hPx * .82;
+
+  ctx.save();
+  // Red lateral (trapecio) con malla
+  ctx.fillStyle = hit ? 'rgba(72, 187, 120, 0.28)' : 'rgba(255, 255, 255, 0.16)';
+  ctx.beginPath();
+  ctx.moveTo(x, groundY - hPx); ctx.lineTo(x + depth, backTop); ctx.lineTo(x + depth, groundY); ctx.lineTo(x, groundY); ctx.closePath();
+  ctx.fill();
+  ctx.save(); ctx.clip();
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)'; ctx.lineWidth = .8;
+  for (let d = -hPx; d < depth + hPx; d += 6) {
+    ctx.beginPath(); ctx.moveTo(x + d, groundY); ctx.lineTo(x + d + hPx, groundY - hPx); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + d, groundY - hPx); ctx.lineTo(x + d + hPx, groundY); ctx.stroke();
+  }
+  ctx.restore();
+  // Soportes traseros
+  ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(x, groundY - hPx); ctx.lineTo(x + depth, backTop); ctx.lineTo(x + depth, groundY); ctx.stroke();
+  // Poste y travesaño (vistos de costado)
+  ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = 4;
+  ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.moveTo(x, groundY); ctx.lineTo(x, groundY - hPx); ctx.lineTo(x + 6, groundY - hPx); ctx.stroke();
+  ctx.restore();
+
+  if (hit) pill(ctx, x + depth / 2, groundY - hPx - 10, language === 'es' ? '¡GOL!' : '¡GOL!', { bg: '#2f855a', size: 12 });
+  pill(ctx, x - 8, groundY - hPx + 4, language === 'es' ? `Arco ${goalHeight.toFixed(2)} m` : `Arco · yvate ${goalHeight.toFixed(2)} m`, { align: 'right', size: 9.5 });
 }
 
 function yard(ctx, width, height, groundY) {
   skyBackdrop(ctx, width, height, groundY, '#dcecf7', '#f2f6e9');
-  ctx.fillStyle = '#8fc48a'; ctx.fillRect(0, groundY - 4, width, height - groundY + 4);
-  ctx.strokeStyle = 'rgba(255,255,255,.4)'; ctx.lineWidth = 1;
-  for (let x = 6; x < width; x += 18) { ctx.beginPath(); ctx.moveTo(x, groundY); ctx.lineTo(x + 6, groundY + 10); ctx.stroke(); }
+  // Fondo de patio de barrio: siluetas bajas y piso claro dan contexto sin
+  // competir con la pelota ni con la trayectoria.
+  ctx.fillStyle = '#9ebc9a'; ctx.fillRect(0, groundY - 32, width, 32);
+  const houseX = width * .65, houseW = width * .2, houseH = Math.max(24, height * .16), houseY = groundY - 32 - houseH;
+  ctx.fillStyle = '#f3e6ce'; ctx.fillRect(houseX, houseY, houseW, houseH);
+  ctx.fillStyle = '#b56d52'; ctx.beginPath(); ctx.moveTo(houseX - 8, houseY + 2); ctx.lineTo(houseX + houseW / 2, houseY - height * .07); ctx.lineTo(houseX + houseW + 8, houseY + 2); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#7593a0'; ctx.fillRect(houseX + houseW * .16, houseY + houseH * .28, houseW * .22, houseH * .3);
+  ctx.fillStyle = '#886750'; ctx.fillRect(houseX + houseW * .65, groundY - 32 - houseH * .56, houseW * .2, houseH * .56);
+  for (const x of [width * .18, width * .49, width * .91]) {
+    ctx.fillStyle = '#718f66'; ctx.beginPath(); ctx.arc(x, groundY - 35, Math.max(11, width * .025), 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#9cb27a'; ctx.beginPath(); ctx.arc(x - 7, groundY - 40, Math.max(7, width * .017), 0, Math.PI * 2); ctx.fill();
+  }
+  const floor = ctx.createLinearGradient(0, groundY, 0, height);
+  floor.addColorStop(0, '#d9d0ba'); floor.addColorStop(1, '#bcae91');
+  ctx.fillStyle = floor; ctx.fillRect(0, groundY - 3, width, height - groundY + 3);
+  ctx.strokeStyle = 'rgba(126,103,75,.2)'; ctx.lineWidth = 1;
+  for (let y = groundY + 13; y < height; y += 15) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke(); }
+  for (let x = 8; x < width; x += 28) { ctx.beginPath(); ctx.moveTo(x, groundY); ctx.lineTo(x - 7, height); ctx.stroke(); }
 }
-function wall(ctx, x, groundY, scale, obstacleHeight, cleared) {
-  const wallHeightPx = Math.max(26, obstacleHeight * scale);
-  ctx.fillStyle = cleared === false ? '#c0392b' : '#9a8b74';
-  roundedRect(ctx, x - 7, groundY - wallHeightPx, 14, wallHeightPx, 3, cleared === false ? '#c0392b' : '#9a8b74');
-  ctx.strokeStyle = '#6b5d47'; ctx.lineWidth = 1;
-  for (let row = 0; row < wallHeightPx; row += 8) { ctx.beginPath(); ctx.moveTo(x - 7, groundY - row); ctx.lineTo(x + 7, groundY - row); ctx.stroke(); }
-  ctx.fillStyle = C.ink; ctx.font = '700 10px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('PAREDÓN', x, groundY - wallHeightPx - 8);
+function wall(ctx, x, groundY, scale, obstacleHeight, cleared, title = 'PAREDÓN') {
+  const wallHeightPx = Math.max(30, obstacleHeight * scale);
+  const wallWidth = Math.max(22, Math.min(38, scale * .42));
+  const left = x - wallWidth / 2, top = groundY - wallHeightPx;
+  ctx.save();
+  ctx.fillStyle = 'rgba(38,48,42,.2)'; ctx.beginPath(); ctx.ellipse(x + 7, groundY - 2, wallWidth * .9, 5, 0, 0, Math.PI * 2); ctx.fill();
+  // Muro de bloques con borde superior y laterales suaves, más legible que
+  // una línea delgada al cruzar la trayectoria.
+  const face = ctx.createLinearGradient(left, top, left + wallWidth, top);
+  face.addColorStop(0, cleared === false ? '#c47c71' : '#e3d8c7'); face.addColorStop(.72, cleared === false ? '#aa655e' : '#cfc2ae'); face.addColorStop(1, '#a99982');
+  ctx.fillStyle = face; ctx.fillRect(left, top, wallWidth, wallHeightPx);
+  ctx.strokeStyle = 'rgba(89,73,57,.35)'; ctx.lineWidth = 1;
+  const rowHeight = Math.max(8, Math.min(13, wallHeightPx / 4));
+  for (let row = 1; row < wallHeightPx / rowHeight; row += 1) {
+    const y = groundY - row * rowHeight;
+    ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(left + wallWidth, y); ctx.stroke();
+    const shift = row % 2 ? wallWidth * .46 : wallWidth * .56;
+    ctx.beginPath(); ctx.moveTo(left + shift, y); ctx.lineTo(left + shift, y - rowHeight); ctx.stroke();
+  }
+  roundedRect(ctx, left - 3, top - 4, wallWidth + 6, 6, 2, cleared === false ? '#8c4b47' : '#aa9a82');
+  ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(left + 2, top + 2); ctx.lineTo(left + 2, groundY - 2); ctx.stroke();
+  ctx.restore();
+  ctx.fillStyle = C.ink; ctx.font = '700 9px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.fillText(title, x, top - 9);
 }
 function landingSpot(ctx, x, groundY, hit) {
   ctx.fillStyle = hit ? '#4a9d65' : C.blue;
@@ -572,12 +785,18 @@ function soccerBall(ctx, x, y, radius, spin) {
   ctx.restore();
 }
 
-function drawWall(ctx, { width, height, flight, progress, phase, now, verdict }) {
+function drawWall(ctx, { width, height, flight, progress, phase, now, verdict, hideTarget, guessX, guessLabel, language }) {
+  const spanish = language === 'es';
+  const labels = spanish
+    ? { wall: 'PAREDÓN', launch: 'LANZAMIENTO', fail: 'No pasó el paredón', ideal: 'Vuelo ideal · sin viento', impact: 'La barrera frenó la pelota (h < 1,80 m)', freeKick: 'Tiro libre · vuelo vertical', kickLabel: distance => `Tiro libre · ${distance} m` }
+    : { wall: 'PAREDÓN', launch: 'ÑEMOMBO', fail: 'Pe pelota ndohasái paredón ári', ideal: 'Vuelo ideal · yvytu’ỹre', impact: 'Barrera ojoko pe pelota (h < 1,80 m)', freeKick: 'Tiro libre · vuelo yvate gotyo', kickLabel: distance => `Ñemombo libre · ${distance} m` };
   const isFreeKick = Boolean(flight.isFreeKick || flight.obstacle?.isFreeKick);
-  const groundY = height - Math.max(30, height * .12);
+  // En el tiro libre el suelo sube (72 %) para mostrar el césped en
+  // perspectiva y que el cielo no ocupe casi toda la escena.
+  const groundY = isFreeKick ? Math.round(height * .72) : height - Math.max(30, height * .12);
 
   if (isFreeKick) {
-    soccerPitch(ctx, width, height, groundY);
+    soccerPitch(ctx, width, height, groundY, language);
   } else {
     yard(ctx, width, height, groundY);
   }
@@ -593,15 +812,35 @@ function drawWall(ctx, { width, height, flight, progress, phase, now, verdict })
   const obstacleX = originX + obstacle.x * scale;
 
   if (isFreeKick) {
-    soccerGoal(ctx, targetPoint.x, groundY, scale, phase === 'landed' && flight.clearsObstacle && (flight.landingX >= flight.targetX - 2));
-    soccerWallBarrier(ctx, obstacleX, groundY, scale, obstacle.height || 1.8);
+    penaltyArea(ctx, targetPoint.x, groundY, height, scale);
+    // "¡GOLAZO!" solo si el reto lo evaluó como gol (verdict); la regla
+    // geométrica queda de respaldo para quien no pase veredicto.
+    const isGoal = typeof verdict === 'boolean' ? verdict : flight.clearsObstacle && (flight.landingX >= flight.targetX - 2);
+    soccerGoal(ctx, targetPoint.x, groundY, scale, phase === 'landed' && isGoal, 2.44, language);
+    soccerWallBarrier(ctx, obstacleX, groundY, scale, obstacle.height || 1.8, language);
   } else {
-    landingSpot(ctx, targetPoint.x, groundY, phase === 'landed' && verdict === true);
-    wall(ctx, obstacleX, groundY, scale, obstacle.height, phase === 'landed' ? flight.clearsObstacle : null);
+    if (!hideTarget) landingSpot(ctx, targetPoint.x, groundY, phase === 'landed' && verdict === true);
+    wall(ctx, obstacleX, groundY, scale, obstacle.height, phase === 'landed' ? flight.clearsObstacle : null, labels.wall);
   }
+  if (Number.isFinite(guessX) && phase === 'landed') guessMarker(ctx, originX + guessX * scale, groundY, width, guessLabel);
 
-  if (phase !== 'idle') trajectory(ctx, points, Math.round(progress * (points.length - 1)) + 1, isFreeKick ? '#e53e3e' : '#2f7d5e', false);
-  kid(ctx, originX - 6, groundY, Math.max(28, Math.min(36, width * .075)), phase === 'flying' && progress < 0.15);
+  if (phase !== 'idle') {
+    if (isFreeKick) {
+      // Estela con brillo para que el disparo se lea bien sobre el estadio.
+      ctx.save(); ctx.shadowColor = 'rgba(255,255,255,.7)'; ctx.shadowBlur = 6;
+      trajectory(ctx, points, Math.round(progress * (points.length - 1)) + 1, '#fef08a', false);
+      ctx.restore();
+    } else {
+      trajectory(ctx, points, Math.round(progress * (points.length - 1)) + 1, '#2f7d5e', false);
+    }
+  }
+  const kickerSize = Math.max(28, Math.min(48, 1.75 * scale));
+  if (isFreeKick) {
+    soccerPlayer(ctx, originX - 12, groundY, kickerSize, { jersey: '#f6e05e', shorts: '#2b6cb0', socks: '#ffffff', number: '6', kicking: phase === 'flying' && progress < 0.2 });
+    if (phase === 'idle') soccerBall(ctx, originX + 2, groundY - 5, Math.max(4.5, Math.min(7, width * .014)), 0);
+  } else {
+    kid(ctx, originX - 6, groundY, Math.max(28, Math.min(36, width * .075)), phase === 'flying' && progress < 0.15);
+  }
 
   if (phase !== 'idle') {
     ctx.fillStyle = 'rgba(30,65,54,.18)'; ctx.beginPath(); ctx.ellipse(current.x, groundY - 3, 9, 3, 0, 0, Math.PI * 2); ctx.fill();
@@ -612,16 +851,29 @@ function drawWall(ctx, { width, height, flight, progress, phase, now, verdict })
     }
   }
 
-  label(ctx, Math.max(8, originX - 20), groundY - 64, isFreeKick ? 'TIRO LIBRE' : 'LANZAMIENTO', C.ink);
+  if (isFreeKick) pill(ctx, originX - 12, groundY - kickerSize * 1.2 - 8, labels.kickLabel(Math.round(flight.targetX * 10) / 10), { bg: 'rgba(255,255,255,.92)', color: C.ink });
+  else label(ctx, Math.max(8, originX - 20), groundY - 64, labels.launch, C.ink);
   const explainerText = isFreeKick
-    ? (flight.clearsObstacle === false && phase === 'landed' ? 'Impactó en la barrera (h < 1.80 m)' : 'Tiro Libre (estilo Roberto Carlos) · Vuelo vertical')
-    : (flight.clearsObstacle === false && phase === 'landed' ? 'No superó el paredón' : 'Vuelo ideal · sin motor');
+    ? (flight.clearsObstacle === false && phase === 'landed' ? labels.impact : labels.freeKick)
+    : (flight.clearsObstacle === false && phase === 'landed' ? labels.fail : labels.ideal);
   label(ctx, 8, 24, explainerText, isFreeKick ? '#c53030' : '#256a4a');
 }
 
-export function drawScene(ctx, { width, height, flight, progress = 0, phase = 'idle', now = 0, scenario = 'dron', verdict = null }) {
+// Marca vertical con la predicción del alumno (minijuego "Predecí y lanzá").
+function guessMarker(ctx, x, groundY, width, text) {
+  const px = Math.max(10, Math.min(width - 10, x));
+  ctx.save();
+  ctx.strokeStyle = '#7047eb'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
+  ctx.beginPath(); ctx.moveTo(px, groundY); ctx.lineTo(px, groundY - 46); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#7047eb'; ctx.font = '800 11px system-ui, sans-serif'; ctx.textAlign = px > width - 40 ? 'right' : 'center';
+  ctx.fillText(text, px, groundY - 50);
+  ctx.restore();
+}
+
+export function drawScene(ctx, { width, height, flight, progress = 0, phase = 'idle', now = 0, scenario = 'dron', verdict = null, hideTarget = false, guessX = null, guessLabel = '', language = 'gn-jopara' }) {
   if (!(width > 0 && height > 0) || !flight) return;
-  const args = { width, height, flight, progress, phase, now, verdict };
+  const args = { width, height, flight, progress, phase, now, verdict, hideTarget, guessX, guessLabel, language };
   if (scenario === 'basketball') return drawBasketball(ctx, args);
   if (scenario === 'wall' || scenario === 'roberto-carlos') return drawWall(ctx, args);
   return drawDrone(ctx, args);

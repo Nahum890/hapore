@@ -57,11 +57,12 @@ export function recordExerciseResult({ correct, hintsUsed = 0, exerciseId = null
   const attemptLog = storedList(STORAGE_KEYS.ATTEMPT_LOG);
   writeJSON(STORAGE_KEYS.ATTEMPT_LOG, [...attemptLog, {
     exerciseId, correct: Boolean(correct), hintsUsed: Math.max(0, Number(hintsUsed) || 0),
-    durationMs: Math.max(0, Math.round(Number(durationMs) || 0)),
+    durationMs: Math.max(0, Math.round(Number(durationMs) || 0)), at: new Date().toISOString(),
+    // Solo se guarda cuando la respuesta fue incorrecta: sirve para el plan de
+    // práctica del alumno y el resumen de dificultades frecuentes del docente.
     errorType: !correct && typeof errorType === 'string' ? errorType.slice(0, 64) : null,
     expectedConcept: typeof expectedConcept === 'string' ? expectedConcept.slice(0, 100) : null,
     scenario: typeof scenario === 'string' ? scenario.slice(0, 40) : null,
-    at: new Date().toISOString(),
   }].slice(-200));
   if (correct && exerciseId && !alreadyCompleted) {
     writeJSON(STORAGE_KEYS.COMPLETED, [...completed, exerciseId]);

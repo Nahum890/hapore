@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { planFlight, startingControls } from '../src/simulator/flightPlan.js';
 import { sceneForExercise, shouldRevealSimulatorAnswer } from '../src/simulator/exerciseSimulation.js';
+import { drawScene } from '../src/simulator/projectileRenderer.js';
 import exercises from '../src/data/exercises.json' with { type: 'json' };
 
 test('el simulador usa los datos del ejercicio y llega al objetivo esperado', () => {
@@ -69,4 +70,35 @@ test('el simulador no revela el resultado hasta que termina la comprobación', (
   assert.equal(shouldRevealSimulatorAnswer('idle'), false);
   assert.equal(shouldRevealSimulatorAnswer('flying'), false);
   assert.equal(shouldRevealSimulatorAnswer('landed'), true);
+});
+
+test('los rótulos de los escenarios del lienzo cambian entre español y Jopara', () => {
+  const captureCanvasText = () => {
+    const text = [];
+    const gradient = { addColorStop() {} };
+    const ctx = new Proxy({
+      fillText: value => text.push(String(value)),
+      strokeText: value => text.push(String(value)),
+      measureText: value => ({ width: String(value).length * 5 }),
+      createLinearGradient: () => gradient,
+      createRadialGradient: () => gradient,
+    }, { get: (target, key) => target[key] ?? (() => {}), set: (target, key, value) => { target[key] = value; return true; } });
+    return { ctx, text };
+  };
+  const wallFlight = planFlight({ speed: 18, angle: 45, gravity: 9.8, targetX: 30, obstacle: { x: 8, height: 1.5 } });
+  const basketballFlight = planFlight({ speed: 8, angle: 50, gravity: 9.8, targetX: 4.6, targetY: 3.05, wind: 2 });
+
+  for (const [scenario, flight, expectedJopara, expectedSpanish] of [
+    ['wall', wallFlight, 'ÑEMOMBO', 'LANZAMIENTO'],
+    ['basketball', basketballFlight, 'Ñemombo', 'Lanzamiento'],
+  ]) {
+    const jopara = captureCanvasText();
+    drawScene(jopara.ctx, { width: 640, height: 360, flight, scenario, language: 'gn-jopara' });
+    assert.ok(jopara.text.some(value => value.includes(expectedJopara)), `${scenario}: etiqueta Jopara`);
+    assert.ok(jopara.text.every(value => !/🏀|🌬️|💥|✅/.test(value)), `${scenario}: sin emojis`);
+
+    const spanish = captureCanvasText();
+    drawScene(spanish.ctx, { width: 640, height: 360, flight, scenario, language: 'es' });
+    assert.ok(spanish.text.some(value => value.includes(expectedSpanish)), `${scenario}: etiqueta en español`);
+  }
 });

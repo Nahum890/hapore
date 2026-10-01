@@ -1,0 +1,43 @@
+{
+  "packageId": "com.kyreydevs.pyfisia",
+  "host": "pyfisia.vercel.app",
+  "name": "PyFis IA",
+  "launcherName": "PyFis IA",
+  "display": "standalone",
+  "themeColor": "#0C1527",
+  "themeColorDark": "#0C1527",
+  "navigationColor": "#0C1527",
+  "navigationColorDark": "#0C1527",
+  "navigationDividerColor": "#0C1527",
+  "navigationDividerColorDark": "#0C1527",
+  "backgroundColor": "#0C1527",
+  "enableNotifications": false,
+  "startUrl": "/",
+  "iconUrl": "https://pyfisia.vercel.app/icons/icon-512.png",
+  "maskableIconUrl": "https://pyfisia.vercel.app/icons/icon-maskable-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "pyfisia"
+  },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://pyfisia.vercel.app/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://pyfisia.vercel.app/",
+  "minSdkVersion": 21,
+  "orientation": "portrait",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "appVersion": "1.0.0"
+}

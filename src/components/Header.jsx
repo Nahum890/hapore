@@ -4,7 +4,7 @@ import Icon from './Icon.jsx';
 import { BrandMark } from './Nanduti.jsx';
 import Avatar from './Avatars.jsx';
 import { useTranslation } from '../i18n/LanguageProvider.jsx';
-export default function Header({ user, onHome, onLogout, onOpenSettings }) {
+export default function Header({ user, onHome, onLogout, onOpenSettings, onOpenNotifications, notificationCount = 0 }) {
   const { t } = useTranslation();
   const [online, setOnline] = useState(() => typeof navigator === 'undefined' || navigator.onLine);
   useEffect(() => {
@@ -45,24 +45,24 @@ export default function Header({ user, onHome, onLogout, onOpenSettings }) {
             <span className="connection-text">{online ? t('header.online') : t('header.offline')}</span>
           </span>
           <LanguageSelector />
-          <button
-            className="user-chip"
-            type="button"
-            onClick={onOpenSettings}
-            aria-label={'Configuración de ' + user.name}
+          {/* Solo muestra quién está conectado: la configuración se abre con
+              el botón del engranaje de al lado (antes ambos hacían lo mismo). */}
+          <div
+            className="user-chip is-static"
             title={user.name + ' (' + (user.role === 'maestro' ? t('header.teacher') : t('header.student')) + ')'}
           >
-            {user.avatar ? (
-              <Avatar id={user.avatar} size={32} />
-            ) : (
-              <span className="user-avatar" aria-hidden="true">
-                {user.name.charAt(0).toUpperCase()}
-              </span>
-            )}
+            <Avatar id={user.avatar} name={user.name} size={32} />
             <span className="user-chip-text">
               <strong>{user.name}</strong>
               <small>{user.role === 'maestro' ? t('header.teacher') : t('header.student')}</small>
             </span>
+          </div>
+          <button type="button" className="header-action-button" onClick={onOpenSettings} aria-label={t('header.openSettings')} title={t('header.openSettings')}>
+            <Icon name="settings" size={19} />
+          </button>
+          <button type="button" className="header-action-button header-notifications-button" onClick={onOpenNotifications} aria-label={t('notifications.open')} title={t('notifications.open')}>
+            <Icon name="bell" size={19} />
+            {notificationCount > 0 && <span className="header-notification-badge">{notificationCount > 99 ? '99+' : notificationCount}</span>}
           </button>
           <button
             className="logout-button"

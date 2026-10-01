@@ -31,6 +31,21 @@
         "question": "¿Qué evidencia de la simulación te hizo corregir o mantener tu predicción?",
         "expectedEvidence": "Menciona los alcances cercanos a 34,64 m y distingue las alturas o tiempos de vuelo.",
         "optionalSelfCheck": true
+      },
+      "jopara": {
+        "title": "Mokõi ángulo ikatu oho mombyry peteĩchagua?",
+        "objective": "Embojoja alcance, altura ha tiempo de vuelo iñambue jave ángulo añoite.",
+        "instructions": [
+          "Emombe’u nde predicción embojoja mboyve umi resultado.",
+          "Ejoja 30° ha 60° velocidad inicial ha gravedad peteĩchagua reheve.",
+          "Ema’ẽ umi medición rehe ha emyesakã mba’épa iñambue pe alcance ári avei."
+        ],
+        "expectedExplanation": "Modelo ideal-pe, mokõive og̃uahẽ 34,64 m rupi, umi ángulo ha’égui complementario. Pe lanzamiento 60°-pe ohupyty yvateve ha opyta hetave tiempo oveve hag̃ua. Ko explicación oikotevẽ ñepyrũ ha aterrizaje peteĩ nivel-pe ha ndoikéi resistencia del aire.",
+        "exitTicket": {
+          "question": "Mba’e evidencia simulación-gui nepytyvõ emoambue térã ereko hag̃ua nde predicción?",
+          "expectedEvidence": "Omombe’u alcance 34,64 m rupi ha ombojoavy altura térã tiempo de vuelo.",
+          "optionalSelfCheck": true
+        }
       }
     },
     {
@@ -51,6 +66,21 @@
         "question": "Si mantienes el ángulo y la gravedad, ¿duplicar la rapidez duplica el alcance? Justifica usando una medición.",
         "expectedEvidence": "Explica que no: con los valores probados, el alcance pasa de 10 m a 40 m.",
         "optionalSelfCheck": true
+      },
+      "jopara": {
+        "title": "¿Mba’épa oiko embohetavéramo velocidad?",
+        "objective": "Ehecha mba’éichapa velocidad inicial omoambue alcance, altura máxima ha tiempo de vuelo.",
+        "instructions": [
+          "Ere nde predicción: ¿velocidad mokõi jey tuichavéramo, alcance avei mokõi jeypa?",
+          "Ejoja 10 m/s ha 20 m/s, eikutu jave ángulo 45° ha gravedad 10 m/s².",
+          "Ema’ẽ umi medición rehe ha emombe’u mba’éichapa iñambue peteĩteĩ."
+        ],
+        "expectedExplanation": "Embohetave v₀ mokõi jey vove, alcance ha altura máxima tuichave irundy jey rupi ko condición-pe. Tiempo de vuelo tuichave mokõi jey. Ángulo, gravedad, aterrizaje yvatekuépe ha resistencia del aire’ỹre opyta peteĩchagua.",
+        "exitTicket": {
+          "question": "Erekóramo ángulo ha gravedad peteĩchagua, ¿velocidad mokõi jey tuichavéva ojapo alcance avei mokõi jey hag̃ua? Emombe’u peteĩ medición reheve.",
+          "expectedEvidence": "Nahániri: ko prueba-pe alcance oho 10 m-gui 40 m-pe.",
+          "optionalSelfCheck": true
+        }
       }
     },
     {
@@ -71,6 +101,21 @@
         "question": "¿Por qué el lanzamiento de la Luna recorre más distancia en esta simulación?",
         "expectedEvidence": "Relaciona la gravedad menor con una caída más lenta y un mayor tiempo disponible para avanzar horizontalmente.",
         "optionalSelfCheck": true
+      },
+      "jopara": {
+        "title": "Peteĩ lanzamiento Tierra ha Jasy-pe",
+        "objective": "Ehecha mba’éichapa gravedad omoambue tiempo ha trayectoria lanzamiento ideal rehegua.",
+        "instructions": [
+          "Ere moõpa pe objeto ipukuve oñemoĩjey hag̃ua salida nivel-pe.",
+          "Embojoja v₀ = 20 m/s ha ángulo = 45° reheve, g = 9,8 m/s² ha g = 1,62 m/s².",
+          "Ema’ẽ alcance ha tiempo rehe. Upéi emombe’u peteĩ mba’e modelo simple ndohechaukáiva vida real-pe."
+        ],
+        "expectedExplanation": "Gravedad michĩve vove, modelo ideal ohechauka tiempo ipukuve, altura yvateve ha alcance tuichave. Ko simulación ndoikéi resistencia del aire ni ambue efecto de peteĩ misión real rehegua.",
+        "exitTicket": {
+          "question": "¿Mba’érepa lanzamiento Jasy-pe oho mombyryve ko simulación-pe?",
+          "expectedEvidence": "Ombojoaju gravedad michĩve, caída mbegueve ha tiempo hetave rehe oñemomýi hag̃ua tenonde gotyo.",
+          "optionalSelfCheck": true
+        }
       }
     }
   ]

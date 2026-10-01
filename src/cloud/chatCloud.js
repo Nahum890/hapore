@@ -29,13 +29,27 @@ export function fetchMessages(classId, afterId = 0) {
   return rest(`messages?select=${COLUMNS}&class_id=eq.${encodeURIComponent(classId)}&id=gt.${Number(afterId) || 0}&order=id.asc&limit=200`);
 }
 
+export function fetchRecentMessages(classId, limit = 80) {
+  const safeLimit = Math.max(1, Math.min(200, Math.floor(Number(limit) || 80)));
+  return rest(`messages?select=${COLUMNS}&class_id=eq.${encodeURIComponent(classId)}&order=id.desc&limit=${safeLimit}`);
+}
+
 export function validateMessage({ kind = 'text', body = '', payload = null }) {
   const text = String(body ?? '').trim();
   if (text.length > MAX_BODY) throw new Error(`El mensaje es muy largo (máximo ${MAX_BODY} caracteres).`);
   if (kind === 'text' && !text) throw new Error('Escribí un mensaje.');
   if (kind === 'image' && !/^data:image\/(jpeg|png|webp);base64,/.test(payload?.dataUrl ?? '')) throw new Error('La imagen no es válida.');
   if (kind === 'lesson' && !(payload?.lesson?.slides?.length > 0)) throw new Error('La clase no tiene diapositivas.');
-  if (kind === 'activity' && !payload?.exercise?.id) throw new Error('Elegí un ejercicio para la actividad.');
+  if (kind === 'activity') {
+    const singleExercise = Boolean(payload?.exercise?.id);
+    const activity = payload?.activity;
+    const activityPacket = Boolean(activity?.id && String(activity.title ?? '').trim()
+      && Array.isArray(activity.cards) && activity.cards.length > 0
+      && Array.isArray(activity.exercises) && activity.exercises.length > 0
+      && activity.cards.every(item => item?.id) && activity.exercises.every(item => item?.id));
+    if (!singleExercise && !activityPacket) throw new Error('La actividad debe tener tarjetas y ejercicios.');
+    if (activityPacket && JSON.stringify(payload).length > 750_000) throw new Error('La actividad ocupa demasiado espacio para enviarse.');
+  }
   if (!['text', ...TEACHER_KINDS].includes(kind)) throw new Error('Tipo de mensaje desconocido.');
   return { kind, body: text, payload: kind === 'text' ? null : payload };
 }
@@ -57,6 +71,19 @@ export function lessonPayload(lesson, allExercises) {
   const exercises = allExercises.filter(item => item.custom && ids.has(item.id));
   const { id, title, description, slides } = lesson;
   return { lesson: { id, title, description, slides }, exercises };
+}
+
+/** Paquete que el docente envía a un grupo desde Aula → Crear actividad. */
+export function activityPayload(activity) {
+  return {
+    activity: {
+      id: activity.id,
+      title: String(activity.title ?? '').trim(),
+      description: String(activity.description ?? ''),
+      cards: Array.isArray(activity.cards) ? activity.cards : [],
+      exercises: Array.isArray(activity.exercises) ? activity.exercises : [],
+    },
+  };
 }
 
 export function mergeMessages(current, incoming) {

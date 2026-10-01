@@ -87,8 +87,8 @@ export default function BasketballChallenge({ langKey = 'gn-jopara', onProgress 
       targetX: level.distance,
       targetY: level.hoopHeight,
       y0: level.releaseHeight,
-      wind: 0,
-      temperature: 21,
+      wind: effectiveWind,
+      temperature,
     });
     planned.hasUserSpeed = hasValidSpeed;
     planned.userSpeed = hasValidSpeed ? numCurrentSpeed : null;
@@ -171,6 +171,7 @@ export default function BasketballChallenge({ langKey = 'gn-jopara', onProgress 
         now,
         scenario: 'basketball',
         verdict: evalResult?.result === 'swish' || evalResult?.result === 'bank-in' || evalResult?.result === 'rim-in',
+        language: langKey,
       });
     };
 
@@ -189,29 +190,33 @@ export default function BasketballChallenge({ langKey = 'gn-jopara', onProgress 
     observer.observe(canvas);
     resize();
 
-    if (phase === 'flying') {
+    const windIsAnimated = Math.abs(Number(flight.environment?.wind) || 0) > 0.05
+      && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (phase === 'flying' || windIsAnimated) {
       const durationMs = Math.min(3500, Math.max(1800, flight.duration * 750));
       const tick = (now) => {
-        if (startedAt === null) startedAt = now;
-        progressRef.current = Math.min(1, (now - startedAt) / durationMs);
+        if (phase === 'flying') {
+          if (startedAt === null) startedAt = now;
+          progressRef.current = Math.min(1, (now - startedAt) / durationMs);
+        }
         draw(now);
-        if (progressRef.current < 1) {
+        if ((phase === 'flying' && progressRef.current < 1) || (phase !== 'flying' && windIsAnimated)) {
           frameId = requestAnimationFrame(tick);
-        } else {
+        } else if (phase === 'flying') {
           setPhase('result');
         }
       };
       frameId = requestAnimationFrame(tick);
     } else {
       progressRef.current = phase === 'result' ? 1 : 0;
-      draw();
+      draw(performance.now());
     }
 
     return () => {
       cancelAnimationFrame(frameId);
       observer.disconnect();
     };
-  }, [flight, phase, evalResult]);
+  }, [flight, phase, evalResult, langKey]);
 
   const handleShoot = (e) => {
     e?.preventDefault();
@@ -307,23 +312,23 @@ export default function BasketballChallenge({ langKey = 'gn-jopara', onProgress 
   return (
     <div className="pgame-challenge-card" aria-label={t.bballTitle}>
       {/* Marcador dinámico superior con Shot Clock */}
-      <div className="pgame-bball-scoreboard" aria-label="Marcador y reloj de tiro">
-        <div className="pgame-sb-item">
-          <span className="pgame-sb-label">Nivel</span>
-          <span className="pgame-sb-val" style={{ fontSize: '0.95rem', color: '#93c5fd' }}>{level.name}</span>
+      <div className="pgame-bball-scoreboard" aria-label={t.bballScoreboardLabel}>
+        <div className="pgame-sb-item pgame-sb-level">
+          <span className="pgame-sb-label">{t.bballLevelLabel}</span>
+          <span className="pgame-sb-val pgame-sb-level-value">{level.name}</span>
         </div>
         <div className="pgame-sb-item">
           <span className="pgame-sb-label">{t.scoreLabel || 'Puntos'}</span>
           <span className="pgame-sb-val">{totalScore} PTS</span>
         </div>
         <div className="pgame-sb-item">
-          <span className="pgame-sb-label">Racha</span>
+          <span className="pgame-sb-label">{t.bballStreakLabel}</span>
           <span className={`pgame-sb-val ${streak >= 2 ? 'is-hot' : ''}`}>
-            {streak > 0 ? `🔥 x${streak}` : '0'}
+            {streak > 0 ? `x${streak}` : '0'}
           </span>
         </div>
-        <div className={`pgame-shot-clock ${shotClock <= 5.0 ? 'is-low' : ''}`} title="Shot Clock (24s NBA/FIBA)">
-          <span className="pgame-sb-label" style={{ color: '#e2e8f0' }}>⏱️ 24s:</span>
+        <div className={`pgame-shot-clock ${shotClock <= 5.0 ? 'is-low' : ''}`}>
+          <span className="pgame-sb-label">{t.bballClockLabel}</span>
           <span className="pgame-clock-digits">{shotClock.toFixed(1)}s</span>
         </div>
       </div>
@@ -400,7 +405,7 @@ export default function BasketballChallenge({ langKey = 'gn-jopara', onProgress 
                 {Math.abs(Number(liveCalcCheck.diff)) <= 0.15 && liveCalcCheck.isDes ? (
                   <span style={{ color: '#16a34a' }}>{t.bballValidCalc}</span>
                 ) : Number(liveCalcCheck.diff) > 0.15 && Number(liveCalcCheck.diff) <= 0.45 && liveCalcCheck.isDes ? (
-                  <span style={{ color: '#0284c7' }}>💥 Buen tiro con tablero: impactará a {liveCalcCheck.yHoop} m y rebotará al aro.</span>
+                  <span style={{ color: '#0284c7' }}>Buen tiro con tablero: impactará a {liveCalcCheck.yHoop} m y rebotará al aro.</span>
                 ) : Number(liveCalcCheck.diff) < -0.15 ? (
                   <span style={{ color: '#dc2626' }}>{t.bballShortCalc}</span>
                 ) : (
@@ -533,7 +538,6 @@ export default function BasketballChallenge({ langKey = 'gn-jopara', onProgress 
                 id="bball-speed"
                 type="text"
                 inputMode="decimal"
-                placeholder={t.bballSpeedPlaceholder || 'Calculá e ingresá v₀ (m/s)...'}
                 value={speed}
                 onChange={handleSpeedChange}
                 disabled={phase === 'flying'}
@@ -594,13 +598,13 @@ export default function BasketballChallenge({ langKey = 'gn-jopara', onProgress 
           </strong>
 
           <div className="pgame-calc-breakdown">
-            <p><strong>Cálculo en x = {level.distance} m:</strong></p>
+            <p><strong>{t.bballCalcAtDistance.replace('{distance}', level.distance)}</strong></p>
             <ul>
-              <li>Tiempo de llegada al aro: <code>t = x / vx = {evalResult.timeToHoop?.toFixed(2)} s</code></li>
-              <li>Altura del balón al llegar: <code>y(t) = {evalResult.heightAtHoop} m</code> (Aro reglamentario: <code>3.05 m</code>)</li>
-              <li>Sentido vertical: <code>{evalResult.isDescending ? '⬇️ Descendente (requisito de enceste cumplido)' : '⬆️ Ascendente (imposible encestar desde abajo)'}</code></li>
+              <li>{t.bballTimeToHoop} <code>t = x / vx = {evalResult.timeToHoop?.toFixed(2)} s</code></li>
+              <li>{t.bballBallHeightAtHoop} <code>y(t) = {evalResult.heightAtHoop} m</code> ({t.bballRegulationHoop} <code>{level.hoopHeight.toFixed(2)} m</code>)</li>
+              <li>{t.bballVerticalDirection} <code>{evalResult.isDescending ? `↓ ${t.bballDescending}` : `↑ ${t.bballAscendingDirection}`}</code></li>
               {evalResult.collision?.type === 'backboard' && (
-                <li>Impacto en tablero: <code>h = {evalResult.collision.y.toFixed(2)} m</code> (recuadro de 3.05 a 3.52 m).</li>
+                <li>{t.bballBackboardImpact} <code>h = {evalResult.collision.y.toFixed(2)} m</code> ({t.bballBackboardBox.replace('{min}', level.hoopHeight.toFixed(2)).replace('{max}', (level.hoopHeight + 0.47).toFixed(2))}).</li>
               )}
             </ul>
           </div>

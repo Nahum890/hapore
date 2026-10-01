@@ -68,50 +68,135 @@ export default function ComplementaryChallenge({ langKey = 'gn-jopara', onProgre
       const scale = Math.min((width - originX - 30) / maxR, (groundY - 30) / (level.speed * level.speed / (2 * level.gravity) + 2));
       const options = { scale, originX, groundY };
 
-      // Fondo
+      // Solo dibujo: la escala, las curvas y la evaluación son las mismas de siempre.
+      const pill = (x, y, text, bg, color = '#fff', align = 'center') => {
+        ctx.font = '700 11px system-ui, sans-serif';
+        const w = ctx.measureText(text).width + 14;
+        const left = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
+        ctx.fillStyle = bg;
+        ctx.beginPath(); ctx.roundRect(left, y - 14, w, 20, 10); ctx.fill();
+        ctx.fillStyle = color; ctx.textAlign = 'left';
+        ctx.fillText(text, left + 7, y);
+      };
+      const peakOf = (pts) => pts.reduce((best, p) => (p.y < best.y ? p : best), pts[0]);
+
+      // Fondo: cielo de laboratorio con grilla en metros
       const sky = ctx.createLinearGradient(0, 0, 0, groundY);
-      sky.addColorStop(0, '#f0fdf4');
-      sky.addColorStop(1, '#dcfce7');
+      sky.addColorStop(0, '#e0f2fe');
+      sky.addColorStop(1, '#f8fafc');
       ctx.fillStyle = sky;
       ctx.fillRect(0, 0, width, height);
 
-      // Suelo
-      ctx.fillStyle = '#15803d';
-      ctx.fillRect(0, groundY, width, height - groundY);
+      const step = [1, 2, 5, 10, 20, 25, 50].find((s) => s * scale >= 42) || 100;
+      ctx.lineWidth = 1;
+      ctx.font = '600 10px system-ui, sans-serif';
+      for (let m = 0; originX + m * scale < width; m += step) {
+        const x = originX + m * scale;
+        ctx.strokeStyle = m === 0 ? 'rgba(15, 23, 42, 0.35)' : 'rgba(14, 116, 144, 0.12)';
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, groundY); ctx.stroke();
+      }
+      for (let m = step; groundY - m * scale > 0; m += step) {
+        const y = groundY - m * scale;
+        ctx.strokeStyle = 'rgba(14, 116, 144, 0.12)';
+        ctx.beginPath(); ctx.moveTo(originX, y); ctx.lineTo(width, y); ctx.stroke();
+        ctx.fillStyle = '#64748b'; ctx.textAlign = 'right';
+        ctx.fillText(`${m} m`, originX - 6, y + 3);
+      }
 
-      // Meta (alcance base)
+      // Suelo con césped y regla de distancias
+      const grass = ctx.createLinearGradient(0, groundY, 0, height);
+      grass.addColorStop(0, '#22c55e');
+      grass.addColorStop(1, '#15803d');
+      ctx.fillStyle = grass;
+      ctx.fillRect(0, groundY, width, height - groundY);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.fillRect(0, groundY, width, 2);
+      ctx.fillStyle = '#f0fdf4'; ctx.textAlign = 'center';
+      for (let m = 0; originX + m * scale < width - 10; m += step) {
+        const x = originX + m * scale;
+        ctx.fillRect(x - 0.5, groundY + 2, 1, 5);
+        ctx.fillText(`${m}`, x, groundY + 18);
+      }
+
+      // Meta: banderín en el alcance obtenido
       const targetPt = toCanvasPoint({ x: level.range, y: 0 }, options);
+      ctx.strokeStyle = '#334155'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(targetPt.x, groundY); ctx.lineTo(targetPt.x, groundY - 34); ctx.stroke();
       ctx.fillStyle = '#dc2626';
-      ctx.beginPath();
-      ctx.arc(targetPt.x, groundY, 6, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#1e293b';
-      ctx.font = '700 10px system-ui, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(`Meta: ${level.range} m`, targetPt.x, groundY + 16);
+      ctx.beginPath(); ctx.moveTo(targetPt.x, groundY - 34); ctx.lineTo(targetPt.x + 18, groundY - 28); ctx.lineTo(targetPt.x, groundY - 22); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = 'rgba(220, 38, 38, 0.18)';
+      ctx.beginPath(); ctx.ellipse(targetPt.x, groundY + 1, 16, 4, 0, 0, Math.PI * 2); ctx.fill();
+      // A la derecha del banderín: las curvas llegan desde la izquierda.
+      pill(targetPt.x + 22, groundY - 24, `R = ${level.range} m`, '#dc2626', '#fff', 'left');
 
       // Curva 1 (Ángulo inicial de referencia)
       const pointsBase = evalResult?.pointsBase || basePoints;
       if (pointsBase?.length > 1) {
         const pts1 = toCanvasPoints(pointsBase, options);
+        ctx.save();
         ctx.strokeStyle = '#2563eb';
         ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.shadowColor = 'rgba(37, 99, 235, 0.35)';
+        ctx.shadowBlur = 6;
         ctx.beginPath();
         pts1.forEach((p, idx) => (idx === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
         ctx.stroke();
+        ctx.restore();
+        const top = peakOf(pts1);
+        pill(top.x, top.y - 10, `θ₁ = ${level.baseAngle}°`, '#2563eb');
       }
+
+      // Cañón en el origen, apuntando al ángulo de referencia (o al del alumno al lanzar)
+      const aimDeg = phase !== 'idle' && evalResult?.proposedAngle ? Number(evalResult.proposedAngle) : level.baseAngle;
+      const aim = (aimDeg * Math.PI) / 180;
+      ctx.save();
+      ctx.translate(originX, groundY - 6);
+      ctx.fillStyle = 'rgba(37, 99, 235, 0.12)';
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, 30, -aim, 0); ctx.closePath(); ctx.fill();
+      ctx.rotate(-aim);
+      ctx.fillStyle = '#334155';
+      ctx.beginPath(); ctx.roundRect(-4, -5, 30, 10, 4); ctx.fill();
+      ctx.restore();
+      ctx.fillStyle = '#1e293b';
+      ctx.beginPath(); ctx.arc(originX, groundY - 4, 9, Math.PI, 0); ctx.fill();
 
       // Curva 2 (Ángulo propuesto por el usuario al lanzar)
       if (phase !== 'idle' && evalResult?.pointsUser?.length > 1) {
         const pts2 = toCanvasPoints(evalResult.pointsUser, options);
         const count = Math.max(2, Math.round(progressRef.current * pts2.length));
-        ctx.strokeStyle = evalResult.isComplementary ? '#16a34a' : '#d97706';
+        const color = evalResult.isComplementary ? '#16a34a' : '#d97706';
+        ctx.save();
+        ctx.strokeStyle = color;
         ctx.lineWidth = 3;
-        ctx.setLineDash(evalResult.isComplementary ? [] : [4, 4]);
+        ctx.lineCap = 'round';
+        ctx.setLineDash(evalResult.isComplementary ? [] : [6, 5]);
         ctx.beginPath();
         pts2.slice(0, count).forEach((p, idx) => (idx === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
         ctx.stroke();
-        ctx.setLineDash([]);
+        ctx.restore();
+        // Pelota recorriendo la curva
+        const head = pts2[Math.min(count, pts2.length) - 1];
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.18)';
+        ctx.beginPath(); ctx.ellipse(head.x, groundY + 1, 7, 2.5, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.arc(head.x, head.y, 6.5, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+        if (progressRef.current >= 1) {
+          const top = peakOf(pts2);
+          pill(top.x, top.y - 10, `θ₂ = ${evalResult.proposedAngle}°`, color);
+        }
+      }
+
+      // Leyenda
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.beginPath(); ctx.roundRect(width - 168, 10, 158, phase !== 'idle' ? 46 : 28, 8); ctx.fill();
+      ctx.font = '600 11px system-ui, sans-serif'; ctx.textAlign = 'left';
+      ctx.fillStyle = '#2563eb'; ctx.fillRect(width - 158, 22, 16, 3);
+      ctx.fillStyle = '#334155'; ctx.fillText('Referencia (θ₁)', width - 136, 27);
+      if (phase !== 'idle') {
+        ctx.fillStyle = evalResult?.isComplementary ? '#16a34a' : '#d97706'; ctx.fillRect(width - 158, 40, 16, 3);
+        ctx.fillStyle = '#334155'; ctx.fillText('Tu ángulo (θ₂)', width - 136, 45);
       }
     };
 
@@ -215,7 +300,7 @@ export default function ComplementaryChallenge({ langKey = 'gn-jopara', onProgre
           ref={canvasRef}
           className="pgame-canvas"
           role="img"
-          aria-label="Comparación de trayectorias complementarias"
+          aria-label={langKey === 'es' ? 'Comparación de trayectorias complementarias' : 'Trayectoria complementaria ñembojoja'}
         />
       </div>
 
@@ -227,7 +312,6 @@ export default function ComplementaryChallenge({ langKey = 'gn-jopara', onProgre
               id="comp-angle"
               type="text"
               inputMode="decimal"
-              placeholder={t.compInputPlaceholder}
               value={angleInput}
               onChange={handleAngleChange}
               disabled={phase === 'flying'}
@@ -251,7 +335,7 @@ export default function ComplementaryChallenge({ langKey = 'gn-jopara', onProgre
               className="btn btn-secondary pgame-btn-next"
               onClick={handleNext}
             >
-              Siguiente reto
+              {t.compNextBtn}
             </button>
           )}
         </div>
@@ -270,9 +354,9 @@ export default function ComplementaryChallenge({ langKey = 'gn-jopara', onProgre
           </strong>
 
           <div className="pgame-calc-breakdown">
-            <p><strong>Demostración trigonométrica:</strong></p>
+            <p><strong>{t.compProofTitle}</strong></p>
             <code>sin(2·θ₂) = sin(2·(90° - {level.baseAngle}°)) = sin(180° - {level.baseAngle * 2}°) = sin({level.baseAngle * 2}°)</code>
-            <p>Por lo tanto, ambos ángulos logran exactamente el mismo alcance horizontal <code>R = {level.range} m</code>.</p>
+            <p>{t.compProofConclusion} <code>R = {level.range} m</code>.</p>
           </div>
         </div>
       )}

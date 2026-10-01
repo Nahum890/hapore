@@ -1,4 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import Trajectory3D, { seriesFromLaunch, TRAJECTORY_COLORS } from '../simulator/Trajectory3D.jsx';
+import { useTranslation } from '../i18n/LanguageProvider.jsx';
+import './ChatWidget.css';
 import { Formula, MathText } from './MathText.jsx';
 import { createLaunch, evaluateTrajectory, maxHeight, range, timeOfFlight } from '../physics/projectileMotion.js';
 import { launchErrors } from '../utils/lessons.js';
@@ -22,6 +25,8 @@ function describeLaunch(v0, angle, gravity) {
  * se ajusta al vuelo más grande. Opcionalmente dibuja un segundo lanzamiento
  * para comparar (por ejemplo, 30° contra 60°). */
 export function Trajectory({ v0, angle, gravity, compare = null, large = false }) {
+  const { t } = useTranslation();
+  const [view, setView] = useState('2d');
   const errors = launchErrors({ v0, angle, gravity });
   const compareErrors = compare ? launchErrors({ v0: compare.v0, angle: compare.angle, gravity }) : {};
   const valid = !Object.keys(errors).length;
@@ -45,7 +50,14 @@ export function Trajectory({ v0, angle, gravity, compare = null, large = false }
   }
 
   return <div className={'projector-trajectory' + (large ? ' is-large' : '')}>
-    <svg viewBox={`0 0 ${data.width} ${data.chartHeight}`} role="img" aria-label={`Trayectoria: ${fmt(data.main.distance)} metros de alcance y ${fmt(data.main.height)} metros de altura máxima`}>
+    <div className="chatw-toggle projector-view-toggle" role="group" aria-label={t('chatw.viewLabel')}>
+      {['2d', '3d'].map(item => <button key={item} type="button" className={view === item ? 'is-active' : ''} aria-pressed={view === item} onClick={() => setView(item)}>{t(`chatw.view.${item}`)}</button>)}
+    </div>
+    {view === '3d' && <Trajectory3D series={[
+      seriesFromLaunch({ v0: Number(v0), angle: Number(angle), g: Number(gravity) }, `${fmt(v0)} m/s · ${fmt(angle)}°`, TRAJECTORY_COLORS[0]),
+      ...(data.other ? [seriesFromLaunch({ v0: Number(compare.v0), angle: Number(compare.angle), g: Number(gravity) }, `${fmt(compare.v0)} m/s · ${fmt(compare.angle)}°`, TRAJECTORY_COLORS[1])] : []),
+    ]} height={large ? 440 : 300} />}
+    <svg hidden={view === '3d'} viewBox={`0 0 ${data.width} ${data.chartHeight}`} role="img" aria-label={`Trayectoria: ${fmt(data.main.distance)} metros de alcance y ${fmt(data.main.height)} metros de altura máxima`}>
       <line x1={data.padX} y1={data.chartHeight - data.padY} x2={data.width - data.padX} y2={data.chartHeight - data.padY} className="trajectory-ground" />
       <line x1={data.padX} y1={data.padY} x2={data.padX} y2={data.chartHeight - data.padY} className="trajectory-axis" />
       {data.other && <path d={data.otherPath} className="trajectory-path trajectory-path-compare" />}
@@ -54,18 +66,19 @@ export function Trajectory({ v0, angle, gravity, compare = null, large = false }
       <text x={data.x(data.main.distance)} y={data.y(0) - 12} textAnchor="middle" className="trajectory-label">{fmt(data.main.distance)} m</text>
     </svg>
     {data.other && <p className="trajectory-legend"><span className="legend-main">{fmt(v0)} m/s · {fmt(angle)}°</span><span className="legend-compare">{fmt(compare.v0)} m/s · {fmt(compare.angle)}° → {fmt(data.other.distance)} m</span></p>}
-    <div className="projector-metrics" aria-label="Resultados de la simulación">
-      <span><strong>{fmt(data.main.distance)} m</strong>Alcance</span>
-      <span><strong>{fmt(data.main.height)} m</strong>Altura máxima</span>
-      <span><strong>{fmt(data.main.duration)} s</strong>Tiempo de vuelo</span>
+    <div className="projector-metrics" aria-label={t('chatw.simTitle')}>
+      <span><strong>{fmt(data.main.distance)} m</strong>{t('free.range')}</span>
+      <span><strong>{fmt(data.main.height)} m</strong>{t('free.maxHeight')}</span>
+      <span><strong>{fmt(data.main.duration)} s</strong>{t('free.flightTime')}</span>
     </div>
   </div>;
 }
 
 function TitleSlide({ slide }) {
+  const { t } = useTranslation();
   return <div className="projector-slide lesson-title-slide">
-    <span className="projector-kicker">Clase de Física</span>
-    <h2>{slide.title || 'Sin título'}</h2>
+    <span className="projector-kicker">{t('slides.kicker')}</span>
+    <h2>{slide.title || t('slides.noTitle')}</h2>
     {slide.subtitle && <p>{slide.subtitle}</p>}
   </div>;
 }
@@ -73,19 +86,21 @@ function TitleSlide({ slide }) {
 function TextSlide({ slide }) {
   const lines = String(slide.body ?? '').split('\n').map(line => line.trim()).filter(Boolean);
   const isList = lines.length > 1 && lines.every(line => /^[-•*]\s*/.test(line));
+  const { t } = useTranslation();
   return <div className="projector-slide lesson-text-slide">
     {slide.title && <h2>{slide.title}</h2>}
     {isList
       ? <ul>{lines.map((line, index) => <li key={index}>{line.replace(/^[-•*]\s*/, '')}</li>)}</ul>
       : lines.map((line, index) => <p key={index}>{line}</p>)}
-    {!slide.title && !lines.length && <p className="projector-empty">Diapositiva vacía</p>}
+    {!slide.title && !lines.length && <p className="projector-empty">{t('slides.empty')}</p>}
   </div>;
 }
 
 function ConceptSlide({ concept }) {
-  if (!concept) return <p className="projector-empty">Elegí un concepto para esta diapositiva.</p>;
+  const { t } = useTranslation();
+  if (!concept) return <p className="projector-empty">{t('slides.pickConcept')}</p>;
   return <div className="projector-slide projector-concept-slide">
-    <span className="projector-kicker">Movimiento parabólico</span>
+    <span className="projector-kicker">{t('slides.topic')}</span>
     <h2>{concept.name}</h2>
     <p>{concept.definition}</p>
     {concept.formula && <div className="projector-formula"><Formula text={concept.formula} /></div>}
@@ -93,19 +108,21 @@ function ConceptSlide({ concept }) {
 }
 
 function ExerciseSlide({ slide, exercise, showAnswer, onToggleAnswer }) {
-  if (!exercise) return <p className="projector-empty">Elegí un ejercicio para esta diapositiva (si era un ejercicio propio, pudo haberse eliminado).</p>;
+  const { t } = useTranslation();
+  if (!exercise) return <p className="projector-empty">{t('slides.pickExercise')}</p>;
   return <div className="projector-slide projector-exercise-slide">
-    <span className="projector-kicker">{slide.title ? `${slide.title} · ` : ''}{exercise.custom ? 'Ejercicio propio' : 'Ejercicio'} · {exercise.difficulty || 'Práctica'}</span>
+    <span className="projector-kicker">{slide.title ? `${slide.title} · ` : ''}{exercise.custom ? t('slides.ownExercise') : t('lesson.type.ejercicio')} · {exercise.difficulty || t('slides.practice')}</span>
     <MathText as="h2" text={exercise.question} />
     <div className="projector-given-values">
-      {Object.entries(exercise.values ?? {}).map(([key, value]) => <span key={key}><small>{VALUE_LABELS[key] ?? key}</small><strong>{value}{key.startsWith('angle') ? '°' : VALUE_UNITS[key] ?? ''}</strong></span>)}
+      {Object.entries(exercise.values ?? {}).map(([key, value]) => <span key={key}><small>{t(`value.${key}`) === `value.${key}` ? key : t(`value.${key}`)}</small><strong>{value}{key.startsWith('angle') ? '°' : VALUE_UNITS[key] ?? ''}</strong></span>)}
     </div>
-    {showAnswer && <p className="projector-answer">Respuesta: {exercise.correctAnswer} {exercise.unit}</p>}
-    {onToggleAnswer && <button type="button" className="btn btn-secondary" onClick={onToggleAnswer}>{showAnswer ? 'Ocultar respuesta' : 'Mostrar respuesta'}</button>}
+    {showAnswer && <p className="projector-answer">{t('slides.answer')} {exercise.correctAnswer} {exercise.unit}</p>}
+    {onToggleAnswer && <button type="button" className="btn btn-secondary" onClick={onToggleAnswer}>{showAnswer ? t('slides.hideAnswer') : t('slides.showAnswer')}</button>}
   </div>;
 }
 
 function SimulatorSlide({ slide, large }) {
+  const { t } = useTranslation();
   return <div className="projector-slide lesson-sim-slide">
     {slide.title && <h2>{slide.title}</h2>}
     <Trajectory
@@ -115,25 +132,26 @@ function SimulatorSlide({ slide, large }) {
       compare={slide.compare ? { v0: slide.v0B, angle: slide.angleB } : null}
       large={large}
     />
-    <p className="lesson-sim-values">v0 = {fmt(Number(slide.v0) || 0)} m/s · ángulo = {fmt(Number(slide.angle) || 0)}° · g = {fmt(Number(slide.gravity) || 0)} m/s² · sin resistencia del aire</p>
+    <p className="lesson-sim-values">v0 = {fmt(Number(slide.v0) || 0)} m/s · θ = {fmt(Number(slide.angle) || 0)}° · g = {fmt(Number(slide.gravity) || 0)} m/s² · {t('slides.noAir')}</p>
   </div>;
 }
 
 export function SlideView({ slide, exercises, concepts, large = false, showAnswer = false, onToggleAnswer }) {
-  if (!slide) return <p className="projector-empty">Esta clase todavía no tiene diapositivas.</p>;
+  const { t } = useTranslation();
+  if (!slide) return <p className="projector-empty">{t('slides.none')}</p>;
   if (slide.type === 'titulo') return <TitleSlide slide={slide} />;
   if (slide.type === 'texto') return <TextSlide slide={slide} />;
   if (slide.type === 'concepto') return <ConceptSlide concept={concepts.find(item => item.id === slide.conceptId)} />;
   if (slide.type === 'ejercicio') return <ExerciseSlide slide={slide} exercise={exercises.find(item => item.id === slide.exerciseId)} showAnswer={showAnswer} onToggleAnswer={onToggleAnswer} />;
   if (slide.type === 'simulador') return <SimulatorSlide slide={slide} large={large} />;
-  return <p className="projector-empty">Tipo de diapositiva desconocido.</p>;
+  return <p className="projector-empty">{t('slides.unknown')}</p>;
 }
 
-export function slideSummary(slide, exercises, concepts) {
-  if (slide.type === 'titulo') return slide.title || 'Portada';
-  if (slide.type === 'texto') return slide.title || String(slide.body ?? '').split('\n')[0] || 'Texto';
-  if (slide.type === 'concepto') return concepts.find(item => item.id === slide.conceptId)?.name ?? 'Concepto sin elegir';
-  if (slide.type === 'ejercicio') return slide.title || exercises.find(item => item.id === slide.exerciseId)?.question || 'Ejercicio sin elegir';
+export function slideSummary(slide, exercises, concepts, t = key => key) {
+  if (slide.type === 'titulo') return slide.title || t('lesson.type.titulo');
+  if (slide.type === 'texto') return slide.title || String(slide.body ?? '').split('\n')[0] || t('lesson.type.texto');
+  if (slide.type === 'concepto') return concepts.find(item => item.id === slide.conceptId)?.name ?? t('slides.noConcept');
+  if (slide.type === 'ejercicio') return slide.title || exercises.find(item => item.id === slide.exerciseId)?.question || t('slides.noExercise');
   if (slide.type === 'simulador') return slide.title || `${slide.v0} m/s · ${slide.angle}°`;
   return slide.type;
 }

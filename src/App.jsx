@@ -16,7 +16,8 @@ import CanvasSimulator from './simulator/CanvasSimulator.jsx';
 import PredictLaunchGame from './simulator/PredictLaunchGame.jsx';
 import TrajectoryDrawingPractice from './components/TrajectoryDrawingPractice.jsx';
 import ExplorationLab from './simulator/ExplorationLab.jsx';
-import AIPrivacyNotice from './components/AIPrivacyNotice.jsx';
+import { useSpeechRecognition, useSpeechSynthesis } from './hooks/useSpeech.js';
+import { imageFileToDataUrl } from './utils/imageData.js';
 import {
   concepts as conceptsData,
   errors as errorsData,
@@ -29,7 +30,14 @@ import {
 import { getCustomExercises } from './utils/customExercises.js';
 import { joinClass, leaveClass } from './utils/classroom.js';
 import ProfileSettings from './components/ProfileSettings.jsx';
+import NotificationsCenter from './components/NotificationsCenter.jsx';
+import useClassNotifications from './hooks/useClassNotifications.js';
 import { Formula, MathText } from './components/MathText.jsx';
+import TutorWorkbench from './components/TutorWorkbench.jsx';
+import ChatWidget from './components/ChatWidget.jsx';
+import { parseWidgetTags } from './ai/chatTools.js';
+import { startTeacherSync } from './cloud/teacherContent.js';
+import { APP_VERSION_LABEL } from './version.js';
 const ClassChat = lazy(() => import('./components/ClassChat.jsx'));
 import { isCloudConfigured } from './cloud/cloudClient.js';
 import { downloadClass, flushProgress, getClassPackage, getPendingProgress, leaveCloudClass, progressSnapshot, queueProgress, syncMyProfile } from './cloud/classCloud.js';
@@ -45,16 +53,13 @@ import { useQuiz } from './hooks/useQuiz.js';
 import { readJSON, writeJSON, setActiveProfile } from './utils/storage.js';
 import { getSession, hasContactInfo, logout } from './auth/localAccounts.js';
 import { decodeClassConfig, encodeClassConfig, selectClassExercises } from './utils/classCode.js';
-import { recommendExercise, summarizeAttempts } from './pedagogy/progression.js';
-import { getRepeatedErrorFocus } from './pedagogy/errorSummary.js';
+import { practiceRecommendation, recommendExercise, summarizeAttempts } from './pedagogy/progression.js';
 import './components/TutorModes.css';
 import Icon from './components/Icon.jsx';
 import { LaunchScene, Nanduti } from './components/Nanduti.jsx';
 import { useTranslation } from './i18n/LanguageProvider.jsx';
-import { translate } from './i18n/messages.js';
-import VoiceChatControls from './components/VoiceChatControls.jsx';
-import ExercisePhotoTutor from './components/ExercisePhotoTutor.jsx';
-import './components/AdaptivePracticePlan.css';
+import { tutorSourceKey } from './ai/tutorSource.js';
+import { localizeError } from './i18n/messages.js';
 
 // Cada sección tiene su color: así se reconoce dónde estás sin leer.
 const SECTIONS = [
@@ -69,27 +74,32 @@ const SECTIONS = [
 // Un solo tema (Movimiento Parabólico) con tres situaciones: mismo motor
 // físico, distinto disfraz visual en el simulador.
 const SCENARIOS = [
-  { id: 'dron', icon: 'launch', label: 'Dron', lead: 'Entregas rurales' },
-  { id: 'basketball', icon: 'ball', label: 'Básquetbol', lead: 'Tiros a la canasta' },
-  { id: 'wall', icon: 'wall', label: 'Paredón', lead: 'Pasar por encima' },
+  // Nombres visibles en messages.js: scenario.<id> y scenario.<id>Lead.
+  { id: 'dron', icon: 'launch' },
+  { id: 'basketball', icon: 'ball' },
+  { id: 'wall', icon: 'wall' },
 ];
 
-// En Jopara, la etiqueta en castellano acompaña como apoyo (no reemplaza).
+// Texto traducido en un elemento. Antes mostraba además la versión en
+// castellano debajo del Jopara; se quitó para que cada idioma se vea completo
+// y sin mezclas.
 function Bilingual({ k, as: Tag = 'span', className = '' }) {
-  const { language, t } = useTranslation();
-  const es = translate('es', k);
-  return <Tag className={className}>{t(k)}{language !== 'es' && es !== t(k) && <small className="bilingual-es" lang="es">{es}</small>}</Tag>;
+  const { t } = useTranslation();
+  return <Tag className={className}>{t(k)}</Tag>;
 }
 
 function HomeView({ user, learning, classConfig, onNavigate, onGuide }) {
   const { t } = useTranslation();
   const teacher = user.role === 'maestro';
   const progress = summarizeAttempts(learning.attemptLog);
-  const reviewFocus = getRepeatedErrorFocus(learning.attemptLog);
   const topicProgress = SCENARIOS.map(scenario => {
     const ids = new Set(getAllExercises().filter(item => item.scenario === scenario.id).map(item => item.id));
-    return { topic: scenario.label, ...summarizeAttempts(learning.attemptLog.filter(item => ids.has(item.exerciseId))) };
+    return { topic: t(`scenario.${scenario.id}`), ...summarizeAttempts(learning.attemptLog.filter(item => ids.has(item.exerciseId))) };
   });
+  // Plan de práctica: si el alumno repite el mismo tipo de error dos veces o
+  // más, se le sugiere un ejercicio corto enfocado en esa dificultad puntual.
+  const practicePlan = !teacher ? practiceRecommendation(getAllExercises(), learning.attemptLog) : null;
+  const goToPractice = exerciseId => { learning.onSelectExercise(exerciseId); onNavigate('simulador'); };
   return <div className="home-view">
     <section className="home-hero">
       <div className="home-hero-copy">
@@ -111,87 +121,92 @@ function HomeView({ user, learning, classConfig, onNavigate, onGuide }) {
       <button className="home-action-card is-review" type="button" onClick={() => onNavigate('tarjetas')}><span className="home-card-icon" aria-hidden="true"><Icon name="cards" size={26} /></span><Bilingual k="nav.tarjetas" as="strong" /><span className="home-card-text">{t('home.reviewText')}</span><small aria-hidden="true"><Icon name="arrow" size={18} /></small></button>
       <button className="home-action-card is-tutor" type="button" onClick={() => onNavigate('chats')}><span className="home-card-icon" aria-hidden="true"><Icon name="chat" size={26} /></span><Bilingual k="nav.chats" as="strong" /><span className="home-card-text">{t('home.tutorText')}</span><small aria-hidden="true"><Icon name="arrow" size={18} /></small></button>
     </div>
-    <section className="home-class-card"><Nanduti size={64} spokes={16} rings={3} className="home-class-nanduti" /><div><span className="panel-eyebrow">{teacher ? 'PARA TU CLASE' : 'APRENDÉ EN CLASE'}</span><h3>{teacher ? '¿Qué necesitás para tu clase?' : classConfig ? 'Tu clase está configurada' : '¿Tenés un código de clase?'}</h3><p>{teacher ? 'Compartí una clase, creá un ejercicio o prepará una presentación para proyectar.' : classConfig ? 'Ya podés practicar los materiales que preparó tu docente.' : 'Ingresalo para ver los ejercicios y tarjetas de tu docente.'}</p></div><button className="btn btn-secondary" type="button" onClick={() => onNavigate('aula')}>{teacher ? 'Ir a Aula docente' : 'Ir a Mi clase'}</button></section>
-    {progress.attempts > 0 && <section className="card learning-progress" aria-label="Progreso por tema"><div className="learning-progress-head"><div><span className="panel-eyebrow">TU AVANCE</span><h2>Así vas aprendiendo</h2></div><strong>{progress.accuracy}% de aciertos</strong></div><div className="learning-topic-grid">{topicProgress.map(item => <div key={item.topic}><div className="learning-topic-title"><strong>{item.topic}</strong><span>{item.correct}/{item.attempts} aciertos</span></div><div className="learning-topic-track"><span style={{width:`${item.accuracy}%`}} /></div><small>{item.attempts ? `Tiempo promedio: ${item.averageSeconds} s` : 'Todavía sin intentos'}</small></div>)}</div></section>}
-    {reviewFocus && <section className="practice-plan card" aria-label="Plan de práctica recomendado"><div><span className="panel-eyebrow">RECOMENDACIÓN PERSONAL</span><h3>Un punto breve para repasar</h3><p>En tus intentos recientes se repitió <strong>{reviewFocus.label.toLocaleLowerCase()}</strong> ({reviewFocus.count} veces). {reviewFocus.activity}</p></div><button type="button" className="btn btn-primary" onClick={() => onNavigate('simulador')}>Practicar ahora</button><small>Este plan se calcula en tu dispositivo a partir de tus ejercicios. No se envían tus respuestas escritas.</small></section>}
-    <p className="home-progress-note">Tu progreso: <strong>{learning.xp} XP</strong> · {progress.correct} respuestas correctas de {progress.attempts} intentos{progress.attempts ? ` · ${progress.accuracy}% de aciertos` : ''}. Guardado en este dispositivo.</p>
+    <section className="home-class-card"><Nanduti size={64} spokes={16} rings={3} className="home-class-nanduti" /><div><span className="panel-eyebrow">{t(teacher ? 'home.classEyebrowTeacher' : 'home.classEyebrowStudent')}</span><h3>{t(teacher ? 'home.classTitleTeacher' : classConfig ? 'home.classTitleJoined' : 'home.classTitleNoCode')}</h3><p>{t(teacher ? 'home.classTextTeacher' : classConfig ? 'home.classTextJoined' : 'home.classTextNoCode')}</p></div><button className="btn btn-secondary" type="button" onClick={() => onNavigate('aula')}>{t(teacher ? 'home.goTeacherClass' : 'home.goStudentClass')}</button></section>
+    {practicePlan && <section className="card practice-plan" aria-label={t('plan.label')}>
+      <span className="panel-eyebrow">{t('plan.eyebrow')}</span>
+      <h2>{t('plan.reason', { label: t(`error.${practicePlan.pattern.errorType}`) })}</h2>
+      <p>{t('plan.why', { n: practicePlan.pattern.count })}</p>
+      <button type="button" className="btn btn-primary" onClick={() => goToPractice(practicePlan.exercise.id)}>{t('plan.cta')} <Icon name="arrow" size={18} /></button>
+    </section>}
+    {progress.attempts > 0 && <section className="card learning-progress" aria-label={t('home.progressLabel')}><div className="learning-progress-head"><div><span className="panel-eyebrow">{t('home.progressEyebrow')}</span><h2>{t('home.progressTitle')}</h2></div><strong>{t('home.accuracy', { n: progress.accuracy })}</strong></div><div className="learning-topic-grid">{topicProgress.map(item => <div key={item.topic}><div className="learning-topic-title"><strong>{item.topic}</strong><span>{t('home.topicCorrect', { c: item.correct, a: item.attempts })}</span></div><div className="learning-topic-track"><span style={{width:`${item.accuracy}%`}} /></div><small>{item.attempts ? t('home.avgTime', { s: item.averageSeconds }) : t('home.noAttempts')}</small></div>)}</div></section>}
+    <p className="home-progress-note">{t('home.progressNote', { xp: learning.xp, c: progress.correct, a: progress.attempts })}{progress.attempts ? t('home.progressAccuracy', { n: progress.accuracy }) : ''}. {t('home.savedHere')}</p>
   </div>;
 }
 
-const RESOURCE_VALUE_LABELS = {
-  v0: 'Velocidad inicial', angle: 'Ángulo', angleA: 'Primer ángulo', angleB: 'Segundo ángulo',
-  gravity: 'Gravedad', vx: 'Velocidad horizontal', t: 'Tiempo', targetDistance: 'Distancia objetivo',
-};
 const RESOURCE_VALUE_UNITS = { v0: 'm/s', vx: 'm/s', angle: '°', angleA: '°', angleB: '°', gravity: 'm/s²', t: 's', targetDistance: 'm' };
 
 function ResourceLibrary({ concepts, errors, examples, glossary, sources }) {
-  const { language } = useTranslation();
+  const { language, t } = useTranslation();
   const [category, setCategory] = useState('conceptos');
   const [query, setQuery] = useState('');
   const categories = [
-    { id: 'conceptos', label: 'Conceptos', items: concepts },
-    { id: 'ejemplos', label: 'Ejercicios resueltos', items: examples },
-    { id: 'errores', label: 'Errores frecuentes', items: errors },
-    { id: 'glosario', label: 'Glosario', items: glossary },
-    { id: 'fuentes', label: 'Fuentes', items: sources },
+    { id: 'conceptos', items: concepts },
+    { id: 'ejemplos', items: examples },
+    { id: 'errores', items: errors },
+    { id: 'glosario', items: glossary },
+    { id: 'fuentes', items: sources },
   ];
   const selected = categories.find(item => item.id === category) ?? categories[0];
   const normalizedQuery = query.trim().toLocaleLowerCase();
   const visibleItems = selected.items.filter(item => JSON.stringify(item).toLocaleLowerCase().includes(normalizedQuery));
 
-  return <section className="resource-section" aria-label="Biblioteca de apoyo">
-    <div className="resource-heading"><div><span className="panel-eyebrow">MATERIAL PARA EXPLICAR Y REPASAR</span><h2>Biblioteca de apoyo</h2><p>Conceptos, ejemplos, errores habituales y fuentes para preparar la clase.</p></div>
-      <div className="resource-summary"><strong>{concepts.length}</strong> conceptos <strong>{examples.length}</strong> ejemplos <strong>{errors.length}</strong> errores <strong>{glossary.length}</strong> términos <strong>{sources.length}</strong> fuentes</div>
+  return <section className="resource-section" aria-label={t('library.label')}>
+    <div className="resource-heading"><div><span className="panel-eyebrow">{t('library.eyebrow')}</span><h2>{t('library.title')}</h2><p>{t('library.lead')}</p></div>
+      <div className="resource-summary">{t('library.summary', { c: concepts.length, e: examples.length, r: errors.length, g: glossary.length, s: sources.length })}</div>
     </div>
-    <div className="resource-filters" role="group" aria-label="Tipo de material">
-      {categories.map(item => <button key={item.id} type="button" aria-pressed={category === item.id} className={category === item.id ? 'is-active' : ''} onClick={() => { setCategory(item.id); setQuery(''); }}>{item.label}<span>{item.items.length}</span></button>)}
+    <div className="resource-filters" role="group" aria-label={t('library.filterLabel')}>
+      {categories.map(item => <button key={item.id} type="button" aria-pressed={category === item.id} className={category === item.id ? 'is-active' : ''} onClick={() => { setCategory(item.id); setQuery(''); }}>{t(`library.cat.${item.id}`)}<span>{item.items.length}</span></button>)}
     </div>
-    <label className="resource-search">Buscar en {selected.label.toLocaleLowerCase()}<input type="search" className="quiz-input" value={query} onChange={event => setQuery(event.target.value)} placeholder="Escribí una palabra o fórmula" /></label>
+    <label className="resource-search">{t('library.search', { cat: t(`library.cat.${selected.id}`).toLocaleLowerCase() })}<input type="search" className="quiz-input" value={query} onChange={event => setQuery(event.target.value)} placeholder={t('library.searchPlaceholder')} /></label>
     {visibleItems.length ? <div className="resource-card-grid">
       {visibleItems.map(item => category === 'conceptos' ? <article className="resource-card" key={item.id}>
-        <span className="resource-card-label">IDEA CLAVE</span><h3>{item.name}</h3><p>{item.definition}</p>{item.formula && <code className="resource-formula"><Formula text={item.formula} /></code>}
+        <span className="resource-card-label">{t('library.keyIdea')}</span><h3>{item.name}</h3><p>{item.definition}</p>{item.formula && <code className="resource-formula"><Formula text={item.formula} /></code>}
       </article> : category === 'errores' ? <article className="resource-card" key={item.id}>
-        <span className="resource-card-label">PARA REVISAR</span><h3>{item.name}</h3><p>{item.description}</p>{item.example && <div className="resource-example"><strong>Cómo corregirlo</strong><MathText as="p" text={item.example} /></div>}
+        <span className="resource-card-label">{t('library.toReview')}</span><h3>{item.name}</h3><p>{item.description}</p>{item.example && <div className="resource-example"><strong>{t('library.howToFix')}</strong><MathText as="p" text={item.example} /></div>}
       </article> : category === 'ejemplos' ? <article className="resource-card resource-worked-example" key={item.id}>
         <span className="resource-card-label">{item.topic} · {item.difficulty}</span><MathText as="h3" text={item.question} />
-        <div className="resource-given-values">{Object.entries(item.values ?? {}).map(([key, value]) => <span key={key}><small>{RESOURCE_VALUE_LABELS[key] ?? key}</small><strong>{value}{RESOURCE_VALUE_UNITS[key] ? ` ${RESOURCE_VALUE_UNITS[key]}` : ''}</strong></span>)}</div>
-        <details><summary>Ver resolución y respuesta</summary><p className="resource-answer">{item.correctAnswer} {item.unit}</p><ol>{(item.hints ?? []).map((hint, index) => <li key={`${item.id}-${index}`}><MathText text={hint} /></li>)}</ol></details>
+        <div className="resource-given-values">{Object.entries(item.values ?? {}).map(([key, value]) => <span key={key}><small>{t(`value.${key}`)}</small><strong>{value}{RESOURCE_VALUE_UNITS[key] ? ` ${RESOURCE_VALUE_UNITS[key]}` : ''}</strong></span>)}</div>
+        <details><summary>{t('library.solution')}</summary><p className="resource-answer">{item.correctAnswer} {item.unit}</p><ol>{(item.hints ?? []).map((hint, index) => <li key={`${item.id}-${index}`}><MathText text={hint} /></li>)}</ol></details>
       </article> : category === 'glosario' ? <article className="resource-card" key={item.id}>
-        <span className="resource-card-label">TÉRMINO</span><h3>{item.term}</h3>{language === 'es' && item.joparaTerm && <p className="resource-translation"><strong>Jopara:</strong> {item.joparaTerm}</p>}<p>{item.definition}</p>{language !== 'es' && item.ejemploJopara && <div className="resource-example"><strong>Ejemplo</strong><p>{item.ejemploJopara}</p></div>}
+        <span className="resource-card-label">{t('library.term')}</span><h3>{item.term}</h3><p>{item.definition}</p>{language !== 'es' && item.ejemploJopara && <div className="resource-example"><strong>{t('library.example')}</strong><p>{item.ejemploJopara}</p></div>}
       </article> : <article className="resource-card resource-source-card" key={item.id}>
-        <span className="resource-card-label">{item.institution}</span><h3>{item.title}</h3><p>{(language === 'es' ? item.supports : item.supportsJopara)?.join(' · ')}</p><p className="resource-source-note">{language === 'es' ? item.assumptions : (item.assumptionsJopara ?? item.assumptions)}</p><small>{item.publicationYear}{item.authors?.length ? ` · ${item.authors.join(', ')}` : ''}{item.license ? ` · ${item.license}` : ''}</small><a href={item.url} target="_blank" rel="noreferrer">Abrir fuente <Icon name="arrow" size={16} /></a>
+        <span className="resource-card-label">{item.institution}</span><h3>{item.title}</h3><p>{(language === 'es' ? item.supports : (item.supportsJopara ?? item.supports))?.join(' · ')}</p><p className="resource-source-note">{language === 'es' ? item.assumptions : (item.assumptionsJopara ?? item.assumptions)}</p><small>{item.publicationYear}{item.authors?.length ? ` · ${item.authors.join(', ')}` : ''}{item.license ? ` · ${item.license}` : ''}</small><a href={item.url} target="_blank" rel="noreferrer">{t('library.openSource')} <Icon name="arrow" size={16} /></a>
       </article>)}
-    </div> : <p className="resource-empty">No hay resultados. Probá con otra palabra.</p>}
+    </div> : <p className="resource-empty">{t('library.empty')}</p>}
   </section>;
 }
 
 function AulaView({ classConfig, onJoinClass, concepts, errors, examples, glossary, sources, teacher }) {
+  const { t } = useTranslation();
   return (
     <>
-      <div className="aula-toolbar"><p>Prepará materiales para usar con tu grupo.</p><PdfButton /></div>
+      <div className="aula-toolbar"><p>{t('aula.toolbar')}</p><PdfButton /></div>
       <TeacherMode classConfig={classConfig} onJoinClass={onJoinClass} teacher={teacher} />
       <ResourceLibrary concepts={concepts} errors={errors} examples={examples} glossary={glossary} sources={sources} />
     </>
   );
 }
 
-function QuizSelector({ quiz }) {
+function QuizSelector({ quiz, onReviewStart }) {
+  const { t } = useTranslation();
+  // Nunca queda vacío: sin tarjetas, estado vacío explicado; con pocas
+  // (menos del mínimo de 5), un único botón con todas las disponibles.
+  if (quiz.maxAvailable <= 0) {
+    return <section className="card deck-empty" role="status">
+      <h2>{t('repaso.emptyTitle')}</h2>
+      <p className="deck-selector-note">{t('repaso.emptyText')}</p>
+    </section>;
+  }
   const options = [...new Set([5, 10, 20, quiz.maxAvailable])].filter(count => count <= quiz.maxAvailable).sort((a, b) => a - b);
+  const label = count => (count === quiz.maxAvailable ? t('repaso.optFull') : count === 5 ? t('repaso.optQuick') : count === 10 ? t('repaso.optNormal') : t('repaso.optMore'));
   return (
-    <section className="card" aria-label="Selector de cantidad de tarjetas">
-      <h2>Elegí tu repaso</h2>
-      <p className="deck-selector-note">
-        Hay {quiz.repasoAvailable} tarjetas disponibles. Empezá con 5 si tenés poco tiempo.
-      </p>
+    <section className="card" aria-label={t('repaso.chooseTitle')}>
+      <h2>{t('repaso.chooseTitle')}</h2>
+      <p className="deck-selector-note">{t('repaso.chooseText', { n: quiz.repasoAvailable })}</p>
       <div className="deck-options">
         {options.map((count) => (
-          <button
-            key={count}
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => quiz.chooseQuantity(count)}
-          >
-            <strong>{count}</strong><span>{count === 5 ? 'Rápido' : count === 10 ? 'Normal' : count === quiz.maxAvailable ? 'Completo' : 'Más práctica'}</span>
+          <button key={count} type="button" className="btn btn-secondary" onClick={() => { quiz.chooseQuantity(count); onReviewStart?.(); }}>
+            <strong>{count}</strong><span>{label(count)}</span>
           </button>
         ))}
       </div>
@@ -199,63 +214,58 @@ function QuizSelector({ quiz }) {
   );
 }
 
+// El mazo de repaso puede no estar en su fase de tarjetas (el cuestionario
+// ya empezó o terminó). Antes la sección quedaba en blanco en ese caso.
+function RepasoPhaseNotice({ quiz, onContinue }) {
+  const { t } = useTranslation();
+  const inQuiz = quiz.step === 'quiz';
+  return <section className="card deck-empty" role="status">
+    <h2>{t(inQuiz ? 'repaso.inQuizTitle' : 'repaso.doneTitle')}</h2>
+    <p className="deck-selector-note">{t(inQuiz ? 'repaso.inQuizText' : 'repaso.doneText')}</p>
+    <div className="quiz-actions">
+      {inQuiz && <button type="button" className="btn btn-primary" onClick={onContinue}>{t('repaso.continueQuiz')}</button>}
+      <button type="button" className={inQuiz ? 'btn btn-secondary' : 'btn btn-primary'} onClick={quiz.restart}>{t('repaso.newReview')}</button>
+    </div>
+  </section>;
+}
+
 function RepasoView({ quiz, onCardConsolidated }) {
+  const { t } = useTranslation();
   const card = quiz.currentCard;
   return (
-    <section className="deck-view" aria-label="Mazo de tarjetas de repaso">
-      <p className="deck-counter">
-        Quedan {quiz.deck.length} de {quiz.quantity} tarjetas
-      </p>
+    <section className="deck-view" aria-label={t('repaso.cards')}>
+      <p className="deck-counter">{t('repaso.cardsLeft', { left: quiz.deck.length, total: quiz.quantity })}</p>
       {card && (
         <Flashcard
           key={card.id}
-          flashcard={{
-            id: card.id,
-            topic: card.tema,
-            frente_es: card.frente,
-            dorso_concepto: card.dorso,
-            formula: card.formula,
-          }}
+          flashcard={{ id: card.id, topic: card.tema, frente_es: card.frente, dorso_concepto: card.dorso, formula: card.formula }}
           consolidated={quiz.consolidatedIds.has(card.id)}
           onConsolidate={onCardConsolidated}
           onReviewLater={quiz.reviewLaterCard}
         />
       )}
       {quiz.seenAll ? (
-        <button type="button" className="btn btn-primary" onClick={quiz.skipToQuiz}>
-          ¡Empezar Cuestionario!
-        </button>
+        <button type="button" className="btn btn-primary" onClick={quiz.skipToQuiz}>{t('repaso.startQuiz')}</button>
       ) : (
-        <button
-          type="button"
-          className="btn btn-secondary"
-          onClick={quiz.skipToQuiz}
-          disabled
-        >
-          Empezar Cuestionario ({quiz.seenIds.size}/{quiz.deckSize} vistas)
+        <button type="button" className="btn btn-secondary" onClick={quiz.skipToQuiz} disabled>
+          {t('repaso.startQuizLocked', { seen: quiz.seenIds.size, total: quiz.deckSize })}
         </button>
       )}
     </section>
   );
 }
 
-function TutorModeTabs({ mode, onModeChange, disabled = false }) {
-  return <div className="tutor-mode-tabs" role="tablist" aria-label="Modo del tutor">
-    <button type="button" role="tab" id="tutor-tab-quiz" aria-selected={mode === 'cuestionario'} aria-controls="tutor-panel" className={mode === 'cuestionario' ? 'is-active' : ''} onClick={() => onModeChange('cuestionario')} disabled={disabled}>Cuestionario</button>
-    <button type="button" role="tab" id="tutor-tab-free" aria-selected={mode === 'libre'} aria-controls="tutor-panel" className={mode === 'libre' ? 'is-active' : ''} onClick={() => onModeChange('libre')} disabled={disabled}>Chat libre</button>
-  </div>;
+function SourceLabel({ entry }) {
+  const { t } = useTranslation();
+  const key = tutorSourceKey(entry);
+  return key ? <small className="chat-message-source">{t(key)}</small> : null;
 }
 
-function tutorSourceLabel(entry = {}) {
-  if (entry.source === 'gemini') return 'Gemini con conexión';
-  if (entry.source === 'local-model') return 'Modelo en el dispositivo';
-  if (entry.source !== 'rules') return '';
-  if (entry.reason === 'offline') return 'Tutor local · sin conexión';
-  if (['consent-required', 'local-only'].includes(entry.reason)) return 'Tutor local · Gemini no habilitado';
-  if (entry.reason === 'rate-limited') return 'Tutor local · Gemini alcanzó su límite temporal';
-  if (entry.reason === 'timeout') return 'Tutor local · Gemini tardó demasiado';
-  if (entry.reason === 'online-fallback') return 'Tutor local · respaldo de Gemini';
-  return 'Tutor local';
+// Indicador "PyFis está respondiendo": es una burbuja más del flujo del chat
+// (no se superpone a los mensajes) y el scroll automático la incluye.
+function TypingBubble() {
+  const { t } = useTranslation();
+  return <div className="chat-bubble chat-tutor-bubble chat-typing" role="status" aria-live="polite"><span>{t('tutor.typing')}</span><span className="chat-typing-dots" aria-hidden="true"><i /><i /><i /></span></div>;
 }
 
 function handlePracticeTabKeyDown(event) {
@@ -270,229 +280,254 @@ function handlePracticeTabKeyDown(event) {
   tabs[target].click();
 }
 
-function FreeChatView({ quiz }) {
-  const { language } = useTranslation();
-  const [photoBusy, setPhotoBusy] = useState(false);
-  const logRef = useRef(null);
+function SpeakerButton({ text, id, speech }) {
+  const { t } = useTranslation();
+  if (!speech.supported || !text) return null;
+  const speaking = speech.speakingId === id;
+  return <button type="button" className={'chat-speak-button' + (speaking ? ' is-speaking' : '')} aria-label={t(speaking ? 'free.stopListen' : 'free.listen')} onClick={() => speech.speak(text, id)}>
+    <Icon name="speaker" size={14} />
+  </button>;
+}
+
+// Desplaza el chat al último mensaje cuando cambia su contenido.
+function useAutoScroll(deps) {
+  const ref = useRef(null);
   useEffect(() => {
-    logRef.current?.scrollTo?.({ top: logRef.current.scrollHeight, behavior: 'smooth' });
-  }, [quiz.charlaLog.length, quiz.streamText, quiz.busy]);
-  const freeHistory = quiz.history.filter(session => session.tipo === 'chat-libre' || session.tema === 'Chat libre');
-  const latestTutorText = [...quiz.charlaLog].reverse().find(message => message.role !== 'alumno')?.text ?? '';
-  return <div className="tutor-mode-panel" id="tutor-panel" role="tabpanel" aria-labelledby="tutor-tab-free">
-    <div className="quiz-head">
-      <div><h2>Chat libre</h2><p>Preguntale al tutor sin completar tarjetas ni cuestionarios.</p></div>
-      <span className="chip">Consultas disponibles hoy: {quiz.charlaLeft}/15</span>
-      <button type="button" className="btn btn-secondary chat-new-button" onClick={quiz.newFreeConversation} disabled={quiz.busy || photoBusy}>Nueva conversación</button>
-    </div>
-    <div className="chats-scroll" ref={logRef} aria-live="polite">
-      {!quiz.charlaLog.length && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble">¡Hola! Estoy acá para ayudarte con Física. Escribí tu pregunta cuando quieras.</div>}
-      {quiz.charlaLog.map((message, position) => <div key={message.id ?? 'free-' + position} className={'chat-bubble ' + (message.role === 'alumno' ? 'chat-alumno-bubble' : 'chat-tutor-bubble')}>
-        <MathText text={message.text} />
-        {message.role !== 'alumno' && message.source && <small className="chat-message-source">{tutorSourceLabel(message)}</small>}
-      </div>)}
-      {quiz.busy && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-typing" role="status" aria-live="polite"><span>PyFis está escribiendo</span><span className="chat-typing-dots" aria-hidden="true"><i /><i /><i /></span></div>}
-      {quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-streaming" aria-live="off"><MathText text={quiz.streamText} /></div>}
-    </div>
-    <ExercisePhotoTutor quiz={quiz} language={language} onBusyChange={setPhotoBusy} />
-    <form className="chats-input-area" onSubmit={event => { event.preventDefault(); quiz.askFreeQuestion(); }}>
-      <input className="quiz-input" type="text" inputMode="text" autoComplete="off" aria-label="Pregunta para el tutor" placeholder={quiz.charlaLeft > 0 ? 'Escribí tu pregunta…' : 'Llegaste al límite diario de consultas'} value={quiz.charlaText} onChange={event => quiz.setCharlaText(event.target.value)} disabled={quiz.busy || photoBusy || quiz.charlaLeft <= 0} />
-      <button type="submit" className="btn btn-primary" disabled={quiz.busy || photoBusy || quiz.charlaLeft <= 0 || !quiz.charlaText.trim()}>{photoBusy ? 'PyFis está procesando…' : quiz.busy ? 'PyFis está escribiendo…' : 'Enviar pregunta'}</button>
-      <VoiceChatControls language={language} disabled={quiz.busy || photoBusy || quiz.charlaLeft <= 0} onTranscript={text => quiz.setCharlaText(current => current ? `${current} ${text}` : text)} speechText={latestTutorText} />
-    </form>
-    {quiz.charlaLeft <= 0 && <p className="deck-selector-note">Alcanzaste las 15 consultas diarias. Iniciar otra conversación no reinicia el límite.</p>}
-    {freeHistory.length > 0 && <details className="chat-history"><summary>Conversaciones anteriores ({freeHistory.length})</summary><ul className="chat-history-list">{[...freeHistory].reverse().map(session => <li key={session.id} className="chat-history-item"><button type="button" className="chat-history-button" onClick={() => quiz.openFreeConversation(session)} disabled={quiz.busy || photoBusy}><strong>{session.tema}</strong><br />{session.fecha} · {session.mensajes?.length ?? 0} mensajes</button></li>)}</ul></details>}
+    const node = ref.current;
+    if (!node) return;
+    requestAnimationFrame(() => node.scrollTo?.({ top: node.scrollHeight, behavior: 'smooth' }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
+  return ref;
+}
+
+function FreeChatView({ quiz }) {
+  const { t, language } = useTranslation();
+  const logRef = useAutoScroll([quiz.charlaLog.length, quiz.streamText, quiz.busy]);
+  const galleryRef = useRef(null);
+  const cameraRef = useRef(null);
+  const composerRef = useRef(null);
+  const [photoError, setPhotoError] = useState('');
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(() => window.matchMedia?.('(min-width: 1180px)')?.matches ?? false);
+  const recognition = useSpeechRecognition();
+  const speech = useSpeechSynthesis();
+  const freeHistory = quiz.history
+    .filter(session => session.tipo === 'chat-libre')
+    .sort((a, b) => new Date(b.hora ?? b.fecha).getTime() - new Date(a.hora ?? a.fecha).getTime());
+  // El Laboratorio PyFis ya no se abre solo por palabras sueltas: se abre
+  // con los datos exactos de una herramienta del chat ("Abrir en el Laboratorio").
+  const [labPreset, setLabPreset] = useState(null);
+  const openLab = params => setLabPreset({ ...params, key: Date.now() });
+  const insertPrompt = text => {
+    quiz.setCharlaText(text);
+    requestAnimationFrame(() => composerRef.current?.focus());
+  };
+  const startNewConversation = () => { quiz.newFreeConversation(); speech.stop(); };
+
+  const pickPhoto = async event => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    setPhotoError(''); setPhotoBusy(true);
+    try { quiz.setCharlaImage(await imageFileToDataUrl(file, { maxSize: 1400, maxChars: 850_000 })); }
+    catch (failure) { setPhotoError(localizeError(language, failure.message)); }
+    finally { setPhotoBusy(false); }
+  };
+  const toggleMic = () => {
+    if (recognition.listening) { recognition.stop(); return; }
+    recognition.start(text => quiz.setCharlaText(current => (current ? current + ' ' : '') + text));
+  };
+  const blocked = quiz.busy || quiz.charlaLeft <= 0;
+
+  return <div className={`free-chat-shell${historyOpen ? ' has-history' : ''}`}>
+    {historyOpen && <>
+      <button type="button" className="free-chat-history-backdrop" aria-label={t('free.historyClose')} onClick={() => setHistoryOpen(false)} />
+      <aside className="free-chat-history-panel" aria-label={t('free.historyOpen')}>
+        <div className="free-chat-history-heading"><h2>{t('free.historyOpen')}</h2><button type="button" aria-label={t('free.historyClose')} onClick={() => setHistoryOpen(false)}>×</button></div>
+        <button type="button" className="btn btn-primary free-chat-history-new" onClick={() => { startNewConversation(); setHistoryOpen(false); }} disabled={quiz.busy}>{t('free.new')}</button>
+        {freeHistory.length ? <nav className="free-chat-history-list" aria-label={t('free.historyOpen')}>
+          {freeHistory.map(session => <div key={session.id} className="free-chat-history-row">
+            <button type="button" className={'free-chat-history-item' + (quiz.freeSessionId === session.id ? ' is-active' : '')} aria-current={quiz.freeSessionId === session.id ? 'page' : undefined} onClick={() => { quiz.openFreeConversation(session); speech.stop(); setHistoryOpen(false); }} disabled={quiz.busy}>
+              <strong>{session.tema}</strong><small>{session.fecha} · {session.mensajes?.length ?? 0} {t('quiz.messages')}</small>
+            </button>
+            <button type="button" className="free-chat-history-delete" aria-label={t('free.deleteChat', { name: session.tema })} title={t('free.deleteChat', { name: session.tema })} disabled={quiz.busy}
+              onClick={() => { if (window.confirm(t('free.deleteConfirm', { name: session.tema }))) { if (quiz.freeSessionId === session.id) speech.stop(); quiz.deleteFreeConversation(session.id); } }}>
+              <span aria-hidden="true">🗑</span>
+            </button>
+          </div>)}
+        </nav> : <p className="free-chat-history-empty">{t('free.historyEmpty')}</p>}
+      </aside>
+    </>}
+    <section className="free-chat-panel" aria-label={t('free.title')}>
+      <header className="free-chat-heading">
+        <div className="free-chat-heading-main">
+          <button type="button" className="btn btn-secondary free-chat-history-toggle" aria-expanded={historyOpen} onClick={() => setHistoryOpen(value => !value)}><span aria-hidden="true">☰</span>{t('free.historyOpen')}</button>
+          <div><h2>{t('free.title')}</h2><p>{t('free.lead')}</p></div>
+        </div>
+        <div className="free-chat-heading-actions"><button type="button" className="btn btn-secondary chat-new-button" onClick={startNewConversation} disabled={quiz.busy}>{t('free.new')}</button></div>
+      </header>
+      <div className="chats-scroll free-chat-scroll" ref={logRef} aria-live="polite">
+        {!quiz.charlaLog.length && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble">{t('free.welcome')}</div>}
+        {quiz.charlaLog.map((message, position) => <div key={message.id ?? 'free-' + position} className={'chat-bubble ' + (message.role === 'alumno' ? 'chat-alumno-bubble' : 'chat-tutor-bubble')}>
+          {message.image && <img className="chat-attached-photo" src={message.image} alt={t('free.photoSent')} />}
+          <MathText text={message.text} />
+          {message.role !== 'alumno' && message.widget && <ChatWidget widget={message.widget} onOpenLab={openLab} onAsk={insertPrompt} />}
+          {message.role !== 'alumno' && <div className="chat-bubble-actions">
+            <SourceLabel entry={message} />
+            <SpeakerButton text={message.text} id={'free-' + position} speech={speech} />
+          </div>}
+        </div>)}
+        {quiz.busy && !quiz.streamText && <TypingBubble />}
+        {quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-streaming" aria-live="off"><MathText text={parseWidgetTags(quiz.streamText).text} /></div>}
+        {!quiz.charlaLog.length && !quiz.busy && <div className="free-chat-suggestions" aria-label={t('chatw.suggestionsLabel')}>
+          {['chatw.s1', 'chatw.s2', 'chatw.s3', 'chatw.s4', 'chatw.s5', 'chatw.s6'].map(key => <button key={key} type="button" className="free-chat-suggestion" onClick={() => insertPrompt(t(key))}>{t(key)}</button>)}
+        </div>}
+        <TutorWorkbench preset={labPreset} onInsertPrompt={insertPrompt} />
+      </div>
+      {quiz.charlaImage && <div className="chat-photo-preview"><img src={quiz.charlaImage} alt={t('free.photoReady')} /><button type="button" className="btn btn-text" onClick={() => quiz.setCharlaImage(null)}>{t('free.removePhoto')}</button></div>}
+      {photoError && <p className="field-error" role="alert">{photoError}</p>}
+      {recognition.error && <p className="field-error" role="alert">{t(recognition.error)}</p>}
+      <form className="chats-input-area" onSubmit={event => { event.preventDefault(); quiz.askFreeQuestion(); }}>
+        <input ref={galleryRef} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={pickPhoto} />
+        <input ref={cameraRef} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" hidden onChange={pickPhoto} />
+        <div className="chat-photo-actions">
+          <button type="button" className="btn btn-secondary chat-photo-option" title={t('free.attach')} onClick={() => galleryRef.current?.click()} disabled={blocked || photoBusy}>
+            <Icon name="image" size={18} />{t('free.attach')}
+          </button>
+          <button type="button" className="btn btn-secondary chat-photo-option" title={t('free.camera')} onClick={() => cameraRef.current?.click()} disabled={blocked || photoBusy}>
+            <Icon name="camera" size={18} />{t('free.camera')}
+          </button>
+        </div>
+        {recognition.supported && <button type="button" className={'btn btn-icon chat-mic-button' + (recognition.listening ? ' is-listening' : '')} title={t('free.voice')} aria-label={t(recognition.listening ? 'free.listening' : 'free.voice')} onClick={toggleMic} disabled={blocked}>
+          <Icon name="mic" size={20} />
+        </button>}
+        <input ref={composerRef} className="quiz-input" type="text" inputMode="text" autoComplete="off" aria-label={t('free.inputLabel')} placeholder={quiz.charlaLeft > 0 ? t(recognition.listening ? 'free.listening' : 'free.placeholder') : t('free.limitReached')} value={quiz.charlaText} onChange={event => quiz.setCharlaText(event.target.value)} disabled={blocked} />
+        <button type="submit" className="btn btn-primary" disabled={blocked || (!quiz.charlaText.trim() && !quiz.charlaImage)}>{quiz.busy ? t('tutor.typing') : t('common.send')}</button>
+      </form>
+      {recognition.supported && <p className="field-help chat-voice-note">{t('free.voiceNote')}</p>}
+      {quiz.charlaLeft <= 0 && <p className="deck-selector-note">{t('free.limitNote')}</p>}
+    </section>
   </div>;
 }
-function ChatsView({ quiz, mode, onModeChange, onCardConsolidated }) {
-  const logRef = useRef(null);
 
-  useEffect(() => {
-    logRef.current?.scrollTo?.({ top: logRef.current.scrollHeight, behavior: 'smooth' });
-  }, [quiz.chat.length, quiz.charlaLog.length, quiz.answered, quiz.busy, quiz.streamText]);
-
-  const score = quiz.chat.filter((entry) => entry.tutor?.correct).length;
-
-  if (mode === 'libre') return <section className="card chats-view" aria-label="Chat libre con el tutor">
-    <TutorModeTabs mode={mode} onModeChange={onModeChange} disabled={quiz.busy} />
-    <FreeChatView quiz={quiz} />
-  </section>;
-
-  if (quiz.step === 'cantidad') return <section className="card chats-view" aria-label="Modo cuestionario">
-    <TutorModeTabs mode={mode} onModeChange={onModeChange} disabled={quiz.busy} />
-    <div className="tutor-mode-panel" id="tutor-panel" role="tabpanel" aria-labelledby="tutor-tab-quiz">
-      <p className="deck-selector-note">Elegí una cantidad. Primero vas a repasar las fichas; después, el tutor te hará preguntas.</p>
-      <QuizSelector quiz={quiz} />
+// Cierre del cuestionario: resumen + opciones claras, en vez de repetir la
+// última pregunta o quedar en un estado ambiguo.
+function QuizEnd({ quiz, onNavigate }) {
+  const { t } = useTranslation();
+  const mistakes = quiz.mistakeCount;
+  return <div className="quiz-end" role="status">
+    <h3>{t('quiz.endTitle')}</h3>
+    <p>{t('quiz.endScore', { c: quiz.score, t: quiz.questions.length })} {t('quiz.endAsk')}</p>
+    <div className="quiz-end-actions">
+      <button type="button" className="btn btn-primary" onClick={quiz.practiceAgain}>{t('quiz.again')}</button>
+      {mistakes > 0 && <button type="button" className="btn btn-secondary" onClick={quiz.retryMistakes}>{t('quiz.retryMistakes', { n: mistakes })}</button>}
+      <button type="button" className="btn btn-secondary" onClick={() => onNavigate('simulador')}>{t('quiz.changeTopic')}</button>
+      <button type="button" className="btn btn-secondary" onClick={() => onNavigate('chats')}>{t('quiz.freeChat')}</button>
+      <button type="button" className="btn btn-text" onClick={() => onNavigate('inicio')}>{t('quiz.menu')}</button>
     </div>
+  </div>;
+}
+
+function QuizView({ quiz, onNavigate, onCardConsolidated, onReviewStart }) {
+  const { t } = useTranslation();
+  const logRef = useAutoScroll([quiz.chat.length, quiz.answered, quiz.busy, quiz.streamText, quiz.step]);
+
+  if (quiz.step === 'cantidad') return <section className="repaso-quiz-setup" aria-label={t('quiz.title')}>
+    <p className="deck-selector-note">{t('quiz.chooseText')}</p>
+    <QuizSelector quiz={quiz} onReviewStart={onReviewStart} />
   </section>;
 
-  if (quiz.step === 'repaso') return <section className="card chats-view" aria-label="Repaso previo al cuestionario">
-    <TutorModeTabs mode={mode} onModeChange={onModeChange} disabled={quiz.busy} />
-    <div className="tutor-mode-panel" id="tutor-panel" role="tabpanel" aria-labelledby="tutor-tab-quiz">
-      <div className="quiz-head"><div><h2>Repaso para el cuestionario</h2><p>Podés abrir Chat libre cuando quieras; el repaso queda guardado.</p></div></div>
-      <RepasoView quiz={quiz} onCardConsolidated={onCardConsolidated} />
-    </div>
+  if (quiz.step === 'repaso') return <section className="repaso-quiz-prep" aria-label={t('quiz.reviewTitle')}>
+    <div className="quiz-head"><div><h2>{t('quiz.reviewTitle')}</h2><p>{t('quiz.reviewText')}</p></div></div>
+    <RepasoView quiz={quiz} onCardConsolidated={onCardConsolidated} />
   </section>;
+
+  const finished = quiz.step === 'charla' || quiz.step === 'fin';
+  const quizHistory = quiz.history.filter(session => session.tipo !== 'chat-libre');
+  const lastQuestion = quiz.questionIndex + 1 >= quiz.questions.length;
+  // La pregunta actual se muestra solo mientras no fue respondida: una vez
+  // respondida ya queda en el historial del chat (antes aparecía dos veces).
+  const showCurrent = quiz.step === 'quiz' && quiz.currentQuestion && !quiz.answered;
 
   return (
-    <section className="card chats-view" aria-label="Chats con el tutor">
-      <TutorModeTabs mode={mode} onModeChange={onModeChange} disabled={quiz.busy} />
+    <section className="quiz-session-view" aria-label={t('quiz.title')}>
       <div className="quiz-head">
-        <h2>Cuestionario</h2>
-        {quiz.step === 'quiz' && (
-          <>
-            <span className="chip">
-              Pregunta {quiz.questionIndex + 1} de {quiz.questions.length}
-            </span>
-            <span className="chip chip-consolidated">Acertadas: {score}</span>
-          </>
-        )}
+        <h2>{t('quiz.title')}</h2>
+        {quiz.step === 'quiz' && <>
+          <span className="chip">{t('quiz.progress', { n: quiz.questionIndex + 1, total: quiz.questions.length })}</span>
+          <span className="chip chip-consolidated">{t('quiz.score', { n: quiz.score })}</span>
+        </>}
       </div>
 
       <div className="chats-scroll" ref={logRef}>
         {quiz.chat.map((entry, position) =>
           entry.closing ? (
-            <div key={`closing-${position}`} className="chat-bubble chat-tutor-bubble" role="status">
-              {entry.message}
-            </div>
+            <div key={`closing-${position}`} className="chat-bubble chat-tutor-bubble" role="status">{quiz.closingText(entry)}</div>
           ) : (
             <div key={`quiz-${position}`} className="chat-entry">
               <div className="chat-bubble chat-tutor-bubble"><MathText text={entry.statement} /></div>
-              <div className="chat-bubble chat-alumno-bubble">Vos: {entry.studentText}</div>
-              <div
-                className={`chat-bubble ${entry.tutor?.correct ? 'chat-correct' : 'chat-incorrect'}`}
-                role="status"
-              >
+              <div className="chat-bubble chat-alumno-bubble">{t('quiz.you', { text: entry.answerKey ? t(entry.answerKey) + (entry.justification ? ` — ${entry.justification}` : '') : entry.studentText })}</div>
+              <div className={`chat-bubble ${entry.tutor?.correct ? 'chat-correct' : entry.tutor?.partial ? 'chat-partial' : 'chat-incorrect'}`} role="status">
                 <MathText text={entry.tutor?.message} />
-                {entry.tutor?.source && <small className="chat-message-source">{tutorSourceLabel(entry.tutor)}</small>}
+                <SourceLabel entry={entry.tutor} />
               </div>
             </div>
           ),
         )}
-
-        {quiz.busy && !quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-typing" role="status" aria-live="polite"><span>PyFis está escribiendo</span><span className="chat-typing-dots" aria-hidden="true"><i /><i /><i /></span></div>}
-        {quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-streaming" aria-live="off"><MathText text={quiz.streamText} /></div>}
-
-        {quiz.step === 'quiz' && quiz.currentQuestion && (
+        {showCurrent && (
           <div className="chat-entry">
             <div className="chat-bubble chat-tutor-bubble">
               <MathText text={quiz.currentQuestion.tipo === 'vf' ? quiz.currentQuestion.enunciado : quiz.currentQuestion.pregunta} />
-              {quiz.currentQuestion.tipo === 'vf' && <span className="chip">Verdadero o falso</span>}
+              {quiz.currentQuestion.tipo === 'vf' && <span className="chip">{t('quiz.vf')}</span>}
             </div>
           </div>
         )}
+        {quiz.busy && !quiz.streamText && <TypingBubble />}
+        {quiz.streamText && <div className="chat-bubble chat-tutor-bubble chat-streaming" aria-live="off"><MathText text={quiz.streamText} /></div>}
       </div>
 
       {quiz.step === 'quiz' && quiz.currentQuestion && (
         <div className="chats-input-area">
           {quiz.answered ? (
-            <button type="button" className="btn btn-primary quiz-send" onClick={quiz.nextQuestion}>
-              {quiz.questionIndex + 1 >= quiz.questions.length ? 'Cerrar y charlar' : 'Siguiente pregunta'}
+            <button type="button" className="btn btn-primary quiz-send" onClick={quiz.nextQuestion} disabled={quiz.busy}>
+              {t(lastQuestion ? 'quiz.finish' : 'quiz.next')}
             </button>
           ) : quiz.currentQuestion.tipo === 'vf' ? (
             <>
               <div className="quiz-actions">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={quiz.markTrue}
-                  disabled={quiz.busy}
-                >
-                  Verdadero
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={quiz.markFalse}
-                  disabled={quiz.busy}
-                >
-                  Falso
-                </button>
+                <button type="button" className="btn btn-primary" onClick={quiz.markTrue} disabled={quiz.busy}>{t('common.true')}</button>
+                <button type="button" className="btn btn-secondary" onClick={quiz.markFalse} disabled={quiz.busy}>{t('common.false')}</button>
               </div>
               {quiz.awaitingJustification && (
                 <div className="quiz-justification">
-                  <p className="quiz-justification-label">
-                    Justificá por qué marcaste que es falso:
-                  </p>
-                  <textarea
-                    className="quiz-input"
-                    rows={2}
-                    placeholder="Escribí tu justificación..."
-                    value={quiz.justificationText}
-                    onChange={(event) => quiz.setJustificationText(event.target.value)}
-                    disabled={quiz.busy}
-                  />
+                  <p className="quiz-justification-label">{t('quiz.justifyLabel')}</p>
+                  <textarea className="quiz-input" rows={2} placeholder={t('quiz.justifyPlaceholder')} value={quiz.justificationText} onChange={(event) => quiz.setJustificationText(event.target.value)} disabled={quiz.busy} />
                   <div className="quiz-actions">
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      onClick={quiz.sendJustification}
-                      disabled={quiz.busy || !quiz.justificationText.trim()}
-                    >
-                      Enviar
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-secondary"
-                      onClick={quiz.cancelJustification}
-                      disabled={quiz.busy}
-                    >
-                      Cancelar
-                    </button>
+                    <button type="button" className="btn btn-primary" onClick={quiz.sendJustification} disabled={quiz.busy || !quiz.justificationText.trim()}>{t('common.send')}</button>
+                    <button type="button" className="btn btn-secondary" onClick={quiz.cancelJustification} disabled={quiz.busy}>{t('common.cancel')}</button>
                   </div>
                 </div>
               )}
             </>
           ) : (
-            <form
-              className="quiz-justification"
-              onSubmit={(event) => {
-                event.preventDefault();
-                quiz.answerOpen(quiz.justificationText.trim());
-              }}
-            >
-              <input
-                className="quiz-input"
-                type="text"
-                inputMode="text"
-                autoComplete="off"
-                placeholder="Escribí tu respuesta..."
-                value={quiz.justificationText}
-                onChange={(event) => quiz.setJustificationText(event.target.value)}
-                disabled={quiz.busy}
-              />
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={quiz.busy || !quiz.justificationText.trim()}
-              >
-                Enviar
-              </button>
+            <form className="quiz-justification" onSubmit={(event) => { event.preventDefault(); quiz.answerOpen(quiz.justificationText.trim()); }}>
+              <input className="quiz-input" type="text" inputMode="text" autoComplete="off" placeholder={t('quiz.answerPlaceholder')} value={quiz.justificationText} onChange={(event) => quiz.setJustificationText(event.target.value)} disabled={quiz.busy} />
+              <button type="submit" className="btn btn-primary" disabled={quiz.busy || !quiz.justificationText.trim()}>{t('common.send')}</button>
             </form>
           )}
         </div>
       )}
 
-      {(quiz.step === 'charla' || quiz.step === 'fin') && (
-        <div className="chats-input-area">
-          <p className="deck-selector-note">
-            Cuestionario terminado: {score} de {quiz.questions.length} respuestas correctas. Si querés conversar sobre un tema, cambiá a Chat libre.
-          </p>
-          <div className="quiz-actions">
-            <button type="button" className="btn btn-primary" onClick={() => onModeChange('libre')}>Ir al chat libre</button>
-            <button type="button" className="btn btn-secondary" onClick={quiz.restart}>Hacer otro cuestionario</button>
-          </div>
-        </div>
-      )}
+      {finished && <QuizEnd quiz={quiz} onNavigate={onNavigate} />}
 
-      {quiz.history.some(session => session.tema !== 'Chat libre') && (
+      {quizHistory.length > 0 && (
         <details className="chat-history">
-          <summary>Historial de cuestionarios ({quiz.history.filter(session => session.tema !== 'Chat libre').length})</summary>
+          <summary>{t('quiz.history', { n: quizHistory.length })}</summary>
           <ul className="chat-history-list">
-            {[...quiz.history].filter(session => session.tema !== 'Chat libre').reverse().map((session) => (
+            {[...quizHistory].reverse().map((session) => (
               <li key={session.id} className="chat-history-item">
-                <strong>{session.fecha}</strong> · {session.tema} · {session.mensajes?.length ?? 0}{' '}
-                mensajes
+                <strong>{session.fecha}</strong> · {session.tema} · {session.mensajes?.length ?? 0} {t('quiz.messages')}
               </li>
             ))}
           </ul>
@@ -502,21 +537,29 @@ function ChatsView({ quiz, mode, onModeChange, onCardConsolidated }) {
   );
 }
 
+function ChatsView({ quiz }) {
+  const { t } = useTranslation();
+  return <section className="card chats-view tutor-chat-view" aria-label={t('free.title')}><FreeChatView quiz={quiz} /></section>;
+}
+
 function LearningApp({ user, onLogout, onUpdateUser }) {
   const { t, language } = useTranslation();
   const [activeTab, setActiveTab] = useState('inicio');
+  // Docente: respaldo en Supabase de sus presentaciones y ejercicios propios.
+  useEffect(() => (user.role === 'maestro' ? startTeacherSync() : undefined), [user.id, user.role]);
   const [practiceMode, setPracticeMode] = useState('ejercicio');
-  const [repasoMode, setRepasoMode] = useState('tarjetas');
-  const [tutorMode, setTutorMode] = useState('cuestionario');
+  const [repasoMode, setRepasoMode] = useState('cuestionario');
   const [simulationSubmission, setSimulationSubmission] = useState(null);
   const [showGuide, setShowGuide] = useState(() => !readJSON('guarania:guideSeen:v2', false));
   const [showSettings, setShowSettings] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   // Cuentas creadas antes de que teléfono y correo fueran obligatorios.
   const missingContact = !hasContactInfo(user);
   const [localClassConfig, setClassConfig] = useState(() => decodeClassConfig(readJSON('guarania:classCode', null)));
   // Clase descargada de la nube (alumno): trae las tarjetas y ejercicios que
   // eligió el docente y queda guardada para usarla sin internet.
   const [classPackage, setClassPackage] = useState(getClassPackage);
+  const notifications = useClassNotifications(user, classPackage);
   const classConfig = classPackage?.content?.config ?? localClassConfig;
   const [syncState, setSyncState] = useState(() => ({ status: getPendingProgress() ? 'pending' : 'idle', at: null }));
   // El docente puede crear ejercicios propios mientras la app sigue abierta
@@ -552,7 +595,7 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
     learning.onSelectExercise,
   );
   const quiz = useQuiz(deckCards, {
-    onMoveToChat: () => { setTutorMode('cuestionario'); setActiveTab('chats'); },
+    onMoveToQuiz: () => { setRepasoMode('cuestionario'); setActiveTab('tarjetas'); },
     onQuizAnswer: learning.onQuizAnswer,
     classConfig,
     includeTheory: !classPackage,
@@ -605,7 +648,7 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
   };
 
   useEffect(() => {
-    if (activeTab === 'inicio') return;
+    if (activeTab === 'inicio' || activeTab === 'chats') return;
     ask({ type: 'section', section: activeTab, role: user.role, topic: currentExercise?.topic, exerciseId: currentExercise?.id });
   }, [activeTab, currentExercise?.id, ask]);
 
@@ -637,31 +680,29 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
 
   return (
     <div className="app" data-accent={section.accent}>
-      <Header user={user} onHome={() => navigate('inicio')} onLogout={onLogout} onOpenSettings={() => setShowSettings(true)} />
+      <Header user={user} onHome={() => navigate('inicio')} onLogout={onLogout} onOpenSettings={() => setShowSettings(true)} onOpenNotifications={() => { notifications.refresh(); setShowNotifications(true); }} notificationCount={notifications.notificationCount} />
       <nav className="primary-nav" aria-label={t('nav.label')}>
         {SECTIONS.map(item => <button key={item.id} type="button" data-accent={item.accent} className={'primary-nav-item' + (activeTab === item.id ? ' is-active' : '')} aria-current={activeTab === item.id ? 'page' : undefined} onClick={() => navigate(item.id)}><span className="primary-nav-icon"><Icon name={item.icon} size={22} /></span><Bilingual k={'nav.' + item.id} className="primary-nav-label" /></button>)}
       </nav>
-      {activeTab !== 'inicio' && <section className="section-intro" aria-labelledby="section-title">
+      {activeTab !== 'inicio' && activeTab !== 'chats' && <section className="section-intro" aria-labelledby="section-title">
         <span className="section-icon" aria-hidden="true"><Icon name={section.icon} size={28} /></span>
         <div className="section-copy"><p className="section-eyebrow">{t(user.role === 'maestro' ? 'section.teacher' : 'section.student')}</p><h2 id="section-title">{t(`section.${sectionKey}.title`)}</h2><p>{t(`section.${sectionKey}.description`)}</p></div>
         <button type="button" className="guide-replay" onClick={() => setShowGuide(true)}><Icon name="help" size={18} />{t('section.guide')}</button>
       </section>}
-      <AIPrivacyNotice />
-      <div className="app-layout"><main className="app-main">
+      <div className={`app-layout${activeTab === 'chats' ? ' is-tutor-page' : ''}`}><main className="app-main">
         {activeTab === 'inicio' && <HomeView user={user} learning={learning} classConfig={classConfig} onNavigate={navigate} onGuide={() => setShowGuide(true)} />}
         {activeTab === 'simulador' && (
           <>
-            <div className="tutor-mode-tabs practice-mode-tabs" role="tablist" aria-label="Modo de práctica">
-              <button id="practice-tab-ejercicio" type="button" role="tab" aria-controls="practice-panel" aria-selected={practiceMode === 'ejercicio'} tabIndex={practiceMode === 'ejercicio' ? 0 : -1} className={practiceMode === 'ejercicio' ? 'is-active' : ''} onKeyDown={handlePracticeTabKeyDown} onClick={() => setPracticeMode('ejercicio')}>Ejercicios</button>
-              <button id="practice-tab-dibujo" type="button" role="tab" aria-controls="practice-panel" aria-selected={practiceMode === 'dibujo'} tabIndex={practiceMode === 'dibujo' ? 0 : -1} className={practiceMode === 'dibujo' ? 'is-active' : ''} onKeyDown={handlePracticeTabKeyDown} onClick={() => setPracticeMode('dibujo')}>Dibujar parábolas</button>
-              <button id="practice-tab-minijuego" type="button" role="tab" aria-controls="practice-panel" aria-selected={practiceMode === 'minijuego'} tabIndex={practiceMode === 'minijuego' ? 0 : -1} className={practiceMode === 'minijuego' ? 'is-active' : ''} onKeyDown={handlePracticeTabKeyDown} onClick={() => setPracticeMode('minijuego')}>Desafíos de Física</button>
-              <button id="practice-tab-laboratorio" type="button" role="tab" aria-controls="practice-panel" aria-selected={practiceMode === 'laboratorio'} tabIndex={practiceMode === 'laboratorio' ? 0 : -1} className={practiceMode === 'laboratorio' ? 'is-active' : ''} onKeyDown={handlePracticeTabKeyDown} onClick={() => setPracticeMode('laboratorio')}>Laboratorio de exploración</button>
+            <div className="tutor-mode-tabs practice-mode-tabs" role="tablist" aria-label={t('practice.tabsLabel')}>
+              {[['ejercicio', 'practice.exercises'], ['dibujo', 'practice.drawing'], ['minijuego', 'practice.game'], ['laboratorio', 'practice.lab']].map(([mode, key]) => (
+                <button key={mode} id={`practice-tab-${mode}`} type="button" role="tab" aria-controls="practice-panel" aria-selected={practiceMode === mode} tabIndex={practiceMode === mode ? 0 : -1} className={practiceMode === mode ? 'is-active' : ''} onKeyDown={handlePracticeTabKeyDown} onClick={() => setPracticeMode(mode)}>{t(key)}</button>
+              ))}
             </div>
             <div id="practice-panel" role="tabpanel" aria-labelledby={`practice-tab-${practiceMode}`} tabIndex={0}>
             {practiceMode === 'dibujo' ? <TrajectoryDrawingPractice /> : practiceMode === 'minijuego' ? <PredictLaunchGame /> : practiceMode === 'laboratorio' ? <ExplorationLab /> : <>
-            <section className="topic-picker card" aria-label="Elegir situación de práctica">
-              <div><span className="panel-eyebrow">MOVIMIENTO PARABÓLICO</span><h2>Elegí una situación</h2><p>El cálculo es siempre el mismo; cambia el contexto y la escena del simulador.</p></div>
-              <div className="scenario-options">{availableScenarios.map(scenario => <button key={scenario.id} type="button" className={'scenario-option' + (currentExercise?.scenario === scenario.id ? ' is-active' : '')} aria-pressed={currentExercise?.scenario === scenario.id} onClick={() => selectScenario(scenario.id)}><Icon name={scenario.icon} size={22} /><span><strong>{scenario.label}</strong><small>{scenario.lead}</small></span></button>)}</div>
+            <section className="topic-picker card" aria-label={t('practice.pickLabel')}>
+              <div><span className="panel-eyebrow">{t('practice.topicEyebrow')}</span><h2>{t('practice.pickTitle')}</h2><p>{t('practice.pickText')}</p></div>
+              <div className="scenario-options">{availableScenarios.map(scenario => <button key={scenario.id} type="button" className={'scenario-option' + (currentExercise?.scenario === scenario.id ? ' is-active' : '')} aria-pressed={currentExercise?.scenario === scenario.id} onClick={() => selectScenario(scenario.id)}><Icon name={scenario.icon} size={22} /><span><strong>{t(`scenario.${scenario.id}`)}</strong><small>{t(`scenario.${scenario.id}Lead`)}</small></span></button>)}</div>
             </section>
             {currentExercise && <div className="practice-workspace">
               <ExerciseCard
@@ -675,14 +716,10 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
               />
               <CanvasSimulator mission={mission} submission={simulationSubmission} />
             </div>}
-            {recommendation && <div className="practice-recommendation" role="status"><div><strong>Tu siguiente paso</strong><p>{recommendation.reason}</p></div>{recommendation.exercise.id !== currentExercise?.id && <button className="btn btn-secondary" type="button" onClick={() => { learning.onSelectExercise(recommendation.exercise.id); setSimulationSubmission(null); }}>Ir al recomendado</button>}</div>}
+            {recommendation && <div className="practice-recommendation" role="status"><div><strong>{t('reco.title')}</strong><p>{recommendation.reasonKey ? t(recommendation.reasonKey) : recommendation.reason}</p></div>{recommendation.exercise.id !== currentExercise?.id && <button className="btn btn-secondary" type="button" onClick={() => { learning.onSelectExercise(recommendation.exercise.id); setSimulationSubmission(null); }}>{t('reco.go')}</button>}</div>}
             <div className="mission-nav">
-              <button type="button" className="btn btn-secondary" onClick={prev} disabled={index === 0}>
-                Anterior
-              </button>
-              <button type="button" className="btn btn-secondary" onClick={next}>
-                Siguiente ejercicio
-              </button>
+              <button type="button" className="btn btn-secondary" onClick={prev} disabled={index === 0}>{t('common.previous')}</button>
+              <button type="button" className="btn btn-secondary" onClick={next}>{t('practice.nextExercise')}</button>
             </div>
             </>}
             </div>
@@ -691,41 +728,27 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
 
         {activeTab === 'tarjetas' && (
           <>
-            <div className="tutor-mode-tabs" role="tablist" aria-label="Modo de repaso">
-              <button
-                type="button"
-                role="tab"
-                aria-selected={repasoMode === 'tarjetas'}
-                className={repasoMode === 'tarjetas' ? 'is-active' : ''}
-                onClick={() => setRepasoMode('tarjetas')}
-              >
-                Tarjetas de repaso
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={repasoMode === 'teoria'}
-                className={repasoMode === 'teoria' ? 'is-active' : ''}
-                onClick={() => setRepasoMode('teoria')}
-              >
-                Teoría: Movimiento Parabólico
-              </button>
+            <div className="tutor-mode-tabs review-mode-tabs" role="tablist" aria-label={t('repaso.tabsLabel')}>
+              <button type="button" role="tab" aria-selected={repasoMode === 'tarjetas'} className={repasoMode === 'tarjetas' ? 'is-active' : ''} onClick={() => setRepasoMode('tarjetas')}>{t('repaso.cards')}</button>
+              <button type="button" role="tab" aria-selected={repasoMode === 'teoria'} className={repasoMode === 'teoria' ? 'is-active' : ''} onClick={() => setRepasoMode('teoria')}>{t('repaso.theory')}</button>
+              <button type="button" role="tab" aria-selected={repasoMode === 'cuestionario'} className={repasoMode === 'cuestionario' ? 'is-active' : ''} onClick={() => setRepasoMode('cuestionario')}>{t('repaso.quiz')}</button>
             </div>
 
             {repasoMode === 'teoria' ? (
               <TheorySection />
+            ) : repasoMode === 'cuestionario' ? (
+              <QuizView quiz={quiz} onNavigate={navigate} onCardConsolidated={handleCardConsolidated} onReviewStart={() => setRepasoMode('tarjetas')} />
+            ) : quiz.step === 'cantidad' ? (
+              <section className="card deck-empty"><h2>{t('repaso.cards')}</h2><p className="deck-selector-note">{t('repaso.cardsIntro')}</p><button type="button" className="btn btn-primary" onClick={() => setRepasoMode('cuestionario')}>{t('repaso.goToQuiz')}</button></section>
+            ) : quiz.step === 'repaso' ? (
+              <RepasoView quiz={quiz} onCardConsolidated={handleCardConsolidated} />
             ) : (
-              <>
-                {quiz.step === 'cantidad' && <QuizSelector quiz={quiz} />}
-                {quiz.step === 'repaso' && (
-                  <RepasoView quiz={quiz} onCardConsolidated={handleCardConsolidated} />
-                )}
-              </>
+              <RepasoPhaseNotice quiz={quiz} onContinue={() => setRepasoMode('cuestionario')} />
             )}
           </>
         )}
 
-        {activeTab === 'mensajes' && <Suspense fallback={<p className="teacher-note">Cargando mensajes…</p>}><ClassChat
+        {activeTab === 'mensajes' && <Suspense fallback={<p className="teacher-note">{t('free.loading')}</p>}><ClassChat
           user={user}
           classPackage={classPackage}
           exercises={supportExercises}
@@ -736,7 +759,7 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
           onIncrementHint={learning.incrementHints}
         /></Suspense>}
 
-        {activeTab === 'chats' && <ChatsView quiz={quiz} mode={tutorMode} onModeChange={setTutorMode} onCardConsolidated={handleCardConsolidated} />}
+        {activeTab === 'chats' && <ChatsView quiz={quiz} />}
 
         {activeTab === 'aula' && (user.role === 'maestro' ?
           <AulaView
@@ -760,9 +783,11 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
             onPractice={() => navigate('simulador')}
             onReview={() => navigate('tarjetas')}
           />)}
-      </main><aside className="app-sidebar" aria-label="Tu progreso y ayuda"><ConfidenceBar xp={learning.xp} level={learning.level} confidence={learning.confidence} /><TutorCard tutor={tutor} /></aside></div>
+      </main>{activeTab !== 'chats' && <aside className="app-sidebar" aria-label={t('home.progressAside')}><ConfidenceBar xp={learning.xp} level={learning.level} confidence={learning.confidence} /><TutorCard tutor={tutor} /></aside>}</div>
+      <footer className="app-credit">{t('credit.madeBy')} <strong>Kyre’y-devs</strong> · PyFis IA · <span className="app-version">{APP_VERSION_LABEL}</span></footer>
       <Onboarding open={showGuide} onDismiss={dismissGuide} onStart={startPracticing} role={user.role} />
       <ProfileSettings open={showSettings || missingContact} required={missingContact} user={user} onClose={() => setShowSettings(false)} onSaved={handleProfileSaved} />
+      <NotificationsCenter open={showNotifications} onClose={() => setShowNotifications(false)} onOpenMessages={() => navigate('mensajes')} messageNotifications={notifications.messageNotifications} upcomingMeetings={notifications.upcomingMeetings} />
       <CurriculumBadge />
     </div>
   );

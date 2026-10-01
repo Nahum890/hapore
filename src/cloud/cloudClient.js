@@ -42,7 +42,11 @@ async function http(path, { method = 'GET', body, token, headers = {} } = {}) {
       signal: controller?.signal,
       headers: {
         apikey: config.key,
-        Authorization: `Bearer ${token ?? config.key}`,
+        // Con sesión se manda el token del usuario. Sin sesión (registro
+        // anónimo) solo va `apikey`; la clave legacy "anon" (JWT, empieza con
+        // eyJ) también se acepta como Bearer, pero la nueva "publishable"
+        // (sb_publishable_…) no es un JWT y Supabase la rechaza ahí.
+        ...(token || /^eyJ/.test(config.key) ? { Authorization: `Bearer ${token ?? config.key}` } : {}),
         'Content-Type': 'application/json',
         ...headers,
       },

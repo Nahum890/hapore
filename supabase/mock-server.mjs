@@ -10,7 +10,9 @@ const tokens = new Map(); // token -> uid
 const classes = [];
 const members = [];
 const messages = [];
+const meetings = [];
 let nextMessageId = 1;
+let nextMeetingId = 1;
 
 const send = (res, status, data) => {
   res.writeHead(status, {
@@ -22,7 +24,7 @@ const send = (res, status, data) => {
   res.end(data === undefined ? '' : JSON.stringify(data));
 };
 const newSession = uid => { const token = randomUUID(); tokens.set(token, uid); return { access_token: token, refresh_token: token, expires_in: 3600, user: { id: uid } }; };
-const params = url => Object.fromEntries([...url.searchParams].map(([k, v]) => [k, v.replace(/^(eq|gt)\./, '')]));
+const params = url => Object.fromEntries([...url.searchParams].map(([k, v]) => [k, v.replace(/^(gte|lte|neq|eq|gt|lt)\./, '')]));
 const isTeacher = (classId, uid) => classes.some(c => c.id === classId && c.teacher_id === uid);
 const isParticipant = (classId, uid) => isTeacher(classId, uid) || members.some(m => m.class_id === classId && m.student_id === uid);
 
@@ -73,11 +75,11 @@ const server = http.createServer(async (req, res) => {
     const p = params(url);
     if (req.method === 'GET') {
       const own = classes.filter(item => item.teacher_id === uid && (!p.teacher_id || p.teacher_id === uid));
-      return send(res, 200, own.map(item => ({ id: item.id, code: item.code, title: item.title, created_at: item.created_at, class_members: members.filter(m => m.class_id === item.id) })));
+      return send(res, 200, own.map(item => ({ id: item.id, code: item.code, title: item.title, created_at: item.created_at, config: item.content?.config ?? null, class_members: members.filter(m => m.class_id === item.id) })));
     }
     if (req.method === 'DELETE') {
       const index = classes.findIndex(item => item.id === p.id && item.teacher_id === uid);
-      if (index >= 0) { const [gone] = classes.splice(index, 1); for (let i = members.length - 1; i >= 0; i--) if (members[i].class_id === gone.id) members.splice(i, 1); }
+      if (index >= 0) { const [gone] = classes.splice(index, 1); for (let i = members.length - 1; i >= 0; i--) if (members[i].class_id === gone.id) members.splice(i, 1); for (let i = meetings.length - 1; i >= 0; i--) if (meetings[i].class_id === gone.id) meetings.splice(i, 1); }
       return send(res, 204);
     }
   }
@@ -94,7 +96,8 @@ const server = http.createServer(async (req, res) => {
       const after = Number(p.id) || 0;
       const visible = messages.filter(m => m.class_id === p.class_id && m.id > after && isParticipant(m.class_id, uid)
         && (!m.recipient_id || m.sender_id === uid || m.recipient_id === uid));
-      return send(res, 200, visible.slice(0, 200));
+      const ordered = p.order?.startsWith('id.desc') ? [...visible].reverse() : visible;
+      return send(res, 200, ordered.slice(0, Math.max(1, Math.min(200, Number(p.limit) || 200))));
     }
     if (req.method === 'POST') {
       const { class_id, recipient_id = null, kind = 'text', body: text = '', payload = null } = body;
@@ -106,6 +109,36 @@ const server = http.createServer(async (req, res) => {
       const row = { id: nextMessageId++, class_id, sender_id: uid, recipient_id, kind, body: text, payload, created_at: new Date().toISOString() };
       messages.push(row);
       return send(res, 201, [row]);
+    }
+  }
+  if (url.pathname === '/rest/v1/class_meetings') {
+    const p = params(url);
+    if (req.method === 'GET') {
+      const visible = meetings.filter(item => (!p.class_id || item.class_id === p.class_id)
+        && (!p.id || String(item.id) === p.id)
+        && (!p.starts_at || item.starts_at >= p.starts_at)
+        && isParticipant(item.class_id, uid))
+        .sort((a, b) => a.starts_at.localeCompare(b.starts_at))
+        .slice(0, Math.max(1, Math.min(100, Number(p.limit) || 40)));
+      return send(res, 200, visible);
+    }
+    if (req.method === 'POST') {
+      const { class_id, title, description = '', starts_at, meet_url } = body;
+      const valid = isTeacher(class_id, uid)
+        && typeof title === 'string' && title.trim().length >= 3 && title.trim().length <= 100
+        && typeof description === 'string' && description.length <= 500
+        && Number.isFinite(new Date(starts_at).getTime()) && new Date(starts_at).getTime() > Date.now()
+        && typeof meet_url === 'string' && /^https:\/\/meet\.google\.com\/[a-z0-9-]{6,40}$/i.test(meet_url);
+      if (!valid) return send(res, 403, { message: 'new row violates row-level security policy for table "class_meetings"' });
+      const row = { id: nextMeetingId++, class_id, creator_id: uid, title: title.trim(), description: description.trim(), starts_at: new Date(starts_at).toISOString(), meet_url, created_at: new Date().toISOString() };
+      meetings.push(row);
+      return send(res, 201, [row]);
+    }
+    if (req.method === 'DELETE') {
+      const index = meetings.findIndex(item => String(item.id) === p.id && isTeacher(item.class_id, uid));
+      if (index < 0) return send(res, 204);
+      meetings.splice(index, 1);
+      return send(res, 204);
     }
   }
   return send(res, 404, { message: `sin ruta ${req.method} ${url.pathname}` });

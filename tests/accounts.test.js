@@ -1,6 +1,6 @@
 import test, { afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { generateUUID, getSession, login, logout, register } from '../src/auth/localAccounts.js';
+import { changePassword, generateUUID, getSession, login, logout, register } from '../src/auth/localAccounts.js';
 import { readJSON, setActiveProfile, writeJSON } from '../src/utils/storage.js';
 
 function installMemoryStorage() {
@@ -130,6 +130,21 @@ test('el registro no crea contraseñas con una sal pseudoaleatoria', async () =>
   } finally {
     crypto.getRandomValues = originalRandom;
   }
+});
+
+test('cambiar contraseña verifica la actual y permite entrar con la nueva', async () => {
+  installMemoryStorage();
+  const oldPassword = makePassword();
+  const newPassword = makePassword();
+  const user = await register({ name: 'Cuenta segura', username: 'cuenta_segura', password: oldPassword, role: 'alumno', ...makeContact('secure', '0107') });
+
+  await assert.rejects(changePassword(user.id, { currentPassword: makePassword(), newPassword }), /PASSWORD_CURRENT_INVALID/);
+  await assert.rejects(changePassword(user.id, { currentPassword: oldPassword, newPassword: 'short' }), /PASSWORD_TOO_SHORT/);
+  await changePassword(user.id, { currentPassword: oldPassword, newPassword });
+
+  logout();
+  await assert.rejects(login({ username: 'cuenta_segura', password: oldPassword }));
+  assert.equal((await login({ username: 'cuenta_segura', password: newPassword })).id, user.id);
 });
 
 test('generateUUID genera UUIDs válidos con o sin crypto.randomUUID y crypto.getRandomValues', () => {

@@ -8,6 +8,8 @@
   border: 1px solid var(--border, #e2e8f0);
   border-radius: 1rem;
   padding: 1.5rem;
+  min-width: 0;
+  box-sizing: border-box;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
@@ -32,9 +34,9 @@
 }
 
 .pgame-score-badge {
-  background: #fef3c7;
-  color: #92400e;
-  border: 1px solid #fde68a;
+  background: var(--brand-blue-soft, #eff4fe);
+  color: var(--brand-blue-deep, #123ea1);
+  border: 1px solid rgba(29, 91, 216, 0.16);
   border-radius: 9999px;
   padding: 0.25rem 0.85rem;
   font-size: 0.85rem;
@@ -87,6 +89,83 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  min-width: 0;
+}
+
+.pgame-selection-heading h3,
+.pgame-selection-heading p {
+  margin: 0;
+}
+
+.pgame-selection-heading h3 {
+  color: var(--text, #1e293b);
+  font-size: 1.05rem;
+}
+
+.pgame-selection-heading p {
+  margin-top: 0.35rem;
+  color: var(--muted, #64748b);
+  line-height: 1.45;
+}
+
+.pgame-challenge-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.pgame-challenge-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  min-width: 0;
+  padding: 1.1rem;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 0.9rem;
+  background: var(--surface, #fff);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+.pgame-challenge-option:hover {
+  border-color: rgba(29, 91, 216, 0.45);
+  box-shadow: 0 6px 18px rgba(29, 91, 216, 0.09);
+  transform: translateY(-2px);
+}
+
+.pgame-option-kicker {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.65rem;
+  background: var(--brand-blue-soft, #eff4fe);
+  color: var(--brand-blue-deep, #123ea1);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.pgame-challenge-option h3 {
+  margin: 0.75rem 0 0;
+  color: var(--text, #1e293b);
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.pgame-challenge-option p {
+  margin: 0.45rem 0 0;
+  color: var(--muted, #64748b);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.pgame-option-button {
+  width: 100%;
+  margin-top: auto;
+}
+
+.pgame-back-button {
+  align-self: flex-start;
 }
 
 .pgame-badge-row {
@@ -373,6 +452,163 @@
   line-height: 1.45;
 }
 
+/* ---------- Pulido visual de los simuladores (solo estilos) ---------- */
+
+/* Tarjetas de elección con ícono y color por desafío */
+.pgame-challenge-option {
+  position: relative;
+  overflow: hidden;
+  border-top: 4px solid var(--pgame-accent, #1d5bd8);
+}
+.pgame-challenge-option:nth-child(1) { --pgame-accent: #ea580c; --pgame-soft: #fff7ed; --pgame-number: '01'; }
+.pgame-challenge-option:nth-child(2) { --pgame-accent: #16a34a; --pgame-soft: #f0fdf4; --pgame-number: '02'; }
+.pgame-challenge-option:nth-child(3) { --pgame-accent: #2563eb; --pgame-soft: #eff6ff; --pgame-number: '03'; }
+.pgame-challenge-option::after {
+  content: var(--pgame-number, '');
+  position: absolute;
+  top: 0.7rem;
+  right: 0.8rem;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--pgame-soft, #eff4fe);
+  color: var(--pgame-accent, #123ea1);
+  font-size: 0.82rem;
+  font-weight: 850;
+  line-height: 1;
+  opacity: 0.95;
+}
+.pgame-challenge-option .pgame-option-kicker {
+  background: var(--pgame-soft, #eff4fe);
+  color: var(--pgame-accent, #123ea1);
+}
+.pgame-challenge-option:hover {
+  border-color: var(--pgame-accent, #1d5bd8);
+  border-top-color: var(--pgame-accent, #1d5bd8);
+}
+
+/* Marco del simulador: bordes suaves, sombra y un brillo sutil arriba */
+.pgame-canvas-wrapper {
+  max-height: 420px;
+  border-radius: 1rem;
+  box-shadow:
+    0 0 0 1px rgba(15, 23, 42, 0.08),
+    0 12px 28px -12px rgba(15, 23, 42, 0.45);
+}
+.pgame-canvas-wrapper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+/* Datos del reto */
+.pgame-chip {
+  position: relative;
+  padding: 0.45rem 0.8rem 0.45rem 0.95rem;
+  background: #ffffff;
+  border-radius: 0.65rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+.pgame-chip::before {
+  content: '';
+  position: absolute;
+  left: 0.35rem;
+  top: 0.45rem;
+  bottom: 0.45rem;
+  width: 3px;
+  border-radius: 3px;
+  background: #1d5bd8;
+  opacity: 0.55;
+}
+.pgame-chip small {
+  letter-spacing: 0.03em;
+}
+
+/* Panel de controles */
+.pgame-controls-form {
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  border-radius: 0.9rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+.pgame-number-input {
+  border-radius: 0.55rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.pgame-number-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+}
+.pgame-step-btn {
+  border-radius: 0.55rem;
+}
+.pgame-btn-fire:not(:disabled) {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  box-shadow: 0 6px 16px -6px rgba(37, 99, 235, 0.65);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.pgame-btn-fire:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px -8px rgba(37, 99, 235, 0.7);
+}
+.pgame-btn-fire:not(:disabled):active {
+  transform: translateY(0);
+}
+
+/* Resultado */
+.pgame-feedback {
+  border-radius: 0.9rem;
+  border-left-width: 5px !important;
+  box-shadow: 0 4px 14px -8px rgba(15, 23, 42, 0.25);
+  animation: pgame-pop 0.28s ease-out;
+}
+.pgame-feedback.is-success { border-left-color: #16a34a !important; }
+.pgame-feedback.is-fail { border-left-color: #dc2626 !important; }
+.pgame-feedback > strong::before {
+  margin-right: 0.35rem;
+}
+.pgame-feedback.is-success > strong::before { content: '✓'; color: #15803d; }
+.pgame-feedback.is-fail > strong::before { content: '↻'; color: #b91c1c; }
+.pgame-calc-breakdown {
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+@keyframes pgame-pop {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+.pgame-level-badge {
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+}
+.pgame-question-highlight {
+  border-radius: 0 0.65rem 0.65rem 0;
+  background: linear-gradient(90deg, #eff6ff, #f8fafc);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pgame-feedback { animation: none; }
+  .pgame-btn-fire:not(:disabled),
+  .pgame-challenge-option { transition: none; }
+}
+
+/* Celular: menos relleno, pestañas de a dos y escena más alta (4:3) para
+   que la parábola no quede aplastada. */
+@media (max-width: 560px) {
+  .pgame-container { padding: 0.9rem; gap: 0.9rem; }
+  .pgame-challenge-options { grid-template-columns: minmax(0, 1fr); gap: 0.7rem; }
+  .pgame-challenge-option { padding: 0.9rem; }
+  .pgame-tab-btn { min-width: 0; flex: 1 1 calc(50% - 0.5rem); font-size: 0.82rem; padding: 0.55rem 0.4rem; }
+  .pgame-canvas-wrapper { aspect-ratio: 4 / 3; max-height: none; }
+  .pgame-controls-form { padding: 0.75rem; }
+  .pgame-actions { flex: 1 1 100%; }
+}
+
 .pgame-question-highlight {
   background: #f8fafc;
   border-left: 4px solid #2563eb;
@@ -385,70 +621,103 @@
 
 /* Marcador y Shot Clock de Básquetbol */
 .pgame-bball-scoreboard {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(5rem, 0.7fr) minmax(5rem, 0.7fr) auto;
   align-items: center;
-  flex-wrap: wrap;
   gap: 0.75rem;
-  background: #0f172a;
-  color: #f8fafc;
-  padding: 0.75rem 1rem;
-  border-radius: 0.75rem;
-  border: 1px solid #334155;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border, #e2e8f0);
+  border-left: 4px solid var(--brand-blue, #1d5bd8);
+  border-radius: 0.9rem;
+  background: var(--surface, #fff);
+  color: var(--text, #1e293b);
+  box-shadow: 0 4px 14px rgba(18, 62, 161, 0.07);
 }
 
 .pgame-sb-item {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.pgame-sb-level {
+  align-items: flex-start;
 }
 
 .pgame-sb-label {
   font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--muted, #64748b);
   letter-spacing: 0.05em;
 }
 
 .pgame-sb-val {
-  font-family: 'Courier New', monospace, sans-serif;
-  font-size: 1.25rem;
-  font-weight: 900;
-  color: #38bdf8;
+  color: var(--brand-blue-deep, #123ea1);
+  font-size: 1.2rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.pgame-sb-level-value {
+  overflow-wrap: anywhere;
+  font-size: 0.98rem;
 }
 
 .pgame-sb-val.is-hot {
-  color: #f97316;
-  text-shadow: 0 0 8px rgba(249, 115, 22, 0.6);
+  color: var(--brand-blue, #1d5bd8);
 }
 
 .pgame-shot-clock {
-  background: #1e293b;
-  border: 1px solid #475569;
-  border-radius: 0.5rem;
-  padding: 0.35rem 0.75rem;
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.25rem 0.5rem;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid rgba(29, 91, 216, 0.16);
+  border-radius: 0.7rem;
+  background: var(--brand-blue-soft, #eff4fe);
+  color: var(--brand-blue-deep, #123ea1);
 }
 
 .pgame-clock-digits {
-  font-family: 'Courier New', monospace, sans-serif;
-  font-size: 1.35rem;
-  font-weight: 900;
-  color: #22c55e;
+  color: var(--brand-blue-deep, #123ea1);
+  font-size: 1.2rem;
+  font-weight: 850;
+  font-variant-numeric: tabular-nums;
+}
+
+.pgame-shot-clock.is-low {
+  border-color: #fecaca;
+  background: #fef2f2;
 }
 
 .pgame-shot-clock.is-low .pgame-clock-digits {
-  color: #ef4444;
-  animation: pgame-pulse 0.6s infinite alternate;
+  color: #b91c1c;
 }
 
-@keyframes pgame-pulse {
-  from { opacity: 1; transform: scale(1); }
-  to { opacity: 0.55; transform: scale(1.08); }
+@media (max-width: 560px) {
+  .pgame-bball-scoreboard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem;
+    padding: 0.8rem;
+  }
+
+  .pgame-sb-level,
+  .pgame-shot-clock {
+    grid-column: 1 / -1;
+  }
+
+  .pgame-sb-item:not(.pgame-sb-level) {
+    align-items: flex-start;
+  }
+
+  .pgame-shot-clock {
+    justify-content: space-between;
+  }
 }
 
 .pgame-step-row {

@@ -1,0 +1,153 @@
+/* Herramientas interactivas dentro del chat libre */
+.chatw-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin-top: 0.7rem;
+  padding: 0.85rem;
+  border: 1px solid rgba(29, 91, 216, 0.14);
+  border-radius: 1rem;
+  background: #ffffff;
+  box-shadow: 0 6px 18px -12px rgba(15, 23, 42, 0.35);
+  min-width: 0;
+  color: #0f172a;
+}
+.chatw-card .chatw-card { margin-top: 0.2rem; box-shadow: none; }
+.chatw-head { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.chatw-head strong { font-size: 0.95rem; flex: 1 1 auto; }
+.chatw-icon {
+  display: inline-grid; place-items: center; width: 1.9rem; height: 1.9rem;
+  border-radius: 0.6rem; background: #eff6ff; font-size: 1rem;
+}
+.chatw-params { margin: 0; font-size: 0.82rem; color: #475569; font-variant-numeric: tabular-nums; }
+.chatw-toggle { display: inline-flex; background: #f1f5f9; border-radius: 0.6rem; padding: 0.2rem; gap: 0.15rem; }
+.chatw-toggle button {
+  border: 0; background: transparent; border-radius: 0.45rem; padding: 0.3rem 0.7rem;
+  font-weight: 700; font-size: 0.8rem; color: #475569; cursor: pointer;
+}
+.chatw-toggle button.is-active { background: #fff; color: #1d4ed8; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12); }
+.chatw-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.chatw-actions .btn, .chatw-lab-button { font-size: 0.85rem; }
+.chatw-lab-button { align-self: flex-start; display: inline-flex; align-items: center; gap: 0.4rem; }
+.chatw-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.45rem; }
+.chatw-metrics span { display: flex; flex-direction: column; padding: 0.45rem 0.6rem; border-radius: 0.65rem; background: #f8fafc; border: 1px solid #e2e8f0; }
+.chatw-metrics small { font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.03em; font-weight: 700; }
+.chatw-metrics strong { font-size: 0.98rem; }
+
+/* Simulación 2D */
+.chatw-sim2d { display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-start; }
+.chatw-canvas {
+  width: 100%; aspect-ratio: 16 / 9; max-height: 300px; display: block; border-radius: 0.9rem;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.08), 0 10px 24px -14px rgba(15, 23, 42, 0.4);
+}
+
+/* Cuaderno */
+.chatw-paper {
+  position: relative;
+  padding: 0.9rem 0.9rem 0.9rem 2.6rem;
+  border-radius: 0.8rem;
+  background-color: #fffef8;
+  background-image:
+    linear-gradient(90deg, transparent 2.05rem, rgba(220, 38, 38, 0.35) 2.05rem, rgba(220, 38, 38, 0.35) 2.15rem, transparent 2.15rem),
+    repeating-linear-gradient(180deg, transparent 0, transparent 1.55rem, rgba(59, 130, 246, 0.16) 1.55rem, rgba(59, 130, 246, 0.16) 1.6rem);
+  border: 1px solid #efe7cf;
+}
+.chatw-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.75rem; }
+.chatw-step { animation: chatw-in 0.25s ease-out; }
+.chatw-step h4 { margin: 0 0 0.25rem; font-size: 0.92rem; color: #1e3a8a; }
+.chatw-step p { margin: 0.1rem 0; font-size: 0.9rem; line-height: 1.55; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.chatw-formula {
+  display: inline-block; margin: 0.15rem 0 0.3rem; padding: 0.3rem 0.6rem; border-radius: 0.5rem;
+  background: rgba(29, 91, 216, 0.08); border: 1px dashed rgba(29, 91, 216, 0.35); max-width: 100%; overflow-x: auto;
+}
+.chatw-answer {
+  margin-top: 0.8rem; display: inline-flex; flex-direction: column; padding: 0.5rem 0.85rem;
+  border: 2px solid #16a34a; border-radius: 0.6rem; background: #f0fdf4;
+}
+.chatw-answer small { font-size: 0.72rem; font-weight: 800; color: #15803d; text-transform: uppercase; }
+.chatw-answer strong { font-size: 1.05rem; }
+
+/* Gráfico paso a paso */
+.chatw-graph-steps { list-style: none; margin: 0; padding: 0; display: flex; gap: 0.3rem; flex-wrap: wrap; counter-reset: gstep; }
+.chatw-graph-steps li {
+  counter-increment: gstep; font-size: 0.75rem; font-weight: 700; color: #64748b;
+  padding: 0.25rem 0.55rem; border-radius: 999px; background: #f1f5f9;
+}
+.chatw-graph-steps li::before { content: counter(gstep) '. '; }
+.chatw-graph-steps li.is-done { background: #dcfce7; color: #166534; }
+.chatw-graph-steps li.is-current { background: #1d4ed8; color: #fff; }
+.chatw-graph-body { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 0.6rem; align-items: start; }
+.chatw-graph-svg, .chatw-compare-svg { width: 100%; height: auto; display: block; border-radius: 0.7rem; border: 1px solid #e2e8f0; }
+.chatw-compare-svg { background: #f8fbff; }
+.chatw-graph-paper { fill: #fffef8; }
+.chatw-graph-square { stroke: rgba(59, 130, 246, 0.12); stroke-width: 1; }
+.chatw-graph-axis { stroke: #0f172a; stroke-width: 2; stroke-linecap: round; }
+.chatw-graph-label { font: 700 11px system-ui, sans-serif; fill: #334155; }
+.chatw-graph-tick { font: 600 9.5px system-ui, sans-serif; fill: #64748b; }
+.chatw-graph-point circle { fill: #dc2626; }
+.chatw-graph-point { animation: chatw-in 0.3s ease-out both; }
+.chatw-graph-point-label { font: 700 9px system-ui, sans-serif; fill: #991b1b; }
+.chatw-graph-curve { fill: none; stroke: #1d4ed8; stroke-width: 2.6; stroke-linecap: round; stroke-dasharray: 1200; stroke-dashoffset: 1200; animation: chatw-draw 1.4s ease-out forwards; }
+.chatw-graph-mark { stroke: #d97706; stroke-width: 1.5; stroke-dasharray: 4 4; }
+.chatw-graph-mark-label { font: 800 10.5px system-ui, sans-serif; fill: #b45309; paint-order: stroke; stroke: #fffef8; stroke-width: 3px; stroke-linejoin: round; }
+.chatw-legend { font: 800 10px system-ui, sans-serif; }
+.chatw-graph-point-label { paint-order: stroke; stroke: #fffef8; stroke-width: 2.5px; }
+.chatw-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; font-variant-numeric: tabular-nums; background: #fff; border-radius: 0.6rem; overflow: hidden; }
+.chatw-table th, .chatw-table td { padding: 0.25rem 0.35rem; text-align: right; border-bottom: 1px solid #eef2f7; }
+.chatw-table th { background: #eff6ff; color: #1e3a8a; font-weight: 800; }
+.chatw-table td:first-child, .chatw-table th:first-child { text-align: left; color: #991b1b; font-weight: 700; }
+.chatw-caption { margin: 0; font-size: 0.86rem; line-height: 1.5; color: #334155; background: #f8fafc; border-left: 3px solid #1d4ed8; padding: 0.5rem 0.7rem; border-radius: 0 0.5rem 0.5rem 0; }
+
+/* Comparar */
+.chatw-compare-values { display: flex; flex-direction: column; gap: 0.3rem; }
+.chatw-compare-values span { font-size: 0.85rem; padding: 0.35rem 0.6rem; border-left: 4px solid; background: #f8fafc; border-radius: 0 0.5rem 0.5rem 0; font-variant-numeric: tabular-nums; }
+
+/* Práctica */
+.chatw-problem { margin: 0; font-size: 0.92rem; line-height: 1.5; background: #fffbeb; border: 1px solid #fde68a; padding: 0.6rem 0.75rem; border-radius: 0.65rem; }
+.chatw-practice-form { display: flex; gap: 0.45rem; align-items: center; flex-wrap: wrap; }
+.chatw-practice-form .quiz-input { flex: 1 1 140px; min-width: 0; }
+.chatw-unit { font-weight: 700; color: #475569; }
+.chatw-verdict { margin: 0; padding: 0.5rem 0.7rem; border-radius: 0.6rem; font-weight: 700; font-size: 0.9rem; }
+.chatw-verdict.is-ok { background: #f0fdf4; color: #166534; border: 1px solid #86efac; }
+.chatw-verdict.is-bad { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+
+/* Fórmulas */
+.chatw-formula-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 0.5rem; }
+.chatw-formula-card { display: flex; flex-direction: column; gap: 0.3rem; padding: 0.55rem 0.65rem; border: 1px solid #e2e8f0; border-radius: 0.65rem; background: #f8fafc; min-width: 0; overflow-x: auto; }
+.chatw-formula-card small { font-weight: 800; font-size: 0.74rem; color: #1e3a8a; text-transform: uppercase; letter-spacing: 0.02em; }
+.chatw-formula-card .btn-text { align-self: flex-start; padding: 0; font-size: 0.8rem; }
+
+/* Sugerencias del chat vacío */
+.free-chat-suggestions { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0.2rem 0 0.4rem; }
+.free-chat-suggestion {
+  border: 1px solid rgba(29, 91, 216, 0.25); background: #f5f8ff; color: #1e3a8a;
+  border-radius: 999px; padding: 0.45rem 0.8rem; font-size: 0.84rem; font-weight: 600; cursor: pointer; text-align: left;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.free-chat-suggestion:hover { background: #e8efff; border-color: #1d5bd8; }
+.tutor-workbench-solve { align-self: flex-start; }
+.free-chat-history-row { display: flex; align-items: stretch; gap: 0.3rem; }
+.free-chat-history-row .free-chat-history-item { flex: 1 1 auto; min-width: 0; }
+.free-chat-history-delete {
+  flex: 0 0 auto; width: 2.4rem; border: 1px solid transparent; background: transparent; border-radius: 0.6rem;
+  cursor: pointer; font-size: 1rem; opacity: 0.55; transition: opacity 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+.free-chat-history-delete:hover, .free-chat-history-delete:focus-visible { opacity: 1; background: #fef2f2; border-color: #fecaca; }
+.free-chat-history-delete:disabled { cursor: not-allowed; opacity: 0.3; }
+.user-chip.is-static { cursor: default; }
+.user-chip.is-static:hover { background: none; border-color: transparent; box-shadow: none; }
+.simulator-canvas[hidden], .theory-canvas-box[hidden], .projector-trajectory svg[hidden] { display: none !important; }
+.simulator-view-toggle, .theory-view-toggle, .projector-view-toggle { align-self: flex-start; margin-bottom: 0.4rem; }
+
+@keyframes chatw-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@keyframes chatw-draw { to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .chatw-step, .chatw-graph-point { animation: none; }
+  .chatw-graph-curve { animation: none; stroke-dashoffset: 0; }
+}
+@media (max-width: 640px) {
+  .chatw-graph-body { grid-template-columns: minmax(0, 1fr); }
+  .chatw-metrics span { padding: 0.4rem 0.45rem; }
+  .chatw-metrics strong { font-size: 0.9rem; }
+  .chatw-paper { padding-left: 2.3rem; }
+}

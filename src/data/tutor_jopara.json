@@ -1,10 +1,10 @@
 {
   "greetings": {
     "jopara": [
-      "¡Mba'éichapa! Eju porã PyFis IA-pe. Eju, jahechami movimiento parabólico kyhyje'ỹme.",
-      "¡Mba'éichapa! Ko'ápe ñañepyrũta jaipapa pe trayectoria parabólica.",
-      "¡Maitei! Ani rekyhyje rejavýgui: jajapóvo ejercicio jaaprende porãve.",
-      "¡Jaha! Eñepractica: dron, básquetbol térã paredón, eiporavo mba'e situación-pa reikoseva."
+      "¡Mba'éichapa! PyFis IA-pe jahechami movimiento parabólico de forma sencilla, paso a paso.",
+      "¡Mba'éichapa! Ko'ápe ñañepyrũta a entender la trayectoria parabólica con ejemplos claros.",
+      "¡Maitei! Ani rekyhyje rejavýgui: cada ejercicio reheve jaaprende porãve.",
+      "¡Jaha! Eñepractica con un dron, básquetbol térã paredón; eiporavo pe situación reipotáva."
     ],
     "es": [
       "¡Hola! Bienvenido/a a PyFis IA. Vamos a ver movimiento parabólico sin miedo a equivocarnos.",
@@ -16,8 +16,8 @@
   "sectionGreetings": {
     "simulador": {
       "jopara": [
-        "Ko'ápe ñaha'ãta peteĩ situación: dron, básquetbol térã paredón. Ehai ne respuesta ha ehecha simulación-pe.",
-        "Eiporavo peteĩ situación ha eñepyrũ: pe cálculo ha'e ne mba'e, pe simulación ohechauka mba'épa oiko."
+        "Ko'ápe ñaha'ãta una situación: dron, básquetbol térã paredón. Ehai ne respuesta ha ehecha mba'épa ohechauka la simulación.",
+        "Eiporavo peteĩ situación ha eñepyrũ; pe cálculo rejapo nde, ha la simulación ohechauka mba'épa oiko."
       ],
       "es": [
         "Acá vas a practicar con una situación: dron, básquetbol o pared. Escribí tu respuesta y comprobala con la simulación.",
@@ -26,8 +26,8 @@
     },
     "tarjetas": {
       "jopara": [
-        "Jahecha jey tarjeta reheve: emoñe'ẽ, eñeha'ã mbohovái ha upéi ehecha.",
-        "Tarjeta ohechauka peteĩ concepto ha'eño: iporã eñepyrũ ápe eñepyrũ mboyve cuestionario."
+        "Jahecha jey con tarjetas: emoñe'ẽ la pregunta, eñeha'ã embohovái ha upéi ehecha la respuesta.",
+        "Cada tarjeta ohechauka peteĩ concepto; iporã eñepyrũ ápe antes del cuestionario."
       ],
       "es": [
         "Repasemos con tarjetas: leé la pregunta, pensá tu respuesta y después girá la tarjeta.",
@@ -36,8 +36,8 @@
     },
     "chats": {
       "jopara": [
-        "Ápe reikuaaukavaerã: cuestionario térã chat libre. Eporandu chéve mba'e reikuaaséva.",
-        "Ani rekyhyje eporandúgui: ndaipóri pregunta vai."
+        "Ápe ikatu eiporavo cuestionario térã chat libre. Eporandu chéve mba'e reikuaaséva.",
+        "Ani rekyhyje eporandúgui: ninguna pregunta está de más."
       ],
       "es": [
         "Acá podés elegir: cuestionario o chat libre. Preguntame lo que necesites.",
@@ -46,8 +46,8 @@
     },
     "aula": {
       "jopara": [
-        "Ápe reheka nde clase código térã ejapo peteĩ, nde mbo'ehára ramo.",
-        "Aula rupive ikatu peteĩcha jaha'ã opavave estudiante-kuéra."
+        "Ápe emoinge el código de tu clase, térã ejapo peteĩ nde docente ramo.",
+        "Aula rupive opavave estudiante ikatu practicar con la misma configuración."
       ],
       "es": [
         "Acá ingresás el código de tu clase, o preparás uno si sos docente.",
@@ -56,26 +56,26 @@
     }
   },
   "fallbackHint": {
-    "jopara": "Ehecha jey el enunciado, eñepyrũ peteĩ paso pequeñito. Ani eafloháke: ikatu.",
+    "jopara": "Ehecha jey el enunciado ha eñepyrũ con un paso pequeño. Ani eafloháke: ikatu rejapo.",
     "es": "Releé el enunciado y empezá por un paso pequeño. No aflojes: podés resolverlo."
   },
   "errors": [
-    { "errorId": "err-01", "esHint": "v0 es la velocidad inicial completa; una componente (vertical u horizontal) es solo una parte de ese valor. Antes de calcular, preguntate: ¿me piden la velocidad total o una parte de ella?", "followUp": { "jopara": "Eñeha'ãjey pe dato correcto reheve.", "es": "Probá de nuevo con el dato correcto." } },
-    { "errorId": "err-02", "esHint": "La horizontal usa coseno: vx = v0 * cos(ángulo). La vertical usa seno: v0y = v0 * sen(ángulo). No las mezcles.", "followUp": { "jopara": "Emyesakã mba'e componente-pa ojerure ha upéi eipuru la fórmula.", "es": "Identificá primero qué componente te piden y después aplicá la fórmula." } },
-    { "errorId": "err-04", "esHint": "La altura máxima es lo más alto que llega (vertical); el alcance es lo más lejos que cae (horizontal). Son cálculos distintos.", "followUp": { "jopara": "Emoñe'ẽ jey mba'épa ojerure: altura térã alcance.", "es": "Releé qué pide el ejercicio: ¿altura o alcance?" } },
-    { "errorId": "err-mec-03", "esHint": "En el eje horizontal no hay aceleración (MRU), pero en el eje vertical la gravedad frena la subida y acelera la caída (MRUV).", "followUp": { "jopara": "¡Ani nderesarái pe gravedad omboguejyha pe proyectil!", "es": "¡No te olvides de que la gravedad siempre entra en la cuenta!" } },
-    { "errorId": "err-mec-05", "esHint": "El ángulo cambia la proporción entre altura y distancia. El alcance depende de sen(2 * ángulo).", "followUp": { "jopara": "¿Mba'épa oikóta si aumentamos o disminuimos el ángulo en el simulador?", "es": "¿Qué pasaría si aumentás o disminuís el ángulo en el simulador?" } }
+    { "errorId": "err-01", "esHint": "v0 es la velocidad inicial completa; una componente (vertical u horizontal) es solo una parte de ese valor. Antes de calcular, preguntate: ¿me piden la velocidad total o una parte de ella?", "followUp": { "jopara": "Eñeha'ãjey usando pe dato correcto, ¿sí?", "es": "Probá de nuevo con el dato correcto." } },
+    { "errorId": "err-02", "esHint": "La horizontal usa coseno: vx = v0 * cos(ángulo). La vertical usa seno: v0y = v0 * sen(ángulo). No las mezcles.", "followUp": { "jopara": "Ehecha primero mba'e componente-pa ojerure, ha después eipuru la fórmula correspondiente.", "es": "Identificá primero qué componente te piden y después aplicá la fórmula." } },
+    { "errorId": "err-04", "esHint": "La altura máxima es lo más alto que llega (vertical); el alcance es lo más lejos que cae (horizontal). Son cálculos distintos.", "followUp": { "jopara": "Emoñe'ẽ jey mba'épa ojerure el ejercicio: ¿altura térã alcance?", "es": "Releé qué pide el ejercicio: ¿altura o alcance?" } },
+    { "errorId": "err-mec-03", "esHint": "En el eje horizontal no hay aceleración (MRU), pero en el eje vertical la gravedad frena la subida y acelera la caída (MRUV).", "followUp": { "jopara": "Ani nderesarái: la gravedad omboguejy pe proyectil durante el vuelo.", "es": "¡No te olvides de que la gravedad siempre entra en la cuenta!" } },
+    { "errorId": "err-mec-05", "esHint": "El ángulo cambia la proporción entre altura y distancia. El alcance depende de sen(2 * ángulo).", "followUp": { "jopara": "¿Mba'épa oikóta si aumentás o disminuís el ángulo en el simulador?", "es": "¿Qué pasaría si aumentás o disminuís el ángulo en el simulador?" } }
   ],
   "_reviewNote": "Todo texto Jopara de este catálogo es un borrador pendiente de revisión por una persona competente en guaraní paraguayo. No se declara ninguna traducción como aprobada.",
   "hintLevels": {
     "byErrorType": {
       "confunde_velocidades": {
         "nivel_1": {
-          "jopara": ["¡Emañami! ¿Opavave pe velocidad-pa oho pe dirección ojeruréva-pe, térã ha'e la velocidad completa?", "Emañami ne respuesta rehe: ¿pe valor ha'e la velocidad inicial completa, térã peteĩ parte año?"],
+          "jopara": ["¡Emañami este dato! ¿v0 representa la velocidad completa o peteĩ componente año?", "Ehecha ne respuesta: ¿pe valor ha'e la velocidad inicial completa, térã peteĩ componente nomás?"],
           "es": ["Mirá tu respuesta: ¿es la velocidad inicial completa o solo la parte que piden?", "Fijate si usaste el valor total de v0 en vez de una de sus componentes."]
         },
         "nivel_2": {
-          "jopara": ["Pe velocidad inicial oñemboja'o mokõi parte-pe: horizontal ha vertical. Ndaha'éi peteĩchante opavave dirección-pe.", "V0 ha'e la magnitud total; cada componente ha'e peteĩ parte de esa magnitud, no el mismo número."],
+          "jopara": ["Pe velocidad inicial oñemboja'o en dos componentes: horizontal ha vertical. Ndaha'éi la misma en ambas direcciones.", "v0 ha'e la magnitud total; cada componente katu es solo una parte de ese valor."],
           "es": ["La velocidad inicial se separa en dos partes: horizontal y vertical. No es el mismo valor para las dos.", "v0 es la magnitud total; cada componente es solo una parte de ese valor."]
         },
         "nivel_3": {
@@ -83,35 +83,35 @@
           "es": ["Usá vx = v0 * cos(ángulo) para la horizontal, y v0y = v0 * sen(ángulo) para la vertical.", "Cada componente sale de multiplicar v0 por el seno o el coseno del ángulo, nunca v0 sola."]
         },
         "nivel_4": {
-          "jopara": ["Ehecha ejercicio-pe mba'e v0 ha ángulo-pa oĩ, ha upéi ejapo la multiplicación indicada.", "Emyesakã v0 ha ángulo umi valor ejercicio-pegua, ha eaplica la fórmula correspondiente."],
+          "jopara": ["Ehecha el ejercicio: mba'e v0 ha ángulo oĩ, ha después hacé la multiplicación indicada.", "Emyesakã primero v0 ha ángulo, después aplicá la fórmula que corresponde."],
           "es": ["Tomá el v0 y el ángulo del ejercicio, y aplicá la multiplicación con seno o coseno según corresponda.", "Sustituí v0 y el ángulo del ejercicio en la fórmula de la componente que te piden."]
         }
       },
       "confunde_componentes": {
         "nivel_1": {
-          "jopara": ["¡Emañami pe velocidad rehe! ¿Opavave la velocidad-pa oho horizontalmente, térã oñemboja'o?", "Emañami: pe proyectil oho yvate ha tenonde al mismo tiempo, ndaha'éi peteĩ dirección año."],
+          "jopara": ["¡Emañami pe velocidad! ¿Va completa horizontalmente o oñemboja'o en componentes?", "Emaña: pe proyectil avanza ha sube al mismo tiempo; ndaha'éi una sola dirección."],
           "es": ["Mirá la velocidad: ¿va toda hacia adelante, o se reparte en dos direcciones?", "El proyectil avanza y sube al mismo tiempo: no es una sola dirección."]
         },
         "nivel_2": {
-          "jopara": ["Pe velocidad oñemboja'o dos partes-pe: horizontal (tenonde) ha vertical (yvate). Cada parte oiko peteĩ función trigonométrica reheve.", "Ani reipuru pe mismo función mokõive componente-pe: horizontal ha vertical ndaha'éi peteĩcha."],
+          "jopara": ["Pe velocidad oñemboja'o en dos componentes: horizontal (tenonde) ha vertical (yvate). Cada una usa una función trigonométrica.", "Ani reipuru la misma función para ambas componentes, porque horizontal ha vertical ndaha'éi peteĩcha."],
           "es": ["La velocidad se separa en dos partes: horizontal (adelante) y vertical (arriba). Cada una usa una función distinta.", "No uses la misma función para las dos componentes: horizontal y vertical no son lo mismo."]
         },
         "nivel_3": {
-          "jopara": ["Horizontal-pe: vx = v0 * cos(ángulo). Vertical-pe: v0y = v0 * sen(ángulo).", "Nemandu'áke: coseno oho horizontal-pe, seno oho vertical-pe."],
+          "jopara": ["Horizontal-pe: vx = v0 * cos(ángulo). Vertical-pe: v0y = v0 * sen(ángulo).", "Nemandu'áke: coseno corresponde a lo horizontal ha seno a lo vertical."],
           "es": ["Horizontal: vx = v0 * cos(ángulo). Vertical: v0y = v0 * sen(ángulo). No las mezcles.", "Recordá: el coseno acompaña a la horizontal, el seno acompaña a la vertical."]
         },
         "nivel_4": {
-          "jopara": ["Eipuru v0 ha ángulo ejercicio-pegua: pe función correcta rehe ejapo la cuenta.", "Emyesakã mba'e componente ojeruréva ha eaplica coseno térã seno según corresponda."],
+          "jopara": ["Eipuru v0 ha ángulo del ejercicio, y calculá con la función correcta.", "Emyesakã mba'e componente ojeruréva ha aplicá coseno térã seno según corresponda."],
           "es": ["Con el v0 y el ángulo del ejercicio, aplicá la función correcta (seno o coseno) según qué componente te piden.", "Confirmá cuál componente te piden y usá coseno para la horizontal o seno para la vertical."]
         }
       },
       "confunde_altura_alcance": {
         "nivel_1": {
-          "jopara": ["¿Altura-pa ojerure, térã alcance pe suelo ári?", "Emoñe'ẽ jey: pe ejercicio ojerure mba'e magnitud-pa exactamente."],
+          "jopara": ["¿Te piden altura térã alcance sobre el suelo?", "Emoñe'ẽ jey el enunciado: mba'e magnitud ojerure exactamente?"],
           "es": ["¿Te piden qué tan alto llega, o qué tan lejos cae?", "Releé el enunciado: ¿qué magnitud exacta te están pidiendo?"]
         },
         "nivel_2": {
-          "jopara": ["Altura máxima ha'e yvatevéva (vertical); alcance ha'e mombyryvéva (horizontal). Son fórmulas diferentes.", "Altura ojupi, alcance ohasa yvýre: mokõi fórmula opaichagua."],
+          "jopara": ["Altura máxima ha'e el punto más alto (vertical); alcance katu es la distancia horizontal. Son fórmulas distintas.", "Altura ojupi ha alcance ohasa yvýre: mokõi cálculo diferente."],
           "es": ["La altura máxima es lo más alto (vertical); el alcance es lo más lejos (horizontal). Son fórmulas diferentes.", "No las confundas: la altura sube, el alcance avanza sobre el suelo."]
         },
         "nivel_3": {
@@ -119,17 +119,17 @@
           "es": ["Hmax = (v0² * sen²(ángulo)) / (2 * g) frente a R = (v0² * sen(2 * ángulo)) / g: fijate cuál corresponde.", "Son dos fórmulas distintas: una eleva el seno al cuadrado, la otra usa el doble del ángulo."]
         },
         "nivel_4": {
-          "jopara": ["Eipuru v0, ángulo ha g ejercicio-pegua pe fórmula correcta-pe (altura térã alcance).", "Emyesakã mba'e magnitud ojeruréva ha eaplica solamente esa fórmula."],
+          "jopara": ["Eipuru v0, ángulo ha g del ejercicio en la fórmula correcta: altura térã alcance.", "Emyesakã mba'e magnitud ojeruréva, y aplicá solo esa fórmula."],
           "es": ["Con v0, ángulo y g del ejercicio, aplicá solo la fórmula que corresponde a lo que te piden.", "Confirmá si es altura o alcance y usá únicamente esa fórmula, no las dos."]
         }
       },
       "olvida_gravedad": {
         "nivel_1": {
-          "jopara": ["¿Mba'érepa ho'a jey pe proyectil? Oĩ peteĩ fuerza omboguejýva chupe todo el tiempo.", "Ejapyhy: pe cálculo ndopái pe primer paso-pe, oikotevẽ gueteri pe gravedad."],
+          "jopara": ["¿Mba'érepa ho'a jey pe proyectil? Hay una fuerza que lo atrae todo el tiempo.", "Emaña: el cálculo no termina en ese primer paso; falta incluir la gravedad."],
           "es": ["¿Por qué el proyectil vuelve a caer? Hay una fuerza que tira de él todo el tiempo.", "Tu cálculo se quedó en un paso intermedio: todavía falta incluir la gravedad."]
         },
         "nivel_2": {
-          "jopara": ["Pe gravedad g omba'apo siempre verticalmente hacia abajo, en toda la ecuación del tiempo o la altura.", "Ani ere pe resultado ohóvo mboyve emultiplica térã edividi g rehe."],
+          "jopara": ["Pe gravedad g omba'apo siempre hacia abajo, en toda la ecuación del tiempo o la altura.", "Ani embohu'a el resultado antes de multiplicar térã dividir por g."],
           "es": ["La gravedad g actúa siempre hacia abajo y forma parte completa de la ecuación, no solo al principio.", "No des el resultado por terminado antes de multiplicar o dividir entre g."]
         },
         "nivel_3": {
@@ -137,17 +137,17 @@
           "es": ["Tiempo de vuelo: T = (2 * v0y) / g. Revisá que no hayas dejado afuera la gravedad.", "La fórmula completa divide entre g; no te quedes solo con v0y."]
         },
         "nivel_4": {
-          "jopara": ["Eipuru v0, ángulo ha g ejercicio-pegua: ejapo primero v0y, upéi multiplica 2 rehe ha edividi g rehe.", "Ejapo la cuenta completa: calculá v0y, duplicalo y dividí por g, en ese orden."],
+          "jopara": ["Eipuru v0, ángulo ha g del ejercicio: primero calculá v0y, después multiplicá por 2 y dividí por g.", "Ejapo la cuenta completa: calculá v0y, duplicalo ha dividí por g, en ese orden."],
           "es": ["Con v0, ángulo y g del ejercicio: calculá v0y, multiplicalo por 2 y recién ahí dividí por g.", "Completá la cuenta en orden: v0y, luego el doble, luego dividir por g."]
         }
       },
       "angulo_desfasado": {
         "nivel_1": {
-          "jopara": ["¡Emañami pe trayectoria rehe! ¿Ho'a mboyvepa, o pasa de largo la meta?", "Ehecha simulación-pe: pe ángulo omoĩ pe proyectil muy rasante térã muy empinado."],
+          "jopara": ["¡Emañami pe trayectoria! ¿Cae antes o pasa de largo la meta?", "Ehecha en la simulación: pe ángulo dejó el tiro muy rasante térã muy empinado."],
           "es": ["Mirá la trayectoria: ¿el lanzamiento cae antes de la meta, o se pasa de largo?", "En la simulación se ve que el ángulo dejó el lanzamiento muy rasante o muy empinado."]
         },
         "nivel_2": {
-          "jopara": ["Pe ángulo cambia mba'éichapa oñemboja'o pe velocidad: avance horizontal ha subida vertical.", "Ángulo michĩ ramo, oho rasante; ángulo tuicha ramo, ojupi heta pero avanza poco."],
+          "jopara": ["Pe ángulo omoambue cómo se divide la velocidad: avance horizontal ha subida vertical.", "Ángulo michĩ ramo, el tiro es rasante; tuicha ramo, ojupi heta pero avanza poco."],
           "es": ["El ángulo cambia cómo se reparte la velocidad entre avanzar y subir.", "Con un ángulo chico, el tiro es rasante; con uno muy grande, sube mucho pero avanza poco."]
         },
         "nivel_3": {
@@ -155,21 +155,21 @@
           "es": ["R = (v0² * sen(2 * ángulo)) / g. ¿Con qué ángulo sen(2 * ángulo) llega a su valor máximo?", "El alcance depende de sen(2 * ángulo); ese factor es máximo en un solo ángulo."]
         },
         "nivel_4": {
-          "jopara": ["sen(2 * ángulo) = 1 oiko 2 * ángulo = 90°-pe, upévare ángulo = 45°.", "Eresolve: sen(2 * ángulo) = 1 significa que 2 * ángulo = 90°, entonces ángulo = 45°."],
+          "jopara": ["sen(2 * ángulo) = 1 cuando 2 * ángulo llega a 90°; upévare el ángulo es 45°.", "Eresolve: sen(2 * ángulo) = 1 significa 2 * ángulo = 90°, entonces el ángulo es 45°."],
           "es": ["sen(2 * ángulo) = 1 ocurre cuando 2 * ángulo = 90°, así que el ángulo es 45°.", "Resolvé: si sen(2 * ángulo) = 1, entonces 2 * ángulo = 90° y el ángulo es 45°."]
         }
       }
     }
   },
   "topicSupport": [
-    { "search": "que es movimiento parabolico definicion trayectoria parabola", "jopara": "Pe movimiento parabólico ha'e peteĩ avance horizontal constante joapy peteĩ caída acelerada gravedad rehe. Pe resultado ha'e peteĩ trayectoria en forma de parábola.", "es": "El movimiento parabólico combina un avance horizontal constante con una caída acelerada por la gravedad. El resultado es una trayectoria en forma de parábola." },
-    { "search": "componente horizontal vertical vx vy velocidad se divide", "jopara": "Pe velocidad inicial oñemboja'o mokõi parte-pe: vx = v0 * cos(ángulo) pe horizontal-pe, ha v0y = v0 * sen(ángulo) pe vertical-pe.", "es": "La velocidad inicial se separa en dos partes: vx = v0 * cos(ángulo) para lo horizontal, y v0y = v0 * sen(ángulo) para lo vertical." },
-    { "search": "gravedad cae rapido baja ho a por que cae", "jopara": "Pe gravedad omba'apo siempre verticalmente hacia abajo con g ≈ 9,8 m/s² (térã 10 m/s² aula-pe). Upéva omboguejy pe proyectil, curvando su trayectoria.", "es": "La gravedad actúa siempre hacia abajo con g ≈ 9,8 m/s² (o 10 m/s² en el aula). Eso hace que el proyectil baje y su trayectoria se curve." },
-    { "search": "tiempo de vuelo cuanto dura mboy tiempo aire", "jopara": "Pe tiempo de vuelo ha'e T = (2 * v0y) / g: mientras más impulso hacia arriba, hetave segundo opyta el aire-pe.", "es": "El tiempo de vuelo es T = (2 * v0y) / g: cuanto mayor es el impulso hacia arriba, más segundos permanece en el aire." },
-    { "search": "alcance horizontal distancia mombyry lejos llega cuanto avanza", "jopara": "Pe alcance R = (v0² * sen(2 * ángulo)) / g: odepende velocidad al cuadrado ha del ángulo de lanzamiento.", "es": "El alcance es R = (v0² * sen(2 * ángulo)) / g: depende de la velocidad al cuadrado y del ángulo de lanzamiento." },
-    { "search": "angulo optimo mejor iporave 45 grados mayor alcance", "jopara": "Sin resistencia del aire, el ángulo de 45° ome'ẽ el mayor alcance posible, porque sen(2 * 45°) = sen(90°) = 1.", "es": "Sin resistencia del aire, el ángulo de 45° da el mayor alcance posible, porque sen(2 * 45°) = sen(90°) = 1." },
-    { "search": "altura maxima punto mas alto cuspide yvate og̃uahe", "jopara": "Pe altura máxima Hmax = (v0² * sen²(ángulo)) / (2 * g) oiko pe punto donde vy = 0, en la mitad del tiempo de vuelo.", "es": "La altura máxima Hmax = (v0² * sen²(ángulo)) / (2 * g) ocurre en el punto donde vy = 0, a la mitad del tiempo de vuelo." },
-    { "search": "30 60 mismo alcance angulos complementarios iguales", "jopara": "30° ha 60° suman 90°: son ángulos complementarios. Como sen(2*30°) = sen(2*60°), ambos alcanzan la misma distancia.", "es": "30° y 60° suman 90°: son ángulos complementarios. Como sen(2*30°) = sen(2*60°), ambos llegan a la misma distancia." },
-    { "search": "resistencia del aire ideal supuestos modelo real", "jopara": "Pe modelo oiporu ápe ha'e ideal: ndoconsidera resistencia del aire ni rebotes. Sirve para aprender la física base antes de casos más complejos.", "es": "El modelo que usamos acá es ideal: no considera la resistencia del aire ni rebotes. Sirve para aprender la física de base antes de casos más complejos." }
+    { "search": "que es movimiento parabolico definicion trayectoria parabola", "jopara": "Pe movimiento parabólico combina avance horizontal constante ha caída acelerada por gravedad. Upéicha se forma una trayectoria con forma de parábola.", "es": "El movimiento parabólico combina un avance horizontal constante con una caída acelerada por la gravedad. El resultado es una trayectoria en forma de parábola." },
+    { "search": "componente horizontal vertical vx vy velocidad se divide", "jopara": "Pe velocidad inicial oñemboja'o en dos componentes: vx = v0 * cos(ángulo) para el eje horizontal, ha v0y = v0 * sen(ángulo) para el vertical.", "es": "La velocidad inicial se separa en dos partes: vx = v0 * cos(ángulo) para lo horizontal, y v0y = v0 * sen(ángulo) para lo vertical." },
+    { "search": "gravedad cae rapido baja ho a por que cae", "jopara": "La gravedad omba'apo siempre hacia abajo en el eje vertical, con g ≈ 9,8 m/s² (térã 10 m/s² aula-pe). Upéva omboguejy el proyectil ha curva su trayectoria.", "es": "La gravedad actúa siempre hacia abajo con g ≈ 9,8 m/s² (o 10 m/s² en el aula). Eso hace que el proyectil baje y su trayectoria se curve." },
+    { "search": "tiempo de vuelo cuanto dura mboy tiempo aire", "jopara": "Pe tiempo de vuelo se calcula T = (2 * v0y) / g cuando sale y cae al mismo nivel. Si aumenta el impulso hacia arriba, hetave segundo opyta el aire-pe.", "es": "El tiempo de vuelo es T = (2 * v0y) / g: cuanto mayor es el impulso hacia arriba, más segundos permanece en el aire." },
+    { "search": "alcance horizontal distancia mombyry lejos llega cuanto avanza", "jopara": "Pe alcance horizontal, para salida y llegada al mismo nivel, es R = (v0² * sen(2 * ángulo)) / g. Odepende de la velocidad inicial ha del ángulo de lanzamiento.", "es": "El alcance es R = (v0² * sen(2 * ángulo)) / g: depende de la velocidad al cuadrado y del ángulo de lanzamiento." },
+    { "search": "angulo optimo mejor iporave 45 grados mayor alcance", "jopara": "Sin resistencia del aire y con salida y llegada al mismo nivel, el ángulo de 45° ome'ẽ el mayor alcance, porque sen(90°) = 1.", "es": "Sin resistencia del aire, el ángulo de 45° da el mayor alcance posible, porque sen(2 * 45°) = sen(90°) = 1." },
+    { "search": "altura maxima punto mas alto cuspide yvate og̃uahe", "jopara": "Pe altura máxima Hmax = (v0² * sen²(ángulo)) / (2 * g) se alcanza cuando vy = 0; ese punto está a la mitad del vuelo si sale y cae al mismo nivel.", "es": "La altura máxima Hmax = (v0² * sen²(ángulo)) / (2 * g) ocurre en el punto donde vy = 0, a la mitad del tiempo de vuelo." },
+    { "search": "30 60 mismo alcance angulos complementarios iguales", "jopara": "30° ha 60° suman 90°, por eso son complementarios. Como sen(2*30°) = sen(2*60°), los dos tiros llegan a la misma distancia si parten y caen al mismo nivel.", "es": "30° y 60° suman 90°: son ángulos complementarios. Como sen(2*30°) = sen(2*60°), ambos llegan a la misma distancia." },
+    { "search": "resistencia del aire ideal supuestos modelo real", "jopara": "Pe modelo que usamos ha'e ideal: no considera resistencia del aire ni rebotes. Péicha ikatu ñaaprende primero la física base antes de mirar casos más complejos.", "es": "El modelo que usamos acá es ideal: no considera la resistencia del aire ni rebotes. Sirve para aprender la física de base antes de casos más complejos." }
   ]
 }

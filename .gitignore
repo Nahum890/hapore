@@ -7,3 +7,8 @@ npm-debug.log*
 .env
 .env.*.local
 /modificacion propia/
+# APK (TWA): solo se versionan la configuración y la guía. La llave de firma
+# y sus contraseñas NUNCA se suben: guardalas en un lugar seguro.
+apk/*
+!apk/twa-manifest.json
+!apk/README.md

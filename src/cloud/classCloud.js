@@ -1,5 +1,8 @@
 import { rpc, rest, isCloudConfigured } from './cloudClient.js';
 import { readJSON, writeJSON, removeKey } from '../utils/storage.js';
+import { topicStats } from '../pedagogy/progression.js';
+import { withFlags } from '../pedagogy/flags.js';
+import { exercises as catalogExercises } from '../data/catalogs.js';
 import { summarizeErrorCounts } from '../pedagogy/errorSummary.js';
 
 // Paquete de clase que descarga el alumno: queda en su perfil local para
@@ -16,9 +19,12 @@ export function normalizeCloudCode(text) {
 
 /** Contenido que el docente comparte. Las tarjetas y ejercicios viajan
  * completos para que el alumno los tenga aunque no existan en su navegador. */
-export function buildClassContent({ config, cards, exercises }) {
+export function buildClassContent({ config, cards, exercises, flags = null }) {
   return {
     version: 1,
+    // Banderitas del docente: con esto el progreso del alumno se agrupa igual
+    // que en el panel del docente (temas y banderas propias).
+    ...(flags ? { flags: { defs: flags.defs ?? [], byExercise: flags.byExercise ?? {} } } : {}),
     config: { subtemas: config.subtemas, ejercicios: Number(config.ejercicios), flashcards: cards.length },
     cards: cards.map(card => ({
       id: card.id, topic: card.topic ?? 'Movimiento Parabólico', frente_es: card.frente_es ?? card.front ?? '',
@@ -38,13 +44,27 @@ export async function createCloudClass({ title, teacherName, teacherAvatar, teac
   return row;
 }
 
+const MEMBER_COLUMNS = 'student_id,display_name,avatar,xp,level,attempts,correct,confidence,cards_consolidated,last_sync,joined_at,phone,email';
+const PANEL_FIELDS = ['solved', 'topic_stats', 'error_summary'];
+const isMissingColumn = error => /column|schema cache|PGRST20/i.test(String(error?.message ?? ''));
+
 export async function listTeacherClasses() {
-  const select = 'id,code,title,created_at,class_members(student_id,display_name,avatar,xp,level,attempts,correct,confidence,cards_consolidated,error_summary,last_sync,joined_at,phone,email)';
-  try { return await rest(session => `classes?select=${select}&teacher_id=eq.${session.userId}&order=created_at.desc`); }
-  catch (error) {
-    if (!/error_summary|column.*exist|schema cache/i.test(error.message ?? '')) throw error;
-    const legacySelect = 'id,code,title,created_at,class_members(student_id,display_name,avatar,xp,level,attempts,correct,confidence,cards_consolidated,last_sync,joined_at,phone,email)';
-    return rest(session => `classes?select=${legacySelect}&teacher_id=eq.${session.userId}&order=created_at.desc`);
+  const query = members => rest(session => `classes?select=id,code,title,created_at,config:content->config,class_members(${members})&teacher_id=eq.${session.userId}&order=created_at.desc`);
+  try {
+    return await query(`${MEMBER_COLUMNS},topic_stats,solved,error_summary`);
+  } catch (error) {
+    if (!isMissingColumn(error)) throw error;
+    try {
+      return await query(`${MEMBER_COLUMNS},topic_stats,solved`);
+    } catch (panelError) {
+      if (!isMissingColumn(panelError)) throw panelError;
+      try {
+        return await query(`${MEMBER_COLUMNS},error_summary`);
+      } catch (summaryError) {
+        if (!isMissingColumn(summaryError)) throw summaryError;
+        return query(MEMBER_COLUMNS);
+      }
+    }
   }
 }
 
@@ -103,8 +123,8 @@ export async function leaveCloudClass() {
 
 export function progressSnapshot(learning) {
   const log = Array.isArray(learning?.attemptLog) ? learning.attemptLog : [];
-  const cards = learning?.flashcardState && typeof learning.flashcardState === 'object' ? Object.values(learning.flashcardState) : [];
   const errorSummary = summarizeErrorCounts(log.slice(-30));
+  const cards = learning?.flashcardState && typeof learning.flashcardState === 'object' ? Object.values(learning.flashcardState) : [];
   return {
     xp: Math.max(0, Math.floor(Number(learning?.xp) || 0)),
     level: Math.max(1, Math.floor(Number(learning?.level?.level) || 1)),
@@ -112,6 +132,11 @@ export function progressSnapshot(learning) {
     correct: log.filter(item => item?.correct).length,
     confidence: Math.max(0, Math.min(100, Math.round(Number(learning?.confidence) || 0))),
     cards_consolidated: cards.filter(item => item?.consolidated).length,
+    // Para el panel docente: ejercicios distintos resueltos y aciertos por tema.
+    solved: new Set(log.filter(item => item?.correct && item.exerciseId).map(item => item.exerciseId)).size,
+    topic_stats: topicStats(log, withFlags([...catalogExercises, ...(getClassPackage()?.content?.exercises ?? [])], getClassPackage()?.content?.flags?.byExercise ?? {})),
+    // Solo se sincronizan categorías conocidas y saturadas en 2; nunca las
+    // respuestas escritas ni un historial individual de errores.
     error_summary: Object.fromEntries(Object.entries(errorSummary).map(([key, count]) => [key, Math.min(2, count)])),
   };
 }
@@ -132,12 +157,29 @@ export function getPendingProgress() {
 export async function flushProgress() {
   const pending = getPendingProgress();
   if (!pending || !isCloudConfigured()) return { status: pending ? 'pending' : 'idle' };
+  const send = stats => rest(session => `class_members?class_id=eq.${pending.classId}&student_id=eq.${session.userId}`, {
+    method: 'PATCH',
+    body: { ...stats, last_sync: new Date().toISOString() },
+    headers: { Prefer: 'return=minimal' },
+  });
   try {
-    await rest(session => `class_members?class_id=eq.${pending.classId}&student_id=eq.${session.userId}`, {
-      method: 'PATCH',
-      body: { ...pending.stats, last_sync: new Date().toISOString() },
-      headers: { Prefer: 'return=minimal' },
-    });
+    const candidates = [
+      pending.stats,
+      Object.fromEntries(Object.entries(pending.stats).filter(([key]) => key !== 'error_summary')),
+      Object.fromEntries(Object.entries(pending.stats).filter(([key]) => !PANEL_FIELDS.includes(key))),
+    ];
+    let lastError;
+    for (const stats of candidates) {
+      try {
+        await send(stats);
+        lastError = null;
+        break;
+      } catch (error) {
+        if (error.offline || !isMissingColumn(error)) throw error;
+        lastError = error;
+      }
+    }
+    if (lastError) throw lastError;
     if (getPendingProgress()?.at === pending.at) removeKey(PENDING_KEY);
     return { status: 'synced', at: new Date().toISOString() };
   } catch (error) {
