@@ -15,7 +15,7 @@ Con Supabase:
 
 1. Creá un proyecto gratuito en <https://supabase.com>.
 2. En **Authentication → Sign In / Providers**, activá **Allow anonymous sign-ins**.
-3. En **SQL Editor**, pegá todo el contenido de [`schema.sql`](schema.sql) y tocá **Run**. Si ya lo habías ejecutado con una versión anterior, podés volver a ejecutarlo: agrega las columnas y tablas nuevas sin borrar datos. Para una base existente también podés ejecutar la migración [`20260927_class_meetings.sql`](migrations/20260927_class_meetings.sql) después del esquema, y [`20260927_teacher_content.sql`](migrations/20260927_teacher_content.sql) para respaldar en la nube las presentaciones, ejercicios propios y banderitas del docente.
+3. En **SQL Editor**, pegá todo el contenido de [`schema.sql`](schema.sql) y tocá **Run**. Si ya lo habías ejecutado con una versión anterior, podés volver a ejecutarlo: agrega las columnas y tablas nuevas sin borrar datos. Para una base existente también podés ejecutar las migraciones [`20260926_class_error_summary.sql`](migrations/20260926_class_error_summary.sql), [`20260927_class_meetings.sql`](migrations/20260927_class_meetings.sql) y [`20260927_teacher_content.sql`](migrations/20260927_teacher_content.sql) después del esquema.
 4. En **Project Settings → API**, copiá **Project URL** y la clave **anon public**.
 5. En la raíz del proyecto, creá o completá el archivo `.env` con:
 

@@ -31,7 +31,7 @@ export function loadLearningState() {
   };
 }
 
-export function recordExerciseResult({ correct, hintsUsed = 0, exerciseId = null, durationMs = 0, errorType = null, expectedConcept = null } = {}) {
+export function recordExerciseResult({ correct, hintsUsed = 0, exerciseId = null, durationMs = 0, errorType = null, expectedConcept = null, scenario = null } = {}) {
   const completed = storedList(STORAGE_KEYS.COMPLETED);
   const alreadyCompleted = Boolean(exerciseId && completed.includes(exerciseId));
   const reward = alreadyCompleted
@@ -60,8 +60,9 @@ export function recordExerciseResult({ correct, hintsUsed = 0, exerciseId = null
     durationMs: Math.max(0, Math.round(Number(durationMs) || 0)), at: new Date().toISOString(),
     // Solo se guarda cuando la respuesta fue incorrecta: sirve para el plan de
     // práctica del alumno y el resumen de dificultades frecuentes del docente.
-    errorType: !correct ? (errorType || null) : null,
-    expectedConcept: expectedConcept || null,
+    errorType: !correct && typeof errorType === 'string' ? errorType.slice(0, 64) : null,
+    expectedConcept: typeof expectedConcept === 'string' ? expectedConcept.slice(0, 100) : null,
+    scenario: typeof scenario === 'string' ? scenario.slice(0, 40) : null,
   }].slice(-200));
   if (correct && exerciseId && !alreadyCompleted) {
     writeJSON(STORAGE_KEYS.COMPLETED, [...completed, exerciseId]);

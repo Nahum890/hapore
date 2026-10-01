@@ -66,7 +66,7 @@ export default function ExerciseCard({ exercise, onResult, onAskHint, onSimulati
     const diagnosis = result.correct ? null : diagnoseAttempt(exercise, answer, language);
     // El diagnóstico se recalcula al mostrarlo para que siga el idioma activo.
     setFeedback({ ...result, answerText: answer });
-    onResult?.({ correct: result.correct, hintsUsed, exerciseId: exercise.id, durationMs: Date.now() - startedAt.current, errorType: diagnosis?.key ?? null, expectedConcept: exercise.expectedConcept });
+    onResult?.({ correct: result.correct, hintsUsed, exerciseId: exercise.id, durationMs: Date.now() - startedAt.current, errorType: diagnosis?.key ?? null, expectedConcept: exercise.expectedConcept ?? null, scenario: exercise.scenario ?? null });
     onSimulationCheck?.({ exerciseId: exercise.id, answer: result.student, result });
     if (!result.correct) onAskHint?.({ type: 'mistake', topic: exercise.topic, exercise, exerciseId: exercise.id, expectedConcept: exercise.expectedConcept, errorType: diagnosis?.key, studentAnswer: result.student ?? answer, expectedAnswer: result.expected, hintLevel: hintsUsed + 1 });
   };
