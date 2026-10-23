@@ -4,11 +4,17 @@ export const LANDING_TEXT = {
     nav: { what: 'Qué es', features: 'Funciones', demo: 'Demo en vivo', videos: 'Videos', teachers: 'Docentes', download: 'Descargar' },
     cta: 'Probar demo', ctaDownload: 'Descargar APK', openApp: 'Abrir la app',
     hero: {
-      eyebrow: 'FeSTEAM 2026 · Física 3.º curso',
+      eyebrow: 'Física 3.º curso · Jopara y castellano',
       titleRed: 'Ani rekyhyje.', title: 'Aprendé Física paso a paso.',
       lead: 'PyFis IA es un tutor de inteligencia artificial en Jopara y castellano que enseña movimiento parabólico con ejercicios guiados, simulaciones 2D y 3D y desafíos. Funciona en el celular, incluso sin internet.',
       badges: ['Gratis', 'Español y Jopara', 'Funciona sin internet', 'Android y web'],
     },
+    stats: [
+      { value: 2, label: 'idiomas: Jopara y castellano' },
+      { value: 4, label: 'escenarios de lanzamiento' },
+      { value: 100, suffix: ' %', label: 'funciona sin internet' },
+      { value: 3.8, decimals: 1, suffix: ' MB', label: 'pesa el APK' },
+    ],
     why: {
       title: '¿Por qué PyFis IA?',
       items: [
@@ -34,7 +40,7 @@ export const LANDING_TEXT = {
     },
     live: {
       title: 'Probalo acá mismo',
-      lead: 'Estas son herramientas reales de la app, funcionando en esta página. Tocá una pestaña.',
+      lead: 'Herramientas reales de la app funcionando en esta página, sin clave API y sin internet. Tocá un ejemplo o escribí tu propia pregunta.',
       tabs: { notebook: 'Cuaderno', graph: 'Gráfico', sim: 'Simulación 3D' },
       questions: {
         notebook: 'Una pelota sale a 20 m/s con 30°, ¿cuál es el alcance?',
@@ -42,6 +48,9 @@ export const LANDING_TEXT = {
         sim: 'Simulá 25 m/s a 60° en 3D',
       },
       you: 'Vos', tutor: 'PyFis', loading: 'Cargando la demo…',
+      placeholder: 'Escribí tu pregunta de movimiento parabólico…', send: 'Preguntar',
+      offline: 'Tutor local: responde sin clave API y sin internet.',
+      noAnswer: 'Esa pregunta la responde mejor la app completa. Probá con: “simulá 18 m/s a 40°”, “dame un ejercicio” o “¿qué es el alcance?”.',
     },
     videos: {
       title: 'Mirá cómo funciona',
@@ -85,20 +94,26 @@ export const LANDING_TEXT = {
     },
     team: {
       title: 'Quiénes somos',
-      text: 'PyFis IA es un proyecto de Kyre’y-devs, del Centro Regional de Educación “Dr. José Gaspar Rodríguez de Francia” de Ciudad del Este, para FeSTEAM 2026.',
+      text: 'PyFis IA es un proyecto independiente de Kyre’y-devs, un equipo de estudiantes del Centro Regional de Educación “Dr. José Gaspar Rodríguez de Francia” de Ciudad del Este, Paraguay.',
       teacher: 'Docente responsable: Carlos Miguel Giménez',
     },
-    footer: 'Hecho por Kyre’y-devs · PyFis IA Demo 1.0 · FeSTEAM 2026',
+    footer: 'Hecho por Kyre’y-devs · PyFis IA Demo 1.0',
   },
   gn: {
     nav: { what: 'Mba’épa', features: 'Mba’épa ojapo', demo: 'Demo', videos: 'Video', teachers: 'Mbo’ehára', download: 'Emboguejy' },
     cta: 'Eñeha’ã demo', ctaDownload: 'Emboguejy APK', openApp: 'Eipe’a app',
     hero: {
-      eyebrow: 'FeSTEAM 2026 · Física 3.º curso',
+      eyebrow: 'Física 3.º curso · Jopara ha castellano',
       titleRed: 'Ani rekyhyje.', title: 'Eaprende Física paso a paso.',
       lead: 'PyFis IA ha’e peteĩ tutor inteligencia artificial Jopara ha castellano-pe, ombo’éva movimiento parabólico ejercicio guiado, simulación 2D ha 3D ha desafío reheve. Ojepuru celular-pe, internet’ỹre avei.',
       badges: ['Rei', 'Español ha Jopara', 'Internet’ỹre oiko', 'Android ha web'],
     },
+    stats: [
+      { value: 2, label: 'ñe’ẽ: Jopara ha castellano' },
+      { value: 4, label: 'escenario lanzamiento rehegua' },
+      { value: 100, suffix: ' %', label: 'oiko internet’ỹre' },
+      { value: 3.8, decimals: 1, suffix: ' MB', label: 'APK ipohýi' },
+    ],
     why: {
       title: '¿Mba’érepa PyFis IA?',
       items: [
@@ -124,7 +139,7 @@ export const LANDING_TEXT = {
     },
     live: {
       title: 'Eñeha’ã ko’ápe voi',
-      lead: 'Ko’ãva ha’e app herramienta añetegua, oikóva ko página-pe. Epoko peteĩ pestaña.',
+      lead: 'App herramienta añetegua oikóva ko página-pe, clave API’ỹre ha internet’ỹre. Epoko peteĩ techapyrã térã ehai nde porandu.',
       tabs: { notebook: 'Cuaderno', graph: 'Gráfico', sim: 'Simulación 3D' },
       questions: {
         notebook: 'Peteĩ pelota osẽ 20 m/s ha 30° reheve, ¿mboýpa alcance?',
@@ -132,6 +147,9 @@ export const LANDING_TEXT = {
         sim: 'Esimula 25 m/s ha 60° 3D-pe',
       },
       you: 'Nde', tutor: 'PyFis', loading: 'Ojehupi hína demo…',
+      placeholder: 'Ehai nde porandu movimiento parabólico rehegua…', send: 'Eporandu',
+      offline: 'Tutor local: ombohovái clave API’ỹre ha internet’ỹre.',
+      noAnswer: 'Upe porandu ombohovái porãve app completa. Eñeha’ã: “esimula 18 m/s ha 40°”, “eme’ẽ chéve peteĩ ejercicio” térã “¿mba’épa alcance?”.',
     },
     videos: {
       title: 'Ehecha mba’éichapa oiko',
@@ -175,9 +193,9 @@ export const LANDING_TEXT = {
     },
     team: {
       title: 'Mávapa ore',
-      text: 'PyFis IA ha’e Kyre’y-devs proyecto, Centro Regional de Educación “Dr. José Gaspar Rodríguez de Francia”, Ciudad del Este-gua, FeSTEAM 2026-pe g̃uarã.',
+      text: 'PyFis IA ha’e Kyre’y-devs proyecto independiente, peteĩ equipo temimbo’ekuéra Centro Regional de Educación “Dr. José Gaspar Rodríguez de Francia”, Ciudad del Este, Paraguay-gua.',
       teacher: 'Docente responsable: Carlos Miguel Giménez',
     },
-    footer: 'Ojapo Kyre’y-devs · PyFis IA Demo 1.0 · FeSTEAM 2026',
+    footer: 'Ojapo Kyre’y-devs · PyFis IA Demo 1.0',
   },
 };
