@@ -1,0 +1,5 @@
+.practice-plan { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px 18px; padding: 18px 20px; border-left: 5px solid var(--naranja-itaipu, #d27628); }
+.practice-plan h3 { margin: 4px 0 6px; font-size: 1.06rem; }
+.practice-plan p { margin: 0; line-height: 1.5; }
+.practice-plan > small { grid-column: 1 / -1; color: var(--texto-suave); font-size: .78rem; }
+@media (max-width: 620px) { .practice-plan { grid-template-columns: 1fr; } .practice-plan > small { grid-column: auto; } .practice-plan > .btn { width: 100%; } }

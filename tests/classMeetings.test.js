@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import { createClassMeeting, deleteClassMeeting, listClassMeetings, validateMeetingInput } from '../src/cloud/classMeetings.js';
 import { configureCloud } from '../src/cloud/cloudClient.js';
 
-const now = Date.parse('2026-09-27T12:00:00.000Z');
+const now = Date.now();
 const valid = {
   classId: 'class-1',
   title: 'Repaso de tiro parabólico',
   description: 'Repasamos alcance y ángulos.',
-  startsAt: '2026-09-28T12:00:00.000Z',
+  startsAt: new Date(now + 24 * 60 * 60 * 1000).toISOString(),
   meetUrl: 'https://meet.google.com/abc-defg-hij',
 };
 
@@ -16,14 +16,14 @@ test('valida y normaliza una reunión futura de Google Meet', () => {
   const result = validateMeetingInput(valid, now);
   assert.equal(result.classId, valid.classId);
   assert.equal(result.title, valid.title);
-  assert.equal(result.startsAt, '2026-09-28T12:00:00.000Z');
+  assert.equal(result.startsAt, valid.startsAt);
   assert.equal(result.meetUrl, valid.meetUrl);
 });
 
 test('rechaza datos incompletos, fechas pasadas y enlaces que no son Meet', () => {
   assert.throws(() => validateMeetingInput({ ...valid, classId: '' }, now), /MEETING_CLASS_REQUIRED/);
   assert.throws(() => validateMeetingInput({ ...valid, title: '  x ' }, now), /MEETING_TITLE_INVALID/);
-  assert.throws(() => validateMeetingInput({ ...valid, startsAt: '2026-09-27T12:00:00.000Z' }, now), /MEETING_TIME_INVALID/);
+  assert.throws(() => validateMeetingInput({ ...valid, startsAt: new Date(now - 1000).toISOString() }, now), /MEETING_TIME_INVALID/);
   assert.throws(() => validateMeetingInput({ ...valid, meetUrl: 'https://meet.google.com.evil.test/abc-defg-hij' }, now), /MEETING_URL_INVALID/);
   assert.throws(() => validateMeetingInput({ ...valid, meetUrl: 'https://example.com/abc-defg-hij' }, now), /MEETING_URL_INVALID/);
 });

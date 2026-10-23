@@ -3,6 +3,7 @@ import { readJSON, writeJSON, removeKey } from '../utils/storage.js';
 import { topicStats } from '../pedagogy/progression.js';
 import { withFlags } from '../pedagogy/flags.js';
 import { exercises as catalogExercises } from '../data/catalogs.js';
+import { summarizeErrorCounts } from '../pedagogy/errorSummary.js';
 
 // Paquete de clase que descarga el alumno: queda en su perfil local para
 // practicar sin internet. Pendiente de subida: la última foto del avance que
@@ -44,18 +45,26 @@ export async function createCloudClass({ title, teacherName, teacherAvatar, teac
 }
 
 const MEMBER_COLUMNS = 'student_id,display_name,avatar,xp,level,attempts,correct,confidence,cards_consolidated,last_sync,joined_at,phone,email';
-// Columnas del panel docente (topic_stats, solved). Si la base todavía no
-// tiene la migración, PostgREST responde 400 y se usa la consulta anterior,
-// así la lista de alumnos nunca deja de funcionar.
-const isMissingColumn = error => error?.status === 400 || /column|PGRST20/i.test(String(error?.message ?? ''));
+const PANEL_FIELDS = ['solved', 'topic_stats', 'error_summary'];
+const isMissingColumn = error => /column|schema cache|PGRST20/i.test(String(error?.message ?? ''));
 
 export async function listTeacherClasses() {
   const query = members => rest(session => `classes?select=id,code,title,created_at,config:content->config,class_members(${members})&teacher_id=eq.${session.userId}&order=created_at.desc`);
   try {
-    return await query(`${MEMBER_COLUMNS},topic_stats,solved`);
+    return await query(`${MEMBER_COLUMNS},topic_stats,solved,error_summary`);
   } catch (error) {
     if (!isMissingColumn(error)) throw error;
-    return query(MEMBER_COLUMNS);
+    try {
+      return await query(`${MEMBER_COLUMNS},topic_stats,solved`);
+    } catch (panelError) {
+      if (!isMissingColumn(panelError)) throw panelError;
+      try {
+        return await query(`${MEMBER_COLUMNS},error_summary`);
+      } catch (summaryError) {
+        if (!isMissingColumn(summaryError)) throw summaryError;
+        return query(MEMBER_COLUMNS);
+      }
+    }
   }
 }
 
@@ -114,6 +123,7 @@ export async function leaveCloudClass() {
 
 export function progressSnapshot(learning) {
   const log = Array.isArray(learning?.attemptLog) ? learning.attemptLog : [];
+  const errorSummary = summarizeErrorCounts(log.slice(-30));
   const cards = learning?.flashcardState && typeof learning.flashcardState === 'object' ? Object.values(learning.flashcardState) : [];
   return {
     xp: Math.max(0, Math.floor(Number(learning?.xp) || 0)),
@@ -125,10 +135,11 @@ export function progressSnapshot(learning) {
     // Para el panel docente: ejercicios distintos resueltos y aciertos por tema.
     solved: new Set(log.filter(item => item?.correct && item.exerciseId).map(item => item.exerciseId)).size,
     topic_stats: topicStats(log, withFlags([...catalogExercises, ...(getClassPackage()?.content?.exercises ?? [])], getClassPackage()?.content?.flags?.byExercise ?? {})),
+    // Solo se sincronizan categorías conocidas y saturadas en 2; nunca las
+    // respuestas escritas ni un historial individual de errores.
+    error_summary: Object.fromEntries(Object.entries(errorSummary).map(([key, count]) => [key, Math.min(2, count)])),
   };
 }
-
-const PANEL_FIELDS = ['solved', 'topic_stats'];
 
 export function queueProgress(snapshot) {
   const pkg = getClassPackage();
@@ -152,13 +163,23 @@ export async function flushProgress() {
     headers: { Prefer: 'return=minimal' },
   });
   try {
-    try {
-      await send(pending.stats);
-    } catch (error) {
-      // Base sin la migración del panel docente: se sube lo de siempre.
-      if (error.offline || !isMissingColumn(error)) throw error;
-      await send(Object.fromEntries(Object.entries(pending.stats).filter(([key]) => !PANEL_FIELDS.includes(key))));
+    const candidates = [
+      pending.stats,
+      Object.fromEntries(Object.entries(pending.stats).filter(([key]) => key !== 'error_summary')),
+      Object.fromEntries(Object.entries(pending.stats).filter(([key]) => !PANEL_FIELDS.includes(key))),
+    ];
+    let lastError;
+    for (const stats of candidates) {
+      try {
+        await send(stats);
+        lastError = null;
+        break;
+      } catch (error) {
+        if (error.offline || !isMissingColumn(error)) throw error;
+        lastError = error;
+      }
     }
+    if (lastError) throw lastError;
     if (getPendingProgress()?.at === pending.at) removeKey(PENDING_KEY);
     return { status: 'synced', at: new Date().toISOString() };
   } catch (error) {

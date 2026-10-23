@@ -40,9 +40,15 @@ create table if not exists public.class_members (
   correct integer not null default 0 check (correct >= 0),
   confidence integer not null default 0 check (confidence between 0 and 100),
   cards_consolidated integer not null default 0 check (cards_consolidated >= 0),
+  error_summary jsonb not null default '{}'::jsonb,
   last_sync timestamptz,
   joined_at timestamptz not null default now(),
-  primary key (class_id, student_id)
+  primary key (class_id, student_id),
+  constraint class_members_error_summary_object check (
+    jsonb_typeof(error_summary) = 'object'
+    and pg_column_size(error_summary) <= 512
+    and (error_summary - array['confunde_componentes', 'confunde_velocidades', 'olvida_gravedad', 'confunde_altura_alcance', 'angulo_desfasado']::text[]) = '{}'::jsonb
+  )
 );
 -- Panel docente: ejercicios distintos resueltos y aciertos por tema
 -- ({ "componentes": { "attempts": 4, "correct": 3 }, ... }). Los sube el alumno.
@@ -51,6 +57,23 @@ alter table public.class_members add column if not exists topic_stats jsonb not 
   check (jsonb_typeof(topic_stats) = 'object' and pg_column_size(topic_stats) <= 4000);
 alter table public.class_members add column if not exists phone text check (char_length(phone) <= 24);
 alter table public.class_members add column if not exists email text check (char_length(email) <= 120);
+alter table public.class_members add column if not exists error_summary jsonb not null default '{}'::jsonb;
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'class_members_error_summary_object'
+      and conrelid = 'public.class_members'::regclass
+  ) then
+    alter table public.class_members
+      add constraint class_members_error_summary_object
+      check (
+        jsonb_typeof(error_summary) = 'object'
+        and pg_column_size(error_summary) <= 512
+        and (error_summary - array['confunde_componentes', 'confunde_velocidades', 'olvida_gravedad', 'confunde_altura_alcance', 'angulo_desfasado']::text[]) = '{}'::jsonb
+      );
+  end if;
+end $$;
 
 create table if not exists public.messages (
   id bigint generated always as identity primary key,

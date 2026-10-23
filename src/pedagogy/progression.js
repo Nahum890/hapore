@@ -1,4 +1,13 @@
+import { getRepeatedErrorFocus } from './errorSummary.js';
+
 const RANK = { básico: 0, intermedio: 1, avanzado: 2 };
+const ERROR_CONCEPTS = {
+  confunde_componentes: ['componente-horizontal', 'componente-vertical'],
+  confunde_velocidades: ['componente-vertical'],
+  olvida_gravedad: ['tiempo-de-vuelo', 'altura-maxima'],
+  confunde_altura_alcance: ['altura-maxima', 'alcance'],
+  angulo_desfasado: ['alcance'],
+};
 
 // Nombre para mostrar y concepto relacionado de cada tipo de error que ya
 // diagnostica pedagogy/diagnoseAttempt.js. Sirve tanto para el plan de
@@ -35,6 +44,16 @@ export function summarizeAttempts(log = []) {
 export function recommendExercise(exercises = [], currentId, log = []) {
   const current = exercises.find(item => item.id === currentId);
   if (!current) return null;
+  const repeatedError = getRepeatedErrorFocus(log);
+  if (repeatedError) {
+    const concepts = ERROR_CONCEPTS[repeatedError.key] ?? [];
+    const mastered = new Set(log.filter(entry => entry.correct).map(entry => entry.exerciseId));
+    const related = exercises.filter(item => concepts.includes(item.expectedConcept) && item.id !== currentId && !mastered.has(item.id));
+    const candidate = related.sort((a, b) => (RANK[a.difficulty] ?? 0) - (RANK[b.difficulty] ?? 0))[0]
+      ?? exercises.find(item => concepts.includes(item.expectedConcept) && item.id !== currentId)
+      ?? current;
+    return { exercise: candidate, reason: `Veo que se repitió la dificultad “${repeatedError.label}”. Te propongo este ejercicio breve para reforzarla.` };
+  }
   const attempts = log.filter(entry => entry.exerciseId === currentId);
   const recent = attempts.slice(-2);
   if (!recent.length) return null;

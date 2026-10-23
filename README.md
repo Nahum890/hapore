@@ -34,6 +34,9 @@ Velocidad, gravedad, vectores y ángulo de lanzamiento se explican como apoyo co
 - Simulación visual que cambia según el ejercicio activo.
 - Diagnóstico específico de errores y reintentos sin penalización.
 - Pistas progresivas en el tutor, con apoyo en castellano y Jopara.
+- Guía socrática que pregunta por datos, magnitud, fórmula y cálculo antes de revelar la resolución.
+- Lectura de una foto del cuaderno con confirmación de transcripción antes de abrir la guía; requiere Gemini online.
+- Dictado y lectura en voz alta en navegadores compatibles; el dictado de Jopara usa reconocimiento de español de Paraguay y puede necesitar correcciones.
 - Cuestionario conceptual y conversación libre con fallback sin conexión.
 - Flashcards, progreso, precisión, tiempo medio y recomendaciones adaptativas.
 - Acceso a una clase mediante código compartido por el docente.
@@ -44,6 +47,7 @@ Velocidad, gravedad, vectores y ángulo de lanzamiento se explican como apoyo co
 - Preparación de una clase guiada con gancho, demostración, práctica y ticket de salida.
 - En modo local, un código de práctica aplica la misma selección en otro dispositivo, sin crear un roster ni enviar progreso.
 - Con Supabase, clases reales con materiales compartidos y avance sincronizado entre dispositivos.
+- Resumen de dificultades frecuentes de la clase basado en errores repetidos; muestra tendencias agregadas y no ordena estudiantes.
 - Creación de ejercicios propios con respuesta calculada automáticamente.
 - Proyector con vista grande para simulaciones, ejercicios y conceptos.
 - Biblioteca con conceptos, ejercicios resueltos, errores frecuentes, glosario y fuentes.
@@ -88,6 +92,12 @@ La clave de Gemini se lee desde el servidor de desarrollo o vista previa y nunca
 Después de la primera carga, el service worker guarda la interfaz, los contenidos y los recursos estáticos. El tutor por reglas, las simulaciones, los ejercicios, las flashcards, el PDF y el progreso local siguen disponibles sin Internet.
 
 Las cuentas, sesiones y el progreso se guardan en el navegador de cada dispositivo.
+
+## Voz y fotos
+
+El dictado y la lectura de respuestas usan las funciones de voz disponibles en el navegador. La app conserva el dictado en el campo de texto para que el estudiante lo revise antes de enviarlo. Jopara mezclado con español requiere validación en los dispositivos del aula.
+
+Para leer una foto se necesita Gemini online y conexión. La imagen se reduce en el navegador y se envía a Google para extraer el enunciado, los valores, las unidades y los pasos manuscritos visibles. PyFis muestra la lectura editable y espera la confirmación del estudiante antes de iniciar la guía. La imagen no se guarda; el texto y los pasos confirmados sí quedan en el historial local de Chat libre. La lectura y la respuesta del tutor cuentan como consultas separadas.
 
 ## Clases compartidas entre dispositivos (opcional)
 

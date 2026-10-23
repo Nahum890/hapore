@@ -81,6 +81,7 @@ export default function StudentClass({ classConfig, onJoinClass, studentId, clas
       <div className="student-class-summary"><span>{t('class.exercises')}</span><strong>{content.config.ejercicios}</strong><span>{t('class.cards')}</span><strong>{content.cards.length}</strong></div>
       <ClassActions onPractice={onPractice} onReview={onReview} />
       <SyncStatus syncState={syncState} />
+      <p className="field-help student-class-note">{t('class.errorSummaryNotice')}</p>
       <div className="student-class-footer">
         <button type="button" className="btn btn-secondary" disabled={busy} onClick={update}>{t(busy ? 'class.updating' : 'class.update')}</button>
         {confirmLeave
