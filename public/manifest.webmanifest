@@ -4,7 +4,7 @@
   "short_name": "PyFis IA",
   "description": "PyFis IA Demo 1.0 — app educativa para aprender Física de 3.º curso (Movimiento Parabólico) con simulación interactiva y tutor inteligente, en español y Jopara. Hecha por Kyre’y-devs.",
   "lang": "es",
-  "start_url": "/",
+  "start_url": "/demo",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",

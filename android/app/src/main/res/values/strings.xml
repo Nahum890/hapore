@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">PyFis IA</string>
+    <string name="title_activity_main">PyFis IA</string>
+    <string name="package_name">com.kyreydevs.pyfisia</string>
+    <string name="custom_url_scheme">com.kyreydevs.pyfisia</string>
+</resources>

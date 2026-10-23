@@ -36,7 +36,9 @@ test('crea, consulta y cancela reuniones en la tabla compartida', async () => {
     removeItem: key => values.delete(key),
   };
   const calls = [];
-  const meeting = { id: 12, class_id: valid.classId, creator_id: 'teacher-1', title: valid.title, description: valid.description, starts_at: valid.startsAt, meet_url: valid.meetUrl };
+  // createClassMeeting compara con la hora real: la reunión tiene que estar en el futuro.
+  const future = { ...valid, startsAt: '2099-01-01T12:00:00.000Z' };
+  const meeting = { id: 12, class_id: future.classId, creator_id: 'teacher-1', title: future.title, description: future.description, starts_at: future.startsAt, meet_url: future.meetUrl };
   configureCloud({ url: 'https://cloud.example.invalid', key: 'publishable-test-key', fetch: async (url, options = {}) => {
     const parsed = new URL(url);
     calls.push({ path: parsed.pathname, search: parsed.search, method: options.method ?? 'GET', body: options.body, headers: options.headers });
@@ -48,7 +50,7 @@ test('crea, consulta y cancela reuniones en la tabla compartida', async () => {
     return new Response(JSON.stringify([meeting]), { status: 200 });
   } });
   try {
-    assert.deepEqual(await createClassMeeting(valid), meeting);
+    assert.deepEqual(await createClassMeeting(future), meeting);
     const listed = await listClassMeetings(valid.classId);
     assert.deepEqual(listed, [meeting]);
     await deleteClassMeeting(meeting.id);

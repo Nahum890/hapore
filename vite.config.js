@@ -31,6 +31,9 @@ export default defineConfig(({ mode }) => {
         supabaseAnonKey: env.SUPABASE_ANON_KEY ?? env.VITE_SUPABASE_ANON_KEY ?? '',
       }),
       VitePWA({
+        // En el APK (Capacitor) todos los archivos ya van dentro de la app:
+        // no hace falta service worker y así no interfiere con la carga local.
+        disable: mode === 'capacitor',
         registerType: 'autoUpdate',
         includeAssets: ['favicon.svg', 'manifest.webmanifest'],
         // El manifest se mantiene como archivo estático en public/manifest.webmanifest.
@@ -40,6 +43,8 @@ export default defineConfig(({ mode }) => {
           // cualquier otro recurso de fuente) no quedaba precacheada, y la
           // ficha PDF podía fallar la primera vez que se generaba sin conexión.
           globPatterns: ['**/*.{js,css,html,svg,png,webmanifest,json,ttf,woff,woff2}'],
+          // La presentación (capturas) y el APK solo se usan con internet.
+          globIgnores: ['**/landing/**', '**/downloads/**', '**/videos/**'],
           navigateFallback: '/index.html',
           // El tutor online nunca debe responderse con el index.html cacheado.
           // Tampoco los archivos de verificación del APK (Digital Asset Links).

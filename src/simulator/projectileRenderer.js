@@ -49,7 +49,10 @@ function pill(ctx, x, y, text, { bg = 'rgba(15,23,42,.72)', color = '#f8fafc', a
   ctx.font = `700 ${size}px system-ui, sans-serif`;
   const w = ctx.measureText(text).width + 12;
   const h = size + 8;
-  const left = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
+  const wanted = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
+  // Que la etiqueta nunca se salga del lienzo (pantallas angostas de celular).
+  const canvasWidth = ctx.canvas?.clientWidth || Infinity;
+  const left = Math.max(4, Math.min(wanted, canvasWidth - w - 4));
   roundedRect(ctx, left, y - h + 4, w, h, h / 2, bg);
   ctx.fillStyle = color; ctx.textAlign = 'left';
   ctx.fillText(text, left + 6, y);
@@ -667,7 +670,9 @@ function soccerWallBarrier(ctx, x, groundY, scale, barrierHeight = 1.8, language
   for (let i = 0; i < 4; i += 1) {
     soccerPlayer(ctx, x + (i - 1.5) * gap, groundY, size, { jersey: '#2b6cb0', shorts: '#ffffff', socks: '#e53e3e', arms: 'cover' });
   }
-  pill(ctx, x, groundY - size * 1.15 - 8, language === 'es'
+  // En pantallas angostas (celular) estas medidas se pisan con las demás
+  // etiquetas; igual se ven en los datos del ejercicio.
+  if ((ctx.canvas?.clientWidth ?? 999) >= 560) pill(ctx, x, groundY - size * 1.15 - 8, language === 'es'
     ? `Barrera · 9,15 m · ${barrierHeight.toFixed(2)} m`
     : `Barrera · 9,15 m · yvate ${barrierHeight.toFixed(2)} m`, { size: 9.5 });
 }
@@ -701,7 +706,7 @@ function soccerGoal(ctx, x, groundY, scale, hit, goalHeight = 2.44, language = '
   ctx.restore();
 
   if (hit) pill(ctx, x + depth / 2, groundY - hPx - 10, language === 'es' ? '¡GOL!' : '¡GOL!', { bg: '#2f855a', size: 12 });
-  pill(ctx, x - 8, groundY - hPx + 4, language === 'es' ? `Arco ${goalHeight.toFixed(2)} m` : `Arco · yvate ${goalHeight.toFixed(2)} m`, { align: 'right', size: 9.5 });
+  if ((ctx.canvas?.clientWidth ?? 999) >= 560) pill(ctx, x - 8, groundY - hPx + 4, language === 'es' ? `Arco ${goalHeight.toFixed(2)} m` : `Arco · yvate ${goalHeight.toFixed(2)} m`, { align: 'right', size: 9.5 });
 }
 
 function yard(ctx, width, height, groundY) {

@@ -259,7 +259,24 @@ export async function createStudyPdf({ config = null, language = DEFAULT_LANGUAG
 export async function downloadStudyPdf(options = {}) {
   const doc = await createStudyPdf(options);
   const name = String(options.options?.title ?? '').trim().replace(/[^\p{L}\p{N}]+/gu, '_').replace(/^_|_$/g, '').slice(0, 40);
-  doc.save(`${name || 'PyFis_IA_Ficha_Aula'}.pdf`);
+  const fileName = `${name || 'PyFis_IA_Ficha_Aula'}.pdf`;
+  // En el APK (Capacitor) no existe la descarga del navegador: el PDF se
+  // guarda en el teléfono y se abre el menú de Android para compartirlo o
+  // abrirlo (WhatsApp, Drive, visor de PDF…). En la web se descarga como siempre.
+  const { Capacitor } = await import('@capacitor/core');
+  if (Capacitor.isNativePlatform()) {
+    const [{ Filesystem, Directory }, { Share }] = await Promise.all([import('@capacitor/filesystem'), import('@capacitor/share')]);
+    const data = doc.output('datauristring').split(',')[1];
+    const saved = await Filesystem.writeFile({ path: fileName, data, directory: Directory.Cache });
+    try {
+      await Share.share({ title: fileName, url: saved.uri, dialogTitle: fileName });
+    } catch (error) {
+      // Cerrar el menú de compartir no es un error: el PDF ya quedó guardado.
+      if (!/cancel/i.test(String(error?.message ?? error))) throw error;
+    }
+    return doc;
+  }
+  doc.save(fileName);
   return doc;
 }
 
