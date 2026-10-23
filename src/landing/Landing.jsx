@@ -311,7 +311,6 @@ export default function Landing() {
           <div className="lp-team-mark"><Nanduti size={96} spokes={16} rings={3} color="#e11d48" accent="#f59e0b" strokeWidth={1.2} /></div>
           <h2 className="lp-h2">{L.team.title}</h2>
           <p>{L.team.text}</p>
-          <p className="lp-team-teacher">{L.team.teacher}</p>
           <p className="lp-team-tag">Kyre’y-devs · Ciudad del Este, Paraguay</p>
         </div>
       </section>

@@ -1,11 +1,11 @@
 // Videos de la sección "Mirá cómo funciona".
-// Para agregar un video: poné el archivo .mp4 en public/videos/ y escribí su
+// Para cambiar un video: poné el archivo .mp4 en public/videos/ y escribí su
 // ruta en `src` (por ejemplo '/videos/tutor.mp4'), o pegá el código de YouTube
 // en `youtube` (lo que va después de "watch?v=" en el enlace).
-// Mientras estén vacíos, se muestra la captura con el aviso "Video próximamente".
+// Si los dos están vacíos, se muestra la captura con el aviso "Video próximamente".
 export const DEMO_VIDEOS = [
-  { id: 'start', src: '', youtube: '', poster: '/landing/app-inicio.png' },
-  { id: 'tutor', src: '', youtube: '', poster: '/landing/chat-cuaderno.png' },
-  { id: 'sim', src: '', youtube: '', poster: '/landing/desafio-tiro-libre.png' },
-  { id: 'teacher', src: '', youtube: '', poster: '/landing/docente-banderas.png' },
+  { id: 'start', src: '/videos/pyfis-primeros-pasos.mp4', youtube: '', poster: '/videos/pyfis-primeros-pasos.jpg' },
+  { id: 'tutor', src: '/videos/pyfis-tutor.mp4', youtube: '', poster: '/videos/pyfis-tutor.jpg' },
+  { id: 'sim', src: '/videos/pyfis-simulaciones.mp4', youtube: '', poster: '/videos/pyfis-simulaciones.jpg' },
+  { id: 'teacher', src: '/videos/pyfis-docentes.mp4', youtube: '', poster: '/videos/pyfis-docentes.jpg' },
 ];

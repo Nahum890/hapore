@@ -95,7 +95,6 @@ export const LANDING_TEXT = {
     team: {
       title: 'Quiénes somos',
       text: 'PyFis IA es un proyecto independiente de Kyre’y-devs, un equipo de estudiantes del Centro Regional de Educación “Dr. José Gaspar Rodríguez de Francia” de Ciudad del Este, Paraguay.',
-      teacher: 'Docente responsable: Carlos Miguel Giménez',
     },
     footer: 'Hecho por Kyre’y-devs · PyFis IA Demo 1.0',
   },
@@ -194,7 +193,6 @@ export const LANDING_TEXT = {
     team: {
       title: 'Mávapa ore',
       text: 'PyFis IA ha’e Kyre’y-devs proyecto independiente, peteĩ equipo temimbo’ekuéra Centro Regional de Educación “Dr. José Gaspar Rodríguez de Francia”, Ciudad del Este, Paraguay-gua.',
-      teacher: 'Docente responsable: Carlos Miguel Giménez',
     },
     footer: 'Ojapo Kyre’y-devs · PyFis IA Demo 1.0',
   },
