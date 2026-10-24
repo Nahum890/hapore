@@ -232,8 +232,8 @@ export default class RuleTutorProvider {
     if (context.type === 'section') {
       if (context.section === 'simulador' && context.exerciseId) {
         return this.result(language === 'es'
-          ? `Ahora practicamos ${context.topic ?? 'Física'}. Escribí tu respuesta y comprobala con la escena de este ejercicio.`
-          : `Ko'ãga practicamos ${context.topic ?? 'Física'}. Ehai ne respuesta ha ehecha la simulación-pe mba'éichapa osẽ.`);
+          ? `Estudiamos ${context.topic ?? 'Física'}. Mirá el simulador y después practicá; si te trabás, pedí una pista.`
+          : `Ko'ãga jastudia ${context.topic ?? 'Física'}. Ehecha simulador ha upéi epractica; rejejokóramo, ejerure pista.`);
       }
       if (context.section === 'aula') {
         if (context.role === 'maestro') {

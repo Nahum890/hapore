@@ -16,12 +16,12 @@
   "sectionGreetings": {
     "simulador": {
       "jopara": [
-        "Ko'ápe ñaha'ãta una situación: dron, básquetbol térã paredón. Ehai ne respuesta ha ehecha mba'épa ohechauka la simulación.",
-        "Eiporavo peteĩ situación ha eñepyrũ; pe cálculo rejapo nde, ha la simulación ohechauka mba'épa oiko."
+        "Eiporavo nde curso ha peteĩ tema. Káda tema oguereko simulador, ejercicio ha porandu.",
+        "Epoko estrella peteĩ tema-pe reñongatu hag̃ua \"Che tema-kuéra\"-pe."
       ],
       "es": [
-        "Acá vas a practicar con una situación: dron, básquetbol o pared. Escribí tu respuesta y comprobala con la simulación.",
-        "Elegí una situación y empezá: el cálculo es tuyo, la simulación te muestra qué pasa con esos datos."
+        "Elegí tu curso y un tema. Cada tema tiene simulador, ejercicios y preguntas.",
+        "Tocá la estrella de un tema para guardarlo en \"Mis temas\"."
       ]
     },
     "tarjetas": {

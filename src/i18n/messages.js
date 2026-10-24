@@ -1,3 +1,5 @@
+import { TOPICS_MESSAGES } from './topicsMessages.js';
+
 export const DEFAULT_LANGUAGE = 'gn-jopara';
 export const SUPPORTED_LANGUAGES = ['gn-jopara', 'es'];
 
@@ -907,6 +909,10 @@ const messages = {
     'teacher.p2': '2. Crear código', 'teacher.localHelp': 'El alumno ingresa este código en “Mi clase” para aplicar la selección en su dispositivo. No crea una clase sincronizada ni comparte el progreso; eso requiere Supabase.', 'teacher.anotherCode': 'Crear otro código',
   },
 };
+
+// Textos de los temas del currículo MEC (archivo aparte; pisa claves repetidas).
+Object.assign(messages['gn-jopara'], TOPICS_MESSAGES['gn-jopara']);
+Object.assign(messages.es, TOPICS_MESSAGES.es);
 
 // Mensajes de error que llegan en castellano desde módulos sin acceso al
 // idioma (cuentas locales). Se traducen acá para no duplicar la lógica.

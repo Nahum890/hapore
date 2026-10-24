@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { formulaParts, splitFraction, toTextbookMarked, toTextbookPlain } from '../src/utils/mathText.js';
+import { formulaParts, splitFraction, splitTerms, toTextbookMarked, toTextbookPlain } from '../src/utils/mathText.js';
 import concepts from '../src/data/concepts.json' with { type: 'json' };
 import flashcards from '../src/data/flashcards.json' with { type: 'json' };
 import exercises from '../src/data/exercises.json' with { type: 'json' };
@@ -23,6 +23,13 @@ test('las divisiones de primer nivel se separan en numerador y denominador', () 
   const parts = formulaParts(toTextbookMarked('Hmax = (v0² * sen²(ángulo)) / (2 * g)'));
   assert.deepEqual(splitFraction(parts.at(-1)), { num: 'v_{0}² · sen² θ', den: '2g' });
   assert.equal(splitFraction('x · tan θ - (g / (2 · v_{0}²)) · x²'), null, 'una división anidada no se apila');
+});
+
+test('cada término de una suma puede ser su propia fracción', () => {
+  assert.deepEqual(splitTerms('1/R_{1} + 1/R_{2}'), ['1/R_{1}', ' + ', '1/R_{2}']);
+  assert.deepEqual(splitTerms('v · t - g · t² / 2'), ['v · t', ' - ', 'g · t² / 2']);
+  assert.deepEqual(splitTerms('(a + b) / 2'), ['(a + b) / 2'], 'lo que está entre paréntesis no se corta');
+  assert.deepEqual(splitTerms('-q · E'), ['-q · E'], 'un signo al inicio no es un término aparte');
 });
 
 test('ninguna fórmula del contenido queda con * ni con (ángulo)', () => {

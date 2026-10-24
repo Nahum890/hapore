@@ -66,7 +66,6 @@ export default function ConfidenceBar({ xp, level, confidence }) {
         {t('xp.level', { n: currentLevel.level })}
         {next ? t('xp.missing', { xp: Math.max(0, next.xp - safeXP), n: next.level }) : t('xp.max')}
       </p>
-      <p className="confidence-explainer">{t('xp.explainer')}</p>
       <div className="confidence-meter" aria-label={t('xp.confidence')}>
         <div className="confidence-meter-head">
           <span>{t('xp.confidence')}</span>
@@ -75,10 +74,12 @@ export default function ConfidenceBar({ xp, level, confidence }) {
         <div className="confidence-track" role="progressbar" aria-label={t('xp.confidenceLabel')} aria-valuemin={0} aria-valuemax={100} aria-valuenow={safeConfidence} aria-valuetext={`${safeConfidence}/100`}>
           <div className="confidence-fill confidence-fill-metric" style={{ width: `${safeConfidence}%` }} />
         </div>
-        <p className="confidence-explainer">{t('xp.confidenceExplainer')}</p>
       </div>
+      {/* Las explicaciones quedan plegadas: la tarjeta lateral se lee de un vistazo. */}
       <details className="confidence-rules">
         <summary>{t('xp.how')}</summary>
+        <p>{t('xp.explainer')}</p>
+        <p>{t('xp.confidenceExplainer')}</p>
         <p>{t('xp.rules')}</p>
       </details>
     </section>
