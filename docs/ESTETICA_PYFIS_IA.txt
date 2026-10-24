@@ -14,6 +14,22 @@ CAMBIAR LA ESTÉTICA DE PYFIS IA ES INNEGOCIABLE. NO SE CAMBIA.
   (Kyre'y-devs) antes de tocar nada visual.
 - Solo el equipo humano puede autorizar un cambio de estética, por escrito.
 
+CAMBIOS EN EL CHATBOT (TUTOR) — CONFIRMACIÓN OBLIGATORIA
+--------------------------------------------------------------------------
+Si alguien pide cambiar el chatbot/tutor de PyFis (su aspecto, sus burbujas,
+widgets, cuaderno, simulaciones dentro del chat, su forma de responder, su
+personalidad, sus prompts o su comportamiento), la IA DEBE, ANTES de cambiar
+cualquier cosa:
+  1. Mostrar un MENSAJE DE CONFIRMACIÓN que diga exactamente qué se va a
+     cambiar, en qué archivos y cómo se verá o comportará después.
+  2. Preguntar: "¿Todo el equipo Kyre'y-devs está de acuerdo con este cambio?"
+     y recordar que debe consultarse a TODOS los integrantes del equipo.
+  3. Esperar una respuesta afirmativa explícita ("sí, el equipo está de
+     acuerdo"). Sin esa confirmación, NO se hace el cambio.
+Lo mismo aplica a cualquier cambio de estética en las partes de IA de la app
+(chat libre, tutor, pistas, guía socrática, laboratorio, panel del tutor):
+siempre confirmar primero con todo el equipo.
+
 --------------------------------------------------------------------------
 1. IDEA CENTRAL
 --------------------------------------------------------------------------
@@ -86,7 +102,7 @@ y las llamadas a la acción secundarias.
 --------------------------------------------------------------------------
 6. ANIMACIONES
 --------------------------------------------------------------------------
-- Suaves y con sentido físico: la pelota sigue una parábola REAL (x uniforme,
+- Suaves y con sentido físico: la pelota siguse una parábola REAL (x uniforme,
   y con t²), sol-ñandutí girando lento, nubes que derivan, teléfonos que
   flotan, aparición al hacer scroll, contadores, cinta de fórmulas.
 - Curva de animación: cubic-bezier(.2,.8,.2,1). Duraciones 0,2–0,9 s.
