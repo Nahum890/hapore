@@ -1,0 +1,119 @@
+==========================================================================
+ ESTÉTICA DE PYFIS IA — GUÍA OBLIGATORIA DE BRANDING Y DISEÑO
+ (app, página pyfisia.vercel.app, APK, videos, portadas y material)
+==========================================================================
+
+AVISO PARA CUALQUIER IA O ASISTENTE (ChatGPT, Codex, Gemini, Claude, etc.)
+--------------------------------------------------------------------------
+CAMBIAR LA ESTÉTICA DE PYFIS IA ES INNEGOCIABLE. NO SE CAMBIA.
+- No rediseñes, no "modernices", no cambies colores, tipografías, motivos ni
+  el estilo general, aunque te parezca una mejora.
+- Toda pieza nueva (pantalla, sección, componente, video, portada, cartel)
+  DEBE seguir esta guía y verse como parte de la misma familia.
+- Si una tarea parece pedir otro estilo, preguntá primero al equipo
+  (Kyre'y-devs) antes de tocar nada visual.
+- Solo el equipo humano puede autorizar un cambio de estética, por escrito.
+
+--------------------------------------------------------------------------
+1. IDEA CENTRAL
+--------------------------------------------------------------------------
+PyFis IA es un tutor de Física (movimiento parabólico) en Jopara y castellano,
+hecho en Paraguay. Su estética mezcla tres cosas:
+  a) El CUADERNO de la escuela: hoja cuadriculada, pasos claros, fórmulas.
+  b) El PAISAJE paraguayo: cielo celeste, sol, pasto verde y TIERRA COLORADA.
+  c) El ÑANDUTÍ: el encaje paraguayo, usado como "sol" y como sello.
+Todo es CLARO, LIMPIO, CÁLIDO y EDUCATIVO. Nunca oscuro ni "futurista".
+
+--------------------------------------------------------------------------
+2. COLORES (usar exactamente estos)
+--------------------------------------------------------------------------
+Azul PyFis (principal) ........ #1D5BD8  (hover #174FC0, profundo #123EA1,
+                                          claro #3B82F6, fondo suave #EFF4FE)
+Rojo/coral "Ani rekyhyje" ..... #E11D48  (suave #FFE4E6)
+Ámbar / sol ................... #F59E0B  (oscuro #D97706, suave #FEF3C7,
+                                          sol ñandutí #EBA431 / #F4B942)
+Violeta (tutor e IA) .......... #7047EB  (suave #F4F0FF)
+Verde (correcto/offline) ...... #059669
+Tinta (textos) ................ #0F172A  secundario #475569  tenue #64748B
+Fondo papel ................... #F8FAFC  tarjetas #FFFFFF  bordes #E2E8F0
+Cuadrícula de cuaderno ........ rgba(29,91,216,.04 a .07), celdas de 22–32 px
+Cielo (degradé) ............... #CFE9F6 → #E6F3FA → #F6EFDC
+Paisaje ....................... pasto #6AA66F, tierra colorada #C8552F,
+                                tierra oscura #A94424
+Vectores físicos .............. v = #0E7C66, vx = #E4572E, vy = #2F80C1
+
+REGLAS: fondo siempre claro. El azul es la identidad. El rojo se usa para
+"Ani rekyhyje." y para destacar. El ámbar es el sol, el progreso (Mbarete XP)
+y las llamadas a la acción secundarias.
+
+--------------------------------------------------------------------------
+3. TIPOGRAFÍA
+--------------------------------------------------------------------------
+- Página y piezas gráficas: "Plus Jakarta Sans" (600, 700, 800).
+- App: fuente del sistema (system-ui, Segoe UI, Roboto, Noto Sans).
+- Fórmulas: estilo matemático en cursiva (Cambria Math / Georgia).
+- Títulos MUY gruesos (800), con espaciado de letras negativo.
+- Lema fijo: "Ani rekyhyje." (en rojo) + "Aprendé Física paso a paso."
+
+--------------------------------------------------------------------------
+4. LOGO Y MOTIVOS
+--------------------------------------------------------------------------
+- Logo (BrandMark): cuadrado azul redondeado con un pequeño ñandutí-sol ámbar,
+  una parábola punteada ámbar, una línea de suelo blanca y una pelota roja.
+  Nombre: "PyFis" en tinta + "IA" en azul.
+- Ñandutí: rosetón de pétalos generado por geometría
+  (src/components/Nanduti.jsx). Se usa como sol, sello o medalla.
+- Parábola punteada con "puntos estroboscópicos" (posiciones a tiempos iguales)
+  y una pelota ámbar con contorno oscuro.
+- Vectores v, vx, vy con flechas (colores de la sección 2).
+- Banda de tierra colorada con ondas (verde, colorado, colorado oscuro) al pie.
+- Teléfonos/ventanas con capturas REALES de la app (nunca maquetas inventadas).
+- Créditos: "Hecho por Kyre'y-devs".
+
+--------------------------------------------------------------------------
+5. COMPONENTES Y FORMA
+--------------------------------------------------------------------------
+- Tarjetas blancas, bordes #E2E8F0, esquinas redondeadas (14–26 px),
+  sombras suaves y difusas.
+- Botón principal: degradé azul (#3B82F6 → #1D5BD8 → #123EA1), texto blanco,
+  bordes redondeados 14 px. Botón secundario: blanco con borde gris.
+- Insignias tipo "píldora" (border-radius 999 px).
+- En piezas gráficas (portadas, carteles) se permite contorno oscuro #0F172A
+  y sombra sólida desplazada, con colores planos.
+- Íconos de línea simples (trazo 1,9). SIN EMOJIS en la página, carteles
+  ni portadas.
+
+--------------------------------------------------------------------------
+6. ANIMACIONES
+--------------------------------------------------------------------------
+- Suaves y con sentido físico: la pelota sigue una parábola REAL (x uniforme,
+  y con t²), sol-ñandutí girando lento, nubes que derivan, teléfonos que
+  flotan, aparición al hacer scroll, contadores, cinta de fórmulas.
+- Curva de animación: cubic-bezier(.2,.8,.2,1). Duraciones 0,2–0,9 s.
+- Siempre respetar prefers-reduced-motion (sin animaciones si el usuario lo pide).
+
+--------------------------------------------------------------------------
+7. PROHIBIDO
+--------------------------------------------------------------------------
+- Fondos oscuros / modo "navy" en la página o piezas de marca.
+- Brillos, neones, halos, glows y degradés "de IA" (efectos tipo
+  inteligencia artificial futurista).
+- Emojis en material de marca (usar íconos o dibujos propios en vectores).
+- Cambiar la paleta, el logo, el lema o reemplazar el ñandutí.
+- Estética genérica de plantilla (morados SaaS, glassmorphism exagerado,
+  ilustraciones 3D de stock).
+- Mencionar FeSTEAM en la página: PyFis IA es un proyecto independiente.
+- Mostrar "docente responsable" en la página.
+
+--------------------------------------------------------------------------
+8. DÓNDE ESTÁ DEFINIDO EN EL CÓDIGO
+--------------------------------------------------------------------------
+- Variables de color de la app ........ src/index.css (:root)
+- Página de presentación ............. src/landing/Landing.css, Landing.jsx,
+                                        HeroScene.jsx, content.js
+- Logo y ñandutí ..................... src/components/Nanduti.jsx
+- Capturas y videos de la página ..... public/landing/, public/videos/
+- Portada de YouTube ................. branding/pyfis/youtube/
+
+Ante la duda: mantener lo que ya existe. La estética de PyFis IA NO SE CAMBIA.
+==========================================================================
