@@ -22,7 +22,7 @@ GuaranIA es una aplicación React que normalmente se ejecuta en el navegador. Es
 | **Supabase** | Mantiene las clases, integrantes, contactos, mensajes y el avance sincronizado. | Solo cuando el proyecto tiene Supabase configurado y su esquema instalado. |
 | **Mock de Supabase** | Imita algunas funciones de clases y chat para pruebas, con datos temporales. | Mientras se ejecuta `node supabase/mock-server.mjs`. Se borra al cerrarlo. |
 
-La clave de Gemini, si se usa, se lee del lado servidor mediante `GEMINI_API_KEY`. El mock de Supabase no es Gemini y no habilita por sí solo el tutor online. Para ofrecer Gemini en un sitio publicado hace falta desplegar `/api/chat` como una función de servidor y guardar allí la clave; una clave puesta en el navegador no es segura. Consulta también el apartado “Tutor e IA” del [README](../README.md).
+La clave de Gemini, si se usa, se lee del lado servidor mediante `GEMINI_API_KEY`. El mock de Supabase no es Gemini y no habilita por sí solo el tutor online. Para ofrecer Gemini en un sitio publicado hace falta desplegar `/api/chat` como una función de servidor y guardar allí la clave; una clave puesta en el navegador no es segura. Consulta también el apartado “Tutor e IA” del [README](../../README.md).
 
 ## Probar en una sola computadora
 
@@ -71,7 +71,7 @@ Desde el teléfono abre `http://192.168.0.20:5173`. Si Windows solicita permiso 
 
 ## Usar Supabase real
 
-Para comunicación persistente entre hogares o dispositivos, cada equipo necesita apuntar al mismo proyecto de Supabase. Una persona autorizada debe crear el proyecto, activar los inicios anónimos y ejecutar [`supabase/schema.sql`](../supabase/schema.sql). Después configura `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` en el entorno de desarrollo o alojamiento. Los pasos detallados están en [supabase/README.md](../supabase/README.md).
+Para comunicación persistente entre hogares o dispositivos, cada equipo necesita apuntar al mismo proyecto de Supabase. Una persona autorizada debe crear el proyecto, activar los inicios anónimos y ejecutar [`supabase/schema.sql`](../../supabase/schema.sql). Después configura `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` en el entorno de desarrollo o alojamiento. Los pasos detallados están en [supabase/README.md](../../supabase/README.md).
 
 La clave `anon public` se utiliza en el navegador; las reglas RLS del esquema limitan qué filas puede leer o cambiar cada integrante. Nunca publiques `service_role`, contraseñas ni una clave real en Git. Las identidades actuales están ligadas al navegador: no hay recuperación de cuenta por correo.
 

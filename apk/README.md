@@ -1,43 +1,42 @@
 # APK de PyFis IA (Demo 1.0)
 
-El APK es una **Trusted Web Activity (TWA)**: abre **https://pyfisia.vercel.app** en pantalla completa, sin barra del navegador.
-Por eso **la app del teléfono y la web de Vercel son siempre la misma versión**: cada deploy en Vercel actualiza también el APK, sin reinstalar.
+El APK se arma con **Capacitor**: lleva toda la app adentro, así que **funciona sin internet**.
+El proyecto Android está en [`android/`](../android) y la configuración en [`capacitor.config.json`](../capacitor.config.json).
+Con internet, el tutor con IA usa `https://pyfisia.vercel.app/api/chat` (ver `.env.capacitor`).
 
 | Dato | Valor |
 | --- | --- |
 | Paquete | `com.kyreydevs.pyfisia` |
 | Versión | `1.0.0` (versionCode `1`) — igual que `package.json` y el pie de la app ("Demo 1.0") |
-| Sitio | `pyfisia.vercel.app` |
-| Android mínimo | 5.0 (API 21) |
-| Verificación | `public/.well-known/assetlinks.json` (huella SHA-256 de la llave de firma) |
+| Descarga pública | `public/downloads/PyFis-IA-Demo-1.0.apk` → https://pyfisia.vercel.app/downloads/PyFis-IA-Demo-1.0.apk |
+
+## Qué hay en esta carpeta
+
+| Archivo | Qué es | ¿Se sube a GitHub? |
+| --- | --- | --- |
+| `README.md` | Esta guía | Sí |
+| `android.keystore` | Llave de firma del APK | **Nunca** |
+| `keystore-credentials.txt` | Contraseñas de la llave | **Nunca** |
+| `PyFis-IA-Demo-1.0.apk` | Último APK firmado | No (la copia pública está en `public/downloads/`) |
+
+Guardá la llave y sus contraseñas en un lugar seguro (por ejemplo, un pendrive y un Drive privado). **Sin ellas no se puede publicar una actualización con el mismo paquete.**
 
 ## Instalar en un teléfono Android
 
-1. Pasá `PyFis-IA-Demo-1.0.apk` al teléfono (WhatsApp, cable USB, Google Drive…).
-2. Tocá el archivo. Si Android lo pide, permití **"Instalar apps desconocidas"** para esa aplicación.
-3. Abrí **PyFis IA**. Necesita **Google Chrome** instalado (viene en casi todos los Android).
+1. Pasá el `.apk` al teléfono (WhatsApp, cable USB, Google Drive…) o descargalo desde la página.
+2. Tocá el archivo. Si Android lo pide, permití **"Instalar apps desconocidas"**.
+3. Abrí **PyFis IA** y creá tu cuenta.
 
-Si la primera vez aparece una barra con la dirección arriba, es porque Android todavía no verificó el sitio: cerrá la app, esperá un minuto con internet y volvé a abrirla.
+## Volver a generar el APK
 
-## Qué NO se sube a GitHub
+Cada cambio de la app necesita un APK nuevo (a diferencia de la web, que se actualiza sola con cada deploy).
 
-Dentro de `apk/` solo se versionan `twa-manifest.json` y este README. **Nunca** subas:
-
-- `android.keystore` → la llave de firma.
-- `keystore-credentials.txt` → sus contraseñas.
-
-Guardá esos dos archivos en un lugar seguro (por ejemplo, un pendrive y un Drive privado). **Sin ellos no se puede publicar una actualización del APK con el mismo paquete** (Play Store la rechazaría).
-
-## Volver a generar el APK (solo si cambia el ícono, el nombre o la versión)
-
-Los cambios de la app **no** requieren un APK nuevo: basta con desplegar en Vercel.
-Si cambiás nombre, ícono o versión:
-
-1. Actualizá `version` en `package.json` y `appVersionName` / `appVersionCode` (+1) en `apk/twa-manifest.json`.
-2. En `apk/`: `npx @bubblewrap/cli update --skipVersionUpgrade --manifest ./twa-manifest.json`.
-3. Compilá: con `JAVA_HOME` apuntando al JDK de Android Studio (`C:\Program Files\Android\Android Studio\jbr`) y `ANDROID_HOME` al SDK, ejecutá `gradlew.bat assembleRelease`.
-4. Firmá `app/build/outputs/apk/release/app-release-unsigned.apk` con `zipalign` y `apksigner` (build-tools 36.1.0) usando `android.keystore` y el alias `pyfisia`.
+1. Si cambia la versión: actualizá `version` en `package.json` y `versionName` / `versionCode` (+1) en `android/app/build.gradle`.
+2. `npm run build:apk` (compila en modo `capacitor` y copia la app a `android/`).
+3. En `android/`, con `JAVA_HOME` apuntando al JDK de Android Studio (`C:\Program Files\Android\Android Studio\jbr`) y `ANDROID_HOME` al SDK: `gradlew.bat assembleRelease`.
+4. Alineá y firmá `android/app/build/outputs/apk/release/app-release-unsigned.apk` con `zipalign -p 4` y `apksigner sign` (build-tools 36.1.0), usando `apk/android.keystore` y el alias `pyfisia`.
+5. Copiá el APK firmado como `apk/PyFis-IA-Demo-1.0.apk` y `public/downloads/PyFis-IA-Demo-1.0.apk` (actualizá el tamaño en `src/landing/Landing.jsx` si cambia).
 
 ## Publicar en Google Play (opcional)
 
-Play Store pide un **AAB** en vez de APK: `gradlew.bat bundleRelease` y firmalo con la misma llave. Si Play genera su propia llave de firma ("Play App Signing"), agregá su huella SHA-256 también en `public/.well-known/assetlinks.json` y volvé a desplegar.
+Play Store pide un **AAB**: `gradlew.bat bundleRelease` en `android/` y firmalo con la misma llave.

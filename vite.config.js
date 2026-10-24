@@ -33,7 +33,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     // Versión visible en la app (pie de página). Es la misma que usa el APK
-    // (apk/twa-manifest.json → appVersionName), así Vercel y el APK coinciden.
+    // (android/app/build.gradle → versionName), así Vercel y el APK coinciden.
     define: {
       __APP_VERSION__: JSON.stringify(APP_VERSION),
       __BUILD_ID__: JSON.stringify(BUILD_ID),
