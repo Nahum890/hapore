@@ -9,10 +9,11 @@ import './Landing.css';
 
 // Página de presentación del producto (pyfisia.vercel.app). La app vive en /demo.
 const LiveDemo = lazy(() => import('./LiveDemo.jsx'));
+const MecTable = lazy(() => import('./MecTable.jsx'));
 export const APK_URL = '/downloads/PyFis-IA-Demo-1.0.apk';
 const APK_SIZE = '3,8 MB';
 const DEMO_URL = '/demo';
-const FORMULAS = ['R = v₀²·sen 2θ / g', 'Hmax = v₀²·sen²θ / 2g', 't = 2·v₀·sen θ / g', 'x = v₀·cos θ · t', 'y = h₀ + v₀·sen θ · t − ½·g·t²', 'vx = v₀·cos θ', 'vy = v₀·sen θ − g·t', 'g = 9,8 m/s²'];
+const FORMULAS = ['R = v₀²·sen 2θ / g', 'F = m·a', 'V = I·R', 'E = ρ·g·V', 'Q = m·c·ΔT', 'v = λ·f', 'F = k·q₁·q₂ / d²', 'Ec = ½·m·v²', 'P = ρ·g·h', 'E = h·f'];
 const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
 const ICONS = {
@@ -102,6 +103,7 @@ export default function Landing() {
   const [showDemo, setShowDemo] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState('');
+  const [mecOpen, setMecOpen] = useState(false);
   const rootRef = useRef(null);
   const heroRef = useRef(null);
 
@@ -155,7 +157,7 @@ export default function Landing() {
     heroRef.current.style.setProperty('--py', ((event.clientY - box.top) / box.height - 0.5).toFixed(3));
   };
 
-  const nav = [['que', L.nav.what], ['funciones', L.nav.features], ['demo', L.nav.demo], ['videos', L.nav.videos], ['docentes', L.nav.teachers], ['descargar', L.nav.download]];
+  const nav = [['que', L.nav.what], ['funciones', L.nav.features], ['mec', L.nav.mec], ['demo', L.nav.demo], ['videos', L.nav.videos], ['docentes', L.nav.teachers], ['descargar', L.nav.download]];
 
   return <div className="lp" ref={rootRef}>
     <header className={'lp-header' + (scrolled ? ' is-scrolled' : '')}>
@@ -284,6 +286,27 @@ export default function Landing() {
           </div>
           <div className="lp-shot-wrap" data-reveal style={{ '--d': 1 }}>
             <img className="lp-shot" src="/landing/docente-banderas.png" alt="Panel docente con banderitas por ejercicio" loading="lazy" />
+          </div>
+        </div>
+      </section>
+
+      <section className="lp-section lp-section-grid" id="mec">
+        <div className="lp-container">
+          <h2 className="lp-h2" data-reveal>{L.mec.title}</h2>
+          <p className="lp-sub" data-reveal>{L.mec.lead}</p>
+          <div className="lp-mec-courses">
+            {L.mec.courses.map(([title, text], index) => <article key={title} className="lp-mec-course" data-reveal style={{ '--d': index }}>
+              <h3>{title}</h3><p>{text}</p>
+            </article>)}
+          </div>
+          <div className="lp-mec-docs" data-reveal>
+            <h3>{L.mec.docsTitle}</h3>
+            <ul>{L.mec.docs.map(([name, text]) => <li key={name}><strong>{name}</strong><span>{text}</span></li>)}</ul>
+            <p className="lp-mec-note">{L.mec.note}</p>
+            <details className="lp-mec-details" onToggle={event => setMecOpen(event.currentTarget.open)}>
+              <summary>{L.mec.link}</summary>
+              {mecOpen && <Suspense fallback={<p className="lp-loading">…</p>}><MecTable language={language} /></Suspense>}
+            </details>
           </div>
         </div>
       </section>

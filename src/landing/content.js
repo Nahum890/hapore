@@ -1,17 +1,34 @@
 // Textos de la página de presentación (español y Jopara).
 export const LANDING_TEXT = {
   es: {
-    nav: { what: 'Qué es', features: 'Funciones', demo: 'Demo en vivo', videos: 'Videos', teachers: 'Docentes', download: 'Descargar' },
+    nav: { what: 'Qué es', features: 'Funciones', mec: 'Programa MEC', demo: 'Demo en vivo', videos: 'Videos', teachers: 'Docentes', download: 'Descargar' },
     cta: 'Probar demo', ctaDownload: 'Descargar APK', openApp: 'Abrir la app',
     hero: {
-      eyebrow: 'Física 3.º curso · Jopara y castellano',
+      eyebrow: 'Física de la Educación Media · Jopara y castellano',
       titleRed: 'Ani rekyhyje.', title: 'Aprendé Física paso a paso.',
-      lead: 'PyFis IA es un tutor de inteligencia artificial en Jopara y castellano que enseña movimiento parabólico con ejercicios guiados, simulaciones 2D y 3D y desafíos. Funciona en el celular, incluso sin internet.',
-      badges: ['Gratis', 'Español y Jopara', 'Funciona sin internet', 'Android y web'],
+      lead: 'PyFis IA es un tutor de inteligencia artificial en Jopara y castellano con todos los temas de Física de la Educación Media del programa del MEC: simuladores, ejercicios con corrección y preguntas. Funciona en el celular, incluso sin internet.',
+      badges: ['Gratis', 'Español y Jopara', 'Programa del MEC', 'Funciona sin internet'],
+    },
+    mec: {
+      title: 'Según el programa del MEC',
+      lead: 'Cada tema de PyFis dice en qué curso y capacidad del programa oficial figura, con la resolución y las páginas. Así el docente sabe exactamente qué está practicando su grupo.',
+      courses: [
+        ['1.er curso · Plan Común', 'Magnitudes, vectores, MRU, MRUV, caída libre, tiro parabólico, Newton, energía, fluidos y calor.'],
+        ['2.º curso · Plan Común', 'Termodinámica, gases, luz, espejos, lentes, ondas, sonido y electricidad hasta la ley de Ohm.'],
+        ['3.er curso · Plan Específico', 'Mecánica avanzada, gravitación, electricidad y magnetismo, relatividad y física cuántica.'],
+      ],
+      docsTitle: 'Documentos del MEC usados',
+      docs: [
+        ['Res. MEC N° 12.506/09 BIS', 'Programa de Física de la Educación Media (Plan Común pp. 139-145, Plan Específico pp. 251-253).'],
+        ['Priorización Curricular 2021', 'Los temas priorizados llevan la marca “Priorizado 2021”.'],
+        ['Guía de planificación 2021', 'El orden semanal de los temas, para seguir el cronograma.'],
+      ],
+      note: 'Las fórmulas son de física estándar de nivel medio: el programa nombra los temas y las leyes, pero no transcribe fórmulas.',
+      link: 'Leer la documentación completa',
     },
     stats: [
       { value: 2, label: 'idiomas: Jopara y castellano' },
-      { value: 4, label: 'escenarios de lanzamiento' },
+      { value: 38, label: 'temas del programa del MEC' },
       { value: 100, suffix: ' %', label: 'funciona sin internet' },
       { value: 3.8, decimals: 1, suffix: ' MB', label: 'pesa el APK' },
     ],
@@ -99,17 +116,34 @@ export const LANDING_TEXT = {
     footer: 'Hecho por Kyre’y-devs · PyFis IA Demo 1.0',
   },
   gn: {
-    nav: { what: 'Mba’épa', features: 'Mba’épa ojapo', demo: 'Demo', videos: 'Video', teachers: 'Mbo’ehára', download: 'Emboguejy' },
+    nav: { what: 'Mba’épa', features: 'Mba’épa ojapo', mec: 'MEC programa', demo: 'Demo', videos: 'Video', teachers: 'Mbo’ehára', download: 'Emboguejy' },
     cta: 'Eñeha’ã demo', ctaDownload: 'Emboguejy APK', openApp: 'Eipe’a app',
     hero: {
-      eyebrow: 'Física 3.º curso · Jopara ha castellano',
+      eyebrow: 'Educación Media Física · Jopara ha castellano',
       titleRed: 'Ani rekyhyje.', title: 'Eaprende Física paso a paso.',
-      lead: 'PyFis IA ha’e peteĩ tutor inteligencia artificial Jopara ha castellano-pe, ombo’éva movimiento parabólico ejercicio guiado, simulación 2D ha 3D ha desafío reheve. Ojepuru celular-pe, internet’ỹre avei.',
-      badges: ['Rei', 'Español ha Jopara', 'Internet’ỹre oiko', 'Android ha web'],
+      lead: 'PyFis IA ha’e peteĩ tutor inteligencia artificial Jopara ha castellano-pe, oguerekóva opavave Educación Media Física tema MEC programa-gui: simulador, ejercicio corrección reheve ha porandu. Ojepuru celular-pe, internet’ỹre avei.',
+      badges: ['Rei', 'Español ha Jopara', 'MEC programa', 'Internet’ỹre oiko'],
+    },
+    mec: {
+      title: 'MEC programa he’iháicha',
+      lead: 'Káda PyFis tema he’i moõ curso ha capacidad-pe oĩ programa oficial-pe, resolución ha kuatiarogue reheve. Upéicha mbo’ehára oikuaa mba’épa opractica igrupo.',
+      courses: [
+        ['1.er curso · Plan Común', 'Magnitud, vector, MRU, MRUV, caída libre, tiro parabólico, Newton, energía, fluido ha calor.'],
+        ['2.º curso · Plan Común', 'Termodinámica, gas, tesape, espejo, lente, onda, sonido ha electricidad ley de Ohm peve.'],
+        ['3.er curso · Plan Específico', 'Mecánica hasyvéva, gravitación, electricidad ha magnetismo, relatividad ha física cuántica.'],
+      ],
+      docsTitle: 'MEC documento ojepuruva',
+      docs: [
+        ['Res. MEC N° 12.506/09 BIS', 'Educación Media Física programa (Plan Común pp. 139-145, Plan Específico pp. 251-253).'],
+        ['Priorización Curricular 2021', 'Tema priorizado oguereko marca “Priorizado 2021”.'],
+        ['Guía de planificación 2021', 'Tema-kuéra orden semana ha semana, cronograma resegi hag̃ua.'],
+      ],
+      note: 'Fórmula-kuéra ha’e física estándar nivel medio-pegua: programa ombohéra tema ha ley, ndohaíri katu fórmula.',
+      link: 'Emoñe’ẽ documentación completa',
     },
     stats: [
       { value: 2, label: 'ñe’ẽ: Jopara ha castellano' },
-      { value: 4, label: 'escenario lanzamiento rehegua' },
+      { value: 38, label: 'tema MEC programa-gui' },
       { value: 100, suffix: ' %', label: 'oiko internet’ỹre' },
       { value: 3.8, decimals: 1, suffix: ' MB', label: 'APK ipohýi' },
     ],
