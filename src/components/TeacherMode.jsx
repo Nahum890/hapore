@@ -17,10 +17,12 @@ import { registerClassCode } from '../utils/classroom.js';
 import { isCloudConfigured } from '../cloud/cloudClient.js';
 import { buildClassContent, createCloudClass, deleteCloudClass, listTeacherClasses } from '../cloud/classCloud.js';
 import { useTranslation } from '../i18n/LanguageProvider.jsx';
+import TeacherCurriculum from './topics/TeacherCurriculum.jsx';
+import { getTeacherTopics } from '../curriculum/progress.js';
 
 // Situaciones de práctica (nombres visibles en messages.js: scenario.<id>).
 const SUBTEMAS = ['dron', 'basketball', 'wall'];
-const TOOLS = ['grupo', 'actividad', 'reuniones', 'analisis', 'ejercicios', 'clase'];
+const TOOLS = ['plan', 'grupo', 'actividad', 'reuniones', 'analisis', 'ejercicios', 'clase'];
 
 export function validClassCode(text) {
   const code = String(text ?? '').trim().toUpperCase();
@@ -222,7 +224,7 @@ function CloudClassSetup({ teacher, allExercises, customExercises }) {
       const cards = allCards.filter(card => selectedCards.includes(card.id));
       const sharedExercises = customExercises.filter(item => selectedExercises.includes(item.id) && subtopics.includes(item.scenario));
       const content = buildClassContent({
-        config: { subtemas: subtopics, ejercicios: Number(exerciseCount), flashcards: cards.length },
+        config: { subtemas: subtopics, ejercicios: Number(exerciseCount), flashcards: cards.length, topics: getTeacherTopics() },
         cards,
         // Ejercicios propios del docente (con su banderita) viajan con la clase.
         exercises: withFlags(sharedExercises, getFlagState().byExercise),
@@ -244,6 +246,7 @@ function CloudClassSetup({ teacher, allExercises, customExercises }) {
   return <>
     <form className="teacher-block class-setup-form" onSubmit={submit}>
       <label className="teacher-field">{t('teacher.s1')}<input className="quiz-input" value={title} onChange={event => { setTitle(event.target.value); setCreated(null); }} maxLength={80} /></label>
+      <p className="field-help">{t('plan.inGroup', { n: getTeacherTopics().length })}</p>
       <fieldset className="teacher-topic-picker"><legend>{t('teacher.s2')}</legend>
         <div className="teacher-topic-options">{SUBTEMAS.map(id => <button key={id} type="button" aria-pressed={subtopics.includes(id)} className={subtopics.includes(id) ? 'is-selected' : ''} onClick={() => toggleTopic(id)}>{t(`scenario.${id}`)}</button>)}</div>
       </fieldset>
@@ -300,7 +303,7 @@ function ClassSetup({ allExercises, customExercises, teacher, classConfig, onLea
 
 export default function TeacherMode({ classConfig, onJoinClass, teacher }) {
   const { t } = useTranslation();
-  const [tool, setTool] = useState('grupo');
+  const [tool, setTool] = useState('plan');
   const cloudEnabled = isCloudConfigured();
   const [customExercises, setCustomExercises] = useState(getCustomExercises);
   const refreshCustomExercises = () => setCustomExercises(getCustomExercises());
@@ -316,6 +319,7 @@ export default function TeacherMode({ classConfig, onJoinClass, teacher }) {
       })}
     </div>
 
+    <div hidden={tool !== 'plan'}><TeacherCurriculum /></div>
     <div hidden={tool !== 'grupo'}><ClassSetup allExercises={allExercises} customExercises={customExercises} teacher={teacher} classConfig={classConfig} onLeaveClass={() => onJoinClass?.(null)} /></div>
     <div hidden={tool !== 'actividad'}><TeacherActivityStudio exercises={allExercises} /></div>
     <div hidden={tool !== 'reuniones'}><TeacherMeetings /></div>

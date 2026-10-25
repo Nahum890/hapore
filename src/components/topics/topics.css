@@ -132,6 +132,38 @@ p.topic-mec-guide { padding-left: 0; }
 .topic-legacy summary { cursor: pointer; font-weight: 850; }
 .topic-legacy[open] summary { margin-bottom: 12px; }
 
+/* Plan MEC del docente */
+.teacher-plan { display: grid; gap: 14px; }
+.teacher-plan h2 { margin: 0; }
+.plan-unit { display: grid; gap: 8px; }
+.plan-unit-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; border-bottom: 2px solid #e8eef8; padding-bottom: 4px; }
+.plan-unit-head h3 { margin: 0; font-size: 17px; font-weight: 850; }
+.plan-capacities { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.plan-capacities > li { display: grid; gap: 8px; padding: 12px; border-radius: 14px; border: 1px solid var(--c-line, #e2e8f0); background: #fff; }
+.plan-capacity-text { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.plan-capacity-text p { flex: 1 1 100%; margin: 0; font-size: 14.5px; font-style: italic; color: #334155; }
+.plan-topic-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.plan-topic { display: inline-flex; align-items: stretch; border-radius: 999px; border: 1.5px solid #cbd5e1; background: #fff; overflow: hidden; transition: border-color .2s, background .2s; }
+.plan-topic.is-on { border-color: var(--area); background: var(--area-soft); }
+.plan-topic-toggle { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 0 10px 0 8px; border: 0; background: transparent; font: inherit; font-size: 13.5px; font-weight: 800; color: #1e293b; cursor: pointer; }
+.plan-topic-check { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 6px; border: 1.5px solid #94a3b8; background: #fff; color: #fff; }
+.plan-topic.is-on .plan-topic-check { border-color: var(--area); background: var(--area); }
+.plan-topic-project { display: grid; place-items: center; width: 34px; border: 0; border-left: 1px solid #e2e8f0; background: transparent; color: var(--area); cursor: pointer; }
+.plan-topic-project:hover { background: var(--area-soft); }
+.plan-footer { position: sticky; bottom: 10px; z-index: 4; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 14px; border-radius: 16px; background: rgba(255, 255, 255, .96); border: 1px solid var(--c-line, #e2e8f0); box-shadow: 0 10px 30px -18px rgba(15, 23, 42, .6); }
+.plan-footer-actions { display: flex; gap: 8px; }
+.plan-saved { flex: 1 1 100%; margin: 0; color: #065f46; font-weight: 750; font-size: 13.5px; }
+.plan-projector { position: fixed; inset: 0; z-index: 90; display: grid; grid-template-rows: auto auto 1fr; gap: 14px; padding: clamp(14px, 3vw, 32px); overflow: auto; background:
+  linear-gradient(rgba(29, 91, 216, .05) 1px, transparent 1px) 0 0 / 24px 24px,
+  linear-gradient(90deg, rgba(29, 91, 216, .05) 1px, transparent 1px) 0 0 / 24px 24px, #fffdf8; }
+.plan-projector-head { display: flex; align-items: center; gap: 16px; }
+.plan-projector-head > div { flex: 1; min-width: 0; }
+.plan-projector-head h2 { margin: 0; font-size: clamp(24px, 3.4vw, 38px); font-weight: 900; }
+.plan-projector-head p { margin: 2px 0 0; color: #475569; font-size: 17px; }
+.plan-projector-formulas { display: flex; flex-wrap: wrap; gap: 10px; }
+.plan-projector-formulas .topic-formula { font-size: 22px; padding: 10px 16px; }
+.plan-projector-sim { min-width: 0; }
+
 /* Ventana de fuentes del MEC */
 .mec-backdrop { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 16px; background: rgba(15, 23, 42, .45); }
 .mec-dialog { width: min(760px, 100%); max-height: min(86vh, 900px); overflow: auto; padding: 22px; border-radius: 22px; background: #fff; box-shadow: 0 30px 80px -30px rgba(15, 23, 42, .7); outline: none; }

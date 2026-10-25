@@ -96,6 +96,10 @@ export const TOPICS_MESSAGES = {
     'plan.schedule': 'Guía 2021 cronograma',
     'plan.closeProjector': 'Embogue proyector',
     'plan.selectAll': 'Eiporavo unidad',
+    'plan.courseCount': 'Ko curso oguereko {n} tema programa-pe.',
+    'plan.inGroup': 'Plan MEC tema-kuéra oñemondótava grupo-pe: {n}. Emoambue “Plan MEC”-pe.',
+    'teacher.tool.plan': 'Plan MEC',
+    'teacher.tool.planText': 'Programa tema-kuéra ha simulador eproyecta hag̃ua.',
   },
   es: {
     'nav.simulador': 'Temas',
@@ -192,5 +196,9 @@ export const TOPICS_MESSAGES = {
     'plan.schedule': 'Cronograma Guía 2021',
     'plan.closeProjector': 'Cerrar proyector',
     'plan.selectAll': 'Elegir la unidad',
+    'plan.courseCount': 'Este curso tiene {n} temas en el programa.',
+    'plan.inGroup': 'Temas del Plan MEC que se envían al grupo: {n}. Los cambiás en “Plan MEC”.',
+    'teacher.tool.plan': 'Plan MEC',
+    'teacher.tool.planText': 'Temas del programa y simuladores para proyectar.',
   },
 };

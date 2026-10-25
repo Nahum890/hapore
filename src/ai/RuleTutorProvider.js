@@ -2,6 +2,7 @@ import { concepts, errors as errorsData, exercises, glossary, quizBank, tutorJop
 import { buildQuizFeedback, evaluateQuizContext, normalizeText } from './quizEngine.js';
 import { sanitizeMarkup } from '../utils/validation.js';
 import { offlineChatAnswer } from './chatTools.js';
+import { topicTutorAnswer } from './topicTutor.js';
 
 // Cuatro niveles de pista: observación, concepto, fórmula, cálculo.
 export const HINT_LEVELS_MAX = 4;
@@ -175,9 +176,13 @@ export default class RuleTutorProvider {
       const thankYouOnly = /^(?:muchas gracias|gracias|aguyje)(?:\s+(?:por todo|ndéve))?$/u.test(question);
       if (thankYouOnly) {
         return this.result(language === 'es'
-          ? '¡De nada! ¿Hay algo más sobre movimiento parabólico que quieras repasar? Preguntame.'
-          : '¡Aguyje ndéve! ¿Oimépa gueteri algo reikuaaséva sobre movimiento parabólico? Eporandu chéve.');
+          ? '¡De nada! ¿Hay algo más de Física que quieras repasar? Preguntame.'
+          : '¡Aguyje ndéve! ¿Oimépa gueteri algo reikuaaséva Física rehegua? Eporandu chéve.');
       }
+      // Temas del programa del MEC (Ohm, MRU, Arquímedes, lentes…): explica,
+      // cita la fuente, resuelve con los datos o propone un ejercicio.
+      const topicReply = topicTutorAnswer(context.message ?? '', context.history ?? [], language);
+      if (topicReply) return this.result(topicReply.message, { widget: topicReply.widget, knowledgeType: 'topic' });
       // Herramientas offline: resolver como en el cuaderno, graficar paso a
       // paso, simular, comparar, practicar, fórmulas, conversiones y FAQ.
       const tool = offlineChatAnswer(context.message ?? '', context.history ?? [], language);
@@ -222,8 +227,8 @@ export default class RuleTutorProvider {
       }
       if (lessonWidget) return this.result(tool.message, { widget: lessonWidget, knowledgeType: 'tool' });
       return this.result((language === 'es'
-        ? 'No encontré una explicación suficientemente cercana en el material offline. Probá preguntar por componentes de la velocidad, gravedad, tiempo de vuelo, altura máxima, alcance o el ángulo óptimo del movimiento parabólico.'
-        : 'Ndajuhúi una explicación suficientemente cercana en el material offline. Ikatu eporandu sobre componentes de la velocidad, gravedad, tiempo de vuelo, altura máxima, alcance térã ángulo óptimo del movimiento parabólico.')
+        ? 'No encontré una explicación suficientemente cercana en el material offline. Probá nombrar el tema (por ejemplo: ley de Ohm, MRU, Arquímedes, lentes, calorimetría) o preguntar por el movimiento parabólico: alcance, altura máxima, tiempo de vuelo. Escribí "¿qué temas hay?" para ver el programa del MEC.'
+        : 'Ndajuhúi una explicación suficientemente cercana en el material offline. Ehai tema réra (techapyrã: ley de Ohm, MRU, Arquímedes, lente, calorimetría) térã eporandu movimiento parabólico rehe: alcance, altura máxima, tiempo de vuelo. Ehai "¿mba’e temas oĩ?" rehecha hag̃ua MEC programa.')
         + (language === 'es'
           ? '\n\nTambién puedo resolver tu ejercicio paso a paso ("sale a 20 m/s con 30°, ¿alcance?"), enseñarte a graficar, simular, comparar ángulos o darte un ejercicio. Escribí "¿qué podés hacer?" para ver todo.'
           : '\n\nIkatu avei aresolve nde ejercicio paso a paso ("osẽ 20 m/s ha 30° reheve, ¿alcance?"), ambo’e ndéve regrafica hag̃ua, asimula, ambojoja ángulo térã ame’ẽ ejercicio. Ehai "¿mba’épa ikatu rejapo?" rehecha hag̃ua opavave.'));

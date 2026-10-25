@@ -62,12 +62,26 @@ export const prefersReducedMotion = () => typeof window !== 'undefined' && windo
 
 /* ---------- Estructura ---------- */
 
+/** Texto HTML con subíndices: "T_f", "ρ_líq", "v_{0x}" → T<sub>f</sub>… */
+export function Sub({ text }) {
+  if (typeof text !== 'string' || !text.includes('_')) return text;
+  const parts = [];
+  const pattern = /(\S)_(\{[^}]+\}|[\p{L}\d]+)/gu;
+  let last = 0;
+  for (let match = pattern.exec(text); match; match = pattern.exec(text)) {
+    parts.push(text.slice(last, match.index + 1), <sub key={match.index}>{match[2].replace(/^\{|\}$/g, '')}</sub>);
+    last = match.index + match[0].length;
+  }
+  parts.push(text.slice(last));
+  return <>{parts}</>;
+}
+
 export function Sim({ title, subtitle, children, controls, readouts, graphs, footer, actions, className = '' }) {
   return <section className={`sim ${className}`} aria-label={title}>
     <header className="sim-head">
       <div className="sim-head-copy">
         <h3>{title}</h3>
-        {subtitle && <p>{subtitle}</p>}
+        {subtitle && <p><Sub text={subtitle} /></p>}
       </div>
       {actions && <div className="sim-head-actions">{actions}</div>}
     </header>
@@ -79,7 +93,7 @@ export function Sim({ title, subtitle, children, controls, readouts, graphs, foo
       </aside>}
     </div>
     {graphs && <div className="sim-graphs">{graphs}</div>}
-    {footer && <p className="sim-note">{footer}</p>}
+    {footer && <p className="sim-note"><Sub text={footer} /></p>}
   </section>;
 }
 
@@ -148,7 +162,7 @@ export function PlayBar({ running, onToggle, onReset, onStep, time, extra }) {
 export function Readouts({ items }) {
   return <dl className="sim-readout-grid">
     {items.filter(Boolean).map(item => <div key={item.label} className={`sim-readout${item.tone ? ` is-${item.tone}` : ''}`}>
-      <dt>{item.label}</dt>
+      <dt><Sub text={item.label} /></dt>
       <dd>{typeof item.value === 'number' ? num(item.value, item.digits ?? 2) : item.value}{item.unit && <small> {item.unit}</small>}</dd>
     </div>)}
   </dl>;
