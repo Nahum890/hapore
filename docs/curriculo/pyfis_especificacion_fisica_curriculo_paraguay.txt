@@ -1,0 +1,471 @@
+ESPECIFICACION CURRICULAR DE FISICA PARA ANALISIS E IMPLEMENTACION EN PyFIS
+Compilacion de contenidos, capacidades, secuencias, fuentes y marco normativo
+
+PROPOSITO
+Este archivo entrega a otra IA una base verificable para analizar como incorporar en PyFIS el curriculo paraguayo de Fisica de la Educacion Media. El alcance es exclusivamente la disciplina Fisica. Educacion Fisica es otra asignatura y no debe mezclarse con este material.
+
+Distinguir siempre:
+1) Programa curricular base ajustado para 2010-2012.
+2) Priorizacion Curricular 2021, elaborada para el contexto de pandemia.
+3) Guia para la planificacion de clases de 2021, con cronogramas semanales y orientaciones didacticas.
+Son documentos y capas distintas. No consolidarlos como si fueran una sola version vigente ni inferir equivalencias de curso sin conservar la fuente.
+
+FUENTES ANALIZADAS
+A. Desarrollo de capacidades en la Educacion Media. Bachillerato Cientifico con enfasis en Ciencias Basicas y Tecnologia, Plan ajustado (anos 2010-2012).
+- Resolucion indicada en portada: Resolucion N° 12.506/09 BIS. La primera pagina tambien dice que el documento se desarrolla en concordancia con la Resolucion N° 12.506.
+- Fisica del Plan Comun: paginas impresas 139-145; en este PDF coinciden con las paginas PDF 139-145.
+- Fisica del Plan Especifico, enfasis en Ciencias Basicas: paginas impresas/PDF 251-253.
+- Orientacion pedagogica para el Plan Especifico: p. 268.
+- Archivo “BACHILLERATO CIENTÍFICO CON ÉNFASIS EN CIENCIAS BÁSICAS Y TECNOLOGÍA.pdf”; 277 paginas; SHA-256 5f501cd9a84999216a034b8dbd40bf097536e6fb1e64f06449e18f91c028d5c1.
+
+B. Priorizacion Curricular 2021, 3er ciclo de la Educacion Escolar Basica y Educacion Media.
+- Fisica del Plan Comun: paginas impresas 66-67; paginas PDF 74-75. La tabla contiene 1° y 2° curso.
+- Fisica del Plan Especifico, Bachillerato Cientifico enfasis en Ciencias Basicas: pagina impresa 91; pagina PDF 99. Contiene 3er curso.
+- Marco legal: paginas impresas 9-11; paginas PDF 17-19.
+- La Priorizacion se describe como seleccion nacional y flexible de capacidades prioritarias para 2021 en el contexto de COVID-19. Las capacidades y temas priorizados constituyen saberes basicos para ese ano; las instituciones pueden anadir otras capacidades del programa oficial que sean pertinentes al contexto.
+- Los archivos “2300836-1-PRIO20213yEMDGDEfinalverif3pdf-1-PRIO2021.3yEM.DGDE.final.verif.3.pdf” y el que termina en “(1).pdf” tienen exactamente el mismo SHA-256 a77d97d7eed852cea2d9c423a80815a486d58359866f7bc238d4dc360d7d4d7a y son identicos, 137 paginas. Contar una sola vez.
+
+C. Guia para la planificacion de clases en tiempos de pandemia, Educacion Media.
+- Plan Comun, Fisica 2° curso: paginas impresas 110-113; paginas PDF 120-123.
+- Plan Comun, Fisica 3er curso: paginas impresas 114-117; paginas PDF 124-127.
+- Plan Especifico, Bachillerato Cientifico enfasis en Ciencias Basicas, Fisica 3er curso: paginas impresas 207-210; paginas PDF 217-220.
+- La tabla de contenido verifica dos entradas rotuladas “Fisica - Tercer curso”: una en Plan Comun y otra en Plan Especifico (PDF pp. 8-9).
+- Archivo “4786101-3-GUADELELABORADOR_MEDIADGDEFINALverif31pdf-3-GUADELELABORADOR_MEDIA.DGDE.FINAL.verif.31.pdf”; 303 paginas; SHA-256 6f276a0cb1fb366f0c38644828c1f41f697b919986a21f41f62c382c005e5c45.
+
+MARCO LEGAL Y RESOLUCIONES QUE APARECEN EN LAS FUENTES
+
+1. Resolucion MEC N° 12.506/09 BIS
+- El programa curricular base la identifica como la resolucion del Plan ajustado del Bachillerato Cientifico (anos 2010-2012).
+- Ubicacion: documento A, pp. 1 y 24.
+- Es la referencia curricular asociada al programa base de este analisis.
+
+2. Resolucion MEC N° 308/2020
+- En el marco legal de la Priorizacion 2021: suspendio clases en instituciones oficiales, privadas y privadas subvencionadas; su Art. 5 autorizaba planes de contingencia y alternativas tecnologicas para actividades educativas y administrativas.
+- Documento B, p. impresa 11 / PDF p. 19.
+
+3. Resolucion MEC N° 602/2020
+- Aprobo el documento “Orientaciones para evaluar el aprendizaje de los estudiantes en los diferentes niveles y modalidades del sistema educativo nacional, en tiempos de pandemia”.
+- Documento B, p. impresa 11 / PDF p. 19.
+
+4. Resolucion MEC N° 832/2020
+- Dispuso el regreso voluntario a clases presenciales para estudiantes del tercer ano de Educacion Media, de acuerdo con el Decreto N° 4220 del 24 de octubre de 2020.
+- Documento B, p. impresa 11 / PDF p. 19.
+
+Otros instrumentos del marco legal citado por la Priorizacion 2021 (no llamarlos resoluciones):
+- Constitucion Nacional: Arts. 68 y 128.
+- Ley N° 1264/1998, General de Educacion: Arts. 3, 5, 11, 117 y 125.
+- Ley N° 5749/2017, Carta Organica del Ministerio de Educacion y Ciencias: Arts. 3, 5, 65 y 66.
+- Ley N° 1680/2001, Codigo de la Ninez y la Adolescencia: Art. 3.
+- Ley N° 6524/2020, emergencia sanitaria por COVID-19.
+- Ley N° 836/1980, Codigo Sanitario.
+- Decreto del Poder Ejecutivo N° 3442/2020: acciones preventivas ante el riesgo de expansion del COVID-19.
+- Decreto del Poder Ejecutivo N° 3456/2020: declaracion de emergencia sanitaria nacional.
+- Decreto del Poder Ejecutivo N° 4705/2021: medidas sanitarias del 11 al 31 de enero de 2021; su Art. 2, num. 23, mantuvo clases presenciales suspendidas salvo la posibilidad para alumnos del tercer ano de la Media bajo protocolos.
+- Decreto del Poder Ejecutivo N° 4798/2021: extendio el periodo del Decreto 4705/2021 hasta el 21 de febrero de 2021.
+- Son contexto legal de la priorizacion durante la pandemia; no son contenidos de Fisica ni requisitos curriculares atemporales.
+- La Guia para planificar clases no muestra en las paginas revisadas una resolucion aprobatoria propia. No atribuirle por su cuenta una resolucion.
+
+PROGRAMA BASE: PLAN COMUN
+
+Competencia especifica de Fisica (documento A, p. 139)
+“Resuelve situaciones problematicas referidas a fenomenos del entorno que requieran de los principios y de las leyes de la Fisica.”
+
+1er curso - alcance
+Al terminar el curso, se espera que el estudiante resuelva problemas que requieren conocimientos de magnitudes escalares y vectoriales, fuerzas, movimientos y leyes de la naturaleza, junto con principios de hidrostatica, hidrodinamica y calorimetria.
+
+1er curso - capacidades y temario completo (documento A, pp. 140-142)
+
+A. Mecanica
+1. Reconoce las magnitudes fisicas:
+   - Magnitudes fundamentales y derivadas.
+   - Magnitudes escalares y vectoriales.
+   - Sistemas de unidades de medida.
+   - Sistema Internacional (SI).
+   - Unidades fundamentales del SI. El documento no enumera las unidades una por una.
+2. Resuelve problemas de magnitudes vectoriales:
+   - Nomenclatura, simbolo matematico y representacion grafica.
+   - Concepto de vector.
+   - Operaciones: suma, resta, producto de un escalar por un vector, producto punto y producto cruz.
+3. Analiza caracteristicas del movimiento de los cuerpos:
+   - Componentes y clases de movimiento; posicion; desplazamiento; tipos de trayectoria; velocidad y aceleracion.
+   - Rapidez media; velocidad media e instantanea; aceleracion media e instantanea.
+4. Resuelve problemas de movimiento:
+   - Movimiento rectilineo uniforme (MRU): caracteristicas, ecuaciones y graficos.
+   - Movimiento rectilineo uniformemente variado (MRUV): caracteristicas, ecuaciones y graficos.
+   - Movimiento vertical en el vacio.
+5. Aplica las leyes de Newton a situaciones problematicas:
+   - Principio de inercia.
+   - Principio fundamental de la dinamica.
+   - Principio de accion y reaccion.
+   - Fuerzas de campo: gravitacional, electrica y magnetica.
+   - Fuerzas de contacto: motriz, rozamiento y elastica.
+   - Aplicaciones; masas acopladas, plano inclinado y polea.
+6. Aplica equilibrio de fuerzas a problemas:
+   - Fuerza y sus elementos; fuerzas concurrentes y paralelas.
+   - Equilibrio traslacional y rotacional.
+   - Momento de una fuerza y momento resultante.
+7. Ejecuta experiencias sencillas sobre elasticidad:
+   - Esfuerzo y deformacion.
+   - Ley de Hooke.
+   - Dinamometros y tipos.
+8. Resuelve problemas sobre energia:
+   - Energia cinetica, potencial y mecanica.
+   - Sistemas conservativos y no conservativos.
+   - Trabajo de una fuerza constante y de una fuerza variable.
+   - Potencia y rendimiento.
+9. Resuelve problemas de conservacion de cantidad de movimiento:
+   - Impulso y cantidad de movimiento.
+   - Teorema del impulso.
+   - Conservacion de la cantidad de movimiento.
+   - Choques elasticos e inelasticos.
+10. Resuelve situaciones de hidrostatica:
+   - Densidad absoluta o masa especifica.
+   - Presion: definicion, expresion matematica, presion hidrostatica y atmosferica.
+   - Principio de Pascal.
+   - Empuje: definicion y calculo (Teorema de Arquimedes).
+   - Equilibrio de cuerpos sumergidos y flotantes.
+11. Resuelve problemas de hidrodinamica:
+   - Flujo y tipos; caudal.
+   - Teorema de Bernoulli: enunciado y expresion.
+B. Calor
+12. Resuelve problemas de termometria, calorimetria y dilatacion:
+   - Calor, temperatura, termometro y escalas termometricas.
+   - Calorimetria: calor especifico, capacidad termica y curva de calentamiento.
+   - Dilatacion termica lineal.
+13. Ejecuta experiencias sencillas de termometria y calorimetria:
+   - Construccion de un termometro.
+   - Determinacion del calor especifico.
+
+2° curso - alcance
+El documento A, p. 143, espera resolucion de problemas usando conocimientos de Termodinamica, Optica, Acustica y Electricidad.
+
+2° curso - capacidades y temario completo (documento A, pp. 143-145)
+
+A. Termodinamica
+1. Resuelve problemas que requieren principios de la Termodinamica:
+   - Ley Cero y Primera, Segunda y Tercera Ley/Principio.
+   - Energia interna de un sistema.
+   - Ciclos termodinamicos, incluyendo el ciclo de Carnot.
+   - Procesos isotermico, isobarico, isocorico y adiabatico.
+2. Ejecuta experiencias sencillas sobre transformaciones gaseosas:
+   - Isotermica, isobarica e isocorica.
+
+B. Optica
+3. Analiza caracteristicas de la luz:
+   - Naturaleza de la luz.
+   - Cuerpos opacos, translucidos y transparentes.
+   - Propagacion rectilinea de la luz y en el vacio.
+   - Principio de optica geometrica.
+4. Resuelve problemas de reflexion:
+   - Caracteristicas y leyes de reflexion.
+   - Principio de Fermat y aplicaciones.
+   - Descomposicion de la luz blanca.
+   - Espejos planos: elementos, ecuaciones y formacion de imagenes.
+   - Espejos esfericos: elementos, ecuaciones, condiciones de Gauss y formacion de imagenes.
+5. Resuelve problemas de refraccion:
+   - Caracteristicas y leyes de refraccion; aplicaciones.
+   - Dioptrio plano y prisma.
+   - Lentes: clases, elementos, formacion de imagenes y ecuaciones.
+
+C. Ondas y Acustica
+6. Ejecuta experiencias sobre ondas:
+   - Periodo, frecuencia, longitud de onda, amplitud y velocidad.
+   - Clasificacion longitudinal/transversal; mecanica/electromagnetica; unidimensional/bidimensional/tridimensional.
+   - Reflexion, refraccion, difraccion e interferencia.
+7. Resuelve problemas de Acustica:
+   - Sonido: produccion, propagacion y cualidades.
+   - Aplicaciones/fenomenos: eco, sonar, resonancia, interferencia y efecto Doppler.
+
+D. Electricidad
+8. Ejecuta experiencias de electrizacion:
+   - Electrizacion de los cuerpos y tipos.
+   - Carga elemental y conservacion de la carga.
+9. Aplica la Ley de Coulomb: fuerza electrica.
+10. Resuelve problemas de campo electrico:
+   - Casos, lineas de fuerza y tipos de campo electrico.
+11. Analiza potencial electrico:
+   - Diferencia de potencial y potencial electrico.
+   - Diferencia de potencial en campo electrico uniforme.
+   - Potencial electrico y energia potencial.
+12. Resuelve problemas de condensadores: caracteristicas y aplicaciones.
+13. Resuelve situaciones de corriente electrica:
+   - Sentido real y convencional, intensidad, tipos y efectos.
+   - Circuito electrico: elementos y aplicaciones de la corriente en el circuito.
+14. Resuelve problemas de Ley de Ohm:
+   - Resistencia electrica y leyes de Ohm.
+   - Asociacion de resistencias.
+   - Potencia disipada en resistores.
+
+PROGRAMA BASE: PLAN ESPECIFICO, ENFASIS EN CIENCIAS BASICAS
+
+Competencia especifica (documento A, p. 251)
+“Resuelve problemas que impliquen la comprension de fenomenos fisicos acontecidos en el ambiente.”
+
+3er curso - capacidades y temario completo (documento A, pp. 251-253)
+
+A. Mecanica
+1. Aplica expresiones fisicas de distintos movimientos a problemas de complejidad progresiva:
+   - MRU: caracteristicas y funcion horaria.
+   - Movimiento uniformemente variado: caracteristicas y funcion horaria.
+   - Movimiento vertical en el vacio.
+   - Movimiento parabolico.
+   - Movimiento circular.
+   - Cinematica del movimiento circular; movimiento circular uniforme y uniformemente variado.
+   - Dinamica del movimiento circular y aplicaciones.
+2. Resuelve problemas de complejidad progresiva con las leyes de Newton.
+3. Resuelve problemas de equilibrio de fuerzas:
+   - Sistemas de fuerzas paralelas y de fuerzas de sentidos contrarios.
+   - Momento de una fuerza.
+4. Resuelve problemas de trabajo, potencia y energia:
+   - Trabajo motor y resistente.
+   - Potencia util, resistente y rendimiento.
+   - Energia cinetica, potencial gravitacional, potencial elastica y mecanica.
+   - Sistemas conservativos y no conservativos.
+5. Plantea problemas y soluciones con los principios de Pascal y Arquimedes.
+6. Interpreta la Ley de Gravitacion Universal y las leyes de Kepler:
+   - Gravitacion universal.
+   - Kepler: Primera y Segunda Ley. El documento solo enumera esas dos.
+
+B. Calor
+7. Resuelve problemas de termometria y calorimetria:
+   - Calor, temperatura, termometro y escalas termometricas.
+   - Calor especifico, capacidad termica, equivalente mecanico del calor y equilibrio termico de mezclas.
+8. Aplica relaciones entre escalas Celsius, Fahrenheit y Kelvin a problemas.
+
+C. Electricidad y Magnetismo
+9. Comprende fenomenos de carga electrica:
+   - Carga elemental, procesos de electrizacion y conservacion de la carga.
+10. Resuelve problemas con la Ley de Coulomb.
+11. Resuelve problemas con la Ley de Ohm:
+   - Resistencia electrica, asociaciones de resistencias y circuitos electricos.
+12. Resuelve problemas de campo magnetico:
+   - Caracteristicas; clases de sustancias magneticas; imanes.
+   - Experiencia de Oersted y Ley de Ampere.
+
+D. Relatividad y Mecanica Cuantica
+13. Interpreta la Teoria de la Relatividad:
+   - Relatividad clasica y principio de relatividad.
+   - Relatividad restringida: equivalencia masa-energia, dilatacion del tiempo y contraccion de longitudes.
+14. Analiza postulados de Mecanica Cuantica:
+   - Cuerpo negro y radiacion.
+   - Teoria cuantica de Planck.
+   - Efecto fotoelectrico.
+   - Rayos X.
+   - Efecto Compton.
+   - Principio de incertidumbre.
+
+Orientacion didactica del Plan Especifico (documento A, p. 268)
+- Profundizar conocimientos y temas cientificos y desarrollar pensamiento logico aplicado a resolver situaciones problematicas del entorno.
+- Para Fisica: orientar interpretacion y aplicacion de leyes y postulados, practicar representaciones graficas, realizar demostraciones de fenomenos y profundizar el planteo y resolucion de problemas.
+
+PRIORIZACION CURRICULAR 2021
+
+Sentido y uso
+El documento B selecciona capacidades consideradas prioritarias para 2021. Conservarlas como estado/version de priorizacion, no como sustituto ni como listado total del programa base. La priorizacion es un piso comun flexible y las instituciones pueden anadir otras capacidades oficiales pertinentes.
+
+Plan Comun, 1er curso (documento B, pp. impresas 66-67 / PDF 74-75)
+1. Reconoce magnitudes fisicas: fundamentales/derivadas, escalares/vectoriales, sistemas de unidades, Sistema Internacional y unidades fundamentales del SI.
+2. Resuelve problemas de magnitudes vectoriales: nomenclatura, simbolo matematico, representacion grafica, concepto de vector, suma, resta, producto por escalar, producto punto y producto cruz.
+3. Analiza movimiento: componentes, clases, posicion, desplazamiento, tipos de trayectoria, velocidad, aceleracion, rapidez media, velocidad media e instantanea y aceleracion media e instantanea.
+4. Resuelve situaciones sobre movimientos: MRU (caracteristicas, ecuaciones, graficos); MRUV (caracteristicas, ecuaciones, graficos); movimiento vertical en el vacio.
+5. Aplica equilibrio de fuerzas: fuerza y elementos, fuerzas concurrentes y paralelas, equilibrio traslacional y rotacional, momento de fuerza y momento resultante.
+6. Ejecuta experiencias sencillas de elasticidad: esfuerzo, deformacion, Ley de Hooke y dinamometros/tipos.
+7. Aplica las leyes de Newton: inercia, principio fundamental de dinamica, accion y reaccion; fuerzas de campo gravitacional/electrica/magnetica; contacto motriz/rozamiento/elastica; aplicaciones, masas acopladas, plano inclinado y polea.
+8. Resuelve problemas de energia: cinetica, potencial y mecanica; sistemas conservativos/no conservativos; trabajo de fuerza constante/variable; potencia y rendimiento.
+9. Resuelve situaciones de hidrostatica: densidad absoluta/masa especifica; presion, expresion matematica, presion hidrostatica/atmosferica; Pascal; empuje y calculo (Arquimedes); equilibrio de cuerpos sumergidos/flotantes.
+10. Resuelve problemas de termometria, calorimetria y dilatacion: calor, temperatura, termometro, escalas; calor especifico, capacidad termica, curva de calentamiento y dilatacion lineal termica.
+Nota: hidrodinamica y cantidad de movimiento aparecen en el programa base de 1er curso, pero no en esta tabla de capacidades prioritarias 2021.
+
+Plan Comun, 2° curso (documento B, pp. impresas 66-67 / PDF 74-75)
+1. Resuelve problemas con principios termodinamicos: Ley Cero, 1a, 2a y 3a; energia interna; ciclos termodinamicos/Carnot; procesos isotermico, isobarico, isocorico y adiabatico.
+2. Analiza caracteristicas de la luz: naturaleza; cuerpos opacos, translucidos y transparentes; propagacion rectilinea y en vacio; optica geometrica.
+3. Resuelve problemas de reflexion: caracteristicas, leyes, principio de Fermat, aplicaciones, descomposicion de luz blanca, espejos planos y esfericos, elementos, ecuaciones, imagenes y condiciones de Gauss.
+4. Resuelve problemas de refraccion: caracteristicas, leyes, aplicaciones, dioptrio plano, prisma; lentes, clases, elementos, imagenes y ecuaciones.
+5. Ejecuta experiencias sobre ondas: periodo, frecuencia, longitud de onda, amplitud, velocidad; clasificacion longitudinal/transversal, mecanica/electromagnetica, uni/bi/tridimensional; reflexion, refraccion, difraccion e interferencia.
+6. Resuelve problemas de Acustica: sonido, produccion, propagacion, cualidades; eco, sonar, resonancia, interferencia y efecto Doppler.
+7. Aplica la Ley de Coulomb a problemas de fuerza electrica.
+8. Resuelve problemas de campo electrico: casos, lineas de fuerza y tipos.
+9. Resuelve problemas de condensadores: caracteristicas y aplicaciones.
+10. Resuelve situaciones de corriente: sentido real/convencional, intensidad, tipos, efectos; circuito y elementos; aplicaciones de corriente al circuito.
+11. Resuelve problemas de Ley de Ohm: resistencia y leyes de Ohm, asociacion de resistencias, potencia disipada en resistores.
+Nota: la tabla priorizada no incluye como capacidad separada las experiencias de transformaciones gaseosas que aparecen en el programa base.
+
+Plan Especifico, enfasis en Ciencias Basicas, 3er curso (documento B, p. impresa 91 / PDF 99)
+1. Aplica expresiones de distintos movimientos en problemas de complejidad progresiva: MRU, caracteristicas/funcion horaria; movimiento uniformemente variado, caracteristicas/funcion horaria; movimiento vertical en vacio; movimiento parabolico; movimiento circular.
+2. Resuelve problemas de complejidad progresiva con leyes de Newton.
+3. Resuelve problemas de equilibrio: sistema de fuerzas paralelas y momento de una fuerza.
+4. Resuelve problemas de trabajo, potencia y energia: trabajo motor/resistente; potencia util/resistente y rendimiento; energia cinetica, potencial gravitacional, potencial elastica y mecanica.
+5. Plantea problemas y soluciones con principios de Pascal y Arquimedes.
+6. Interpreta gravitacion universal y Kepler: gravitacion universal; Primera y Segunda Ley de Kepler.
+7. Resuelve problemas progresivos de termometria y calorimetria: calor, temperatura, termometro, escalas, calor especifico, capacidad termica, equivalente mecanico del calor y equilibrio termico de mezclas.
+8. Comprende fenomenos de carga: carga elemental, electrizacion y conservacion.
+9. Resuelve problemas de Ley de Coulomb.
+10. Resuelve problemas de Ley de Ohm: resistencia, asociacion de resistencias y circuitos.
+11. Resuelve problemas de campo magnetico: caracteristicas, clases de sustancias magneticas, imanes, experiencia de Oersted y Ley de Ampere.
+La tabla priorizada 2021 no lista Relatividad ni Mecanica Cuantica, aunque ambas estan en el programa base del enfasis. No borrarlas del programa completo; marcarlas como no incluidas en la seleccion priorizada consultada.
+
+GUIA DE PLANIFICACION 2021: CRONOGRAMAS DE FISICA
+
+Las fechas siguientes son del calendario lectivo de 2021 y son historicas, no fechas para un calendario actual. La Guia propone diagnostico y nivelacion, uso de materiales de plataforma con adecuaciones docentes y enfoque basado en competencias. En varios bloques pide resolver problemas de complejidad progresiva. Mantener semanas/fechas y orientaciones vinculadas con su fuente.
+
+A. Plan Comun, 2° curso (documento C, pp. impresas 110-113 / PDF 120-123)
+
+Inicio y nivelacion:
+- Semana A, 2-5 marzo: reencuentro; toma de conciencia de cuidados para clases presenciales, protocolos, horarios y conversatorio sobre 2020.
+- Semana B, 8-12 marzo: diagnostico por areas; evaluar capacidades necesarias para iniciar el curso y nivelar en marzo.
+- C, 8-12 marzo: introduccion a Fisica, conceptos basicos, componente y objeto de estudio.
+- D, 19-23 abril: MRU y MRUV; situaciones horizontales y verticales.
+- E, 30 agosto-3 septiembre: leyes de Newton; fuerzas de campo/contacto, masas acopladas, plano inclinado y polea.
+- F, 27 septiembre-1 octubre: hidrostatica; Pascal, Stevin y Arquimedes.
+
+Desarrollo de capacidades:
+1. 15-19 marzo: reconoce magnitudes fisicas; tema magnitudes fisicas.
+2. 22-26 marzo: vectores y operaciones.
+3. 28 marzo-2 abril: caracteristicas de movimientos y velocidad media.
+4. 5-9 abril: MRU.
+5. 12-16 abril: MRUV; la fuente agrega literalmente “MUA y MUR”.
+6. 26-30 abril: movimiento vertical en vacio; lanzamiento hacia arriba y hacia abajo, con y sin velocidad inicial.
+7. 3-7 mayo: equilibrio; fuerzas concurrentes y paralelas.
+8. 10-13 mayo: momento de una fuerza.
+9. 17-21 mayo: momento resultante.
+10. 24-28 mayo: experiencia/capacidad de elasticidad, Ley de Hooke.
+11. 31 mayo-4 junio: leyes/principios de Newton.
+12. 7-11 junio: tipos de fuerza de campo y contacto; masas acopladas.
+- 14-25 junio: repaso para cierre de primera etapa.
+- 28 junio-9 julio: evaluaciones de primera etapa.
+- 26 julio-6 agosto: retroalimentacion y fijacion de aprendizajes de primera etapa.
+13. 9-13 agosto: plano inclinado y polea.
+14. 16-20 agosto: trabajo mecanico de fuerza constante y variable.
+15. 23-27 agosto: potencia mecanica media e instantanea; rendimiento.
+16. 6-10 septiembre: transformaciones de energia potencial, cinetica y mecanica; sistemas conservativos y no conservativos.
+17. 13-17 septiembre: densidad y presion.
+18. 20-24 septiembre: Pascal y Teorema de Stevin.
+19. 4-8 octubre: Teorema de Arquimedes.
+20. 11-15 octubre: calor y temperatura.
+21. 18-22 octubre: calorimetria.
+22. 25-29 octubre: dilatometria.
+- 1-12 noviembre: repaso para evaluaciones de cierre de segunda etapa.
+- 15-30 noviembre: evaluaciones de segunda etapa.
+
+B. Plan Comun, 3er curso de la Guia (documento C, pp. impresas 114-117 / PDF 124-127)
+Conservarlo como entrada independiente: el rotulo del documento dice Plan Comun, Tercer curso.
+
+Nivelacion:
+- A, 2-5 marzo: reencuentro y cuidados/protocolos.
+- B, 8-12 marzo: diagnostico y nivelacion.
+- C, 8-12 marzo: termometria, calorimetria; problemas de conversion entre escalas termometricas y calorimetria.
+- D, 19-23 abril: reflexion y espejos; problemas progresivos.
+- E, 30 agosto-3 septiembre: campo y potencial electricos.
+- F, 27 septiembre-1 octubre: condensadores en serie y paralelo.
+
+Desarrollo de capacidades:
+1. 15-19 marzo: procesos termodinamicos isotermico, isobarico, isocorico y adiabatico.
+2. 22-26 marzo: principios termodinamicos.
+3. 29 marzo-2 abril: naturaleza de la luz.
+4. 5-9 abril: reflexion.
+5. 12-16 abril: espejos, tipos y caracteristicas.
+6. 26-30 abril: espejos esfericos, elementos, ecuaciones, condiciones de Gauss e imagenes.
+7. 3-7 mayo: refraccion.
+8. 10-13 mayo: lentes.
+9. 17-21 mayo: movimiento ondulatorio; periodo, longitud de onda, amplitud y velocidad.
+10. 24-28 mayo: fenomenos ondulatorios.
+11. 31 mayo-4 junio: cualidades y propagacion del sonido.
+12. 7-11 junio: fenomenos propios del sonido.
+- 14-25 junio: repaso de primera etapa; 28 junio-9 julio: evaluaciones; 26 julio-6 agosto: retroalimentacion.
+13. 9-13 agosto: Ley de Coulomb.
+14. 16-20 agosto: campo electrico.
+15. 23-27 agosto: potencial electrico.
+16. 6-10 septiembre: condensadores en serie.
+17. 13-17 septiembre: condensadores en paralelo.
+18. 20-24 septiembre: corriente electrica; sentido real/convencional, intensidad, tipos y efectos.
+19. 4-8 octubre: circuito electrico, elementos y aplicaciones de corriente.
+20. 11-15 octubre: resistencia electrica y Leyes de Ohm.
+21. 18-22 octubre: asociacion de resistencias.
+22. 25-29 octubre: potencia disipada en resistores.
+- 1-12 noviembre: repaso; 15-30 noviembre: evaluaciones de segunda etapa.
+
+C. Plan Especifico, enfasis en Ciencias Basicas, 3er curso (documento C, pp. impresas 207-210 / PDF 217-220)
+
+Nivelacion:
+- A, 2-5 marzo: reencuentro y cuidados/protocolos.
+- B, 8-12 marzo: diagnostico y nivelacion.
+- C, 8-12 marzo: recuperacion de leyes de Newton, plano inclinado y polea; problemas progresivos.
+- D, 19-23 abril: movimiento parabolico; problemas progresivos.
+- E, 30 agosto-3 septiembre: principio de Arquimedes; problemas progresivos.
+- F, 27 septiembre-1 octubre: electrostatica.
+
+Desarrollo de capacidades:
+1. 15-19 marzo: MRU.
+2. 22-26 marzo: MRUV.
+3. 29 marzo-2 abril: movimiento vertical en vacio.
+4. 5-9 abril: movimiento parabolico.
+5. 12-16 abril: movimiento circular.
+6. 26-30 abril: leyes de Newton, masas acopladas y plano inclinado.
+7. 3-7 mayo: equilibrio; fuerzas paralelas del mismo sentido y de sentido contrario.
+8. 10-13 mayo: momento de una fuerza y fuerza resultante.
+9. 17-21 mayo: trabajo motor y resistente.
+10. 24-28 mayo: potencia mecanica.
+11. 31 mayo-4 junio: energia potencial, cinetica y mecanica.
+12. 7-11 junio: Principio de Pascal.
+- 14-25 junio: repaso primera etapa; 28 junio-9 julio: evaluaciones; 26 julio-6 agosto: retroalimentacion.
+13. 9-13 agosto: Principio/Teorema de Arquimedes.
+14. 16-20 agosto: Ley de Gravitacion Universal.
+15. 23-27 agosto: Ley de Kepler.
+16. 6-10 septiembre: termometria.
+17. 13-17 septiembre: calorimetria.
+18. 20-24 septiembre: electrostatica.
+19. 4-8 octubre: Ley de Coulomb.
+20. 11-15 octubre: Ley de Ohm y circuito electrico.
+21. 18-22 octubre: campo magnetico.
+22. 24-29 octubre: Ley de Ampere.
+- 1-12 noviembre: repaso para evaluaciones de cierre de segunda etapa; 15-30 noviembre: evaluaciones.
+
+ORIENTACIONES DIDACTICAS TRANSVERSALES EXTRAIDAS
+- Usar recursos/plataforma y permitir adecuaciones pertinentes del docente al contexto y al grupo, con enfoque educativo basado en competencias.
+- En contenidos cuantitativos, proponer situaciones y problemas progresivos, no limitarse a repetir definiciones.
+- Conservar experiencias/demostraciones explicitamente planteadas: elasticidad y Ley de Hooke; transformaciones gaseosas; ondas; fenomenos de Fisica segun tema.
+- El Plan Especifico pide representaciones graficas, demostraciones de fenomenos, interpretacion y aplicacion de leyes/postulados y resolucion de problemas.
+- En el calendario 2021 hay diagnostico, nivelacion, repaso, retroalimentacion y evaluaciones por etapas; son componentes de la planificacion 2021, no contenidos disciplinares.
+
+DISCREPANCIAS, OMISIONES Y REGLAS PARA NO PERDER INFORMACION
+1. Mantener versiones y trayectorias separadas:
+   - El programa base A presenta Fisica comun en 1° y 2° curso y Fisica del Plan Especifico en 3°.
+   - La priorizacion B tambien presenta Fisica comun en 1° y 2° y Plan Especifico en 3°.
+   - La Guia C, sin embargo, incluye Fisica de Plan Comun de 2° y tambien una tabla rotulada Plan Comun, 3er curso; ademas incluye Fisica Plan Especifico de 3er curso.
+   - No borrar ni reasignar el “Plan Comun, 3er curso” de C. Conservar su rotulo, fuente y cronograma separados, y marcar que no tiene correspondencia clara en A/B. Resolver la correspondencia curricular al integrar datos; no asumir equivalencia.
+2. La Guia C no ofrece una planificacion de Fisica de 1er curso en el indice/paginas de Fisica revisadas. No inventar ese cronograma; el programa base y la priorizacion B si especifican 1er curso.
+3. La Guia C del Plan Especifico 3er curso programa temas hasta la Ley de Ampere y no calendariza Relatividad ni Mecanica Cuantica, aunque A las incluye en el temario completo. Marcarlas como programa base y como no calendarizadas en esta guia.
+4. La Priorizacion 2021 reduce la seleccion: por ejemplo, no incluye en su tabla la hidrodinamica ni cantidad de movimiento del programa base de 1er curso, tampoco algunas experiencias de transformaciones gaseosas de 2°; no quitar esos temas de la version curricular completa.
+5. No hay formulas concretas desarrolladas en estas secciones PDF. Los documentos nombran ecuaciones, funciones horarias, expresiones matematicas o leyes, pero no proporcionan una biblioteca de formulas con definicion de variables, unidades, convencion de signos o ejemplos. No presentar una formula externa como transcripcion de estas fuentes. Si PyFIS requiere formulas ejecutables, vincularlas a una fuente aprobada aparte y dejar esa procedencia visible.
+6. Los documentos alternan variantes de nombre/capitalizacion (por ejemplo, “Leyes de Ohm”, “MUA y MUR”, “calorimetria”/“dilatometria”). Guardar texto fuente y, por separado, forma normalizada con sinonimos/acronimos; no perder el termino original.
+7. Mantener distincion entre contenido, capacidad (verbo + objeto), orientacion didactica, calendario y norma legal.
+8. Para citas/trazabilidad registrar archivo, version, pagina PDF y pagina impresa cuando difieran. Cada tema/capacidad debe apuntar a la fuente concreta.
+
+REQUISITOS DE DATOS PARA LA IA QUE IMPLEMENTE
+Representar al menos:
+- documento_fuente: titulo, archivo, SHA-256, fecha/version, paginas y rol curricular.
+- asignatura: Fisica; no Educacion Fisica.
+- trayectoria: Plan Comun o Plan Especifico + enfasis en Ciencias Basicas.
+- curso: 1°, 2° o 3° exactamente como lo rotula cada fuente.
+- capacidad: formulacion textual original, verbo de desempeno, objeto/tema y numero/orden si lo hay.
+- temas: conceptos desglosados con jerarquia y relaciones; incluir formulas solo si provienen de fuente con cita.
+- estado curricular: programa_base, priorizado_2021, calendario_guia_2021.
+- secuencia: semana, intervalo de fechas 2021, capacidad, tema y orientacion de abordaje.
+- normativa: tipo de instrumento (resolucion/ley/decreto/constitucion), numero/ano, nombre, articulos citados, fuente y pagina.
+- trazabilidad y discrepancia: correspondencias exactas o aproximadas, ausencias y conflictos de rotulo/curso.
+
+LISTA DE CONTROL DE COBERTURA
+Antes de dar por completa una implementacion de contenido:
+[ ] Cubrir Plan Comun 1° curso: magnitudes, vectores, cinematica, Newton, equilibrio, elasticidad, energia, cantidad de movimiento, hidrostatica, hidrodinamica, calorimetria y dilatacion.
+[ ] Cubrir Plan Comun 2° curso: termodinamica, optica/reflexion/refraccion, ondas, acustica, electrostatica, campos/potencial, condensadores, corriente, circuitos, Ohm y potencia.
+[ ] Cubrir Plan Especifico Ciencias Basicas 3°: mecanica, hidraulica, gravitacion/Kepler, calor, electricidad/magnetismo, relatividad y mecanica cuantica.
+[ ] Mantener contenidos priorizados 2021 y distinguirlos del temario base.
+[ ] Incluir los tres cronogramas de la Guia por separado: Plan Comun 2°, Plan Comun 3° segun el rotulo de la fuente y Plan Especifico 3°.
+[ ] Registrar Res. MEC 12.506/09 BIS y las Res. MEC 308/2020, 602/2020, 832/2020; registrar tambien leyes/decretos como instrumentos de otro tipo.
+[ ] No confundir Fisica con Educacion Fisica.
+[ ] No inventar formulas, fechas, capacidades, numero de resolucion aprobatoria de la Priorizacion 2021 ni equivalencias para el conflicto de cursos.
+
+FIN DE LA ESPECIFICACION
+
+
+

@@ -1,0 +1,233 @@
+// Textos de la página de presentación (español y Jopara).
+export const LANDING_TEXT = {
+  es: {
+    nav: { what: 'Qué es', features: 'Funciones', mec: 'Programa MEC', demo: 'Demo en vivo', videos: 'Videos', teachers: 'Docentes', download: 'Descargar' },
+    cta: 'Probar demo', ctaDownload: 'Descargar APK', openApp: 'Abrir la app',
+    hero: {
+      eyebrow: 'Física de la Educación Media · Jopara y castellano',
+      titleRed: 'Ani rekyhyje.', title: 'Aprendé Física paso a paso.',
+      lead: 'PyFis IA es un tutor de inteligencia artificial en Jopara y castellano con todos los temas de Física de la Educación Media del programa del MEC: simuladores, ejercicios con corrección y preguntas. Funciona en el celular, incluso sin internet.',
+      badges: ['Gratis', 'Español y Jopara', 'Programa del MEC', 'Funciona sin internet'],
+    },
+    mec: {
+      title: 'Según el programa del MEC',
+      lead: 'Cada tema de PyFis dice en qué curso y capacidad del programa oficial figura, con la resolución y las páginas. Así el docente sabe exactamente qué está practicando su grupo.',
+      courses: [
+        ['1.er curso · Plan Común', 'Magnitudes, vectores, MRU, MRUV, caída libre, tiro parabólico, Newton, energía, fluidos y calor.'],
+        ['2.º curso · Plan Común', 'Termodinámica, gases, luz, espejos, lentes, ondas, sonido y electricidad hasta la ley de Ohm.'],
+        ['3.er curso · Plan Específico', 'Mecánica avanzada, gravitación, electricidad y magnetismo, relatividad y física cuántica.'],
+      ],
+      docsTitle: 'Documentos del MEC usados',
+      docs: [
+        ['Res. MEC N° 12.506/09 BIS', 'Programa de Física de la Educación Media (Plan Común pp. 139-145, Plan Específico pp. 251-253).'],
+        ['Priorización Curricular 2021', 'Los temas priorizados llevan la marca “Priorizado 2021”.'],
+        ['Guía de planificación 2021', 'El orden semanal de los temas, para seguir el cronograma.'],
+      ],
+      note: 'Las fórmulas son de física estándar de nivel medio: el programa nombra los temas y las leyes, pero no transcribe fórmulas.',
+      link: 'Leer la documentación completa',
+    },
+    stats: [
+      { value: 2, label: 'idiomas: Jopara y castellano' },
+      { value: 38, label: 'temas del programa del MEC' },
+      { value: 100, suffix: ' %', label: 'funciona sin internet' },
+      { value: 3.8, decimals: 1, suffix: ' MB', label: 'pesa el APK' },
+    ],
+    why: {
+      title: '¿Por qué PyFis IA?',
+      items: [
+        ['La física se entiende mejor en tu idioma', 'Explicaciones en Jopara y castellano, con los términos científicos claros y ejemplos de nuestra realidad.'],
+        ['Sin señal no se corta el aprendizaje', 'El tutor, los ejercicios y las simulaciones funcionan offline. El progreso se sincroniza cuando vuelve internet.'],
+        ['Ver para entender', 'Cada cálculo se convierte en una trayectoria que podés animar, girar en 3D y comparar con otra.'],
+      ],
+    },
+    features: {
+      title: 'Todo lo que podés hacer',
+      lead: 'Una sola app para aprender, practicar y enseñar movimiento parabólico.',
+      items: [
+        ['Tutor IA bilingüe', 'Preguntá con tus palabras, por texto o por voz. Responde con IA cuando hay internet y con el tutor local cuando no hay.'],
+        ['Cuaderno paso a paso', 'Resuelve tus ejercicios como en el cuaderno: datos, fórmulas, sustitución, resultado y verificación.'],
+        ['Simulaciones 2D y 3D', 'Dron, básquet, tiro libre y paredón: mirá el lanzamiento y girá la cámara en 3D.'],
+        ['Aprender a graficar', 'Tabla de valores, puntos, curva, altura máxima y alcance, explicado en cinco pasos.'],
+        ['Desafíos y minijuegos', 'Encestá en el aro de 3,05 m, superá la barrera del tiro libre y descubrí los ángulos complementarios.'],
+        ['Práctica que se corrige sola', 'Ejercicios generados al azar, cuestionarios y tarjetas de repaso con corrección inmediata.'],
+        ['Panel docente', 'Rendimiento de la clase por tema y por alumno, con banderitas en cada ejercicio.'],
+        ['Ficha PDF a medida', 'Fichas para imprimir con el color, los ejercicios y el espacio para resolver que elijas.'],
+        ['Clases conectadas', 'Código de clase, mensajes, reuniones y progreso sincronizado entre teléfonos.'],
+      ],
+    },
+    live: {
+      title: 'Probalo acá mismo',
+      lead: 'Herramientas reales de la app funcionando en esta página, sin clave API y sin internet. Tocá un ejemplo o escribí tu propia pregunta.',
+      tabs: { notebook: 'Cuaderno', graph: 'Gráfico', sim: 'Simulación 3D' },
+      questions: {
+        notebook: 'Una pelota sale a 20 m/s con 30°, ¿cuál es el alcance?',
+        graph: 'Enseñame a dibujar el gráfico de 15 m/s a 45°',
+        sim: 'Simulá 25 m/s a 60° en 3D',
+      },
+      you: 'Vos', tutor: 'PyFis', loading: 'Cargando la demo…',
+      placeholder: 'Escribí tu pregunta de movimiento parabólico…', send: 'Preguntar',
+      offline: 'Tutor local: responde sin clave API y sin internet.',
+      noAnswer: 'Esa pregunta la responde mejor la app completa. Probá con: “simulá 18 m/s a 40°”, “dame un ejercicio” o “¿qué es el alcance?”.',
+    },
+    videos: {
+      title: 'Mirá cómo funciona',
+      lead: 'Videos cortos de cada parte de la app.',
+      soon: 'Video próximamente',
+      items: {
+        start: 'Primeros pasos: cuenta e idioma',
+        tutor: 'El tutor resuelve un ejercicio paso a paso',
+        sim: 'Simulaciones y desafíos',
+        teacher: 'Panel docente y ficha PDF',
+      },
+    },
+    how: {
+      title: 'Empezá en tres pasos',
+      items: [
+        ['Descargá o abrí', 'Instalá el APK en tu Android o abrí la demo en el navegador.'],
+        ['Creá tu cuenta', 'Elegí si sos alumno o docente y el idioma: Jopara o español.'],
+        ['Preguntá y practicá', 'Resolvé ejercicios, simulá lanzamientos y jugá los desafíos.'],
+      ],
+    },
+    teachers: {
+      title: 'Pensado también para docentes',
+      lead: 'Herramientas para preparar, proyectar y acompañar la clase.',
+      items: [
+        'Creá clases con código y compartí tus propios ejercicios.',
+        'Mirá qué temas entienden más y cuáles menos tus alumnos.',
+        'Proyectá presentaciones con simulaciones en vivo.',
+        'Imprimí fichas PDF a tu gusto.',
+      ],
+    },
+    download: {
+      title: 'Descargá PyFis IA para Android',
+      meta: ['Versión Demo 1.0', 'Android 7 o superior', 'Funciona sin internet'],
+      steps: [
+        'Descargá el archivo en tu teléfono.',
+        'Abrilo y, si Android lo pide, permití “Instalar apps desconocidas”.',
+        'Abrí PyFis IA y creá tu cuenta.',
+      ],
+      noAndroid: '¿No tenés Android? Probá la demo web.',
+      size: 'Tamaño',
+    },
+    team: {
+      title: 'Quiénes somos',
+      text: 'PyFis IA es un proyecto independiente de Kyre’y-devs, un equipo de estudiantes del Centro Regional de Educación “Dr. José Gaspar Rodríguez de Francia” de Ciudad del Este, Paraguay.',
+    },
+    footer: 'Hecho por Kyre’y-devs · PyFis IA Demo 1.0',
+  },
+  gn: {
+    nav: { what: 'Mba’épa', features: 'Mba’épa ojapo', mec: 'MEC programa', demo: 'Demo', videos: 'Video', teachers: 'Mbo’ehára', download: 'Emboguejy' },
+    cta: 'Eñeha’ã demo', ctaDownload: 'Emboguejy APK', openApp: 'Eipe’a app',
+    hero: {
+      eyebrow: 'Educación Media Física · Jopara ha castellano',
+      titleRed: 'Ani rekyhyje.', title: 'Eaprende Física paso a paso.',
+      lead: 'PyFis IA ha’e peteĩ tutor inteligencia artificial Jopara ha castellano-pe, oguerekóva opavave Educación Media Física tema MEC programa-gui: simulador, ejercicio corrección reheve ha porandu. Ojepuru celular-pe, internet’ỹre avei.',
+      badges: ['Rei', 'Español ha Jopara', 'MEC programa', 'Internet’ỹre oiko'],
+    },
+    mec: {
+      title: 'MEC programa he’iháicha',
+      lead: 'Káda PyFis tema he’i moõ curso ha capacidad-pe oĩ programa oficial-pe, resolución ha kuatiarogue reheve. Upéicha mbo’ehára oikuaa mba’épa opractica igrupo.',
+      courses: [
+        ['1.er curso · Plan Común', 'Magnitud, vector, MRU, MRUV, caída libre, tiro parabólico, Newton, energía, fluido ha calor.'],
+        ['2.º curso · Plan Común', 'Termodinámica, gas, tesape, espejo, lente, onda, sonido ha electricidad ley de Ohm peve.'],
+        ['3.er curso · Plan Específico', 'Mecánica hasyvéva, gravitación, electricidad ha magnetismo, relatividad ha física cuántica.'],
+      ],
+      docsTitle: 'MEC documento ojepuruva',
+      docs: [
+        ['Res. MEC N° 12.506/09 BIS', 'Educación Media Física programa (Plan Común pp. 139-145, Plan Específico pp. 251-253).'],
+        ['Priorización Curricular 2021', 'Tema priorizado oguereko marca “Priorizado 2021”.'],
+        ['Guía de planificación 2021', 'Tema-kuéra orden semana ha semana, cronograma resegi hag̃ua.'],
+      ],
+      note: 'Fórmula-kuéra ha’e física estándar nivel medio-pegua: programa ombohéra tema ha ley, ndohaíri katu fórmula.',
+      link: 'Emoñe’ẽ documentación completa',
+    },
+    stats: [
+      { value: 2, label: 'ñe’ẽ: Jopara ha castellano' },
+      { value: 38, label: 'tema MEC programa-gui' },
+      { value: 100, suffix: ' %', label: 'oiko internet’ỹre' },
+      { value: 3.8, decimals: 1, suffix: ' MB', label: 'APK ipohýi' },
+    ],
+    why: {
+      title: '¿Mba’érepa PyFis IA?',
+      items: [
+        ['Física ojeikuaa porãve nde ñe’ẽme', 'Explicación Jopara ha castellano-pe, término científico hesakãva ha techapyrã ñande rekove-gua reheve.'],
+        ['Señal’ỹre noñekytĩri aprendizaje', 'Tutor, ejercicio ha simulación oiko offline. Progreso oñesincroniza oĩ jeývo internet.'],
+        ['Rehecha hag̃ua reikuaa', 'Káda cálculo oiko peteĩ trayectoria rehechaukakuaáva, rembojerekuaáva 3D-pe ha rembojojakuaáva ambue ndive.'],
+      ],
+    },
+    features: {
+      title: 'Opa mba’e ikatúva rejapo',
+      lead: 'Peteĩ app año reaprende, repractica ha rembo’e hag̃ua movimiento parabólico.',
+      items: [
+        ['Tutor IA mokõi ñe’ẽme', 'Eporandu ne ñe’ẽ rupi, texto térã voz reheve. Ombohovái IA reheve oĩ jave internet ha tutor local reheve ndaipóri jave.'],
+        ['Cuaderno paso a paso', 'Oresolve nde ejercicio cuaderno-pe ojapoháicha: dato, fórmula, sustitución, resultado ha verificación.'],
+        ['Simulación 2D ha 3D', 'Dron, básquet, tiro libre ha paredón: ehecha lanzamiento ha embojere cámara 3D-pe.'],
+        ['Eaprende regrafica', 'Tabla de valores, punto, curva, altura máxima ha alcance, po paso-pe ojemyesakãva.'],
+        ['Desafío ha minijuego', 'Emoinge aro 3,05 m-pe, ehasa tiro libre barrera ha ejuhu ángulo complementario.'],
+        ['Práctica ojecorregíva ijehegui', 'Ejercicio ojejapóva azar-pe, cuestionario ha tarjeta repaso, corrección pya’e reheve.'],
+        ['Panel docente', 'Clase rendimiento tema ha temimbo’e rupi, bandera michĩ káda ejercicio-pe.'],
+        ['Ficha PDF nde rembipotaháicha', 'Ficha reimprimi hag̃ua, color, ejercicio ha espacio reiporavóva reheve.'],
+        ['Clase oñembojoajúva', 'Código de clase, mensaje, reunión ha progreso oñesincronizáva teléfono-kuéra pa’ũme.'],
+      ],
+    },
+    live: {
+      title: 'Eñeha’ã ko’ápe voi',
+      lead: 'App herramienta añetegua oikóva ko página-pe, clave API’ỹre ha internet’ỹre. Epoko peteĩ techapyrã térã ehai nde porandu.',
+      tabs: { notebook: 'Cuaderno', graph: 'Gráfico', sim: 'Simulación 3D' },
+      questions: {
+        notebook: 'Peteĩ pelota osẽ 20 m/s ha 30° reheve, ¿mboýpa alcance?',
+        graph: 'Embo’e chéve rehai hag̃ua gráfico 15 m/s ha 45° reheve',
+        sim: 'Esimula 25 m/s ha 60° 3D-pe',
+      },
+      you: 'Nde', tutor: 'PyFis', loading: 'Ojehupi hína demo…',
+      placeholder: 'Ehai nde porandu movimiento parabólico rehegua…', send: 'Eporandu',
+      offline: 'Tutor local: ombohovái clave API’ỹre ha internet’ỹre.',
+      noAnswer: 'Upe porandu ombohovái porãve app completa. Eñeha’ã: “esimula 18 m/s ha 40°”, “eme’ẽ chéve peteĩ ejercicio” térã “¿mba’épa alcance?”.',
+    },
+    videos: {
+      title: 'Ehecha mba’éichapa oiko',
+      lead: 'Video mbyky káda app parte rehegua.',
+      soon: 'Video oúta',
+      items: {
+        start: 'Ñepyrũ: cuenta ha ñe’ẽ',
+        tutor: 'Tutor oresolve peteĩ ejercicio paso a paso',
+        sim: 'Simulación ha desafío',
+        teacher: 'Panel docente ha ficha PDF',
+      },
+    },
+    how: {
+      title: 'Eñepyrũ mbohapy paso-pe',
+      items: [
+        ['Emboguejy térã eipe’a', 'Emoĩ APK nde Android-pe térã eipe’a demo navegador-pe.'],
+        ['Ejapo nde cuenta', 'Eiporavo temimbo’e térã mbo’ehára ha ñe’ẽ: Jopara térã español.'],
+        ['Eporandu ha epractica', 'Eresolve ejercicio, esimula lanzamiento ha ehuga desafío.'],
+      ],
+    },
+    teachers: {
+      title: 'Mbo’ehára-kuéra g̃uarã avei',
+      lead: 'Herramienta rembosako’i, reproyecta ha reñangareko hag̃ua clase rehe.',
+      items: [
+        'Ejapo clase código reheve ha emoherakuã nde ejercicio.',
+        'Ehecha mba’e tema ontende porãve ha sa’ive nde temimbo’e.',
+        'Eproyecta presentación simulación oikóva reheve.',
+        'Eimprimi ficha PDF nde rembipotaháicha.',
+      ],
+    },
+    download: {
+      title: 'Emboguejy PyFis IA Android-pe g̃uarã',
+      meta: ['Versión Demo 1.0', 'Android 7 térã yvateve', 'Internet’ỹre oiko'],
+      steps: [
+        'Emboguejy archivo nde teléfono-pe.',
+        'Eipe’a ha, Android ojerure ramo, emoneĩ “Instalar apps desconocidas”.',
+        'Eipe’a PyFis IA ha ejapo nde cuenta.',
+      ],
+      noAndroid: '¿Ndereguerekói Android? Eñeha’ã demo web.',
+      size: 'Tuichakue',
+    },
+    team: {
+      title: 'Mávapa ore',
+      text: 'PyFis IA ha’e Kyre’y-devs proyecto independiente, peteĩ equipo temimbo’ekuéra Centro Regional de Educación “Dr. José Gaspar Rodríguez de Francia”, Ciudad del Este, Paraguay-gua.',
+    },
+    footer: 'Ojapo Kyre’y-devs · PyFis IA Demo 1.0',
+  },
+};

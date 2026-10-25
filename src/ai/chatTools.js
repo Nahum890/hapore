@@ -1,4 +1,5 @@
 import { createLaunch, maxHeight, positionAt, range, timeOfFlight, velocityAt } from '../physics/projectileMotion.js';
+import { detectTopic } from './topicTutor.js';
 
 // Herramientas del chat libre que funcionan SIN internet.
 // 1) Entiende qué pide el estudiante (resolver, cuaderno, graficar, simular…).
@@ -517,8 +518,8 @@ function metricsLine(params, language) {
 }
 
 const HELP = {
-  es: 'Esto es lo que puedo hacer, también sin internet:\n\n• Resolver tu ejercicio paso a paso como en el cuaderno: "una pelota sale a 20 m/s con 30°, ¿cuál es el alcance?"\n• Enseñarte a dibujar el gráfico de la parábola con tabla de valores: "enseñame a graficar un lanzamiento de 15 m/s a 45°".\n• Mostrarte la simulación en 2D y 3D: "simulá 25 m/s a 60°".\n• Comparar ángulos: "compará 30° y 60°".\n• Darte ejercicios para practicar y corregirlos: "dame un ejercicio".\n• Explicarte un tema desde cero: "explicame paso a paso el tiempo de vuelo".\n• Hoja de fórmulas, conversión de km/h a m/s, otros planetas ("¿y en la Luna?"), errores comunes y consejos para la prueba.',
-  gn: 'Ko’ãva ikatu ajapo, internet’ỹre avei:\n\n• Aresolve nde ejercicio paso a paso cuaderno-pe ojapoháicha: "peteĩ pelota osẽ 20 m/s ha 30° reheve, ¿mboýpa alcance?"\n• Ambo’e ndéve rehai hag̃ua parábola gráfico tabla de valores reheve: "embo’e chéve graficar 15 m/s ha 45°".\n• Ahechauka simulación 2D ha 3D-pe: "simulá 25 m/s ha 60°".\n• Ambojoja ángulo: "embojoja 30° ha 60°".\n• Ame’ẽ ejercicio repractica hag̃ua ha acorregi: "eme’ẽ chéve peteĩ ejercicio".\n• Amyesakã peteĩ tema ñepyrũ guive: "emyesakã chéve paso a paso tiempo de vuelo".\n• Fórmula-kuéra, km/h m/s-pe, ambue planeta ("¿ha Jasy-pe?"), javy ojehujepíva ha consejo prueba-pe g̃uarã.',
+  es: 'Esto es lo que puedo hacer, también sin internet:\n\n• Resolver tu ejercicio paso a paso como en el cuaderno: "una pelota sale a 20 m/s con 30°, ¿cuál es el alcance?"\n• Enseñarte a dibujar el gráfico de la parábola con tabla de valores: "enseñame a graficar un lanzamiento de 15 m/s a 45°".\n• Mostrarte la simulación en 2D y 3D: "simulá 25 m/s a 60°".\n• Comparar ángulos: "compará 30° y 60°".\n• Darte ejercicios para practicar y corregirlos: "dame un ejercicio".\n• Explicarte un tema desde cero: "explicame paso a paso el tiempo de vuelo".\n• Hoja de fórmulas, conversión de km/h a m/s, otros planetas ("¿y en la Luna?"), errores comunes y consejos para la prueba.\n• Todos los temas del programa del MEC (1.º a 3.º de la Media): "¿qué es la ley de Ohm?", "12 V y 4 Ω, ¿qué corriente circula?", "dame un ejercicio de MRU". Te digo además en qué curso y capacidad del MEC figura. Escribí "¿qué temas hay?" para ver la lista.',
+  gn: 'Ko’ãva ikatu ajapo, internet’ỹre avei:\n\n• Aresolve nde ejercicio paso a paso cuaderno-pe ojapoháicha: "peteĩ pelota osẽ 20 m/s ha 30° reheve, ¿mboýpa alcance?"\n• Ambo’e ndéve rehai hag̃ua parábola gráfico tabla de valores reheve: "embo’e chéve graficar 15 m/s ha 45°".\n• Ahechauka simulación 2D ha 3D-pe: "simulá 25 m/s ha 60°".\n• Ambojoja ángulo: "embojoja 30° ha 60°".\n• Ame’ẽ ejercicio repractica hag̃ua ha acorregi: "eme’ẽ chéve peteĩ ejercicio".\n• Amyesakã peteĩ tema ñepyrũ guive: "emyesakã chéve paso a paso tiempo de vuelo".\n• Fórmula-kuéra, km/h m/s-pe, ambue planeta ("¿ha Jasy-pe?"), javy ojehujepíva ha consejo prueba-pe g̃uarã.\n• Opavave MEC programa tema (Media 1.º guive 3.º peve): "¿mba’épa ley de Ohm?", "12 V ha 4 Ω, ¿mboýpa corriente?", "eme’ẽ peteĩ ejercicio MRU". Ha ha’e avei moõ curso ha capacidad MEC-pe oĩ. Ehai "¿mba’e temas oĩ?" rehecha hag̃ua lista.',
 };
 
 /**
@@ -614,6 +615,8 @@ export function offlineChatAnswer(text, history = [], language = 'gn-jopara') {
  * locales agregan el widget que corresponde a lo que pidió el estudiante.
  */
 export function widgetForMessage(text, history = [], language = 'gn-jopara') {
+  // Una pregunta de otro tema del MEC (Ohm, MRU…) no lleva tarjetas de tiro parabólico.
+  if (detectTopic(text)) return null;
   const intent = detectIntent(text, history);
   if (!intent || ['help', 'convert', 'answer-practice'].includes(intent)) return null;
   return offlineChatAnswer(text, history, language)?.widget ?? null;

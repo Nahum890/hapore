@@ -1,4 +1,4 @@
-import { formulaParts, mathSegments, splitFraction, toTextbookMarked, toTextbookPlain } from '../utils/mathText.js';
+import { formulaParts, mathSegments, splitFraction, splitTerms, toTextbookMarked, toTextbookPlain } from '../utils/mathText.js';
 
 function Segments({ marked }) {
   return mathSegments(marked).map((segment, index) => (
@@ -24,8 +24,8 @@ export function MathText({ text, as: Tag = 'span', className }) {
 export function Formula({ text, className = '' }) {
   const marked = toTextbookMarked(text);
   return <span className={`math-formula ${className}`} role="math" aria-label={toTextbookPlain(text)}>
-    {formulaParts(marked).map((part, index) => {
-      const fraction = /^\s*(=|→|≈|;)\s*$/.test(part) ? null : splitFraction(part);
+    {formulaParts(marked).flatMap(part => (/^\s*(=|→|≈|;)\s*$/.test(part) ? [part] : splitTerms(part))).map((part, index) => {
+      const fraction = /^\s*(=|→|≈|;|[+−-])\s*$/.test(part) ? null : splitFraction(part);
       if (!fraction) return <span key={index} className="math-inline"><Segments marked={part} /></span>;
       return <span key={index} className="math-fraction">
         <span className="math-num"><Segments marked={fraction.num} /></span>

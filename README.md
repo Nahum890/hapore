@@ -15,13 +15,11 @@ La interfaz utiliza un sistema de diseño educativo y tecnológico moderno:
 
 ## Contenido principal
 
-El único tema educativo de la app es **Movimiento Parabólico**, con tres situaciones que comparten el mismo motor físico:
+La app cubre **toda la Física de la Educación Media según el programa del MEC** (1.º, 2.º y 3.º curso, Plan Común y Plan Específico): 38 temas, de magnitudes y cinemática hasta electricidad, relatividad y física cuántica. Cada tema cita la **Res. MEC N° 12.506/09 BIS**, las páginas del programa, la Priorización Curricular 2021 y las semanas de la Guía 2021. Cada tema tiene resumen, fórmulas, simulador, práctica ilimitada con corrección y preguntas.
 
-- **Dron:** entregas con salida y llegada a la misma altura.
-- **Básquetbol:** lanzamientos a la canasta.
-- **Pelota sobre un paredón:** tiro que debe superar un obstáculo.
+Detalle completo y trazabilidad tema por tema: [`docs/curriculo/IMPLEMENTACION_MEC.md`](docs/curriculo/IMPLEMENTACION_MEC.md).
 
-Velocidad, gravedad, vectores y ángulo de lanzamiento se explican como apoyo conceptual para entender el movimiento parabólico, no como temas propios.
+El **movimiento parabólico** conserva además su práctica original, con tres situaciones que comparten el mismo motor físico: dron, básquetbol y pelota sobre un paredón (más dibujo de parábolas, minijuego y laboratorio 3D).
 
 ## Funciones disponibles
 
@@ -101,11 +99,11 @@ Para leer una foto se necesita Gemini online y conexión. La imagen se reduce en
 
 ## Clases compartidas entre dispositivos (opcional)
 
-Si se configura Supabase (ver [`supabase/README.md`](supabase/README.md)), el docente crea una clase con un código, elige qué tarjetas y ejercicios compartir y ve el avance sincronizado de sus alumnos. El alumno descarga la clase una vez con internet, la resuelve sin conexión y su avance se sube cuando vuelve la conexión. Sin Supabase, el código comparte solo una selección de situaciones y cantidades: no crea una clase identificada ni sincroniza progreso. Para entender la diferencia entre Vite, Supabase y el servidor simulado, consulta [docs/SERVIDOR_Y_COMUNICACION.md](docs/SERVIDOR_Y_COMUNICACION.md).
+Si se configura Supabase (ver [`supabase/README.md`](supabase/README.md)), el docente crea una clase con un código, elige qué tarjetas y ejercicios compartir y ve el avance sincronizado de sus alumnos. El alumno descarga la clase una vez con internet, la resuelve sin conexión y su avance se sube cuando vuelve la conexión. Sin Supabase, el código comparte solo una selección de situaciones y cantidades: no crea una clase identificada ni sincroniza progreso. Para entender la diferencia entre Vite, Supabase y el servidor simulado, consulta [docs/guias/SERVIDOR_Y_COMUNICACION.md](docs/guias/SERVIDOR_Y_COMUNICACION.md).
 
 ## Instalación y ejecución
 
-**Para una presentación o demo:** doble clic en `start.bat` (o `npm run start:all`). Para publicar la app, convertirla en APK y usarla en varios teléfonos con datos móviles, seguí [docs/PRESENTACION.md](docs/PRESENTACION.md).
+**Para una presentación o demo:** doble clic en `start.bat` (o `npm run start:all`). Para publicar la app, convertirla en APK y usarla en varios teléfonos con datos móviles, seguí [docs/guias/PRESENTACION.md](docs/guias/PRESENTACION.md). Para generar el APK, ver [apk/README.md](apk/README.md).
 
 ```bash
 npm install
@@ -129,19 +127,53 @@ npm run build
 npm run preview
 ```
 
-La suite actual cubre cuentas y roles, motor físico, contenido, códigos de clase, simulaciones, progresión, fallback, reintentos, streaming y servidor, todo sobre movimiento parabólico.
+La suite actual cubre cuentas y roles, motor físico, contenido, códigos de clase, simulaciones, progresión, fallback, reintentos, streaming y servidor, además del currículo del MEC (datos, generadores de ejercicios y tutor de temas).
 
-## Estructura principal
+## Estructura de carpetas
+
+```text
+Guarania/
+├── src/              Código de la app (ver detalle abajo)
+├── public/           Archivos que se publican tal cual
+│   ├── icons/        Íconos de la app instalable
+│   ├── landing/      Capturas de la página de presentación
+│   ├── videos/       Videos de demostración (mp4 + portada)
+│   └── downloads/    APK descargable desde la página
+├── tests/            Pruebas automáticas (npm test)
+├── api/              Función de Vercel /api/chat (tutor con Gemini)
+├── supabase/         Base de datos: esquema, migraciones y servidor simulado
+├── android/          Proyecto Android de Capacitor (APK sin internet)
+├── apk/              Guía del APK + llave de firma (la llave NO se sube)
+├── scripts/          Script de inicio para demos (lo usa start.bat)
+├── docs/
+│   ├── guias/        Paso a paso: Supabase, servidor, presentación, prompt del tutor
+│   ├── historial/    Registro de cambios y evaluación de la fusión
+│   ├── curriculo/    Especificación de Física según el currículo de Paraguay
+│   └── presentacion/ Cartel del proyecto
+├── branding/         Material de difusión (solo local, no se sube)
+└── _archivo/         Copias viejas y restos sin uso (solo local, no se sube)
+```
+
+En la raíz quedan solo los archivos de configuración: `package.json`, `vite.config.js`, `vercel.json`, `capacitor.config.json`, `index.html`, los `.env` y `start.bat`.
 
 ```text
 src/
-├── ai/          Tutor por reglas, proveedor online y banco conceptual
+├── ai/          Tutor por reglas, herramientas offline del chat y proveedor online
 ├── auth/        Cuentas y sesiones locales
-├── components/  Interfaz de alumno, maestro, onboarding y PDF
+├── cloud/       Conexión con Supabase (clases, chat, contenido docente)
+├── components/  Interfaz de alumno, maestro, onboarding y PDF (topics/: sección Temas y Plan MEC)
+├── curriculum/  Currículo del MEC: fuentes, cursos, 38 temas y generadores de ejercicios
 ├── data/        Ejercicios, conceptos, errores, glosario y flashcards
-├── pedagogy/    Progreso, diagnóstico y recomendaciones
+├── games/       Desafíos y minijuegos
+├── hooks/       Hooks de React (misión, cuestionario, tutor, voz…)
+├── i18n/        Textos en Jopara y castellano
+├── landing/     Página de presentación (pyfisia.vercel.app)
+├── pdf/         Fichas PDF
+├── pedagogy/    Progreso, diagnóstico, banderas y recomendaciones
 ├── physics/     Cálculo y validación determinista
-├── simulator/   Escenas y modelos visuales por ejercicio
+├── server/      Lógica de /api/chat compartida con Vite
+├── sims/        24 simuladores de los temas del MEC (kit visual común)
+├── simulator/   Escenas 2D/3D y modelos visuales del tiro parabólico
 └── utils/       Persistencia, códigos de clase y validaciones
 ```
 
@@ -149,9 +181,9 @@ src/
 
 - Validación lingüística de todos los textos en Jopara por una persona competente.
 - Revisión y aprobación del contenido por un docente de Física.
-- Matriz de trazabilidad con las fuentes del programa MEC: se buscó un programa oficial de Física de 3.º curso publicado en mec.gov.py y no se encontró un documento puntual sobre movimiento parabólico verificable en línea; falta que el equipo aporte la fuente oficial exacta (ver `src/data/contentReviewStatus.json`).
+- Matriz de trazabilidad con el programa del MEC: hecha (ver `docs/curriculo/IMPLEMENTACION_MEC.md`); falta que un docente la revise.
 - Endpoint `/api/chat` desplegable si se presenta la IA generativa online (hoy depende del servidor de desarrollo/vista previa de Vite; no está pensado para tocarse en esta etapa).
 - Pruebas de instalación y modo avión en teléfonos reales.
 - Pitch, guion de demostración, evidencia de colaboración y plan de continuidad.
 
-La evaluación detallada de preparación y fusión se encuentra en `EVALUACION_FUSION.md`.
+La evaluación detallada de preparación y fusión se encuentra en [`docs/historial/EVALUACION_FUSION.md`](docs/historial/EVALUACION_FUSION.md).

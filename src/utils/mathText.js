@@ -88,6 +88,25 @@ export function splitFraction(expr) {
   return num && den ? { num, den } : null;
 }
 
+/** Separa un lado de la fórmula en términos unidos por " + " o " − " (con
+ * espacios y fuera de paréntesis), para que cada término pueda dibujarse
+ * como fracción: 1/R₁ + 1/R₂ → ["1/R₁", " + ", "1/R₂"]. */
+export function splitTerms(expr) {
+  const terms = [];
+  let depth = 0, start = 0;
+  for (let index = 0; index < expr.length; index += 1) {
+    const char = expr[index];
+    if (char === '(') depth += 1;
+    else if (char === ')') depth -= 1;
+    else if (depth === 0 && /[+−-]/.test(char) && expr[index - 1] === ' ' && expr[index + 1] === ' ' && index > 1) {
+      terms.push(expr.slice(start, index - 1), ` ${char} `);
+      start = index + 2;
+    }
+  }
+  terms.push(expr.slice(start));
+  return terms.filter(term => term !== '');
+}
+
 /** Divide una fórmula en partes separadas por =, →, ≈ y ; para poder
  * dibujar cada lado (y sus fracciones) por separado. */
 export function formulaParts(marked) {

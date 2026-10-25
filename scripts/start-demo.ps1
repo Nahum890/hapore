@@ -1,4 +1,4 @@
-﻿# Inicia PyFis IA con un solo comando para una demo.
+# Inicia PyFis IA con un solo comando para una demo.
 #
 #   start.bat            -> versión de producción local (build + vite preview, con service worker)
 #   start.bat dev        -> servidor de desarrollo (recarga en caliente)
@@ -7,7 +7,7 @@
 # Qué levanta:
 #   - Vite (la app y el endpoint /api/chat, que usa GEMINI_API_KEY del archivo .env).
 #   - Opcional (modo mock): supabase/mock-server.mjs en el puerto 54321.
-# Supabase real NO se levanta acá: es un servicio en la nube (ver docs/PRESENTACION.md).
+# Supabase real NO se levanta acá: es un servicio en la nube (ver docs/guias/PRESENTACION.md).
 param([ValidateSet('preview', 'dev', 'mock')][string]$Mode = 'preview')
 
 $ErrorActionPreference = 'Stop'

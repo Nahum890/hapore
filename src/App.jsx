@@ -10,8 +10,12 @@ import StudentClass from './components/StudentClass.jsx';
 import AuthScreen from './components/AuthScreen.jsx';
 import PdfButton from './components/PdfButton.jsx';
 import Onboarding from './components/Onboarding.jsx';
-import CurriculumBadge from './components/CurriculumBadge.jsx';
 import TheorySection from './components/TheorySection.jsx';
+import TopicsView from './components/topics/TopicsView.jsx';
+import TopicPage from './components/topics/TopicPage.jsx';
+import TopicIcon from './components/topics/TopicIcon.jsx';
+import { topicById, pickLang } from './curriculum/topics/index.js';
+import { getLastTopic, getMyTopics, getTeacherTopics, topicStats } from './curriculum/progress.js';
 import CanvasSimulator from './simulator/CanvasSimulator.jsx';
 import PredictLaunchGame from './simulator/PredictLaunchGame.jsx';
 import TrajectoryDrawingPractice from './components/TrajectoryDrawingPractice.jsx';
@@ -88,48 +92,59 @@ function Bilingual({ k, as: Tag = 'span', className = '' }) {
   return <Tag className={className}>{t(k)}</Tag>;
 }
 
-function HomeView({ user, learning, classConfig, onNavigate, onGuide }) {
-  const { t } = useTranslation();
+// Fila de temas rápidos (los marcados con estrella o elegidos por el docente).
+function HomeTopicRow({ ids, onOpenTopic }) {
+  const { language } = useTranslation();
+  const topics = ids.map(topicById).filter(Boolean).slice(0, 8);
+  return <div className="home-topic-row">{topics.map(topic => <button key={topic.id} type="button" className={`home-topic-pill area-${topic.area}`} onClick={() => onOpenTopic(topic.id)}>
+    <span className="home-topic-pill-icon"><TopicIcon name={topic.icon} size={20} /></span>{pickLang(topic.name, language)}
+  </button>)}</div>;
+}
+
+function HomeView({ user, learning, classConfig, teacherTopics, onNavigate, onOpenTopic, onGuide }) {
+  const { t, language } = useTranslation();
   const teacher = user.role === 'maestro';
   const progress = summarizeAttempts(learning.attemptLog);
-  const topicProgress = SCENARIOS.map(scenario => {
-    const ids = new Set(getAllExercises().filter(item => item.scenario === scenario.id).map(item => item.id));
-    return { topic: t(`scenario.${scenario.id}`), ...summarizeAttempts(learning.attemptLog.filter(item => ids.has(item.exerciseId))) };
-  });
+  const lastTopic = topicById(getLastTopic());
+  const myTopics = getMyTopics();
+  const stats = topicStats(learning.attemptLog);
+  const topicProgress = Object.entries(stats).map(([id, value]) => ({ topic: topicById(id), ...value }))
+    .filter(item => item.topic).sort((a, b) => b.attempts - a.attempts).slice(0, 6);
   // Plan de práctica: si el alumno repite el mismo tipo de error dos veces o
   // más, se le sugiere un ejercicio corto enfocado en esa dificultad puntual.
   const practicePlan = !teacher ? practiceRecommendation(getAllExercises(), learning.attemptLog) : null;
-  const goToPractice = exerciseId => { learning.onSelectExercise(exerciseId); onNavigate('simulador'); };
+  const goToPractice = exerciseId => { learning.onSelectExercise(exerciseId); onOpenTopic('movimiento-parabolico', 'practice'); };
   return <div className="home-view">
     <section className="home-hero">
       <div className="home-hero-copy">
         <span className="home-kicker">{t(teacher ? 'home.kickerTeacher' : 'home.kickerStudent')}</span>
         <h2>{t('home.hello')}, {user.name.split(' ')[0]}!</h2>
         <p>{t(teacher ? 'home.leadTeacher' : 'home.leadStudent')}</p>
-        <button className="btn home-main-action" type="button" onClick={() => onNavigate(teacher ? 'aula' : 'simulador')}>{t(teacher ? 'home.ctaTeacher' : 'home.ctaStudent')} <Icon name="arrow" size={20} /></button>
+        <div className="home-hero-actions">
+          {!teacher && lastTopic
+            ? <button className="btn home-main-action" type="button" onClick={() => onOpenTopic(lastTopic.id)}>{t('home.continue')} {pickLang(lastTopic.name, language)} <Icon name="arrow" size={20} /></button>
+            : <button className="btn home-main-action" type="button" onClick={() => onNavigate(teacher ? 'aula' : 'simulador')}>{t(teacher ? 'home.ctaTeacher' : 'home.ctaStudent')} <Icon name="arrow" size={20} /></button>}
+          {!teacher && lastTopic && <button className="btn btn-secondary" type="button" onClick={() => onNavigate('simulador')}>{t('home.ctaStudent')}</button>}
+        </div>
       </div>
       <div className="hero-art"><LaunchScene /><span className="hero-motto"><Icon name="spark" size={16} />{t('home.motto')}</span></div>
     </section>
-    <ul className="home-principles" aria-label="Kyhyje’ỹ">
-      <li><Icon name="spark" size={18} /><Bilingual k="home.p1" /></li>
-      <li><Icon name="retry" size={18} /><Bilingual k="home.p2" /></li>
-      <li><Icon name="offline" size={18} /><Bilingual k="home.p3" /></li>
-    </ul>
+    {!teacher && teacherTopics.length > 0 && <section className="home-topics"><h2>{t('topics.teacherPicked')}</h2><HomeTopicRow ids={teacherTopics} onOpenTopic={onOpenTopic} /></section>}
+    {!teacher && myTopics.length > 0 && <section className="home-topics"><h2>{t('home.myTopics')}</h2><HomeTopicRow ids={myTopics} onOpenTopic={onOpenTopic} /></section>}
     <div className="home-section-heading"><Bilingual k="home.question" as="h2" /><button type="button" onClick={onGuide}><Icon name="help" size={18} />{t('home.guide')}</button></div>
     <div className="home-action-grid">
       <button className="home-action-card is-practice" type="button" onClick={() => onNavigate('simulador')}><span className="home-card-icon" aria-hidden="true"><Icon name="launch" size={26} /></span><Bilingual k="nav.simulador" as="strong" /><span className="home-card-text">{t('home.practiceText')}</span><small aria-hidden="true"><Icon name="arrow" size={18} /></small></button>
       <button className="home-action-card is-review" type="button" onClick={() => onNavigate('tarjetas')}><span className="home-card-icon" aria-hidden="true"><Icon name="cards" size={26} /></span><Bilingual k="nav.tarjetas" as="strong" /><span className="home-card-text">{t('home.reviewText')}</span><small aria-hidden="true"><Icon name="arrow" size={18} /></small></button>
       <button className="home-action-card is-tutor" type="button" onClick={() => onNavigate('chats')}><span className="home-card-icon" aria-hidden="true"><Icon name="chat" size={26} /></span><Bilingual k="nav.chats" as="strong" /><span className="home-card-text">{t('home.tutorText')}</span><small aria-hidden="true"><Icon name="arrow" size={18} /></small></button>
     </div>
-    <section className="home-class-card"><Nanduti size={64} spokes={16} rings={3} className="home-class-nanduti" /><div><span className="panel-eyebrow">{t(teacher ? 'home.classEyebrowTeacher' : 'home.classEyebrowStudent')}</span><h3>{t(teacher ? 'home.classTitleTeacher' : classConfig ? 'home.classTitleJoined' : 'home.classTitleNoCode')}</h3><p>{t(teacher ? 'home.classTextTeacher' : classConfig ? 'home.classTextJoined' : 'home.classTextNoCode')}</p></div><button className="btn btn-secondary" type="button" onClick={() => onNavigate('aula')}>{t(teacher ? 'home.goTeacherClass' : 'home.goStudentClass')}</button></section>
     {practicePlan && <section className="card practice-plan" aria-label={t('plan.label')}>
       <span className="panel-eyebrow">{t('plan.eyebrow')}</span>
       <h2>{t('plan.reason', { label: t(`error.${practicePlan.pattern.errorType}`) })}</h2>
       <p>{t('plan.why', { n: practicePlan.pattern.count })}</p>
       <button type="button" className="btn btn-primary" onClick={() => goToPractice(practicePlan.exercise.id)}>{t('plan.cta')} <Icon name="arrow" size={18} /></button>
     </section>}
-    {progress.attempts > 0 && <section className="card learning-progress" aria-label={t('home.progressLabel')}><div className="learning-progress-head"><div><span className="panel-eyebrow">{t('home.progressEyebrow')}</span><h2>{t('home.progressTitle')}</h2></div><strong>{t('home.accuracy', { n: progress.accuracy })}</strong></div><div className="learning-topic-grid">{topicProgress.map(item => <div key={item.topic}><div className="learning-topic-title"><strong>{item.topic}</strong><span>{t('home.topicCorrect', { c: item.correct, a: item.attempts })}</span></div><div className="learning-topic-track"><span style={{width:`${item.accuracy}%`}} /></div><small>{item.attempts ? t('home.avgTime', { s: item.averageSeconds }) : t('home.noAttempts')}</small></div>)}</div></section>}
-    <p className="home-progress-note">{t('home.progressNote', { xp: learning.xp, c: progress.correct, a: progress.attempts })}{progress.attempts ? t('home.progressAccuracy', { n: progress.accuracy }) : ''}. {t('home.savedHere')}</p>
+    {topicProgress.length > 0 && <section className="card learning-progress" aria-label={t('home.progressLabel')}><div className="learning-progress-head"><div><span className="panel-eyebrow">{t('home.progressEyebrow')}</span><h2>{t('home.progressTitle')}</h2></div><strong>{t('home.accuracy', { n: progress.accuracy })}</strong></div><div className="learning-topic-grid">{topicProgress.map(item => { const accuracy = Math.round((item.correct / item.attempts) * 100); return <button type="button" key={item.topic.id} className="learning-topic-item" onClick={() => onOpenTopic(item.topic.id)}><div className="learning-topic-title"><strong>{pickLang(item.topic.name, language)}</strong><span>{t('home.topicCorrect', { c: item.correct, a: item.attempts })}</span></div><div className="learning-topic-track"><span style={{width:`${accuracy}%`}} /></div></button>; })}</div></section>}
+    <section className="home-class-card"><Nanduti size={64} spokes={16} rings={3} className="home-class-nanduti" /><div><span className="panel-eyebrow">{t(teacher ? 'home.classEyebrowTeacher' : 'home.classEyebrowStudent')}</span><h3>{t(teacher ? 'home.classTitleTeacher' : classConfig ? 'home.classTitleJoined' : 'home.classTitleNoCode')}</h3><p>{t(teacher ? 'home.classTextTeacher' : classConfig ? 'home.classTextJoined' : 'home.classTextNoCode')}</p></div><button className="btn btn-secondary" type="button" onClick={() => onNavigate('aula')}>{t(teacher ? 'home.goTeacherClass' : 'home.goStudentClass')}</button></section>
   </div>;
 }
 
@@ -548,6 +563,8 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
   // Docente: respaldo en Supabase de sus presentaciones y ejercicios propios.
   useEffect(() => (user.role === 'maestro' ? startTeacherSync() : undefined), [user.id, user.role]);
   const [practiceMode, setPracticeMode] = useState('ejercicio');
+  // Tema abierto en la sección Temas (null = lista de temas del curso).
+  const [openTopic, setOpenTopic] = useState(null);
   const [repasoMode, setRepasoMode] = useState('cuestionario');
   const [simulationSubmission, setSimulationSubmission] = useState(null);
   const [showGuide, setShowGuide] = useState(() => !readJSON('guarania:guideSeen:v2', false));
@@ -647,10 +664,15 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
     setSyncState({ status: 'idle', at: null });
   };
 
+  // En Temas, el tutor lateral nombra el tema abierto (o saluda en la lista).
+  const openTopicData = activeTab === 'simulador' ? topicById(openTopic?.id) : null;
+  const openTopicName = openTopicData ? pickLang(openTopicData.name, language) : null;
   useEffect(() => {
     if (activeTab === 'inicio' || activeTab === 'chats') return;
-    ask({ type: 'section', section: activeTab, role: user.role, topic: currentExercise?.topic, exerciseId: currentExercise?.id });
-  }, [activeTab, currentExercise?.id, ask]);
+    if (activeTab === 'simulador') ask({ type: 'section', section: activeTab, role: user.role, topic: openTopicName, exerciseId: openTopicName ? openTopic.id : null });
+    else ask({ type: 'section', section: activeTab, role: user.role, topic: currentExercise?.topic, exerciseId: currentExercise?.id });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, currentExercise?.id, openTopicName, ask]);
 
   const handleCardConsolidated = (flashcardId) => {
     learning.onFlashcardConsolidated(flashcardId);
@@ -676,7 +698,46 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
   };
 
   const sectionKey = activeTab === 'aula' && user.role === 'maestro' ? 'aulaTeacher' : activeTab;
-  const navigate = id => { setActiveTab(id); window.scrollTo?.({ top: 0, behavior: 'smooth' }); };
+  const navigate = id => { setActiveTab(id); if (id === 'simulador') setOpenTopic(null); window.scrollTo?.({ top: 0, behavior: 'smooth' }); };
+  const showTopic = (id, tab = 'learn') => { setOpenTopic({ id, tab }); setActiveTab('simulador'); window.scrollTo?.({ top: 0, behavior: 'smooth' }); };
+  // Temas que eligió el docente: llegan con la clase de la nube (alumno) o
+  // quedan guardados en este dispositivo (docente).
+  const teacherTopics = user.role === 'maestro' ? getTeacherTopics() : (Array.isArray(classConfig?.topics) ? classConfig.topics : []);
+
+  // Práctica original de tiro parabólico (ejercicios fijos, dibujo, minijuego
+  // y laboratorio 3D): vive dentro de la pestaña Practicar de ese tema.
+  const renderParabolicPractice = () => <>
+    <div className="tutor-mode-tabs practice-mode-tabs" role="tablist" aria-label={t('practice.tabsLabel')}>
+      {[['ejercicio', 'practice.exercises'], ['dibujo', 'practice.drawing'], ['minijuego', 'practice.game'], ['laboratorio', 'practice.lab']].map(([mode, key]) => (
+        <button key={mode} id={`practice-tab-${mode}`} type="button" role="tab" aria-controls="practice-panel" aria-selected={practiceMode === mode} tabIndex={practiceMode === mode ? 0 : -1} className={practiceMode === mode ? 'is-active' : ''} onKeyDown={handlePracticeTabKeyDown} onClick={() => setPracticeMode(mode)}>{t(key)}</button>
+      ))}
+    </div>
+    <div id="practice-panel" role="tabpanel" aria-labelledby={`practice-tab-${practiceMode}`} tabIndex={0} className="legacy-practice-panel">
+    {practiceMode === 'dibujo' ? <TrajectoryDrawingPractice /> : practiceMode === 'minijuego' ? <PredictLaunchGame /> : practiceMode === 'laboratorio' ? <ExplorationLab /> : <>
+    <section className="topic-picker card" aria-label={t('practice.pickLabel')}>
+      <div><span className="panel-eyebrow">{t('practice.topicEyebrow')}</span><h2>{t('practice.pickTitle')}</h2></div>
+      <div className="scenario-options">{availableScenarios.map(scenario => <button key={scenario.id} type="button" className={'scenario-option' + (currentExercise?.scenario === scenario.id ? ' is-active' : '')} aria-pressed={currentExercise?.scenario === scenario.id} onClick={() => selectScenario(scenario.id)}><Icon name={scenario.icon} size={22} /><span><strong>{t(`scenario.${scenario.id}`)}</strong><small>{t(`scenario.${scenario.id}Lead`)}</small></span></button>)}</div>
+    </section>
+    {currentExercise && <div className="practice-workspace">
+      <ExerciseCard
+        exercise={currentExercise}
+        onResult={learning.onExerciseResult}
+        onAskHint={ask}
+        onSimulationCheck={submission => setSimulationSubmission(previous => ({ ...submission, id: (previous?.id ?? 0) + 1 }))}
+        onSimulationClear={() => setSimulationSubmission(null)}
+        hintsUsed={learning.hintsUsed}
+        onIncrementHint={learning.incrementHints}
+      />
+      <CanvasSimulator mission={mission} submission={simulationSubmission} />
+    </div>}
+    {recommendation && <div className="practice-recommendation" role="status"><div><strong>{t('reco.title')}</strong><p>{recommendation.reasonKey ? t(recommendation.reasonKey) : recommendation.reason}</p></div>{recommendation.exercise.id !== currentExercise?.id && <button className="btn btn-secondary" type="button" onClick={() => { learning.onSelectExercise(recommendation.exercise.id); setSimulationSubmission(null); }}>{t('reco.go')}</button>}</div>}
+    <div className="mission-nav">
+      <button type="button" className="btn btn-secondary" onClick={prev} disabled={index === 0}>{t('common.previous')}</button>
+      <button type="button" className="btn btn-secondary" onClick={next}>{t('practice.nextExercise')}</button>
+    </div>
+    </>}
+    </div>
+  </>;
 
   return (
     <div className="app" data-accent={section.accent}>
@@ -684,47 +745,16 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
       <nav className="primary-nav" aria-label={t('nav.label')}>
         {SECTIONS.map(item => <button key={item.id} type="button" data-accent={item.accent} className={'primary-nav-item' + (activeTab === item.id ? ' is-active' : '')} aria-current={activeTab === item.id ? 'page' : undefined} onClick={() => navigate(item.id)}><span className="primary-nav-icon"><Icon name={item.icon} size={22} /></span><Bilingual k={'nav.' + item.id} className="primary-nav-label" /></button>)}
       </nav>
-      {activeTab !== 'inicio' && activeTab !== 'chats' && <section className="section-intro" aria-labelledby="section-title">
+      {activeTab !== 'inicio' && activeTab !== 'chats' && !(activeTab === 'simulador' && openTopic) && <section className="section-intro" aria-labelledby="section-title">
         <span className="section-icon" aria-hidden="true"><Icon name={section.icon} size={28} /></span>
         <div className="section-copy"><p className="section-eyebrow">{t(user.role === 'maestro' ? 'section.teacher' : 'section.student')}</p><h2 id="section-title">{t(`section.${sectionKey}.title`)}</h2><p>{t(`section.${sectionKey}.description`)}</p></div>
         <button type="button" className="guide-replay" onClick={() => setShowGuide(true)}><Icon name="help" size={18} />{t('section.guide')}</button>
       </section>}
       <div className={`app-layout${activeTab === 'chats' ? ' is-tutor-page' : ''}`}><main className="app-main">
-        {activeTab === 'inicio' && <HomeView user={user} learning={learning} classConfig={classConfig} onNavigate={navigate} onGuide={() => setShowGuide(true)} />}
-        {activeTab === 'simulador' && (
-          <>
-            <div className="tutor-mode-tabs practice-mode-tabs" role="tablist" aria-label={t('practice.tabsLabel')}>
-              {[['ejercicio', 'practice.exercises'], ['dibujo', 'practice.drawing'], ['minijuego', 'practice.game'], ['laboratorio', 'practice.lab']].map(([mode, key]) => (
-                <button key={mode} id={`practice-tab-${mode}`} type="button" role="tab" aria-controls="practice-panel" aria-selected={practiceMode === mode} tabIndex={practiceMode === mode ? 0 : -1} className={practiceMode === mode ? 'is-active' : ''} onKeyDown={handlePracticeTabKeyDown} onClick={() => setPracticeMode(mode)}>{t(key)}</button>
-              ))}
-            </div>
-            <div id="practice-panel" role="tabpanel" aria-labelledby={`practice-tab-${practiceMode}`} tabIndex={0}>
-            {practiceMode === 'dibujo' ? <TrajectoryDrawingPractice /> : practiceMode === 'minijuego' ? <PredictLaunchGame /> : practiceMode === 'laboratorio' ? <ExplorationLab /> : <>
-            <section className="topic-picker card" aria-label={t('practice.pickLabel')}>
-              <div><span className="panel-eyebrow">{t('practice.topicEyebrow')}</span><h2>{t('practice.pickTitle')}</h2><p>{t('practice.pickText')}</p></div>
-              <div className="scenario-options">{availableScenarios.map(scenario => <button key={scenario.id} type="button" className={'scenario-option' + (currentExercise?.scenario === scenario.id ? ' is-active' : '')} aria-pressed={currentExercise?.scenario === scenario.id} onClick={() => selectScenario(scenario.id)}><Icon name={scenario.icon} size={22} /><span><strong>{t(`scenario.${scenario.id}`)}</strong><small>{t(`scenario.${scenario.id}Lead`)}</small></span></button>)}</div>
-            </section>
-            {currentExercise && <div className="practice-workspace">
-              <ExerciseCard
-                exercise={currentExercise}
-                onResult={learning.onExerciseResult}
-                onAskHint={ask}
-                onSimulationCheck={submission => setSimulationSubmission(previous => ({ ...submission, id: (previous?.id ?? 0) + 1 }))}
-                onSimulationClear={() => setSimulationSubmission(null)}
-                hintsUsed={learning.hintsUsed}
-                onIncrementHint={learning.incrementHints}
-              />
-              <CanvasSimulator mission={mission} submission={simulationSubmission} />
-            </div>}
-            {recommendation && <div className="practice-recommendation" role="status"><div><strong>{t('reco.title')}</strong><p>{recommendation.reasonKey ? t(recommendation.reasonKey) : recommendation.reason}</p></div>{recommendation.exercise.id !== currentExercise?.id && <button className="btn btn-secondary" type="button" onClick={() => { learning.onSelectExercise(recommendation.exercise.id); setSimulationSubmission(null); }}>{t('reco.go')}</button>}</div>}
-            <div className="mission-nav">
-              <button type="button" className="btn btn-secondary" onClick={prev} disabled={index === 0}>{t('common.previous')}</button>
-              <button type="button" className="btn btn-secondary" onClick={next}>{t('practice.nextExercise')}</button>
-            </div>
-            </>}
-            </div>
-          </>
-        )}
+        {activeTab === 'inicio' && <HomeView user={user} learning={learning} classConfig={classConfig} teacherTopics={teacherTopics} onNavigate={navigate} onOpenTopic={showTopic} onGuide={() => setShowGuide(true)} />}
+        {activeTab === 'simulador' && (openTopic
+          ? <TopicPage topicId={openTopic.id} initialTab={openTopic.tab} onBack={() => setOpenTopic(null)} learning={learning} renderLegacy={renderParabolicPractice} />
+          : <TopicsView learning={learning} teacherTopics={teacherTopics} onOpenTopic={id => showTopic(id)} />)}
 
         {activeTab === 'tarjetas' && (
           <>
@@ -788,7 +818,6 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
       <Onboarding open={showGuide} onDismiss={dismissGuide} onStart={startPracticing} role={user.role} />
       <ProfileSettings open={showSettings || missingContact} required={missingContact} user={user} onClose={() => setShowSettings(false)} onSaved={handleProfileSaved} />
       <NotificationsCenter open={showNotifications} onClose={() => setShowNotifications(false)} onOpenMessages={() => navigate('mensajes')} messageNotifications={notifications.messageNotifications} upcomingMeetings={notifications.upcomingMeetings} />
-      <CurriculumBadge />
     </div>
   );
 }

@@ -111,7 +111,7 @@ Componente nuevo `ClassDashboard`, usado tanto para alumnos locales como para al
   - el tutor online nunca se sirve desde caché;
   - se mejoró el manifest.
 - **`vercel.json`:** el service worker no se guarda en caché.
-- **Guía de presentación:** `docs/PRESENTACION.md` con arquitectura, checklist, prueba con 4 teléfonos, protecciones y límites.
+- **Guía de presentación:** `docs/guias/PRESENTACION.md` con arquitectura, checklist, prueba con 4 teléfonos, protecciones y límites.
 
 ---
 
@@ -129,7 +129,7 @@ Componente nuevo `ClassDashboard`, usado tanto para alumnos locales como para al
 - Login anónimo activado.
 - `schema.sql` y la migración del límite diario ejecutados.
 - Todo verificado desde la computadora: la clave funciona, las tablas y columnas existen y las funciones responden.
-- Guía paso a paso nueva: `docs/SUPABASE_PASO_A_PASO.md`.
+- Guía paso a paso nueva: `docs/guias/SUPABASE_PASO_A_PASO.md`.
 
 ### `.env` local
 - Creado con la URL y la clave pública de Supabase, la clave de Gemini y el modelo.

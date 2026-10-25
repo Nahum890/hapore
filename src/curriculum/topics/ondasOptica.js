@@ -1,0 +1,147 @@
+// Contenido de Óptica, Ondas y Acústica (mismo formato que mecanica.js).
+
+export const ONDAS_OPTICA = [
+  {
+    id: 'luz', area: 'optica', icon: 'sun',
+    name: { es: 'Naturaleza y propagación de la luz', gn: 'Tesape rekoite ha iñemosarambi' },
+    tagline: { es: 'Rayos, sombras y velocidad de la luz', gn: 'Rayo, kuarahy’ã ha tesape velocidad' },
+    summary: {
+      es: ['La luz es una onda electromagnética: viaja incluso en el vacío, a 300 000 km/s.', 'En un medio uniforme se propaga en línea recta: por eso hay sombras.', 'Cuerpos transparentes (dejan pasar la luz), translúcidos (la dejan pasar difusa) y opacos (no la dejan pasar).'],
+      gn: ['Tesape ha’e onda electromagnética: oho vacío-pe jepe, 300 000 km/s-pe.', 'Medio uniforme-pe oho línea recta-pe: upévare oĩ kuarahy’ã.', 'Cuerpo transparente (ohejaháva tesape), translúcido (oheja difuso) ha opaco (noheja’ỹva).'],
+    },
+    formulas: [
+      { f: 'c = 3 × 10⁸ m/s', es: 'Velocidad de la luz en el vacío.', gn: 'Tesape velocidad vacío-pe.' },
+      { f: 'n = c / v', es: 'Índice de refracción de un medio.', gn: 'Medio índice de refracción.' },
+      { f: 't = d / c', es: 'Tiempo que tarda la luz en recorrer d.', gn: 'Tiempo tesape ohasa hag̃ua d.' },
+    ],
+    example: { es: 'La luz del Sol tarda unos 8 minutos y 20 segundos en llegar a la Tierra.', gn: 'Kuarahy rendy oipuru 8 minuto ha 20 segundo rupi og̃uahẽ hag̃ua Yvýpe.' },
+    mistake: { es: 'Pensar que la luz necesita aire para viajar.', gn: 'Ñaimo’ã tesape oikotevẽha aire oho hag̃ua.' },
+    sim: { type: 'optics', mode: 'shadow' },
+    practice: ['luz-time', 'luz-index', 'luz-speed-medium'],
+    quiz: [
+      { q: { es: 'Un vidrio esmerilado (de baño) es…', gn: 'Vidrio esmerilado (baño-pegua) ha’e…' }, options: [{ es: 'Translúcido', gn: 'Translúcido' }, { es: 'Opaco', gn: 'Opaco' }, { es: 'Transparente', gn: 'Transparente' }], a: 0, why: { es: 'Deja pasar la luz pero no se ve nítido.', gn: 'Oheja ohasa tesape ndojehechái katu porã.' } },
+      { q: { es: 'Las sombras prueban que la luz…', gn: 'Kuarahy’ã ohechauka tesape…' }, options: [{ es: 'Se propaga en línea recta', gn: 'Oho línea recta-pe' }, { es: 'Es lenta', gn: 'Imbegue' }, { es: 'Necesita aire', gn: 'Oikotevẽ aire' }], a: 0, why: { es: 'El objeto bloquea los rayos rectos.', gn: 'Objeto ojoko rayo recto.' } },
+      { q: { es: 'En el agua (n = 1,33) la luz va…', gn: 'Ýpe (n = 1,33) tesape oho…' }, options: [{ es: 'Más lenta que en el vacío', gn: 'Mbeguekatuve vacío-gui' }, { es: 'Más rápida', gn: 'Pya’eve' }, { es: 'Igual', gn: 'Peteĩcha' }], a: 0, why: { es: 'v = c/n ≈ 225 000 km/s.', gn: 'v = c/n ≈ 225 000 km/s.' } },
+    ],
+    keywords: ['luz', 'sombra', 'opaco', 'translucido', 'transparente', 'velocidad de la luz', 'propagacion', 'rayo'],
+  },
+  {
+    id: 'reflexion', area: 'optica', icon: 'mirror',
+    name: { es: 'Reflexión y espejos', gn: 'Reflexión ha espejo' },
+    tagline: { es: 'Espejos planos y esféricos', gn: 'Espejo plano ha esférico' },
+    summary: {
+      es: ['Ley de reflexión: el ángulo de incidencia es igual al de reflexión.', 'Espejo plano: imagen virtual, derecha y del mismo tamaño, a la misma distancia detrás del espejo.', 'Espejos esféricos (cóncavo y convexo): la imagen se ubica con 1/f = 1/d₀ + 1/dᵢ, con f = R/2 (condiciones de Gauss: rayos cerca del eje).'],
+      gn: ['Reflexión ley: ángulo de incidencia ojoja reflexión ndive.', 'Espejo plano: imagen virtual, derecha ha peteĩ tamaño, peteĩ distancia espejo rapykuéri.', 'Espejo esférico (cóncavo ha convexo): imagen ojejuhu 1/f = 1/d₀ + 1/dᵢ reheve, f = R/2 (Gauss condición: rayo eje ypýpe).'],
+    },
+    formulas: [
+      { f: 'θ_{i} = θ_{r}', es: 'Ley de reflexión.', gn: 'Reflexión ley.' },
+      { f: '1/f = 1/d_{o} + 1/d_{i}', es: 'Ecuación de los espejos.', gn: 'Espejo ecuación.' },
+      { f: 'A = −d_{i} / d_{o}', es: 'Aumento lateral.', gn: 'Aumento lateral.' },
+      { f: 'f = R / 2', es: 'Distancia focal de un espejo esférico.', gn: 'Espejo esférico distancia focal.' },
+    ],
+    example: { es: 'Los espejos convexos de las esquinas muestran más calle pero las imágenes se ven pequeñas.', gn: 'Esquina espejo convexo ohechauka hetave tape, imagen katu michĩ.' },
+    mistake: { es: 'Olvidar que en el convexo f es negativa.', gn: 'Ñanderesarái convexo-pe f ha’eha negativa.' },
+    sim: { type: 'optics', mode: 'mirror' },
+    practice: ['refl-image', 'refl-magnification', 'refl-focal'],
+    quiz: [
+      { q: { es: 'Un rayo llega a 35° de la normal de un espejo. Sale a…', gn: 'Rayo og̃uahẽ 35°-pe espejo normal-gui. Osẽ…' }, options: [{ es: '35°', gn: '35°' }, { es: '55°', gn: '55°' }, { es: '70°', gn: '70°' }], a: 0, why: { es: 'Ángulo de incidencia = ángulo de reflexión.', gn: 'Incidencia ángulo = reflexión ángulo.' } },
+      { q: { es: 'La imagen en un espejo plano es…', gn: 'Espejo plano-pe imagen…' }, options: [{ es: 'Virtual y del mismo tamaño', gn: 'Virtual ha peteĩ tamaño' }, { es: 'Real e invertida', gn: 'Real ha ojere' }, { es: 'Más grande', gn: 'Tuichave' }], a: 0, why: { es: 'Se forma detrás del espejo, igual de grande.', gn: 'Oñemoheñói espejo rapykuéri, peteĩcha tuicha.' } },
+      { q: { es: 'Un espejo cóncavo de R = 40 cm tiene f =', gn: 'Espejo cóncavo R = 40 cm, f =' }, options: [{ es: '20 cm', gn: '20 cm' }, { es: '80 cm', gn: '80 cm' }, { es: '40 cm', gn: '40 cm' }], a: 0, why: { es: 'f = R/2.', gn: 'f = R/2.' } },
+    ],
+    keywords: ['reflexion', 'espejo', 'concavo', 'convexo', 'imagen', 'foco', 'focal', 'gauss', 'fermat'],
+  },
+  {
+    id: 'refraccion', area: 'optica', icon: 'prism',
+    name: { es: 'Refracción', gn: 'Refracción' },
+    tagline: { es: 'La luz se dobla al cambiar de medio', gn: 'Tesape ijere medio okambiávo' },
+    summary: {
+      es: ['Al pasar de un medio a otro, la luz cambia de velocidad y se desvía (refracción).', 'Ley de Snell: n₁·sen θ₁ = n₂·sen θ₂.', 'El prisma separa la luz blanca en colores (dispersión); un dioptrio plano hace que el fondo de la pileta parezca más cerca.'],
+      gn: ['Ohasávo peteĩ medio-gui ambuépe, tesape okambia velocidad ha ijere (refracción).', 'Snell ley: n₁·sen θ₁ = n₂·sen θ₂.', 'Prisma omboja’o tesape morotĩ sa’y-kuérape (dispersión); dioptrio plano ojapo pileta ypy ojehecha hi’aguĩve.'],
+    },
+    formulas: [
+      { f: 'n_{1} · sen θ_{1} = n_{2} · sen θ_{2}', es: 'Ley de Snell.', gn: 'Snell ley.' },
+      { f: 'sen θ_{c} = n_{2} / n_{1}', es: 'Ángulo crítico (reflexión total).', gn: 'Ángulo crítico (reflexión total).' },
+    ],
+    example: { es: 'Una bombilla en el vaso de tereré parece quebrada en la superficie del agua.', gn: 'Bombilla tereré vaso-pe ojehecha ipe’ẽva y ape ári.' },
+    mistake: { es: 'Medir los ángulos desde la superficie en vez de desde la normal.', gn: 'Ñamedi ángulo superficie-gui normal-gui rangue.' },
+    sim: { type: 'optics', mode: 'snell' },
+    practice: ['refr-snell', 'refr-critical', 'refr-index'],
+    quiz: [
+      { q: { es: 'Al pasar del aire al agua, el rayo se acerca…', gn: 'Aire-gui ýpe ohasávo, rayo oñemboja…' }, options: [{ es: 'A la normal', gn: 'Normal-re' }, { es: 'A la superficie', gn: 'Superficie-re' }, { es: 'No se desvía nunca', gn: 'Ndojereiri araka’eve' }], a: 0, why: { es: 'Entra en un medio más refringente (n mayor).', gn: 'Oike medio n tuichavévape.' } },
+      { q: { es: 'La descomposición de la luz blanca en un prisma se llama…', gn: 'Tesape morotĩ ñemboja’o prisma-pe héra…' }, options: [{ es: 'Dispersión', gn: 'Dispersión' }, { es: 'Reflexión', gn: 'Reflexión' }, { es: 'Difracción', gn: 'Difracción' }], a: 0, why: { es: 'Cada color se refracta distinto.', gn: 'Káda sa’y ojere iñambuéva.' } },
+      { q: { es: 'La reflexión total ocurre al pasar…', gn: 'Reflexión total oiko ohasávo…' }, options: [{ es: 'De un medio de n mayor a uno de n menor', gn: 'n tuichavéva guive n michĩvévape' }, { es: 'Del aire al vidrio', gn: 'Aire-gui vidrio-pe' }, { es: 'Siempre', gn: 'Akóinte' }], a: 0, why: { es: 'Así funciona la fibra óptica.', gn: 'Péicha oiko fibra óptica.' } },
+    ],
+    keywords: ['refraccion', 'snell', 'indice de refraccion', 'prisma', 'dioptrio', 'dispersion', 'reflexion total', 'angulo critico'],
+  },
+  {
+    id: 'lentes', area: 'optica', icon: 'lens',
+    name: { es: 'Lentes', gn: 'Lente' },
+    tagline: { es: 'Convergentes, divergentes y formación de imágenes', gn: 'Convergente, divergente ha imagen ñemoheñói' },
+    summary: {
+      es: ['Lente convergente (más gruesa en el centro): junta los rayos en el foco. Lupa, cámara, ojo.', 'Lente divergente (más fina en el centro): separa los rayos. Corrige la miopía.', 'Ecuación de las lentes: 1/f = 1/d₀ + 1/dᵢ. Potencia: P = 1/f (dioptrías, f en metros).'],
+      gn: ['Lente convergente (ipirĩve mbytépe): ombyaty rayo foco-pe. Lupa, cámara, tesa.', 'Lente divergente (ipire’ive mbytépe): omboja’o rayo. Ombohovái miopía.', 'Lente ecuación: 1/f = 1/d₀ + 1/dᵢ. Potencia: P = 1/f (dioptría, f metro-pe).'],
+    },
+    formulas: [
+      { f: '1/f = 1/d_{o} + 1/d_{i}', es: 'Ecuación de las lentes delgadas.', gn: 'Lente delgada ecuación.' },
+      { f: 'A = −d_{i} / d_{o}', es: 'Aumento.', gn: 'Aumento.' },
+      { f: 'P = 1 / f', es: 'Potencia en dioptrías (f en m).', gn: 'Potencia dioptría-pe (f m-pe).' },
+    ],
+    example: { es: 'Con una lupa se puede concentrar la luz del sol en un punto muy caliente: el foco.', gn: 'Lupa reheve ikatu ñambyaty kuarahy rendy peteĩ punto hakuetereívape: foco.' },
+    mistake: { es: 'Olvidar el signo: f negativa en lentes divergentes.', gn: 'Ñanderesarái signo: f negativa lente divergente-pe.' },
+    sim: { type: 'optics', mode: 'lens' },
+    practice: ['lens-image', 'lens-power', 'lens-magnification'],
+    quiz: [
+      { q: { es: 'Para corregir la miopía se usan lentes…', gn: 'Miopía ñembohovái hag̃ua ojepuru lente…' }, options: [{ es: 'Divergentes', gn: 'Divergente' }, { es: 'Convergentes', gn: 'Convergente' }, { es: 'Espejos', gn: 'Espejo' }], a: 0, why: { es: 'Separan los rayos para que enfoquen más atrás.', gn: 'Omboja’o rayo oenfoka hag̃ua tapykuevépe.' } },
+      { q: { es: 'Una lente de f = 0,5 m tiene potencia…', gn: 'Lente f = 0,5 m ipotencia…' }, options: [{ es: '2 dioptrías', gn: '2 dioptría' }, { es: '0,5 dioptrías', gn: '0,5 dioptría' }, { es: '5 dioptrías', gn: '5 dioptría' }], a: 0, why: { es: 'P = 1/0,5 = 2 D.', gn: 'P = 1/0,5 = 2 D.' } },
+      { q: { es: 'Un objeto entre el foco y una lente convergente da una imagen…', gn: 'Objeto foco ha lente convergente pa’ũme ome’ẽ imagen…' }, options: [{ es: 'Virtual y aumentada (lupa)', gn: 'Virtual ha tuichave (lupa)' }, { es: 'Real e invertida', gn: 'Real ha ojere' }, { es: 'No hay imagen', gn: 'Ndaipóri imagen' }], a: 0, why: { es: 'Así funciona la lupa.', gn: 'Péicha oiko lupa.' } },
+    ],
+    keywords: ['lente', 'lentes', 'convergente', 'divergente', 'lupa', 'dioptria', 'miopia', 'foco', 'imagen'],
+  },
+  {
+    id: 'ondas', area: 'ondas', icon: 'wave',
+    name: { es: 'Ondas', gn: 'Onda' },
+    tagline: { es: 'Período, frecuencia, longitud de onda y velocidad', gn: 'Período, frecuencia, longitud de onda ha velocidad' },
+    summary: {
+      es: ['Una onda transporta energía sin transportar materia.', 'Transversal (vibra perpendicular al avance, como una cuerda) o longitudinal (vibra en la dirección del avance, como el sonido).', 'v = λ·f: velocidad = longitud de onda × frecuencia. Fenómenos: reflexión, refracción, difracción e interferencia.'],
+      gn: ['Onda ogueraha energía materia’ỹre.', 'Transversal (oñemomýi perpendicular, cuerda ramo) térã longitudinal (oñemomýi oho gotyo, sonido ramo).', 'v = λ·f: velocidad = longitud de onda × frecuencia. Fenómeno: reflexión, refracción, difracción ha interferencia.'],
+    },
+    formulas: [
+      { f: 'v = λ · f', es: 'Ecuación fundamental de las ondas.', gn: 'Onda ecuación fundamental.' },
+      { f: 'f = 1 / T', es: 'Frecuencia (Hz) y período (s).', gn: 'Frecuencia (Hz) ha período (s).' },
+    ],
+    example: { es: 'Al tirar una piedra al lago de Ypacaraí se forman ondas circulares que llegan a la orilla.', gn: 'Ñamombo ita Ypacaraí ýpe oñemoheñói onda circular og̃uahẽva yrembe’ýpe.' },
+    mistake: { es: 'Creer que el agua viaja con la onda: solo sube y baja.', gn: 'Ñaimo’ã y oho onda ndive: ojupi ha oguejy añoite.' },
+    experiment: { es: 'Con una soga atada a una silla, sacudí más rápido: la longitud de onda se achica.', gn: 'Ñapytĩ soga apyka-re, emomýi pya’eve: longitud de onda omichĩve.' },
+    sim: { type: 'wave' },
+    practice: ['wave-speed', 'wave-lambda', 'wave-period'],
+    quiz: [
+      { q: { es: 'Si la frecuencia aumenta y la velocidad no cambia, λ…', gn: 'Frecuencia ojupi ha velocidad ndokambiái, λ…' }, options: [{ es: 'Disminuye', gn: 'Oguejy' }, { es: 'Aumenta', gn: 'Ojupi' }, { es: 'No cambia', gn: 'Ndokambiái' }], a: 0, why: { es: 'λ = v/f.', gn: 'λ = v/f.' } },
+      { q: { es: 'El sonido en el aire es una onda…', gn: 'Sonido aire-pe ha’e onda…' }, options: [{ es: 'Longitudinal y mecánica', gn: 'Longitudinal ha mecánica' }, { es: 'Transversal y electromagnética', gn: 'Transversal ha electromagnética' }, { es: 'No es onda', gn: 'Ndaha’éi onda' }], a: 0, why: { es: 'Necesita un medio y vibra en la dirección de avance.', gn: 'Oikotevẽ medio ha oñemomýi oho gotyo.' } },
+      { q: { es: 'Período de una onda de 50 Hz:', gn: 'Onda 50 Hz período:' }, options: [{ es: '0,02 s', gn: '0,02 s' }, { es: '50 s', gn: '50 s' }, { es: '0,5 s', gn: '0,5 s' }], a: 0, why: { es: 'T = 1/50.', gn: 'T = 1/50.' } },
+    ],
+    keywords: ['onda', 'ondas', 'frecuencia', 'periodo', 'longitud de onda', 'amplitud', 'transversal', 'longitudinal', 'interferencia', 'difraccion'],
+  },
+  {
+    id: 'acustica', area: 'ondas', icon: 'sound',
+    name: { es: 'Acústica: el sonido', gn: 'Acústica: sonido' },
+    tagline: { es: 'Eco, resonancia y efecto Doppler', gn: 'Eco, resonancia ha efecto Doppler' },
+    summary: {
+      es: ['El sonido es una onda mecánica longitudinal; en el aire viaja a unos 340 m/s.', 'Cualidades: intensidad (fuerte/débil), tono (agudo/grave, según la frecuencia) y timbre.', 'Eco: el sonido rebota y vuelve. Doppler: si la fuente se acerca, se oye más agudo; si se aleja, más grave.'],
+      gn: ['Sonido ha’e onda mecánica longitudinal; aire-pe oho 340 m/s rupi.', 'Cualidad: intensidad (hatã/kangy), tono (agudo/grave, frecuencia he’iháicha) ha timbre.', 'Eco: sonido opo ha ou jey. Doppler: fuente oñemboja ramo, ojehendu agudove; oñemomombyrýramo, graveve.'],
+    },
+    formulas: [
+      { f: 'd = v · t / 2', es: 'Distancia con el eco (ida y vuelta).', gn: 'Distancia eco reheve (oho ha ou).' },
+      { f: 'f′ = f · v / (v − v_{f})', es: 'Doppler: fuente que se acerca a un oyente quieto.', gn: 'Doppler: fuente oñembojáva ohendúva opytávape.' },
+    ],
+    example: { es: 'La sirena de la ambulancia suena más aguda cuando viene y más grave cuando se va.', gn: 'Ambulancia sirena ipu agudove oúramo ha graveve ohóramo.' },
+    mistake: { es: 'Olvidar dividir por 2 en el eco (el sonido va y vuelve).', gn: 'Ñanderesarái ñadividi 2 rehe eco-pe (sonido oho ha ou).' },
+    sim: { type: 'wave', mode: 'doppler' },
+    practice: ['ac-echo', 'ac-doppler', 'ac-lambda'],
+    quiz: [
+      { q: { es: 'Escuchás el eco 2 s después de gritar (340 m/s). La pared está a…', gn: 'Rehendu eco 2 s rire resapukái rire (340 m/s). Pared oĩ…' }, options: [{ es: '340 m', gn: '340 m' }, { es: '680 m', gn: '680 m' }, { es: '170 m', gn: '170 m' }], a: 0, why: { es: 'd = 340·2/2.', gn: 'd = 340·2/2.' } },
+      { q: { es: 'Un sonido agudo tiene…', gn: 'Sonido agudo oguereko…' }, options: [{ es: 'Frecuencia alta', gn: 'Frecuencia yvate' }, { es: 'Frecuencia baja', gn: 'Frecuencia karape' }, { es: 'Más amplitud', gn: 'Amplitud tuichave' }], a: 0, why: { es: 'El tono depende de la frecuencia.', gn: 'Tono odepende frecuencia-gui.' } },
+      { q: { es: '¿Puede viajar el sonido en el vacío?', gn: '¿Ikatúpa sonido oho vacío-pe?' }, options: [{ es: 'No', gn: 'Nahániri' }, { es: 'Sí, más rápido', gn: 'Héẽ, pya’eve' }, { es: 'Sí, igual', gn: 'Héẽ, peteĩcha' }], a: 0, why: { es: 'Es una onda mecánica: necesita un medio.', gn: 'Ha’e onda mecánica: oikotevẽ medio.' } },
+    ],
+    keywords: ['sonido', 'acustica', 'eco', 'sonar', 'doppler', 'resonancia', 'agudo', 'grave', 'decibel', 'timbre'],
+  },
+];

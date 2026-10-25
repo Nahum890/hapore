@@ -2,7 +2,7 @@
 // un proyecto real. Imita las reglas RLS de supabase/schema.sql para clases,
 // directorio de contactos y chat. Los datos se pierden al cerrarlo.
 // Uso: node supabase/mock-server.mjs   (escucha en el puerto 54321)
-// Ver docs/GUIA_CODEX_SERVIDOR.md.
+// Ver docs/guias/GUIA_CODEX_SERVIDOR.md.
 import http from 'node:http';
 import { randomUUID } from 'node:crypto';
 

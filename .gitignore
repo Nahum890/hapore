@@ -6,9 +6,17 @@ dev-dist/
 npm-debug.log*
 .env
 .env.*.local
+.claude/
+
+# Archivo local: copias viejas y restos que ya no se usan (no se suben).
+/_archivo/
 /modificacion propia/
-# APK (TWA): solo se versionan la configuración y la guía. La llave de firma
-# y sus contraseñas NUNCA se suben: guardalas en un lugar seguro.
+
+# Material de difusión (videos, audio, proyectos de After Effects): pesado,
+# se guarda solo en la computadora.
+/branding/
+
+# APK: solo se versiona la guía. La llave de firma, sus contraseñas y los
+# APK compilados NUNCA se suben: guardalos en un lugar seguro.
 apk/*
-!apk/twa-manifest.json
 !apk/README.md

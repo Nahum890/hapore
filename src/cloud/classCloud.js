@@ -25,7 +25,12 @@ export function buildClassContent({ config, cards, exercises, flags = null }) {
     // Banderitas del docente: con esto el progreso del alumno se agrupa igual
     // que en el panel del docente (temas y banderas propias).
     ...(flags ? { flags: { defs: flags.defs ?? [], byExercise: flags.byExercise ?? {} } } : {}),
-    config: { subtemas: config.subtemas, ejercicios: Number(config.ejercicios), flashcards: cards.length },
+    config: {
+      subtemas: config.subtemas, ejercicios: Number(config.ejercicios), flashcards: cards.length,
+      // Temas del plan MEC que eligió el docente (ids de src/curriculum/topics).
+      ...(Array.isArray(config.topics) && config.topics.length
+        ? { topics: config.topics.filter(id => typeof id === 'string' && id.length <= 40).slice(0, 60) } : {}),
+    },
     cards: cards.map(card => ({
       id: card.id, topic: card.topic ?? 'Movimiento Parabólico', frente_es: card.frente_es ?? card.front ?? '',
       dorso_concepto: card.dorso_concepto ?? card.back ?? '', formula: card.formula ?? '', ...(card.custom ? { custom: true } : {}),

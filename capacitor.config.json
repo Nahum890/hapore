@@ -1,0 +1,11 @@
+{
+  "appId": "com.kyreydevs.pyfisia",
+  "appName": "PyFis IA",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "backgroundColor": "#0c1527"
+  }
+}
