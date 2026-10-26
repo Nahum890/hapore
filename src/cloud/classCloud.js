@@ -54,7 +54,7 @@ const PANEL_FIELDS = ['solved', 'topic_stats', 'error_summary'];
 const isMissingColumn = error => /column|schema cache|PGRST20/i.test(String(error?.message ?? ''));
 
 export async function listTeacherClasses() {
-  const query = members => rest(session => `classes?select=id,code,title,created_at,config:content->config,class_members(${members})&teacher_id=eq.${session.userId}&order=created_at.desc`);
+  const query = members => rest(session => `classes?select=id,code,title,created_at,config:content->config,class_members(${members})&teacher_id=eq.${encodeURIComponent(session.userId)}&order=created_at.desc`);
   try {
     return await query(`${MEMBER_COLUMNS},topic_stats,solved,error_summary`);
   } catch (error) {
@@ -89,7 +89,9 @@ export async function downloadClass({ code, displayName, avatar, phone, email })
     p_phone: phone ?? null, p_email: email ?? null,
   });
   const row = Array.isArray(rows) ? rows[0] : rows;
-  if (!row?.class_id) throw new Error('No se pudo descargar la clase.');
+  // La base devuelve 0 filas (sin error) para un código inexistente: así el
+  // intento queda contado para el límite anti fuerza bruta.
+  if (!row?.class_id) throw new Error('Código de clase inexistente.');
   const pkg = {
     classId: row.class_id, code: row.code, title: row.title,
     teacherId: row.teacher_id, teacherName: row.teacher_name, teacherAvatar: row.teacher_avatar,
@@ -120,7 +122,7 @@ export async function leaveCloudClass() {
   removeKey(PENDING_KEY);
   if (!pkg || !isCloudConfigured()) return;
   try {
-    await rest(session => `class_members?class_id=eq.${pkg.classId}&student_id=eq.${session.userId}`, { method: 'DELETE' });
+    await rest(session => `class_members?class_id=eq.${encodeURIComponent(pkg.classId)}&student_id=eq.${encodeURIComponent(session.userId)}`, { method: 'DELETE' });
   } catch {
     // Sin conexión: la clase ya se quitó de este dispositivo; el docente la verá hasta que vuelva a sincronizar.
   }
@@ -162,7 +164,7 @@ export function getPendingProgress() {
 export async function flushProgress() {
   const pending = getPendingProgress();
   if (!pending || !isCloudConfigured()) return { status: pending ? 'pending' : 'idle' };
-  const send = stats => rest(session => `class_members?class_id=eq.${pending.classId}&student_id=eq.${session.userId}`, {
+  const send = stats => rest(session => `class_members?class_id=eq.${encodeURIComponent(pending.classId)}&student_id=eq.${encodeURIComponent(session.userId)}`, {
     method: 'PATCH',
     body: { ...stats, last_sync: new Date().toISOString() },
     headers: { Prefer: 'return=minimal' },

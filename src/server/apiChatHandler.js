@@ -3,6 +3,16 @@ import { sanitizeMarkup } from '../utils/validation.js';
 
 const DAILY_LIMIT = 15;
 const BURST_LIMIT = 5;
+// Pistas, evaluación del cuestionario y diagnóstico no gastan las 15 consultas
+// del chat libre, pero también tienen tope: antes llegaban a Gemini sin límite
+// y cualquiera podía usar /api/chat como proxy gratuito.
+const AUX_DAILY_LIMIT = 80;
+const AUX_BURST_LIMIT = 12;
+// Tope por dirección IP (por instancia), además de la cuota por usuario: frena
+// a quien crea sesiones anónimas nuevas para saltarse la cuota. Es generoso
+// porque un aula entera puede salir a internet con la misma IP.
+const IP_DAILY_LIMIT = 400;
+const IP_BURST_LIMIT = 40;
 const MAX_BODY_BYTES = 12000;
 // Una foto de ejercicio pesa mucho más que una consulta de texto: se admite
 // un cuerpo más grande solo para ese caso, ya normalizeChatImage() en el
@@ -12,15 +22,25 @@ const IMAGE_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 const SERVER_TIMEOUT_MS = 18000;
 const FALLBACK_MODEL = 'gemini-flash-latest';
 
+// Primeros bytes de cada formato: el tipo declarado tiene que coincidir con el
+// contenido real (antes pasaba cualquier texto, incluso "====").
+const IMAGE_SIGNATURES = {
+  'image/jpeg': bytes => bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff,
+  'image/png': bytes => bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47,
+  'image/webp': bytes => bytes.toString('ascii', 0, 4) === 'RIFF' && bytes.toString('ascii', 8, 12) === 'WEBP',
+};
+
 /** Valida `{ mimeType, data }` ya separados por el cliente (ver
  * ai/LocalAIProvider.js normalizeChatImage). Nunca confía en el tamaño
- * declarado: mide el base64 real. */
+ * declarado: mide el base64 real y revisa que los bytes sean de esa imagen. */
 function validImage(image) {
   if (!image || typeof image !== 'object') return null;
   const mimeType = String(image.mimeType ?? '');
   const data = String(image.data ?? '');
   if (!IMAGE_MIME_TYPES.has(mimeType)) return null;
-  if (!data || data.length > 900_000 || !/^[a-z0-9+/=]+$/i.test(data)) return null;
+  if (!data || data.length > 900_000 || data.length % 4 !== 0 || !/^[A-Za-z0-9+/]+={0,2}$/.test(data)) return null;
+  const head = Buffer.from(data.slice(0, 24), 'base64');
+  if (head.length < 4 || !IMAGE_SIGNATURES[mimeType](head)) return null;
   return { mimeType, data };
 }
 
@@ -62,7 +82,11 @@ function normalizeContext(raw = {}) {
   };
 }
 
-function requestAddress(req) {
+// Las cabeceras x-real-ip / x-forwarded-for solo son confiables detrás de un
+// proxy que las reescribe (Vercel). En otro servidor cualquiera las inventa y
+// rota la IP para saltarse los límites, así que se usa la del socket.
+function requestAddress(req, trustProxy = true) {
+  if (!trustProxy) return req.socket?.remoteAddress ?? 'unknown';
   const real = req.headers?.['x-real-ip'];
   if (typeof real === 'string' && real.trim()) return real.trim().slice(0, 80);
   const forwarded = req.headers?.['x-forwarded-for'];
@@ -70,7 +94,7 @@ function requestAddress(req) {
   return req.socket?.remoteAddress ?? 'unknown';
 }
 
-function createInstanceQuota() {
+function createInstanceQuota({ daily = DAILY_LIMIT, burst = BURST_LIMIT } = {}) {
   const usage = new Map();
   return function consume(address, now = Date.now()) {
     const day = localDay(new Date(now));
@@ -79,7 +103,7 @@ function createInstanceQuota() {
     const next = !current || current.day !== day
       ? { day, count: 0, minute, burst: 0 }
       : current.minute === minute ? current : { ...current, minute, burst: 0 };
-    if (next.count >= DAILY_LIMIT || next.burst >= BURST_LIMIT) return false;
+    if (next.count >= daily || next.burst >= burst) return false;
     next.count += 1;
     next.burst += 1;
     usage.set(address, next);
@@ -106,9 +130,7 @@ async function validateSupabaseSession(req, options, fetchImpl, signal) {
   return { headers };
 }
 
-async function consumeSupabaseQuota(req, options, fetchImpl, signal) {
-  const session = await validateSupabaseSession(req, options, fetchImpl, signal);
-  if (session?.status) return session;
+async function consumeSupabaseQuota(session, options, fetchImpl, signal) {
   const response = await fetchImpl(`${options.supabaseUrl}/rest/v1/rpc/consume_tutor_query`, {
     method: 'POST', headers: session.headers, body: JSON.stringify({ p_usage_date: localDay() }), signal,
   });
@@ -119,11 +141,30 @@ async function consumeSupabaseQuota(req, options, fetchImpl, signal) {
   return null;
 }
 
+// Cuota de pistas/evaluaciones (supabase/migrations/20261026_tutor_quota_fix.sql).
+// Si esa migración todavía no se aplicó (404), se usa el límite por instancia.
+async function consumeSupabaseAuxQuota(session, options, fetchImpl, signal, fallback) {
+  const response = await fetchImpl(`${options.supabaseUrl}/rest/v1/rpc/consume_tutor_quota`, {
+    method: 'POST', headers: session.headers, body: JSON.stringify({ p_usage_date: localDay(), p_kind: 'aux' }), signal,
+  });
+  if (response.status === 404) {
+    await response.body?.cancel?.();
+    return fallback() ? null : { status: 429, body: { error: 'Se alcanzó el límite diario de ayudas del tutor online.' } };
+  }
+  if (!response.ok) return { status: 503, body: { error: 'Falta aplicar la migración de cuota del tutor en Supabase.' } };
+  const rows = await response.json();
+  const quota = Array.isArray(rows) ? rows[0] : rows;
+  if (!quota || quota.allowed !== true) return { status: 429, body: { error: 'Se alcanzó el límite diario de ayudas del tutor online.' } };
+  return null;
+}
+
 export function createApiChatHandler(apiKey, primaryModel, options = {}) {
   const fetchImpl = options.fetch ?? fetch;
   const quotaUrl = String(options.supabaseUrl ?? '').replace(/\/+$/, '');
   const quotaKey = options.supabaseAnonKey ?? '';
   const fallbackQuota = options.consumeQuota ?? createInstanceQuota();
+  const auxQuota = options.consumeAuxQuota ?? createInstanceQuota({ daily: AUX_DAILY_LIMIT, burst: AUX_BURST_LIMIT });
+  const addressGuard = options.addressGuard ?? createInstanceQuota({ daily: IP_DAILY_LIMIT, burst: IP_BURST_LIMIT });
   const models = [...new Set([primaryModel || 'gemini-3.8-flash', FALLBACK_MODEL])];
   const textFrom = data => data?.candidates?.[0]?.content?.parts?.filter(part => !part.thought).map(part => part.text).filter(Boolean).join('') ?? '';
 
@@ -135,6 +176,16 @@ export function createApiChatHandler(apiKey, primaryModel, options = {}) {
     if (!origin || !corsOrigins.length || !(corsOrigins.includes('*') || corsOrigins.includes(origin))) return {};
     return { 'Access-Control-Allow-Origin': origin, 'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept', 'Access-Control-Allow-Methods': 'POST, OPTIONS', Vary: 'Origin' };
   };
+  // Una página de otro sitio puede mandar un POST "simple" (sin preflight) y
+  // gastar la cuota de Gemini aunque no lea la respuesta. Si el navegador
+  // declara un origen, tiene que ser este mismo sitio o uno de CORS_ORIGINS.
+  const originAllowed = req => {
+    const origin = req.headers?.origin;
+    if (!origin) return true;
+    if (corsOrigins.includes('*') || corsOrigins.includes(origin)) return true;
+    try { return new URL(origin).host === String(req.headers?.host ?? ''); } catch { return false; }
+  };
+  const trustProxy = options.trustProxy ?? true;
 
   return async function handle(req, res) {
     const cors = corsHeadersFor(req);
@@ -144,6 +195,7 @@ export function createApiChatHandler(apiKey, primaryModel, options = {}) {
     };
     if (req.method === 'OPTIONS' && Object.keys(cors).length) { res.writeHead(204, cors); res.end(); return; }
     if (req.method !== 'POST') { json(405, { error: 'Método no permitido.' }, { Allow: 'POST' }); return; }
+    if (!originAllowed(req)) { json(403, { error: 'Origen no permitido.' }); return; }
     if (!apiKey) { json(503, { error: 'Tutor online sin configurar.' }); return; }
 
     const controller = new AbortController();
@@ -158,11 +210,18 @@ export function createApiChatHandler(apiKey, primaryModel, options = {}) {
         if (Buffer.byteLength(raw, 'utf8') > MAX_IMAGE_BODY_BYTES) { json(413, { error: 'Consulta demasiado extensa.' }); return; }
         body = req.body;
       } else {
+        // La lectura también respeta el tiempo límite: un cliente que manda el
+        // cuerpo de a un byte (slowloris) ya no deja la función colgada.
         let raw = '', bytes = 0;
-        for await (const chunk of req) {
-          bytes += chunk.length;
-          if (bytes > MAX_IMAGE_BODY_BYTES) { json(413, { error: 'Consulta demasiado extensa.' }); return; }
-          raw += chunk;
+        const iterator = req[Symbol.asyncIterator]();
+        const aborted = new Promise(resolve => controller.signal.addEventListener('abort', () => resolve({ aborted: true }), { once: true }));
+        for (;;) {
+          const step = await Promise.race([iterator.next(), aborted]);
+          if (step.aborted) { json(408, { error: 'La consulta tardó demasiado en llegar.' }); req.destroy?.(); return; }
+          if (step.done) break;
+          bytes += step.value.length;
+          if (bytes > MAX_IMAGE_BODY_BYTES) { json(413, { error: 'Consulta demasiado extensa.' }); req.destroy?.(); return; }
+          raw += step.value;
         }
         try { body = JSON.parse(raw); } catch { json(400, { error: 'La consulta no tiene un formato válido.' }); return; }
       }
@@ -174,16 +233,21 @@ export function createApiChatHandler(apiKey, primaryModel, options = {}) {
       if (!image && Buffer.byteLength(JSON.stringify(body), 'utf8') > MAX_BODY_BYTES) { json(413, { error: 'Consulta demasiado extensa.' }); return; }
       const context = normalizeContext({ ...body.context, message: body.context.message ?? body.message });
       if (!context.message) { json(400, { error: 'Escribí una pregunta antes de enviar.' }); return; }
-      let quotaError;
-      if (quotaUrl && quotaKey) {
+      // Toda consulta que llega a Gemini descuenta de alguna cuota: el chat libre
+      // y las fotos de las 15 diarias; pistas, diagnóstico y cuestionario de la
+      // cuota "aux". Nada pasa sin límite.
+      const kind = image || context.tipo === 'charla_libre' ? 'chat' : 'aux';
+      const address = requestAddress(req, trustProxy);
+      let quotaError = addressGuard(address)
+        ? null
+        : { status: 429, body: { error: 'Demasiadas consultas desde esta red. Probá de nuevo en un rato.' } };
+      if (!quotaError && quotaUrl && quotaKey) {
         const quotaOptions = { supabaseUrl: quotaUrl, supabaseAnonKey: quotaKey };
-        if (context.tipo === 'charla_libre') {
-          quotaError = await consumeSupabaseQuota(req, quotaOptions, fetchImpl, controller.signal);
-        } else {
-          const session = await validateSupabaseSession(req, quotaOptions, fetchImpl, controller.signal);
-          quotaError = session?.status ? session : null;
-        }
-      } else if (context.tipo === 'charla_libre' && !fallbackQuota(requestAddress(req))) {
+        const session = await validateSupabaseSession(req, quotaOptions, fetchImpl, controller.signal);
+        if (session?.status) quotaError = session;
+        else if (kind === 'chat') quotaError = await consumeSupabaseQuota(session, quotaOptions, fetchImpl, controller.signal);
+        else quotaError = await consumeSupabaseAuxQuota(session, quotaOptions, fetchImpl, controller.signal, () => auxQuota(address));
+      } else if (!quotaError && !(kind === 'chat' ? fallbackQuota(address) : auxQuota(address))) {
         quotaError = { status: 429, body: { error: 'Se alcanzó el límite de consultas de este dispositivo o red.' } };
       }
       if (quotaError) { json(quotaError.status, quotaError.body); return; }

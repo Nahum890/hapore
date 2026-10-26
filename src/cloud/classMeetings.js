@@ -19,6 +19,18 @@ export function validateMeetingInput({ classId, title, description = '', startsA
   return { classId, title: cleanTitle, description: cleanDescription, startsAt: new Date(timestamp).toISOString(), meetUrl: parsed.toString() };
 }
 
+/** Enlace de Meet que se puede abrir: se vuelve a comprobar al mostrarlo,
+ * porque la fila llega de la nube y no se confía solo en el cliente que la creó. */
+export function safeMeetUrl(value) {
+  try {
+    const parsed = new URL(String(value ?? ''));
+    return parsed.protocol === 'https:' && parsed.hostname === 'meet.google.com' && /^\/[a-z0-9-]{6,40}$/i.test(parsed.pathname)
+      ? parsed.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function listClassMeetings(classId, { from = new Date().toISOString(), limit = 40 } = {}) {
   if (!classId) return [];
   const safeLimit = Math.max(1, Math.min(100, Math.floor(Number(limit) || 40)));

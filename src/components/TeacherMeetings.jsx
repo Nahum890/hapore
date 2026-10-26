@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { createClassMeeting, deleteClassMeeting, listClassMeetings } from '../cloud/classMeetings.js';
+import { createClassMeeting, deleteClassMeeting, listClassMeetings, safeMeetUrl } from '../cloud/classMeetings.js';
 import { listTeacherClasses } from '../cloud/classCloud.js';
 import { isCloudConfigured } from '../cloud/cloudClient.js';
 import { useTranslation } from '../i18n/LanguageProvider.jsx';
@@ -105,7 +105,7 @@ export default function TeacherMeetings() {
     <div className="meeting-list"><h3>{t('meetings.upcoming')}</h3>
       {meetings.length ? meetings.map(meeting => <article className="meeting-card" key={meeting.id}>
         <div><strong>{meeting.title}</strong><time dateTime={meeting.starts_at}>{localDateTime(meeting.starts_at, language)}</time>{meeting.description && <p>{meeting.description}</p>}</div>
-        <div className="meeting-card-actions"><a className="btn btn-secondary" href={meeting.meet_url} target="_blank" rel="noreferrer">{t('meetings.open')}</a><button type="button" className="btn btn-text" onClick={() => cancelMeeting(meeting.id)}>{t('meetings.cancel')}</button></div>
+        <div className="meeting-card-actions">{safeMeetUrl(meeting.meet_url) && <a className="btn btn-secondary" href={safeMeetUrl(meeting.meet_url)} target="_blank" rel="noreferrer">{t('meetings.open')}</a>}<button type="button" className="btn btn-text" onClick={() => cancelMeeting(meeting.id)}>{t('meetings.cancel')}</button></div>
       </article>) : <p className="field-help">{t('meetings.empty')}</p>}
     </div>
   </section>;

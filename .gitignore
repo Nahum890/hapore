@@ -20,3 +20,7 @@ npm-debug.log*
 # APK compilados NUNCA se suben: guardalos en un lugar seguro.
 apk/*
 !apk/README.md
+
+# Informes de seguridad con detalles de vulnerabilidades: el repositorio es
+# público, así que se guardan solo en la computadora.
+/auditoria-privada/

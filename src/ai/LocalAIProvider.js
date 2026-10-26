@@ -9,7 +9,10 @@ const RETRY_STATUS = new Set([408, 429, 500, 502, 503, 504]);
 // Vacío = mismo servidor que la app (PWA o APK tipo TWA publicado en HTTPS).
 // Si la app se empaqueta con los archivos dentro del APK (Capacitor), definí
 // VITE_API_BASE_URL=https://tu-app.vercel.app para llegar al /api/chat público.
-const API_BASE = (() => { try { return String(import.meta.env?.VITE_API_BASE_URL ?? '').replace(/\/+$/, ''); } catch { return ''; } })();
+// Acceso directo (sin "?."): así Vite reemplaza solo esta variable. Con
+// `import.meta.env?.X` o `import.meta.env` suelto, Vite metía en el bundle
+// TODAS las VITE_* (en Vercel: autor del commit, rama, id del repo...).
+const API_BASE = (() => { try { return String(import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, ''); } catch { return ''; } })();
 const MAX_WAIT_MS = 15000;
 const aborted = () => new DOMException('Tiempo de espera agotado', 'AbortError');
 const safeText = (value, limit) => String(value ?? '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').trim().slice(0, limit);

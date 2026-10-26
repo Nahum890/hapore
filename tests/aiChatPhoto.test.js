@@ -24,7 +24,9 @@ async function callApi(body, fetchModel) {
   return res;
 }
 
-const TINY_IMAGE = { mimeType: 'image/jpeg', data: 'QUJDREVGRw==' }; // "ABCDEFG" en base64
+// Cabecera real de un JPEG (FF D8 FF E0 … "JFIF"): el servidor ahora revisa los
+// primeros bytes y rechaza texto disfrazado de imagen.
+const TINY_IMAGE = { mimeType: 'image/jpeg', data: '/9j/4AAQSkZJRg==' };
 
 test('una foto válida se manda a Gemini como inlineData junto con el texto', async () => {
   let upstreamPayload;

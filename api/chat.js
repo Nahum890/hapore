@@ -12,6 +12,8 @@ const handler = createApiChatHandler(
     supabaseAnonKey: process.env.SUPABASE_ANON_KEY ?? process.env.VITE_SUPABASE_ANON_KEY ?? '',
     // Solo si la app corre desde otro origen (APK con archivos empaquetados).
     corsOrigins: process.env.CORS_ORIGINS ?? '',
+    // Solo en Vercel las cabeceras de IP las pone la plataforma.
+    trustProxy: Boolean(process.env.VERCEL),
   },
 );
 

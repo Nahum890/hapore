@@ -44,6 +44,8 @@ export default defineConfig(({ mode }) => {
       apiChatPlugin(apiKey, primaryModel, {
         supabaseUrl: env.SUPABASE_URL ?? env.VITE_SUPABASE_URL ?? '',
         supabaseAnonKey: env.SUPABASE_ANON_KEY ?? env.VITE_SUPABASE_ANON_KEY ?? '',
+        // Servidor local: la IP sale del socket, nunca de cabeceras inventables.
+        trustProxy: false,
       }),
       VitePWA({
         // En el APK (Capacitor) todos los archivos ya van dentro de la app:

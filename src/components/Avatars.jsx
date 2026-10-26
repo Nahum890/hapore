@@ -130,7 +130,9 @@ function Dron() {
 const RENDERERS = { sol: Sol, rio: Rio, selva: Selva, tierra: Tierra, cielo: Cielo, yaguarete: Yaguarete, guacamayo: Guacamayo, tatu: Tatu, cohete: Cohete, atomo: Atomo, pelota: Pelota, dron: Dron };
 const LETTER_COLORS = [['#4dabf7', '#1c7ed6'], ['#63e6be', '#0ca678'], ['#ffa94d', '#e8590c'], ['#b197fc', '#7048e8'], ['#ff8787', '#e03131'], ['#ffd43b', '#f08c00']];
 
-export const isPhotoAvatar = id => typeof id === 'string' && /^data:image\/(jpeg|png|webp);base64,/.test(id);
+// Los avatares también llegan de la nube (directorio de la clase): se exige
+// un data URL completo y chico, nunca una dirección externa.
+export const isPhotoAvatar = id => typeof id === 'string' && id.length <= 200_000 && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(id);
 
 /** Inicial del nombre sobre un color estable (siempre el mismo para el mismo nombre). */
 function LetterAvatar({ name }) {

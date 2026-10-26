@@ -1,5 +1,6 @@
 import { getCloudSession, rest } from './cloudClient.js';
 import { readJSON, writeJSON } from '../utils/storage.js';
+import { isSafeImageDataUrl } from '../utils/imageData.js';
 
 // Chat de la clase sobre la tabla `messages` de Supabase (ver
 // supabase/schema.sql). recipient_id null = chat grupal. Las reglas de quién
@@ -38,7 +39,7 @@ export function validateMessage({ kind = 'text', body = '', payload = null }) {
   const text = String(body ?? '').trim();
   if (text.length > MAX_BODY) throw new Error(`El mensaje es muy largo (máximo ${MAX_BODY} caracteres).`);
   if (kind === 'text' && !text) throw new Error('Escribí un mensaje.');
-  if (kind === 'image' && !/^data:image\/(jpeg|png|webp);base64,/.test(payload?.dataUrl ?? '')) throw new Error('La imagen no es válida.');
+  if (kind === 'image' && !isSafeImageDataUrl(payload?.dataUrl, 900_000)) throw new Error('La imagen no es válida.');
   if (kind === 'lesson' && !(payload?.lesson?.slides?.length > 0)) throw new Error('La clase no tiene diapositivas.');
   if (kind === 'activity') {
     const singleExercise = Boolean(payload?.exercise?.id);

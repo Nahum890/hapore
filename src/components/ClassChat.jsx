@@ -16,7 +16,7 @@ import { getLessons } from '../utils/lessons.js';
 import { exercises as catalogExercises, localizeCatalogItem } from '../data/catalogs.js';
 import { getCustomExercises } from '../utils/customExercises.js';
 import { useTranslation } from '../i18n/LanguageProvider.jsx';
-import { imageFileToDataUrl } from '../utils/imageData.js';
+import { imageFileToDataUrl, isSafeImageDataUrl } from '../utils/imageData.js';
 import { readJSON, writeJSON } from '../utils/storage.js';
 
 const POLL_MS = 4000;
@@ -99,15 +99,17 @@ function ActivityPacketDialog({ activity, onClose, onSolve }) {
   </dialog>;
 }
 
-function MessageContent({ message, onOpenLesson, onOpenActivity }) {
+function MessageContent({ message, onOpenLesson, onOpenActivity, onOpenActivityPacket }) {
   const { kind, body, payload } = message;
   // La actividad viaja sin traducir; cada alumno la ve en su idioma.
   const { language, t } = useTranslation();
   const packet = kind === 'activity' ? payload?.activity : null;
   const activity = kind === 'activity' && payload?.exercise ? localizeCatalogItem(payload.exercise, language) : null;
+  // Solo data URL de imagen: nunca `javascript:` ni enlaces externos.
+  const imageUrl = kind === 'image' && isSafeImageDataUrl(payload?.dataUrl) ? payload.dataUrl : null;
   return <>
-    {kind === 'image' && (payload?.dataUrl
-      ? <a href={payload.dataUrl} target="_blank" rel="noreferrer" className="chat-image-link"><img className="chat-image" src={payload.dataUrl} alt={body || t('chat.imageAlt')} /></a>
+    {kind === 'image' && (imageUrl
+      ? <a href={imageUrl} target="_blank" rel="noreferrer" className="chat-image-link"><img className="chat-image" src={imageUrl} alt={body || t('chat.imageAlt')} /></a>
       : <p className="chat-image-missing">{t('chat.imageOffline')}</p>)}
     {kind === 'lesson' && <div className="chat-attachment">
       <span className="panel-eyebrow">{t('chat.lesson')}</span>

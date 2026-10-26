@@ -3,6 +3,16 @@
 // del chat). Se reduce en el navegador con un <canvas>; nunca se guarda el
 // archivo original.
 
+/** Data URL de imagen que se puede mostrar sin riesgo (JPEG, PNG o WebP en
+ * base64). Todo lo que llega de la nube pasa por acá antes de ir a un src o
+ * href: un "docente" malicioso podría mandar `javascript:…` o un enlace de
+ * rastreo saltándose la app. */
+export function isSafeImageDataUrl(value, maxChars = 1_000_000) {
+  return typeof value === 'string'
+    && value.length <= maxChars
+    && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(value);
+}
+
 function loadImage(file) {
   return new Promise((resolve, reject) => {
     if (!file || !/^image\//.test(file.type)) { reject(new Error('Elegí un archivo de imagen (JPG, PNG o WebP).')); return; }

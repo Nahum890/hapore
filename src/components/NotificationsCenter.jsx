@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from '../i18n/LanguageProvider.jsx';
+import { safeMeetUrl } from '../cloud/classMeetings.js';
 
 function formatDateTime(value, language) {
   const date = new Date(value);
@@ -31,7 +32,7 @@ export default function NotificationsCenter({ open, onClose, onOpenMessages, mes
       <section className="notifications-section" aria-labelledby="notifications-meetings-title">
         <h3 id="notifications-meetings-title">{t('notifications.meetings')}</h3>
         {upcomingMeetings.length ? <ul className="notifications-list">
-          {upcomingMeetings.map(item => <li key={item.id} className="notification-meeting-item"><div><strong>{item.title}</strong><small>{item.classTitle} · {formatDateTime(item.starts_at, language)}</small>{item.description && <p>{item.description}</p>}</div><a className="btn btn-primary" href={item.meet_url} target="_blank" rel="noreferrer">{t('notifications.joinMeet')}</a></li>)}
+          {upcomingMeetings.map(item => <li key={item.id} className="notification-meeting-item"><div><strong>{item.title}</strong><small>{item.classTitle} · {formatDateTime(item.starts_at, language)}</small>{item.description && <p>{item.description}</p>}</div>{safeMeetUrl(item.meet_url) && <a className="btn btn-primary" href={safeMeetUrl(item.meet_url)} target="_blank" rel="noreferrer">{t('notifications.joinMeet')}</a>}</li>)}
         </ul> : <p className="field-help">{t('notifications.noMeetings')}</p>}
       </section>
       <footer className="notifications-footer"><button type="button" className="btn btn-secondary" onClick={onClose}>{t('common.close')}</button></footer>
