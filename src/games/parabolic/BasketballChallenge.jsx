@@ -93,7 +93,8 @@ export default function BasketballChallenge({ langKey = 'gn-jopara', onProgress 
     planned.hasUserSpeed = hasValidSpeed;
     planned.userSpeed = hasValidSpeed ? numCurrentSpeed : null;
     return planned;
-  }, [level, angle, hasValidSpeed, numCurrentSpeed]);
+    // El viento y la temperatura también cambian el vuelo de vista previa.
+  }, [level, angle, hasValidSpeed, numCurrentSpeed, effectiveWind, temperature]);
 
   // La simulación solo usa el vuelo lanzado cuando no está en reposo
   const flight = (phase !== 'idle' && activeFlight) ? activeFlight : idleFlight;
@@ -193,7 +194,7 @@ export default function BasketballChallenge({ langKey = 'gn-jopara', onProgress 
     const windIsAnimated = Math.abs(Number(flight.environment?.wind) || 0) > 0.05
       && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     if (phase === 'flying' || windIsAnimated) {
-      const durationMs = Math.min(3500, Math.max(1800, flight.duration * 750));
+      const durationMs = Math.min(3500, Math.max(1800, (flight.animationDuration ?? flight.duration) * 750));
       const tick = (now) => {
         if (phase === 'flying') {
           if (startedAt === null) startedAt = now;

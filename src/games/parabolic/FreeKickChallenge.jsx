@@ -108,7 +108,7 @@ export default function FreeKickChallenge({ langKey = 'gn-jopara', onProgress })
     resize();
 
     if (phase === 'flying') {
-      const durationMs = Math.min(3800, Math.max(2000, flight.duration * 800));
+      const durationMs = Math.min(3800, Math.max(2000, (flight.animationDuration ?? flight.duration) * 800));
       const tick = (now) => {
         if (startedAt === null) startedAt = now;
         progressRef.current = Math.min(1, (now - startedAt) / durationMs);

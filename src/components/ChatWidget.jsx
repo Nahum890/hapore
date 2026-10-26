@@ -71,7 +71,7 @@ function Simulation2D({ params, scenario = 'dron' }) {
     observer.observe(canvas); resize();
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     if (phase === 'flying' && !reduced) {
-      const duration = Math.min(4000, Math.max(1800, flight.duration * 750));
+      const duration = Math.min(4000, Math.max(1800, (flight.animationDuration ?? flight.duration) * 750));
       const tick = now => {
         if (start === null) start = now;
         progressRef.current = Math.min(1, (now - start) / duration);

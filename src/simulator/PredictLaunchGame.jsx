@@ -92,7 +92,7 @@ export default function PredictLaunchGame() {
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (reduced) { progressRef.current = 1; draw(); setPhase('result'); }
       else {
-        const durationMs = Math.min(4200, Math.max(2200, flight.duration * 800));
+        const durationMs = Math.min(4200, Math.max(2200, (flight.animationDuration ?? flight.duration) * 800));
         const tick = (now) => {
           if (startedAt === null) startedAt = now;
           progressRef.current = Math.min(1, (now - startedAt) / durationMs);

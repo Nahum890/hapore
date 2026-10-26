@@ -55,7 +55,7 @@ export default function CanvasSimulator({ mission, submission }) {
     const observer = new ResizeObserver(resize);
     observer.observe(canvas); resize();
     if (phase === 'flying') {
-      const durationMs = Math.min(4200, Math.max(2200, scene.flight.duration * 800));
+      const durationMs = Math.min(4200, Math.max(2200, (scene.flight.animationDuration ?? scene.flight.duration) * 800));
       const tick = now => {
         if (startedAt === null) startedAt = now;
         progressRef.current = Math.min(1, (now - startedAt) / durationMs);

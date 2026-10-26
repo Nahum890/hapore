@@ -1,4 +1,5 @@
 import { planFlight, startingControls } from './flightPlan.js';
+import { createLaunch, maxHeight } from '../physics/projectileMotion.js';
 
 // Todo el contenido es Movimiento Parabólico: una sola fuente de física
 // (src/physics/projectileMotion.js) alimenta el simulador, sin recalcular
@@ -15,7 +16,9 @@ export const shouldRevealSimulatorAnswer = phase => phase === 'landed';
 const toRad = degrees => (degrees * Math.PI) / 180;
 const toDeg = radians => (radians * 180) / Math.PI;
 
-export function sceneForExercise(exercise, studentAnswer) {
+/** Rapidez y ángulo del vuelo que corresponde a una respuesta (la del alumno
+ * o la correcta). */
+function launchForAnswer(exercise, studentAnswer) {
   const values = exercise?.values ?? {};
   const initial = startingControls(exercise);
   const v0 = Number(values.v0);
@@ -71,11 +74,36 @@ export function sceneForExercise(exercise, studentAnswer) {
       }
     }
   }
+  return { speed, angle, gravity, y0: Number(values.y0) > 0 ? Number(values.y0) : 0 };
+}
+
+/** Dónde tiene que terminar el vuelo correcto. Se calcula con la misma física
+ * que dibuja el vuelo del alumno: antes, si el ejercicio no traía targetX, el
+ * objetivo quedaba en 35 m (valor por defecto) y una respuesta correcta caía
+ * lejos de la marca aunque el mensaje dijera "¡Correcto!". */
+function targetForExercise(exercise) {
+  const truth = launchForAnswer(exercise, exercise?.correctAnswer);
+  const ground = planFlight({ ...truth, targetX: 1 });
+  const fallbackX = Number(exercise?.targetX ?? exercise?.values?.targetDistance);
+  const targetX = Number.isFinite(ground.landingX) && ground.landingX > 0 ? ground.landingX : (fallbackX > 0 ? fallbackX : 35);
+  if (scenarioOf(exercise) !== SCENARIOS.basketball) return { targetX, targetY: 0, basket: false };
+  // Básquet: el aro va donde el vuelo correcto baja por la altura del aro
+  // (3,05 m, o más bajo si el tiro no sube tanto). Antes el aro se dibujaba a
+  // 3,05 m sobre el punto de caída y el balón pasaba por debajo.
+  const launch = createLaunch(truth.speed, truth.angle, { gravity: truth.gravity, y0: truth.y0 });
+  const peak = maxHeight(launch);
+  const hoopHeight = peak > 3.4 ? 3.05 : Math.round(Math.max(0.5, peak * 0.8) * 100) / 100;
+  const disc = launch.vy * launch.vy - 2 * launch.gravity * (hoopHeight - launch.y0);
+  const tDown = disc >= 0 ? (launch.vy + Math.sqrt(disc)) / launch.gravity : null;
+  if (!(tDown > 0) || !(launch.vx > 0)) return { targetX, targetY: 0, basket: false };
+  return { targetX: Math.round(launch.vx * tDown * 1000) / 1000, targetY: hoopHeight, basket: true };
+}
+
+export function sceneForExercise(exercise, studentAnswer) {
+  const target = targetForExercise(exercise);
   const flight = planFlight({
-    speed,
-    angle,
-    gravity,
-    targetX: exercise?.targetX ?? values.targetDistance,
+    ...launchForAnswer(exercise, studentAnswer),
+    ...target,
     obstacle: exercise?.obstacle ?? null,
   });
   return { scenario: scenarioOf(exercise), flight, measured: measureExercise(exercise, flight) };

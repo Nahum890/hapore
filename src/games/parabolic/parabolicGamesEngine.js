@@ -5,9 +5,9 @@ import {
   positionAt,
   range,
   timeOfFlight,
-  velocityAt,
 } from '../../physics/projectileMotion.js';
 import { GRAVITY } from '../../physics/formulas.js';
+import { classifyBasketballShot, timeAtX, windAcceleration, xAtTime } from '../../physics/basketballShot.js';
 
 // Retos de Básquetbol con aro suspendido a 3.05 m y diámetro de 45 cm (balón 24 cm)
 export const BASKETBALL_LEVELS = [
@@ -108,10 +108,12 @@ export const TARGET_LEVELS = [
   },
 ];
 
+// range = v0² · sen(2θ) / g (redondeado a 2 decimales). comp-2 y comp-3 tenían
+// 37.95 y 62.77: el banderín quedaba corrido respecto de donde caía el disparo.
 export const COMPLEMENTARY_LEVELS = [
   { id: 'comp-1', baseAngle: 30, expectedAngle: 60, speed: 20, gravity: 9.8, range: 35.35 },
-  { id: 'comp-2', baseAngle: 25, expectedAngle: 65, speed: 22, gravity: 9.8, range: 37.95 },
-  { id: 'comp-3', baseAngle: 40, expectedAngle: 50, speed: 25, gravity: 9.8, range: 62.77 },
+  { id: 'comp-2', baseAngle: 25, expectedAngle: 65, speed: 22, gravity: 9.8, range: 37.83 },
+  { id: 'comp-3', baseAngle: 40, expectedAngle: 50, speed: 25, gravity: 9.8, range: 62.81 },
   { id: 'comp-4', baseAngle: 15, expectedAngle: 75, speed: 24, gravity: 9.8, range: 29.39 },
 ];
 
@@ -347,84 +349,15 @@ export function evaluateBasketballShot({
     };
   }
 
+  // Misma clasificación que usa la animación (physics/basketballShot.js): el
+  // mensaje de "canasta" y lo que se ve en pantalla ya no pueden diferir.
   const launch = createLaunch(numSpeed, numAngle, { x0: 0, y0: releaseHeight, gravity });
-  const duration = timeOfFlight(launch);
-  const timeToHoop = distance / (launch.vx + numWind * 0.04);
-  const velAtHoop = velocityAt(launch, Math.min(timeToHoop, duration));
-  const isDescending = velAtHoop.vy < 0;
+  const shot = classifyBasketballShot(launch, { targetX: distance, hoopHeight, wind: numWind });
+  const { duration, timeToHoop, heightAtHoop, diffY, isDescending, result, score } = shot;
+  const collision = shot.collision ? { type: shot.collision.type, x: shot.collision.x, y: shot.collision.y } : null;
 
-  // Altura en el aro (con deriva de viento si existe)
-  const posAtHoop = positionAt(launch, Math.min(timeToHoop, duration));
-  const heightAtHoop = timeToHoop <= duration ? posAtHoop.y : 0;
-  const diffY = heightAtHoop - hoopHeight;
-
-  // Evaluación de tablero (a distance + 0.18 m)
-  const bbDist = distance + 0.18;
-  const timeToBb = bbDist / (launch.vx + numWind * 0.04);
-  const posAtBb = timeToBb <= duration ? positionAt(launch, timeToBb) : null;
-  const heightAtBb = posAtBb ? posAtBb.y : 0;
-
-  let result = 'miss';
-  let score = 0;
-  let collision = null;
-
-  if (timeToHoop > duration) {
-    result = 'short';
-    score = 0;
-  } else if (!isDescending) {
-    result = 'ascending';
-    score = 15;
-  } else if (Math.abs(diffY) <= 0.15) {
-    // 1. Canasta limpia directa (Swish)
-    result = 'swish';
-    score = 100;
-  } else if (timeToBb <= duration && heightAtBb >= 2.85 && heightAtBb <= 3.98) {
-    // 2. Colisión con tablero
-    const vyImpact = launch.vy - gravity * timeToBb;
-    const vxImpact = launch.vx + numWind * 0.04;
-    const vxReb = -0.42 * vxImpact;
-    const vyReb = 0.52 * vyImpact;
-    const tToHoopReb = 0.18 / Math.abs(vxReb);
-    const yAtHoopReb = heightAtBb + vyReb * tToHoopReb - 0.5 * gravity * tToHoopReb * tToHoopReb;
-
-    collision = { type: 'backboard', x: bbDist, y: heightAtBb };
-
-    if (heightAtBb >= 3.05 && heightAtBb <= 3.52 && yAtHoopReb >= 2.90 && yAtHoopReb <= 3.35) {
-      result = 'bank-in';
-      score = 90;
-    } else {
-      result = 'bank-miss';
-      score = 40;
-    }
-  } else {
-    // 3. Evaluar aro o fallo
-    const rfX = distance - 0.225;
-    const timeToRf = rfX / (launch.vx + numWind * 0.04);
-    const posAtRf = timeToRf <= duration ? positionAt(launch, timeToRf) : null;
-    const heightAtRf = posAtRf ? posAtRf.y : 0;
-
-    if (Math.abs(diffY) <= 0.32) {
-      result = 'rim-in';
-      score = 75;
-      collision = { type: 'rim', x: rfX, y: heightAtRf };
-    } else if (timeToRf <= duration && Math.abs(heightAtRf - hoopHeight) <= 0.22) {
-      result = 'rim-miss';
-      score = 35;
-      collision = { type: 'rim', x: rfX, y: heightAtRf };
-    } else if (diffY < -0.32) {
-      result = 'short';
-      score = 25;
-    } else {
-      result = 'high';
-      score = 25;
-    }
-  }
-
-  const basePoints = evaluateTrajectory(launch, { step: duration / 75 });
-  const points = numWind === 0 ? basePoints : basePoints.map((pt) => ({
-    ...pt,
-    x: Math.max(0, pt.x + 0.5 * (numWind * 0.04) * (pt.t * pt.t)),
-  }));
+  const accel = windAcceleration(numWind);
+  const points = evaluateTrajectory(launch, { step: duration / 75 }).map(pt => ({ ...pt, x: Math.max(0, xAtTime(launch, pt.t, accel)) }));
 
   return {
     launch,
@@ -478,14 +411,16 @@ export function evaluateFreeKickShot({
 
   const launch = createLaunch(numSpeed, numAngle, { x0: 0, y0: 0, gravity });
   const duration = timeOfFlight(launch);
-  const totalRange = range(launch);
+  // Mismo modelo de viento que la animación (aceleración horizontal constante).
+  const accel = windAcceleration(numWind);
+  const totalRange = xAtTime(launch, duration, accel);
 
-  const tBarrier = barrierDistance / (launch.vx + numWind * 0.04);
-  const barrierY = tBarrier <= duration ? positionAt(launch, tBarrier).y : 0;
+  const tBarrier = timeAtX(launch, barrierDistance, accel);
+  const barrierY = tBarrier !== null && tBarrier <= duration ? positionAt(launch, tBarrier).y : 0;
   const clearsBarrier = barrierY > barrierHeight;
 
-  const tGoal = distance / (launch.vx + numWind * 0.04);
-  const goalY = tGoal <= duration ? positionAt(launch, tGoal).y : 0;
+  const tGoal = timeAtX(launch, distance, accel);
+  const goalY = tGoal !== null && tGoal <= duration ? positionAt(launch, tGoal).y : 0;
 
   let result = 'miss';
   let score = 0;
@@ -507,11 +442,7 @@ export function evaluateFreeKickShot({
     score = 20;
   }
 
-  const basePoints = evaluateTrajectory(launch, { step: duration / 80 });
-  const points = numWind === 0 ? basePoints : basePoints.map((pt) => ({
-    ...pt,
-    x: Math.max(0, pt.x + 0.5 * (numWind * 0.04) * (pt.t * pt.t)),
-  }));
+  const points = evaluateTrajectory(launch, { step: duration / 80 }).map(pt => ({ ...pt, x: Math.max(0, xAtTime(launch, pt.t, accel)) }));
 
   return {
     launch,

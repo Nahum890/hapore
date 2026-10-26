@@ -1,4 +1,9 @@
 import { toCanvasPoint, toCanvasPoints } from './trajectory.js';
+import { BACKBOARD_BELOW_RIM, BACKBOARD_HEIGHT, BACKBOARD_OFFSET } from '../physics/basketballShot.js';
+
+// Ancho del mundo que hay que mostrar: el objetivo y todo el recorrido animado
+// (con rebotes). Los vuelos viejos sin extentX usan el punto de caída.
+const reachOf = flight => (Number.isFinite(flight.extentX) ? flight.extentX : flight.landingX);
 
 // Tres escenarios, un solo motor físico: solo cambia el dibujo (canvas 2D),
 // nunca el cálculo de la trayectoria (viene siempre de flightPlan.js).
@@ -132,7 +137,7 @@ function drawDrone(ctx, { width, height, flight, progress, phase, now, verdict, 
   const groundY = height - Math.max(34, height * .13);
   farmBackdrop(ctx, width, height, groundY);
   const originX = Math.max(34, width * .07);
-  const worldWidth = Math.max(flight.targetX, flight.landingX, 20) * 1.13;
+  const worldWidth = Math.max(flight.targetX, reachOf(flight), 20) * 1.13;
   const scale = Math.min((width - originX - 35) / worldWidth, (groundY - 55) / Math.max(flight.peakY, 7));
   const options = { scale, originX, groundY };
   const points = toCanvasPoints(flight.points, options);
@@ -287,8 +292,10 @@ function hoopTarget(ctx, x, groundY, scale, hit, hoopHeight = 3.05, collision = 
   // Altura física reglamentaria del aro FIBA / NBA: 3.05 metros
   const rimY = groundY - hoopHeight * scale;
   const rimWidth = Math.max(18, 0.45 * scale); // Diámetro reglamentario del aro: 45 cm (0.45 m)
-  const backboardX = x + rimWidth * 0.4;
-  const backboardH = Math.max(32, 1.05 * scale); // 1.05 m de alto reglamentario
+  // El tablero va exactamente donde la física calcula el rebote (antes se
+  // corría con el ancho mínimo del aro y el balón "rebotaba en el aire").
+  const backboardX = x + BACKBOARD_OFFSET * scale;
+  const backboardH = Math.max(32, BACKBOARD_HEIGHT * scale); // 1.05 m de alto reglamentario
   const backboardW = Math.max(5, 0.15 * scale);
 
   ctx.save();
@@ -311,7 +318,8 @@ function hoopTarget(ctx, x, groundY, scale, hit, hoopHeight = 3.05, collision = 
   ctx.fillStyle = 'rgba(245, 250, 255, 0.9)';
   ctx.strokeStyle = '#c0392b';
   ctx.lineWidth = 2;
-  const bbTop = rimY - backboardH * 0.65;
+  // Borde inferior 15 cm debajo del aro (2,90 m), igual que en el cálculo.
+  const bbTop = rimY + Math.max(4, BACKBOARD_BELOW_RIM * scale) - backboardH;
   roundedRect(ctx, backboardX, bbTop, backboardW, backboardH, 2, 'rgba(245, 250, 255, 0.92)');
   ctx.strokeRect(backboardX, bbTop, backboardW, backboardH);
   // Recuadro interior de puntería (59 cm x 45 cm)
@@ -447,7 +455,7 @@ function drawBasketball(ctx, { width, height, flight, progress, phase, now, verd
   court(ctx, width, height, groundY, flight.environment, language);
   if (flight.environment?.isIndoor === false) drawWindFlow(ctx, width, groundY, flight.environment.wind, now);
   const originX = Math.max(30, width * .08);
-  const worldWidth = Math.max(flight.targetX, flight.landingX, 12) * 1.2;
+  const worldWidth = Math.max(flight.targetX + 1, reachOf(flight), 12) * 1.2;
   const hoopH = flight.targetY > 0 ? flight.targetY : 3.05;
   const scale = Math.min((width - originX - 45) / worldWidth, (groundY - 55) / Math.max(flight.peakY, hoopH + 1.5, 4));
   const options = { scale, originX, groundY };
@@ -468,7 +476,10 @@ function drawBasketball(ctx, { width, height, flight, progress, phase, now, verd
 
   // Guía de mira balística interactiva en reposo
   if (phase === 'idle' && flight.launch) {
-    const launchAngleRad = (flight.launch.angle * Math.PI) / 180;
+    // createLaunch guarda el ángulo en angleDeg (launch.angle no existe: la
+    // flecha salía con NaN y el rótulo decía "NaN°").
+    const launchAngle = Number(flight.launch.angleDeg) || 0;
+    const launchAngleRad = (launchAngle * Math.PI) / 180;
     const hasSpeed = Boolean(flight.hasUserSpeed && flight.userSpeed > 0);
     const speedVal = hasSpeed ? flight.userSpeed : null;
     const arrowLen = speedVal ? Math.max(28, Math.min(60, speedVal * 3.5)) : 36;
@@ -496,7 +507,7 @@ function drawBasketball(ctx, { width, height, flight, progress, phase, now, verd
     ctx.fillStyle = '#ffffff';
     ctx.strokeStyle = '#1b2a41';
     ctx.lineWidth = 3;
-    const labelText = speedVal ? `${Math.round(flight.launch.angle)}° · ${speedVal.toFixed(1)} m/s` : `${Math.round(flight.launch.angle)}° (${labels.enterSpeed})`;
+    const labelText = speedVal ? `${Math.round(launchAngle)}° · ${speedVal.toFixed(1)} m/s` : `${Math.round(launchAngle)}° (${labels.enterSpeed})`;
     ctx.strokeText(labelText, endX + 8, endY + 3);
     ctx.fillText(labelText, endX + 8, endY + 3);
     ctx.restore();
@@ -807,7 +818,7 @@ function drawWall(ctx, { width, height, flight, progress, phase, now, verdict, h
   }
 
   const originX = Math.max(30, width * .08);
-  const worldWidth = Math.max(flight.targetX, flight.landingX, 14) * 1.15;
+  const worldWidth = Math.max(flight.targetX + (isFreeKick ? 2 : 0), reachOf(flight), 14) * 1.15;
   const scale = Math.min((width - originX - 35) / worldWidth, (groundY - 50) / Math.max(flight.peakY, 5));
   const options = { scale, originX, groundY };
   const points = toCanvasPoints(flight.points, options);
@@ -849,10 +860,15 @@ function drawWall(ctx, { width, height, flight, progress, phase, now, verdict, h
 
   if (phase !== 'idle') {
     ctx.fillStyle = 'rgba(30,65,54,.18)'; ctx.beginPath(); ctx.ellipse(current.x, groundY - 3, 9, 3, 0, 0, Math.PI * 2); ctx.fill();
+    // El centro del balón va sobre la trayectoria (antes se dibujaba 7 px más
+    // arriba y parecía pasar la barrera o caer en otro punto); solo se apoya
+    // sobre el piso para no hundirse.
+    const radius = Math.max(6, Math.min(9, width * .02));
+    const ballY = Math.min(current.y, groundY - radius);
     if (isFreeKick) {
-      soccerBall(ctx, current.x, current.y - 7, Math.max(6, Math.min(9, width * .02)), now * 0.02);
+      soccerBall(ctx, current.x, ballY, radius, now * 0.02);
     } else {
-      ball(ctx, current.x, current.y - 7, Math.max(6, Math.min(9, width * .02)), now * .01);
+      ball(ctx, current.x, ballY, radius, now * .01);
     }
   }
 

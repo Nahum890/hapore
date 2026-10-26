@@ -94,7 +94,7 @@ export default function TargetChallenge({ langKey = 'gn-jopara', onProgress }) {
     resize();
 
     if (phase === 'flying') {
-      const durationMs = Math.min(3500, Math.max(1800, flight.duration * 750));
+      const durationMs = Math.min(3500, Math.max(1800, (flight.animationDuration ?? flight.duration) * 750));
       const tick = (now) => {
         if (startedAt === null) startedAt = now;
         progressRef.current = Math.min(1, (now - startedAt) / durationMs);

@@ -49,7 +49,35 @@ test('una componente de velocidad mal calculada dibuja un vuelo distinto, no sie
   const correct = sceneForExercise(exercise, exercise.correctAnswer);
   assert.notEqual(guess90.flight.landingX, guess12.flight.landingX);
   assert.notEqual(guess12.flight.landingX, correct.flight.landingX);
-  assert.ok(Math.abs(correct.flight.landingX - correct.flight.targetX) < 0.05);
+  // Escena de básquet: la respuesta correcta tiene que entrar por el aro (antes
+  // el aro se dibujaba a 3,05 m sobre el punto de caída y el balón pasaba por
+  // debajo mientras el mensaje decía "correcto").
+  assert.equal(correct.flight.targetY, 3.05);
+  assert.ok(Math.abs(correct.flight.heightAtTarget - correct.flight.targetY) < 0.05);
+  assert.equal(correct.flight.bballOutcome, 'swish');
+  assert.equal(guess12.flight.basketSwish, false);
+  assert.equal(guess90.flight.basketSwish, false);
+});
+
+test('cada respuesta correcta termina exactamente en el objetivo dibujado', () => {
+  for (const exercise of exercises) {
+    const { flight } = sceneForExercise(exercise, exercise.correctAnswer);
+    if (exercise.scenario === 'basketball') {
+      assert.ok(flight.basketSwish, `${exercise.id}: entra al aro`);
+      const end = flight.positionAt(1);
+      assert.ok(Math.abs(end.x - flight.targetX) < 0.2, `${exercise.id}: cae debajo del aro, no lejos (${end.x} vs ${flight.targetX})`);
+      assert.ok(end.y < 1e-6, `${exercise.id}: termina en el piso`);
+    } else {
+      assert.ok(Math.abs(flight.landingX - flight.targetX) < 0.05, `${exercise.id}: ${flight.landingX} vs ${flight.targetX}`);
+      if (flight.clearsObstacle) assert.ok(Math.abs(flight.positionAt(1).x - flight.targetX) < 0.05, `${exercise.id}: la animación termina en la marca`);
+    }
+  }
+});
+
+test('un ejercicio propio sin targetX ya no pone la marca en 35 m', () => {
+  const exercise = { scenario: 'dron', values: { v0: 15, angle: 40, gravity: 9.8 }, expectedConcept: 'alcance', unit: 'm', correctAnswer: 22.61 };
+  const { flight } = sceneForExercise(exercise, exercise.correctAnswer);
+  assert.ok(Math.abs(flight.targetX - 22.61) < 0.05, String(flight.targetX));
 });
 
 test('altura, tiempo y alcance mal calculados también cambian el vuelo dibujado', () => {
