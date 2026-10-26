@@ -328,7 +328,7 @@ const messages = {
     'auth.contactNote': 'Ohecha añoite nde mbo’ehára ha nde irũnguéra clase-pe, ikatu hag̃uáicha ojokuaa.', 'auth.username': 'Nombre de usuario', 'auth.usernamePh': 'Nde usuario',
     'auth.password': 'Contraseña', 'auth.passwordNew': 'Mínimo 8 caracteres', 'auth.passwordPh': 'Nde contraseña', 'auth.show': 'Ehechauka', 'auth.hide': 'Eñomi',
     'auth.showLabel': 'Ehechauka contraseña', 'auth.hideLabel': 'Eñomi contraseña', 'auth.busy': 'Eha’arõmína…', 'auth.submitRegister': 'Ejapo che cuenta', 'auth.submitLogin': 'Eike PyFis IA-pe',
-    'auth.errDefault': 'Ndaikatúi eike. Eñeha’ã jey.', 'auth.noteCloud': 'Nde cuenta ha progreso oñeñongatu ko dispositivo-pe. Reikéramo peteĩ clase-pe, nde avance oñemondo nde mbo’ehára-pe oĩ jave internet.',
+    'auth.errDefault': 'Ndaikatúi eike. Eñeha’ã jey.', 'auth.noteCloud': 'Nde cuenta oñeñongatu nube-pe: ikatu reike oimeraẽ teléfono térã computadora-gui nde usuario ha contraseña reheve. Pe progreso oñeñongatu ko dispositivo-pe; reikéramo peteĩ clase-pe, nde avance oñemondo nde mbo’ehára-pe oĩ jave internet.',
     'auth.noteLocal': 'Umi cuenta ha progreso oñeñongatu ko dispositivo-pe añoite. Ndaipóri sincronización dispositivo-kuéra pa’ũme.',
 
     'settings.brand': 'Configuración', 'settings.closeLabel': 'Emboty configuración', 'settings.title': 'Nde dato', 'settings.requiredTitle': 'Emoĩ nde dato de contacto',
@@ -337,7 +337,7 @@ const messages = {
     'settings.uploading': 'Ombosako’i hína ta’anga…', 'settings.phone': 'Teléfono', 'settings.email': 'Correo', 'settings.errSave': 'Ndaikatúi oñeñongatu. Eñeha’ã jey.',
     'settings.geminiTitle': 'Gemini', 'settings.geminiOnline': 'Gemini ikatu oipuru internet ha ombohovái porãve. Umi consulta oñemondo servicio-pe.', 'settings.geminiLocal': 'Tutor local añoite. Gemini oñembogue ko sesión-pe.', 'settings.geminiToggle': 'Emyandy térã embogue Gemini', 'settings.geminiError': 'Ndaikatúi oñeñongatu ko preferencia. Eñeha’ã jey.',
     'settings.passwordTitle': 'Embohasa contraseña pyahu', 'settings.passwordScope': 'Ko contraseña oñemoambue ko cuenta PyFis rehe ko dispositivo-pe.', 'settings.passwordCurrent': 'Contraseña ko’ág̃agua', 'settings.passwordNew': 'Contraseña pyahu (8 letra michĩvéva)', 'settings.passwordConfirm': 'Ehai jey contraseña pyahu',
-    'settings.passwordSave': 'Eñongatu contraseña', 'settings.passwordSaved': 'Contraseña oñemoambue porã.', 'settings.passwordWrong': 'Pe contraseña ko’ág̃agua ndoikói.',
+    'settings.passwordNeedsInternet': 'Nde cuenta oĩ nube-pe: emoambue hag̃ua contraseña reikotevẽ internet.', 'settings.passwordSessionExpired': 'Nde sesión nube-pe opáma. Esẽ ha eike jey internet reheve, upéi emoambue contraseña.', 'settings.passwordSave': 'Eñongatu contraseña', 'settings.passwordSaved': 'Contraseña oñemoambue porã.', 'settings.passwordWrong': 'Pe contraseña ko’ág̃agua ndoikói.',
     'settings.passwordShort': 'Pe contraseña pyahu oguereko va’erã por lo menos 8 letra.', 'settings.passwordMismatch': 'Umi contraseña pyahu ndojojái.', 'settings.passwordUnavailable': 'Ndaikatúi oñemoambue ko contraseña ko cuenta-pe.', 'settings.passwordError': 'Ndaikatúi oñemoambue contraseña. Eñeha’ã jey.',
 
     'dash.title': 'Rendimiento clase rehegua', 'dash.eyebrow': 'PANEL DOCENTE', 'dash.noData': 'Nde temimbo’ekuéra ndojapói gueteri ejercicio. Oñepyrũ vove, ojehecháta ko’ápe umi dato.',
@@ -774,7 +774,7 @@ const messages = {
     'auth.contactNote': 'Solo los ven tu docente y tus compañeros de clase, para poder contactarte.', 'auth.username': 'Nombre de usuario', 'auth.usernamePh': 'Tu usuario',
     'auth.password': 'Contraseña', 'auth.passwordNew': 'Mínimo 8 caracteres', 'auth.passwordPh': 'Tu contraseña', 'auth.show': 'Mostrar', 'auth.hide': 'Ocultar',
     'auth.showLabel': 'Mostrar contraseña', 'auth.hideLabel': 'Ocultar contraseña', 'auth.busy': 'Un momento…', 'auth.submitRegister': 'Crear mi cuenta', 'auth.submitLogin': 'Entrar a PyFis IA',
-    'auth.errDefault': 'No se pudo acceder. Intentá de nuevo.', 'auth.noteCloud': 'La cuenta y el progreso se guardan en este dispositivo. Si te unís a una clase, tu avance se envía a tu docente cuando hay internet.',
+    'auth.errDefault': 'No se pudo acceder. Intentá de nuevo.', 'auth.noteCloud': 'Tu cuenta se guarda en la nube: podés entrar desde cualquier teléfono o computadora con tu usuario y contraseña. El progreso queda en este dispositivo; si te unís a una clase, tu avance se envía a tu docente cuando hay internet.',
     'auth.noteLocal': 'Las cuentas y el progreso se guardan únicamente en este dispositivo. Sincronización entre dispositivos no disponible.',
 
     'settings.brand': 'Configuración', 'settings.closeLabel': 'Cerrar configuración', 'settings.title': 'Tus datos', 'settings.requiredTitle': 'Completá tus datos de contacto',
@@ -783,7 +783,7 @@ const messages = {
     'settings.uploading': 'Preparando foto…', 'settings.phone': 'Teléfono', 'settings.email': 'Correo', 'settings.errSave': 'No se pudo guardar. Probá de nuevo.',
     'settings.geminiTitle': 'Gemini', 'settings.geminiOnline': 'Gemini puede usar internet para responder. Tu consulta se envía al servicio.', 'settings.geminiLocal': 'Solo se usa el tutor local; Gemini está apagado en esta pestaña.', 'settings.geminiToggle': 'Activar o desactivar Gemini', 'settings.geminiError': 'No se pudo guardar la preferencia. Probá de nuevo.',
     'settings.passwordTitle': 'Cambiar contraseña', 'settings.passwordScope': 'Esta contraseña solo cambia el acceso de tu cuenta PyFis en este dispositivo.', 'settings.passwordCurrent': 'Contraseña actual', 'settings.passwordNew': 'Nueva contraseña (mínimo 8 caracteres)', 'settings.passwordConfirm': 'Repetí la nueva contraseña',
-    'settings.passwordSave': 'Guardar contraseña', 'settings.passwordSaved': 'La contraseña se cambió correctamente.', 'settings.passwordWrong': 'La contraseña actual no coincide.',
+    'settings.passwordNeedsInternet': 'Tu cuenta está en la nube: para cambiar la contraseña necesitás internet.', 'settings.passwordSessionExpired': 'Tu sesión en la nube venció. Cerrá sesión, volvé a entrar con internet y cambiá la contraseña.', 'settings.passwordSave': 'Guardar contraseña', 'settings.passwordSaved': 'La contraseña se cambió correctamente.', 'settings.passwordWrong': 'La contraseña actual no coincide.',
     'settings.passwordShort': 'La nueva contraseña debe tener al menos 8 caracteres.', 'settings.passwordMismatch': 'Las contraseñas nuevas no coinciden.', 'settings.passwordUnavailable': 'No se puede cambiar la contraseña de esta cuenta.', 'settings.passwordError': 'No se pudo cambiar la contraseña. Probá de nuevo.',
 
     'dash.title': 'Rendimiento de la clase', 'dash.eyebrow': 'PANEL DOCENTE', 'dash.noData': 'Tus alumnos todavía no resolvieron ejercicios. Cuando empiecen, los datos van a aparecer acá.',
@@ -926,6 +926,12 @@ const ERROR_MESSAGES_GN = {
   'Elegí Alumno o Maestro.': 'Eiporavo Temimbo’e térã Mbo’ehára.',
   'Ese nombre de usuario ya existe en este dispositivo.': 'Ko nombre de usuario oĩma ko dispositivo-pe.',
   'Usuario o contraseña incorrectos.': 'Usuario térã contraseña ndoikói.',
+  'Ese nombre de usuario ya existe. Elegí otro.': 'Ko nombre de usuario oĩma. Eiporavo ambue.',
+  'Demasiados intentos seguidos. Esperá unos minutos y volvé a probar.': 'Heta jey reñeha’ã. Eha’arõmi michĩmi ha eñeha’ã jey.',
+  'Sin conexión: para entrar por primera vez en este dispositivo necesitás internet.': 'Ndaipóri internet: reike hag̃ua peteĩha jey ko dispositivo-pe reikotevẽ internet.',
+  'Tu sesión en la nube venció. Cerrá sesión y volvé a entrar con internet.': 'Nde sesión nube-pe opáma. Esẽ ha eike jey internet reheve.',
+  'Demasiados códigos incorrectos. Esperá 15 minutos y volvé a intentar.': 'Heta código ndoikóiva. Eha’arõ 15 minuto ha eñeha’ã jey.',
+  'Estás enviando mensajes muy rápido. Esperá un momento.': 'Pya’eterei remondo mensaje. Eha’arõmi.',
   'No se encontró la cuenta en este dispositivo.': 'Ndojejuhúi pe cuenta ko dispositivo-pe.',
   'Elegí un archivo de imagen (JPG, PNG o WebP).': 'Eiporavo peteĩ ta’anga (JPG, PNG térã WebP).',
   'No se pudo abrir la imagen. Probá con otra.': 'Ndaikatúi ojeike ta’angápe. Eñeha’ã ambuéva reheve.',

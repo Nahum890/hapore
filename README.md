@@ -89,7 +89,7 @@ La clave de Gemini se lee desde el servidor de desarrollo o vista previa y nunca
 
 Después de la primera carga, el service worker guarda la interfaz, los contenidos y los recursos estáticos. El tutor por reglas, las simulaciones, los ejercicios, las flashcards, el PDF y el progreso local siguen disponibles sin Internet.
 
-Las cuentas, sesiones y el progreso se guardan en el navegador de cada dispositivo.
+Con Supabase configurado, la **cuenta** (usuario y contraseña) se crea en la nube y sirve para entrar desde cualquier teléfono o computadora; además queda una copia local para poder entrar sin internet. El **progreso** se guarda en el navegador de cada dispositivo. Sin Supabase, o si la cuenta se crea sin conexión, la cuenta vive solo en ese dispositivo y se sube a la nube la próxima vez que se inicia sesión con internet.
 
 ## Voz y fotos
 

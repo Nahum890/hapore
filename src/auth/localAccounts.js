@@ -1,3 +1,8 @@
+import {
+  cloudAccountsAvailable, cloudChangePassword, cloudConvertAnonymous, cloudProfile, cloudSignIn, cloudSignUp, cloudUpdateProfile,
+} from '../cloud/cloudAccounts.js';
+import { getCloudSession, readCloudSessionFor, saveCloudSessionFor, signOutCloudFor } from '../cloud/cloudClient.js';
+
 const ACCOUNTS_KEY = 'guarania:accounts:v1';
 const SESSION_KEY = 'guarania:session:v1';
 const ITERATIONS = 120000;
@@ -230,6 +235,8 @@ function publicAccount(account) {
     phone: account.phone ?? '',
     email: account.email ?? '',
     avatar: account.avatar ?? null,
+    // true: la cuenta existe en la nube y sirve en cualquier dispositivo.
+    cloud: Boolean(account.cloudLinked),
   };
 }
 
@@ -282,6 +289,10 @@ export function updateProfile(accountId, { phone, email, avatar } = {}) {
   const list = [...saved];
   list[index] = next;
   saveAccounts(list);
+  if (next.cloudLinked && cloudAccountsAvailable()) {
+    // Nombre, rol y contactos viajan con la cuenta (la foto queda en el dispositivo).
+    getCloudSession().then(session => cloudUpdateProfile(session, cloudProfile(next))).catch(() => {});
+  }
   return publicAccount(next);
 }
 
@@ -297,6 +308,18 @@ export async function changePassword(accountId, { currentPassword, newPassword }
   if (candidate !== account.passwordHash) throw new Error('PASSWORD_CURRENT_INVALID');
   const cleanNewPassword = String(newPassword ?? '');
   if (cleanNewPassword.length < 8) throw new Error('PASSWORD_TOO_SHORT');
+  if (account.cloudLinked) {
+    // La clave nueva tiene que llegar a la nube: si no, en otro dispositivo
+    // seguiría valiendo la anterior.
+    if (!cloudAccountsAvailable()) throw new Error('PASSWORD_NEEDS_INTERNET');
+    let session;
+    try { session = await getCloudSession(); } catch (error) {
+      throw new Error(error?.code === 'session_expired' ? 'PASSWORD_SESSION_EXPIRED' : 'PASSWORD_NEEDS_INTERNET');
+    }
+    try { await cloudChangePassword(session, cleanNewPassword); } catch (error) {
+      throw new Error(error?.code === 'CLOUD_WEAK_PASSWORD' ? 'PASSWORD_TOO_SHORT' : 'PASSWORD_NEEDS_INTERNET');
+    }
+  }
   const salt = bytesToHex(getSecureRandomBytes(16));
   account.salt = salt;
   account.passwordHash = await hashPassword(cleanNewPassword, salt);
@@ -338,11 +361,32 @@ export async function register({ name, username, password, role, phone, email })
   const contact = validateContact({ phone, email });
   const saved = accounts();
   if (saved.some(item => item.username === cleanUsername)) throw new Error('Ese nombre de usuario ya existe en este dispositivo.');
+  // Con internet, la cuenta se crea primero en la nube: así el nombre de
+  // usuario es único entre todos los dispositivos y se puede entrar desde
+  // cualquiera. Sin internet se crea solo acá y se sube al próximo inicio de
+  // sesión con conexión.
+  let cloud = null;
+  if (cloudAccountsAvailable()) {
+    try {
+      cloud = await cloudSignUp({ username: cleanUsername, password: String(password), profile: cloudProfile({ name: cleanName, username: cleanUsername, role, ...contact }) });
+    } catch (error) {
+      if (error?.code === 'USERNAME_TAKEN') throw new Error('Ese nombre de usuario ya existe. Elegí otro.');
+      if (error?.code === 'CLOUD_RATE_LIMIT') throw new Error('Demasiados intentos seguidos. Esperá unos minutos y volvé a probar.');
+      if (error?.code === 'CLOUD_WEAK_PASSWORD') throw new Error('La contraseña debe tener al menos 8 caracteres.');
+      // Sin conexión o nube mal configurada: la cuenta sigue funcionando en este dispositivo.
+      if (!error?.offline) console.warn('No se pudo crear la cuenta en la nube:', error?.code || error?.message);
+    }
+  }
   const salt = bytesToHex(getSecureRandomBytes(16));
-  const account = { id: generateUUID(), name: cleanName, username: cleanUsername, role, ...contact, salt, passwordHash: await hashPassword(password, salt) };
+  const account = {
+    id: cloud?.user?.id ?? generateUUID(), name: cleanName, username: cleanUsername, role, ...contact, salt,
+    passwordHash: await hashPassword(password, salt),
+    cloudUserId: cloud?.user?.id ?? null, cloudLinked: Boolean(cloud),
+  };
   try {
     storage().setItem(ACCOUNTS_KEY, JSON.stringify([...saved, account]));
     storage().setItem(SESSION_KEY, account.id);
+    if (cloud) saveCloudSessionFor(account.id, cloud, true);
     if (saved.length === 0) {
       for (const key of LEGACY_PROGRESS_KEYS) {
         const previous = storage().getItem(key);
@@ -355,12 +399,106 @@ export async function register({ name, username, password, role, phone, email })
   return publicAccount(account);
 }
 
+function replaceAccount(next) {
+  saveAccounts(accounts().map(item => item.id === next.id ? next : item));
+}
+
+/** Copia local de una cuenta de la nube que acaba de entrar: se crea (para
+ * poder entrar sin internet la próxima vez) o se actualiza con lo que se
+ * cambió en otro dispositivo. La clave queda solo como hash PBKDF2. */
+async function rememberCloudLogin(local, cloud, username, password) {
+  const meta = cloud.user.user_metadata ?? {};
+  const salt = bytesToHex(getSecureRandomBytes(16));
+  const fromCloud = {
+    ...(typeof meta.name === 'string' && meta.name.trim().length >= 2 ? { name: meta.name.trim().slice(0, 80) } : {}),
+    ...(meta.role === 'maestro' || meta.role === 'alumno' ? { role: meta.role } : {}),
+    ...(typeof meta.phone === 'string' && meta.phone ? { phone: meta.phone.slice(0, 24) } : {}),
+    ...(typeof meta.email === 'string' && meta.email ? { email: meta.email.slice(0, 120) } : {}),
+  };
+  const base = local ?? { id: cloud.user.id, name: username, role: 'alumno', phone: '', email: '', avatar: null };
+  return {
+    ...base, ...fromCloud, username,
+    cloudUserId: cloud.user.id, cloudLinked: true, salt, passwordHash: await hashPassword(password, salt),
+  };
+}
+
+/** Sube a la nube una cuenta que hasta ahora vivía solo en este dispositivo.
+ * Si el perfil tenía una sesión anónima (con clases creadas), se convierte esa
+ * misma, así no se pierden. Nunca bloquea el inicio de sesión. */
+async function linkLocalAccount(account, password) {
+  const credentials = { username: account.username, password: String(password), profile: cloudProfile(account) };
+  let cloud = await cloudConvertAnonymous(readCloudSessionFor(account.id), credentials);
+  if (!cloud) {
+    try {
+      cloud = await cloudSignUp(credentials);
+    } catch (error) {
+      if (error?.code !== 'USERNAME_TAKEN') return account;
+      // Ya existe en la nube: si la clave coincide es esta misma cuenta
+      // (vinculada desde otro dispositivo). Si no, es de otra persona.
+      cloud = await cloudSignIn(credentials).catch(() => null);
+      if (!cloud) return { ...account, cloudConflict: true };
+    }
+  }
+  const next = { ...account, cloudUserId: cloud.user.id, cloudLinked: true };
+  delete next.cloudConflict;
+  saveCloudSessionFor(account.id, cloud, true);
+  return next;
+}
+
+const LOGIN_FAILED = 'Usuario o contraseña incorrectos.';
+
 export async function login({ username, password }) {
-  const account = accounts().find(item => item.username === String(username || '').trim().toLowerCase());
-  if (!account || !account.salt || !account.passwordHash) throw new Error('Usuario o contraseña incorrectos.');
-  const candidate = await hashPassword(password, account.salt, account.passwordHash);
-  if (candidate !== account.passwordHash) throw new Error('Usuario o contraseña incorrectos.');
-  if (account.passwordHash.startsWith('fb:')) {
+  const cleanUsername = String(username || '').trim().toLowerCase();
+  const cleanPassword = String(password ?? '');
+  let account = accounts().find(item => item.username === cleanUsername);
+  // Cuenta de la nube (o que no está en este dispositivo): manda la nube. Así
+  // se entra desde cualquier teléfono, y una clave cambiada en otro
+  // dispositivo deja de valer también acá.
+  if (cloudAccountsAvailable() && (!account || account.cloudLinked)) {
+    let cloud = null;
+    try {
+      cloud = await cloudSignIn({ username: cleanUsername, password: cleanPassword });
+    } catch (error) {
+      if (error?.code === 'CLOUD_RATE_LIMIT') throw new Error('Demasiados intentos seguidos. Esperá unos minutos y volvé a probar.');
+      if (!account) throw new Error(error?.offline ? 'Sin conexión: para entrar por primera vez en este dispositivo necesitás internet.' : LOGIN_FAILED);
+      if (error?.code === 'INVALID_CREDENTIALS') {
+        // ¿La nube perdió la cuenta (proyecto nuevo o reiniciado)? Si la clave
+        // local coincide y el usuario no existe allá, se vuelve a crear; si
+        // existe con otra clave, la cambiaron en otro dispositivo: no se entra.
+        const candidate = await hashPassword(cleanPassword, account.salt, account.passwordHash).catch(() => null);
+        if (candidate !== account.passwordHash) throw new Error(LOGIN_FAILED);
+        const relinked = await linkLocalAccount({ ...account, cloudLinked: false }, cleanPassword);
+        if (!relinked.cloudLinked) throw new Error(LOGIN_FAILED);
+        replaceAccount(relinked);
+        storage().setItem(SESSION_KEY, relinked.id);
+        return publicAccount(relinked);
+      }
+      // Sin conexión o nube caída: se valida con la copia local (más abajo).
+    }
+    if (cloud) {
+      // Un usuario de la nube con el mismo id que otra cuenta local: no se mezclan.
+      if (!account && accounts().some(item => item.id === cloud.user.id)) throw new Error(LOGIN_FAILED);
+      const remembered = await rememberCloudLogin(account, cloud, cleanUsername, cleanPassword);
+      saveAccounts(account ? accounts().map(item => item.id === account.id ? remembered : item) : [...accounts(), remembered]);
+      saveCloudSessionFor(remembered.id, cloud, true);
+      storage().setItem(SESSION_KEY, remembered.id);
+      return publicAccount(remembered);
+    }
+  }
+  if (!account || !account.salt || !account.passwordHash) throw new Error(LOGIN_FAILED);
+  const candidate = await hashPassword(cleanPassword, account.salt, account.passwordHash);
+  if (candidate !== account.passwordHash) throw new Error(LOGIN_FAILED);
+  if (!account.cloudLinked && cloudAccountsAvailable()) {
+    try {
+      account = await linkLocalAccount(account, cleanPassword);
+      replaceAccount(account);
+    } catch {
+      // Se reintenta en el próximo inicio de sesión con internet.
+    }
+  }
+  // Hashes viejos (1.000 o 20.000 iteraciones) se rehacen con la clave recién
+  // verificada: con WebCrypto quedan en 120.000.
+  if (/^fb2?:/.test(account.passwordHash)) {
     try {
       const salt = bytesToHex(getSecureRandomBytes(16));
       account.salt = salt;
@@ -376,5 +514,8 @@ export async function login({ username, password }) {
 }
 
 export function logout() {
+  const id = storage().getItem(SESSION_KEY);
+  // La sesión de la nube no queda guardada en un dispositivo compartido.
+  if (id) signOutCloudFor(id);
   storage().removeItem(SESSION_KEY);
 }

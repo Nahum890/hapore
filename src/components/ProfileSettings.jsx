@@ -84,7 +84,9 @@ export default function ProfileSettings({ open, user, onClose, onSaved, required
     } catch (failure) {
       const key = failure.message === 'PASSWORD_CURRENT_INVALID' ? 'settings.passwordWrong'
         : failure.message === 'PASSWORD_TOO_SHORT' ? 'settings.passwordShort'
-          : failure.message === 'PASSWORD_UNAVAILABLE' ? 'settings.passwordUnavailable' : 'settings.passwordError';
+          : failure.message === 'PASSWORD_UNAVAILABLE' ? 'settings.passwordUnavailable'
+            : failure.message === 'PASSWORD_NEEDS_INTERNET' ? 'settings.passwordNeedsInternet'
+              : failure.message === 'PASSWORD_SESSION_EXPIRED' ? 'settings.passwordSessionExpired' : 'settings.passwordError';
       setPasswordError(key);
     }
   };

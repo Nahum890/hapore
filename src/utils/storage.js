@@ -3,6 +3,7 @@ let activeProfileId = null;
 export function setActiveProfile(id) {
   activeProfileId = id || null;
 }
+export const getActiveProfile = () => activeProfileId;
 const profileKey = (key) => activeProfileId ? `guarania:profile:${activeProfileId}:${key}` : key;
 
 const safeStorage = {
@@ -89,6 +90,17 @@ export function readJSONForProfile(profileId, key, fallback) {
     return JSON.parse(raw);
   } catch {
     return fallback;
+  }
+}
+
+/** Escribe en el perfil indicado sin cambiar el perfil activo (por ejemplo, la
+ * sesión de la nube de una cuenta que se está creando o iniciando). */
+export function writeJSONForProfile(profileId, key, value) {
+  const prefixed = profileId ? `guarania:profile:${profileId}:${key}` : key;
+  try {
+    safeStorage.setItem(prefixed, JSON.stringify(value));
+  } catch {
+    // Los valores no serializables no pueden guardarse.
   }
 }
 
