@@ -7,6 +7,7 @@ import http from 'node:http';
 import { randomUUID } from 'node:crypto';
 
 const tokens = new Map(); // token -> uid
+const accounts = new Map(); // correo interno -> { uid, password, meta }
 const classes = [];
 const members = [];
 const messages = [];
@@ -23,7 +24,11 @@ const send = (res, status, data) => {
   });
   res.end(data === undefined ? '' : JSON.stringify(data));
 };
-const newSession = uid => { const token = randomUUID(); tokens.set(token, uid); return { access_token: token, refresh_token: token, expires_in: 3600, user: { id: uid } }; };
+const userOf = uid => {
+  const entry = [...accounts.entries()].find(([, account]) => account.uid === uid);
+  return entry ? { id: uid, email: entry[0], is_anonymous: false, user_metadata: entry[1].meta } : { id: uid, is_anonymous: true, user_metadata: {} };
+};
+const newSession = uid => { const token = randomUUID(); tokens.set(token, uid); return { access_token: token, refresh_token: token, expires_in: 3600, user: userOf(uid) }; };
 const params = url => Object.fromEntries([...url.searchParams].map(([k, v]) => [k, v.replace(/^(gte|lte|neq|eq|gt|lt)\./, '')]));
 const isTeacher = (classId, uid) => classes.some(c => c.id === classId && c.teacher_id === uid);
 const isParticipant = (classId, uid) => isTeacher(classId, uid) || members.some(m => m.class_id === classId && m.student_id === uid);
@@ -32,12 +37,41 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'OPTIONS') return send(res, 204);
   const url = new URL(req.url, 'http://x');
   let raw = ''; for await (const chunk of req) raw += chunk;
-  const body = raw ? JSON.parse(raw) : {};
+  let body;
+  try { body = raw ? JSON.parse(raw) : {}; } catch { return send(res, 400, { message: 'JSON inválido' }); }
   const uid = tokens.get((req.headers.authorization ?? '').replace('Bearer ', ''));
 
-  if (url.pathname === '/auth/v1/signup') return send(res, 200, newSession(randomUUID()));
+  // Cuentas con usuario y contraseña (como Supabase Auth con "Confirm email" desactivado).
+  if (url.pathname === '/auth/v1/signup') {
+    if (!body.email) return send(res, 200, newSession(randomUUID())); // sesión anónima
+    const email = String(body.email).toLowerCase();
+    if (accounts.has(email)) return send(res, 422, { code: 422, error_code: 'user_already_exists', msg: 'User already registered' });
+    if (String(body.password ?? '').length < 8) return send(res, 422, { code: 422, error_code: 'weak_password', msg: 'Password should be at least 8 characters.' });
+    const id = randomUUID();
+    accounts.set(email, { uid: id, password: String(body.password), meta: body.data ?? {} });
+    return send(res, 200, newSession(id));
+  }
+  if (url.pathname === '/auth/v1/token' && url.searchParams.get('grant_type') === 'password') {
+    const account = accounts.get(String(body.email ?? '').toLowerCase());
+    if (!account || account.password !== String(body.password ?? '')) return send(res, 400, { code: 400, error_code: 'invalid_credentials', msg: 'Invalid login credentials' });
+    return send(res, 200, newSession(account.uid));
+  }
   if (url.pathname === '/auth/v1/token') { const old = tokens.get(body.refresh_token); return old ? send(res, 200, newSession(old)) : send(res, 400, { error_description: 'refresh inválido' }); }
   if (!uid) return send(res, 401, { message: 'JWT inválido' });
+  if (url.pathname === '/auth/v1/logout') { tokens.delete((req.headers.authorization ?? '').replace('Bearer ', '')); return send(res, 204); }
+  if (url.pathname === '/auth/v1/user' && req.method === 'PUT') {
+    let entry = [...accounts.entries()].find(([, account]) => account.uid === uid);
+    if (!entry && body.email) {
+      const email = String(body.email).toLowerCase();
+      if (accounts.has(email)) return send(res, 422, { error_code: 'email_exists', msg: 'Email already registered' });
+      accounts.set(email, { uid, password: '', meta: {} });
+      entry = [email, accounts.get(email)];
+    }
+    if (!entry) return send(res, 422, { msg: 'Una sesión anónima necesita un correo antes de la contraseña.' });
+    if (body.password) entry[1].password = String(body.password);
+    if (body.data) entry[1].meta = { ...entry[1].meta, ...body.data };
+    return send(res, 200, userOf(uid));
+  }
 
   if (url.pathname === '/rest/v1/rpc/create_class') {
     let code;

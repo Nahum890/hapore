@@ -11,8 +11,8 @@ const AUX_BURST_LIMIT = 12;
 // Tope por dirección IP (por instancia), además de la cuota por usuario: frena
 // a quien crea sesiones anónimas nuevas para saltarse la cuota. Es generoso
 // porque un aula entera puede salir a internet con la misma IP.
-const IP_DAILY_LIMIT = 400;
-const IP_BURST_LIMIT = 40;
+const IP_DAILY_LIMIT = 2000;
+const IP_BURST_LIMIT = 120;
 const MAX_BODY_BYTES = 12000;
 // Una foto de ejercicio pesa mucho más que una consulta de texto: se admite
 // un cuerpo más grande solo para ese caso, ya normalizeChatImage() en el

@@ -17,6 +17,7 @@ import { exercises as catalogExercises, localizeCatalogItem } from '../data/cata
 import { getCustomExercises } from '../utils/customExercises.js';
 import { useTranslation } from '../i18n/LanguageProvider.jsx';
 import { imageFileToDataUrl, isSafeImageDataUrl } from '../utils/imageData.js';
+import { sanitizeActivityPacket, sanitizeExercise, sanitizeLessonPayload } from '../cloud/classContent.js';
 import { readJSON, writeJSON } from '../utils/storage.js';
 
 const POLL_MS = 4000;
@@ -366,9 +367,9 @@ export default function ClassChat({ user, classPackage, exercises, concepts, onE
                 {!mine && <Avatar id={sender?.avatar} name={sender?.display_name} size={30} />}
                 <div className="class-chat-bubble">
                   {!mine && conversation === GROUP && <span className="class-chat-sender">{sender?.display_name ?? t('chat.someone')}{sender?.role === 'maestro' ? t('chat.teacherTag') : ''}</span>}
-                  <MessageContent message={message} onOpenLesson={setOpenLesson}
-                    onOpenActivity={exercise => setOpenActivity({ type: 'exercise', value: exercise })}
-                    onOpenActivityPacket={activity => setOpenActivity({ type: 'packet', value: activity })} />
+                  <MessageContent message={message} onOpenLesson={payload => setOpenLesson(sanitizeLessonPayload(payload))}
+                    onOpenActivity={exercise => { const clean = sanitizeExercise(exercise); if (clean) setOpenActivity({ type: 'exercise', value: clean }); }}
+                    onOpenActivityPacket={activity => { const clean = sanitizeActivityPacket(activity); if (clean) setOpenActivity({ type: 'packet', value: clean }); }} />
                   <time dateTime={message.created_at}>{formatTime(message.created_at)}</time>
                 </div>
               </li>;

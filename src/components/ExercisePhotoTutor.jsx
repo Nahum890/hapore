@@ -3,8 +3,9 @@ import { getOnlineConsent, hasOnlineConsent, subscribeOnlineConsent } from '../a
 import { recordTutorQuery } from '../ai/tutorQuota.js';
 import { getCloudSession, isCloudConfigured } from '../cloud/cloudClient.js';
 
-const MAX_IMAGE_BYTES = 1_500_000;
-const MAX_DATA_URL_LENGTH = 2_000_000;
+// Mismo tope que el servidor (/api/chat acepta hasta 900.000 caracteres base64).
+const MAX_IMAGE_BYTES = 650_000;
+const MAX_DATA_URL_LENGTH = 900_000;
 const onlineConsentEnabled = () => getOnlineConsent() === 'online';
 
 function readDataUrl(blob) {
@@ -88,7 +89,7 @@ export default function ExercisePhotoTutor({ quiz, language, onBusyChange }) {
         const session = await getCloudSession();
         if (session?.accessToken) headers.Authorization = `Bearer ${session.accessToken}`;
       }
-      const response = await fetch('/api/chat', { method: 'POST', headers, body: JSON.stringify({ action: 'analyze-exercise-image', language, image }) });
+      const response = await fetch('/api/chat', { method: 'POST', headers, body: JSON.stringify({ image, context: { message: 'Leé el ejercicio de la foto.', tipo: 'charla_libre', language } }) });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload.error || 'No se pudo leer la foto. Revisá la conexión e intentá otra vez.');
       recordTutorQuery();

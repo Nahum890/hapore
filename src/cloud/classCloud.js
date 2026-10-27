@@ -4,6 +4,7 @@ import { topicStats } from '../pedagogy/progression.js';
 import { withFlags } from '../pedagogy/flags.js';
 import { exercises as catalogExercises } from '../data/catalogs.js';
 import { summarizeErrorCounts } from '../pedagogy/errorSummary.js';
+import { sanitizeClassContent } from './classContent.js';
 
 // Paquete de clase que descarga el alumno: queda en su perfil local para
 // practicar sin internet. Pendiente de subida: la última foto del avance que
@@ -77,9 +78,17 @@ export async function deleteCloudClass(id) {
   await rest(`classes?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE' });
 }
 
+// Versión del saneado del contenido: los paquetes guardados antes se revisan
+// una vez al leerlos (ver cloud/classContent.js).
+const CONTENT_CHECK = 1;
+
 export function getClassPackage() {
   const stored = readJSON(PACKAGE_KEY, null);
-  return stored && stored.classId && stored.content ? stored : null;
+  if (!stored || !stored.classId || !stored.content) return null;
+  if (stored.contentChecked === CONTENT_CHECK) return stored;
+  const checked = { ...stored, content: sanitizeClassContent(stored.content), contentChecked: CONTENT_CHECK };
+  writeJSON(PACKAGE_KEY, checked);
+  return checked;
 }
 
 /** "Descargar clase": se une en la nube y guarda todo para usarlo offline. */
@@ -96,7 +105,7 @@ export async function downloadClass({ code, displayName, avatar, phone, email })
     classId: row.class_id, code: row.code, title: row.title,
     teacherId: row.teacher_id, teacherName: row.teacher_name, teacherAvatar: row.teacher_avatar,
     teacherPhone: row.teacher_phone ?? '', teacherEmail: row.teacher_email ?? '',
-    content: row.content, downloadedAt: new Date().toISOString(),
+    content: sanitizeClassContent(row.content), contentChecked: CONTENT_CHECK, downloadedAt: new Date().toISOString(),
   };
   writeJSON(PACKAGE_KEY, pkg);
   return pkg;

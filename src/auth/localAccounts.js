@@ -459,7 +459,9 @@ export async function login({ username, password }) {
     try {
       cloud = await cloudSignIn({ username: cleanUsername, password: cleanPassword });
     } catch (error) {
-      if (error?.code === 'CLOUD_RATE_LIMIT') throw new Error('Demasiados intentos seguidos. Esperá unos minutos y volvé a probar.');
+      // Supabase limita los inicios de sesión por IP y un aula entera comparte
+      // la misma: si esta cuenta ya está en el dispositivo, se valida local.
+      if (error?.code === 'CLOUD_RATE_LIMIT' && !account) throw new Error('Demasiados intentos seguidos. Esperá unos minutos y volvé a probar.');
       if (!account) throw new Error(error?.offline ? 'Sin conexión: para entrar por primera vez en este dispositivo necesitás internet.' : LOGIN_FAILED);
       if (error?.code === 'INVALID_CREDENTIALS') {
         // ¿La nube perdió la cuenta (proyecto nuevo o reiniciado)? Si la clave

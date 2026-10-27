@@ -20,6 +20,7 @@ Con Supabase:
    - activá **Email** y **desactivá "Confirm email"**. Las cuentas usan un correo interno `usuario@cuentas.pyfis.invalid` (dominio reservado que nadie puede registrar); con la confirmación activada Supabase no deja entrar.
    - activá **Allow anonymous sign-ins** (lo usan las cuentas creadas sin internet hasta que se suben a la nube).
    - en **Password**, poné la longitud mínima en **8**.
+   - en **Rate Limits**, subí "sign-ups and sign-ins" (por ejemplo a 150 cada 5 minutos): Supabase cuenta por dirección IP y un aula entera sale a internet con la misma IP. Si igual se alcanza el límite, una cuenta que ya entró antes en ese dispositivo sigue entrando con su copia local.
 3. En **SQL Editor**, ejecutá en este orden (cada uno: pegar todo y **Run**; se pueden volver a ejecutar sin borrar datos):
    1. [`schema.sql`](schema.sql) — tablas, reglas de acceso y el endurecimiento de seguridad.
    2. [`migrations/20260926_tutor_daily_quota.sql`](migrations/20260926_tutor_daily_quota.sql) — cuota diaria del tutor online.

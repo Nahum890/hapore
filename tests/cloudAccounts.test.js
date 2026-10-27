@@ -23,6 +23,7 @@ function fakeSupabaseAuth() {
   const users = new Map(); // email -> { id, password, meta, anonymous }
   const tokens = new Map(); // access/refresh token -> email
   const calls = [];
+  const state = { rateLimited: false };
   let counter = 0;
   const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json' } });
   const session = email => {
@@ -43,6 +44,7 @@ function fakeSupabaseAuth() {
       return json(session(body.email));
     }
     if (path === '/auth/v1/token?grant_type=password') {
+      if (state.rateLimited) return json({ code: 429, error_code: 'over_request_rate_limit', msg: 'Request rate limit reached' }, 429);
       const user = users.get(body.email);
       if (!user || user.password !== body.password) return json({ code: 400, error_code: 'invalid_credentials', msg: 'Invalid login credentials' }, 400);
       return json(session(body.email));
@@ -63,7 +65,7 @@ function fakeSupabaseAuth() {
     if (path.startsWith('/auth/v1/logout')) return new Response(null, { status: 204 });
     return json({ message: 'no encontrado' }, 404);
   };
-  return { users, calls, fetch };
+  return { users, calls, fetch, state };
 }
 
 const cloud = fakeSupabaseAuth();
@@ -169,4 +171,20 @@ test('la foto de perfil no viaja dentro de la cuenta de la nube', async () => {
   const meta = cloud.users.get(accountEmail('ana.b')).meta;
   assert.deepEqual(Object.keys(meta).sort(), ['email', 'name', 'phone', 'role', 'username']);
   assert.match(accountEmail('Ana.B'), /^ana\.b@[a-z0-9.-]+\.invalid$/, 'dominio reservado: nadie recibe correos de otra cuenta');
+});
+
+test('si Supabase limita por IP (un aula entera), la cuenta ya guardada en el dispositivo entra igual', async () => {
+  useDevice('aula-h');
+  const account = await register({ name: 'Dani Paz', username: 'dani.p', password, role: 'alumno', ...contact });
+  logout();
+  cloud.state.rateLimited = true;
+  try {
+    assert.equal((await login({ username: 'dani.p', password })).id, account.id);
+    logout();
+    await assert.rejects(login({ username: 'dani.p', password: `${password}-mal` }), /incorrectos/);
+    useDevice('aula-nueva');
+    await assert.rejects(login({ username: 'dani.p', password }), /Demasiados intentos/);
+  } finally {
+    cloud.state.rateLimited = false;
+  }
 });
