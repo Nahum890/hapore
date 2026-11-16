@@ -45,6 +45,7 @@ import { APP_VERSION_LABEL } from './version.js';
 const ClassChat = lazy(() => import('./components/ClassChat.jsx'));
 import { isCloudConfigured } from './cloud/cloudClient.js';
 import { downloadClass, flushProgress, getClassPackage, getPendingProgress, leaveCloudClass, progressSnapshot, queueProgress, syncMyProfile } from './cloud/classCloud.js';
+import { formatRoute, parseRoute } from './utils/appRoute.js';
 
 // Los ejercicios que crea el docente viven en este dispositivo (ver
 // src/utils/customExercises.js) y se suman a los del banco fijo dondequiera
@@ -559,12 +560,24 @@ function ChatsView({ quiz }) {
 
 function LearningApp({ user, onLogout, onUpdateUser }) {
   const { t, language } = useTranslation();
-  const [activeTab, setActiveTab] = useState('inicio');
+  // Pantalla actual = hash de la dirección (ver utils/appRoute.js).
+  const [route, setRoute] = useState(() => parseRoute(window.location.hash));
+  useEffect(() => {
+    const sync = () => setRoute(parseRoute(window.location.hash));
+    window.addEventListener('hashchange', sync);
+    return () => window.removeEventListener('hashchange', sync);
+  }, []);
+  const go = next => {
+    const hash = formatRoute(next);
+    if (window.location.hash === hash) setRoute(parseRoute(hash));
+    else window.location.hash = hash; // agrega una entrada al historial y dispara hashchange
+  };
+  const activeTab = route.tab;
+  // Un tema inexistente en la dirección (enlace viejo o mal escrito) muestra la lista.
+  const openTopic = route.topic && topicById(route.topic.id) ? route.topic : null;
   // Docente: respaldo en Supabase de sus presentaciones y ejercicios propios.
   useEffect(() => (user.role === 'maestro' ? startTeacherSync() : undefined), [user.id, user.role]);
   const [practiceMode, setPracticeMode] = useState('ejercicio');
-  // Tema abierto en la sección Temas (null = lista de temas del curso).
-  const [openTopic, setOpenTopic] = useState(null);
   const [repasoMode, setRepasoMode] = useState('cuestionario');
   const [simulationSubmission, setSimulationSubmission] = useState(null);
   const [showGuide, setShowGuide] = useState(() => !readJSON('guarania:guideSeen:v2', false));
@@ -612,7 +625,7 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
     learning.onSelectExercise,
   );
   const quiz = useQuiz(deckCards, {
-    onMoveToQuiz: () => { setRepasoMode('cuestionario'); setActiveTab('tarjetas'); },
+    onMoveToQuiz: () => { setRepasoMode('cuestionario'); go({ tab: 'tarjetas', topic: null }); },
     onQuizAnswer: learning.onQuizAnswer,
     classConfig,
     includeTheory: !classPackage,
@@ -688,7 +701,22 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
     }
   };
   const dismissGuide = () => { writeJSON('guarania:guideSeen:v2', true); setShowGuide(false); };
-  const startPracticing = () => { setActiveTab('simulador'); dismissGuide(); };
+  const startPracticing = () => { go({ tab: 'simulador', topic: null }); dismissGuide(); };
+  // Android (ver main.jsx): "atrás" cierra primero la ventana que esté abierta.
+  const openOverlays = useRef({});
+  openOverlays.current = { notifications: showNotifications, settings: showSettings && !missingContact, guide: showGuide };
+  useEffect(() => {
+    const onBack = event => {
+      const open = openOverlays.current;
+      if (open.notifications) setShowNotifications(false);
+      else if (open.settings) setShowSettings(false);
+      else if (open.guide) dismissGuide();
+      else return;
+      event.preventDefault();
+    };
+    window.addEventListener('pyfis:back', onBack);
+    return () => window.removeEventListener('pyfis:back', onBack);
+  }, []);
   const section = SECTIONS.find(item => item.id === activeTab) ?? SECTIONS[0];
   const availableScenarios = SCENARIOS.filter(scenario => visibleExercises.some(item => item.scenario === scenario.id));
   const recommendation = recommendExercise(visibleExercises, currentExercise?.id, learning.attemptLog);
@@ -698,8 +726,8 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
   };
 
   const sectionKey = activeTab === 'aula' && user.role === 'maestro' ? 'aulaTeacher' : activeTab;
-  const navigate = id => { setActiveTab(id); if (id === 'simulador') setOpenTopic(null); window.scrollTo?.({ top: 0, behavior: 'smooth' }); };
-  const showTopic = (id, tab = 'learn') => { setOpenTopic({ id, tab }); setActiveTab('simulador'); window.scrollTo?.({ top: 0, behavior: 'smooth' }); };
+  const navigate = id => { go({ tab: id, topic: null }); window.scrollTo?.({ top: 0, behavior: 'smooth' }); };
+  const showTopic = (id, tab = 'learn') => { go({ tab: 'simulador', topic: { id, tab } }); window.scrollTo?.({ top: 0, behavior: 'smooth' }); };
   // Temas que eligió el docente: llegan con la clase de la nube (alumno) o
   // quedan guardados en este dispositivo (docente).
   const teacherTopics = user.role === 'maestro' ? getTeacherTopics() : (Array.isArray(classConfig?.topics) ? classConfig.topics : []);
@@ -753,7 +781,7 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
       <div className={`app-layout${activeTab === 'chats' ? ' is-tutor-page' : ''}`}><main className="app-main">
         {activeTab === 'inicio' && <HomeView user={user} learning={learning} classConfig={classConfig} teacherTopics={teacherTopics} onNavigate={navigate} onOpenTopic={showTopic} onGuide={() => setShowGuide(true)} />}
         {activeTab === 'simulador' && (openTopic
-          ? <TopicPage topicId={openTopic.id} initialTab={openTopic.tab} onBack={() => setOpenTopic(null)} learning={learning} renderLegacy={renderParabolicPractice} />
+          ? <TopicPage topicId={openTopic.id} initialTab={openTopic.tab} onBack={() => go({ tab: 'simulador', topic: null })} learning={learning} renderLegacy={renderParabolicPractice} />
           : <TopicsView learning={learning} teacherTopics={teacherTopics} onOpenTopic={id => showTopic(id)} />)}
 
         {activeTab === 'tarjetas' && (
@@ -825,6 +853,10 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
 export default function App() {
   const [user, setUser] = useState(getSession);
   setActiveProfile(user?.id);
-  const handleLogout = () => { logout(); setActiveProfile(null); setUser(null); };
+  const handleLogout = () => {
+    // La próxima cuenta que entre empieza en Inicio.
+    if (window.location.hash) window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    logout(); setActiveProfile(null); setUser(null);
+  };
   return user ? <LearningApp key={user.id} user={user} onLogout={handleLogout} onUpdateUser={setUser} /> : <AuthScreen onAuthenticated={setUser} />;
 }

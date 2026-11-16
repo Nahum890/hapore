@@ -8,6 +8,17 @@ import AppErrorBoundary from './components/AppErrorBoundary.jsx';
 
 const native = Capacitor.isNativePlatform();
 
+// Botón "atrás" de Android: primero cierra una ventana abierta (App.jsx escucha
+// "pyfis:back"); si no hay, vuelve a la pantalla anterior; en la primera, sale.
+if (native) {
+  import('@capacitor/app').then(({ App }) => App.addListener('backButton', ({ canGoBack }) => {
+    const handled = !window.dispatchEvent(new CustomEvent('pyfis:back', { cancelable: true }));
+    if (handled) return;
+    if (canGoBack) window.history.back();
+    else App.exitApp();
+  })).catch(() => { /* sin el plugin, Android usa su comportamiento por defecto */ });
+}
+
 // Busca versión nueva al abrir, cada 30 minutos y al volver a la pestaña.
 registerSW({
   immediate: true,
