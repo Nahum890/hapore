@@ -188,6 +188,12 @@ function TeacherAnalytics({ active, exercises: allExercises }) {
   </section>;
 }
 
+// Botones de situaciones (dron, básquet, paredón) para elegir qué practicar.
+function TopicButtons({ selected, onToggle }) {
+  const { t } = useTranslation();
+  return <div className="teacher-topic-options">{SUBTEMAS.map(id => <button key={id} type="button" aria-pressed={selected.includes(id)} className={selected.includes(id) ? 'is-selected' : ''} onClick={() => onToggle(id)}>{t(`scenario.${id}`)}</button>)}</div>;
+}
+
 function CloudClassSetup({ teacher, allExercises, customExercises }) {
   const { t } = useTranslation();
   const [customCards, setCustomCards] = useState(getCustomFlashcards);
