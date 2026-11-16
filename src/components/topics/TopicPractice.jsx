@@ -3,6 +3,7 @@
 // paso a paso. Cada resultado suma al progreso del alumno (XP, intentos).
 import { useMemo, useRef, useState } from 'react';
 import { generateExercise, checkAnswer, fmt } from '../../curriculum/practice.js';
+import { emptyRecording, nextRecording } from '../../pedagogy/practiceRecording.js';
 import { pickLang } from '../../curriculum/topics/index.js';
 import { useTranslation } from '../../i18n/LanguageProvider.jsx';
 import { Formula, MathText } from '../MathText.jsx';
@@ -19,14 +20,14 @@ export default function TopicPractice({ topic, onResult }) {
   const [showHint, setShowHint] = useState(false);
   const [showSteps, setShowSteps] = useState(false);
   const [streak, setStreak] = useState(0);
-  const recorded = useRef(false);
+  const recording = useRef(emptyRecording());
   const started = useRef(Date.now());
   const genId = topic.practice[index % topic.practice.length];
   const exercise = useMemo(() => generateExercise(genId, seed), [genId, seed]);
 
   const next = () => {
     setIndex(value => value + 1); setSeed(newSeed()); setInput(''); setResult(null);
-    setShowHint(false); setShowSteps(false); recorded.current = false; started.current = Date.now();
+    setShowHint(false); setShowSteps(false); recording.current = emptyRecording(); started.current = Date.now();
   };
   const check = event => {
     event.preventDefault();
@@ -34,8 +35,9 @@ export default function TopicPractice({ topic, onResult }) {
     setResult(verdict);
     if (!verdict.valid) return;
     setStreak(value => (verdict.correct ? value + 1 : 0));
-    if (!recorded.current) {
-      recorded.current = true;
+    const nextState = nextRecording(recording.current, verdict.correct);
+    if (nextState) {
+      recording.current = nextState;
       onResult?.({
         correct: verdict.correct, hintsUsed: showHint ? 1 : 0, exerciseId: `${topic.id}:${exercise.id}`,
         durationMs: Date.now() - started.current, scenario: topic.id, expectedConcept: topic.id,
