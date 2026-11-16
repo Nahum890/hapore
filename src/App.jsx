@@ -55,7 +55,7 @@ import { useTutor } from './hooks/useTutor.js';
 import { useMission } from './hooks/useMission.js';
 import { useQuiz } from './hooks/useQuiz.js';
 import { readJSON, writeJSON, setActiveProfile } from './utils/storage.js';
-import { getSession, hasContactInfo, logout } from './auth/localAccounts.js';
+import { contactRequired, getSession, hasContactInfo, logout } from './auth/localAccounts.js';
 import { decodeClassConfig, encodeClassConfig, selectClassExercises } from './utils/classCode.js';
 import { practiceRecommendation, recommendExercise, summarizeAttempts } from './pedagogy/progression.js';
 import './components/TutorModes.css';
@@ -571,7 +571,7 @@ function LearningApp({ user, onLogout, onUpdateUser }) {
   const [showSettings, setShowSettings] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   // Cuentas creadas antes de que teléfono y correo fueran obligatorios.
-  const missingContact = !hasContactInfo(user);
+  const missingContact = contactRequired(user.role) && !hasContactInfo(user);
   const [localClassConfig, setClassConfig] = useState(() => decodeClassConfig(readJSON('guarania:classCode', null)));
   // Clase descargada de la nube (alumno): trae las tarjetas y ejercicios que
   // eligió el docente y queda guardada para usarla sin internet.

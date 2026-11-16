@@ -9,8 +9,8 @@
 --   * El docente solo ve y modifica las clases que creó y el avance de SUS alumnos.
 --   * El alumno solo puede unirse con un código válido, leer la clase a la que se
 --     unió y actualizar SU propia fila de avance.
---   * Teléfono y correo solo los ven las personas de la MISMA clase (docente y
---     compañeros), a través de class_directory().
+--   * Teléfono y correo: los del docente los ve su clase; los de un alumno, solo su
+--     docente (los compañeros no), a través de class_directory().
 --   * Chat: los mensajes privados solo los leen sus dos participantes; los del
 --     grupo, todos los de la clase. Solo el docente envía imágenes, clases y
 --     actividades.
@@ -242,8 +242,8 @@ begin
     found.teacher_phone, found.teacher_email, found.content;
 end $$;
 
--- Personas de una clase con sus datos de contacto. Solo responde a quien es
--- parte de esa clase (docente o alumno); para cualquier otra persona, vacío.
+-- Personas de una clase. Teléfono y correo de un alumno: solo para su docente y para él mismo.
+-- Solo responde a quien es parte de esa clase (docente o alumno); para cualquier otra persona, vacío.
 create or replace function public.class_directory(p_class_id uuid)
 returns table (user_id uuid, role text, display_name text, avatar text, phone text, email text)
 language sql stable security definer set search_path = public as $$
@@ -251,7 +251,9 @@ language sql stable security definer set search_path = public as $$
     from public.classes c
     where c.id = p_class_id and public.is_class_participant(p_class_id)
   union all
-  select m.student_id, 'alumno', m.display_name, m.avatar, m.phone, m.email
+  select m.student_id, 'alumno', m.display_name, m.avatar,
+         case when public.is_class_teacher(p_class_id) or m.student_id = auth.uid() then m.phone end,
+         case when public.is_class_teacher(p_class_id) or m.student_id = auth.uid() then m.email end
     from public.class_members m
     where m.class_id = p_class_id and public.is_class_participant(p_class_id);
 $$;

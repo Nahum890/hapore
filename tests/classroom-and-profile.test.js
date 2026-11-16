@@ -25,20 +25,29 @@ test('updateProfile guarda teléfono, correo y avatar sin tocar la contraseña',
   assert.ok(!('passwordHash' in updated));
 }));
 
-test('crear cuenta exige teléfono y correo válidos; la foto se valida', () => withLocalStorage(async () => {
-  const base = { name: 'Sin Datos', username: 'sin_datos', password: 'claveSegura1', role: 'alumno' };
-  await assert.rejects(register(base), /teléfono/);
-  await assert.rejects(register({ ...base, phone: '0981 123 456' }), /correo/);
-  await assert.rejects(register({ ...base, phone: '12', email: 'a@b.com' }), /teléfono/);
-  await assert.rejects(register({ ...base, phone: '0981 123 456', email: 'sin-arroba' }), /correo/);
-  const account = await register({ ...base, phone: '+595 981 123 456', email: 'Alumno@Ejemplo.com' });
+test('alumno: teléfono y correo son opcionales, pero si los escribe tienen que ser válidos; la foto se valida', () => withLocalStorage(async () => {
+  const base = { name: 'Sin Datos', password: 'claveSegura1', role: 'alumno' };
+  const sinContacto = await register({ ...base, username: 'sin_datos' });
+  assert.equal(sinContacto.phone, '');
+  assert.equal(sinContacto.email, '');
+  await assert.rejects(register({ ...base, username: 'tel_malo', phone: '12' }), /teléfono/);
+  await assert.rejects(register({ ...base, username: 'correo_malo', email: 'sin-arroba' }), /correo/);
+  const account = await register({ ...base, username: 'con_datos', phone: '+595 981 123 456', email: 'Alumno@Ejemplo.com' });
   assert.equal(account.email, 'alumno@ejemplo.com');
   assert.ok(hasContactInfo(account));
   assert.equal(hasContactInfo({ phone: '', email: '' }), false);
   const photo = 'data:image/jpeg;base64,' + 'A'.repeat(100);
   assert.equal(updateProfile(account.id, { avatar: photo }).avatar, photo);
   assert.throws(() => updateProfile(account.id, { avatar: 'data:text/html;base64,AAAA' }), /foto/);
-  assert.throws(() => updateProfile(account.id, { email: '' }), /correo/);
+  assert.equal(updateProfile(account.id, { email: '' }).email, '');
+}));
+
+test('docente: teléfono y correo siguen siendo obligatorios', () => withLocalStorage(async () => {
+  const base = { name: 'Profe Sin Datos', password: 'claveSegura1', role: 'maestro' };
+  await assert.rejects(register({ ...base, username: 'profe_sin' }), /teléfono/);
+  await assert.rejects(register({ ...base, username: 'profe_sin_correo', phone: '0981 123 456' }), /correo/);
+  const teacher = await register({ ...base, username: 'profe_ok', phone: '0981 123 456', email: 'profe@ejemplo.com' });
+  assert.throws(() => updateProfile(teacher.id, { email: '' }), /correo/);
 }));
 
 test('un docente ve en su lista a los alumnos que se unieron con su código, no a otros', () => withLocalStorage(async () => {

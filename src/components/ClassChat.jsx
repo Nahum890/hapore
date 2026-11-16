@@ -355,7 +355,7 @@ export default function ClassChat({ user, classPackage, exercises, concepts, onE
         : <>
           <header className="class-chat-thread-head">
             <button type="button" className="btn btn-secondary class-chat-back" onClick={() => setShowThread(false)}>← {t('common.back')}</button>
-            {partner ? <><Avatar id={partner.avatar} name={partner.display_name} size={40} /><div><strong>{partner.display_name}</strong><small>{roleLabel(partner)}</small><ContactLinks person={partner} /></div></>
+            {partner ? <><Avatar id={partner.avatar} name={partner.display_name} size={40} /><div><strong>{partner.display_name}</strong><small>{roleLabel(partner)}</small>{(teacher || partner.role === 'maestro') && <ContactLinks person={partner} />}</div></>
               : <div><strong>{t('chat.group')}</strong><small>{t('chat.people', { n: others.length + 1 })}{teacher ? t('chat.teacherExtras') : ''}</small></div>}
           </header>
           <ol className="class-chat-messages" ref={threadRef} aria-live="polite">

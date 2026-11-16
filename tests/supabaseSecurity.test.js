@@ -25,11 +25,12 @@ await db.exec(sql('schema.sql'));
 await db.exec(sql('migrations/20260926_tutor_daily_quota.sql'));
 await db.exec(sql('migrations/20261026_tutor_quota_fix.sql'));
 await db.exec(sql('migrations/20261026_security_hardening.sql')); // idempotente: segunda pasada
+await db.exec(sql('migrations/20261116_contact_privacy.sql'));
 await db.exec(sql('schema.sql')); // volver a correr el esquema no deshace el endurecimiento
 check('esquema + migraciones se aplican (y se pueden repetir)', true);
 
-const T = '11111111-1111-4111-8111-111111111111', S = '22222222-2222-4222-8222-222222222222', O = '33333333-3333-4333-8333-333333333333', S2 = '44444444-4444-4444-8444-444444444444';
-await db.exec(`insert into auth.users (id) values ('${T}'), ('${S}'), ('${O}'), ('${S2}')`);
+const T = '11111111-1111-4111-8111-111111111111', S = '22222222-2222-4222-8222-222222222222', O = '33333333-3333-4333-8333-333333333333', S2 = '44444444-4444-4444-8444-444444444444', S3 = '55555555-5555-4555-8555-555555555555';
+await db.exec(`insert into auth.users (id) values ('${T}'), ('${S}'), ('${O}'), ('${S2}'), ('${S3}')`);
 
 async function as(user, query, params) {
   await db.exec(`reset role; select set_config('request.jwt.claim.sub', '${user ?? ''}', false); set role ${user ? 'authenticated' : 'anon'};`);
@@ -128,6 +129,17 @@ const directory = await as(S, `select role, phone from public.class_directory($1
 check('el directorio sigue funcionando para integrantes', directory.rows?.length === 2);
 const outsiderDir = await as(O, `select * from public.class_directory($1)`, [classId]);
 check('el directorio no responde a extraños', outsiderDir.rows?.length === 0);
+// Privacidad de contactos: los compañeros no ven teléfono ni correo de otros alumnos.
+const joinedS3 = await as(S3, `select class_id from public.join_class($1, 'Beto', null, '', '')`, [code]);
+check('un alumno se une sin teléfono ni correo', joinedS3.rows?.[0]?.class_id === classId, joinedS3.error);
+const classmateView = await as(S3, `select role, display_name, phone, email from public.class_directory($1)`, [classId]);
+const anaSeenByBeto = classmateView.rows?.find(row => row.display_name === 'Ana');
+check('un compañero NO ve el teléfono ni el correo de otro alumno', Boolean(anaSeenByBeto) && anaSeenByBeto.phone === null && anaSeenByBeto.email === null, JSON.stringify(anaSeenByBeto));
+check('un alumno sí ve el contacto de su docente', classmateView.rows?.find(row => row.role === 'maestro')?.phone === '0981 111 222');
+const teacherView = await as(T, `select display_name, phone, email from public.class_directory($1)`, [classId]);
+check('el docente ve el contacto de sus alumnos', teacherView.rows?.find(row => row.display_name === 'Ana')?.phone === '0982 333 444');
+const ownView = await as(S, `select display_name, phone from public.class_directory($1)`, [classId]);
+check('cada alumno ve su propio contacto', ownView.rows?.find(row => row.display_name === 'Ana')?.phone === '0982 333 444');
 const meeting = await as(T, `insert into public.class_meetings (class_id, title, starts_at, meet_url) values ($1, 'Repaso', now() + interval '1 day', 'https://meet.google.com/abc-defg-hij') returning id`, [classId]);
 check('el docente programa reuniones', Boolean(meeting.rows?.[0]?.id), meeting.error);
 const teacherList = await as(T, `select c.id, (select count(*) from public.class_members m where m.class_id = c.id) as n from public.classes c where c.teacher_id = $1`, [T]);

@@ -88,14 +88,14 @@ export default function AuthScreen({ onAuthenticated }) {
                     <input id="auth-name" required autoComplete="name" value={name} onChange={event => setName(event.target.value)} placeholder={t('auth.namePh')} />
                   </label>
                   <label htmlFor="auth-phone">
-                    {t('auth.phone')}
-                    <input id="auth-phone" required type="tel" autoComplete="tel" value={phone} onChange={event => setPhone(event.target.value)} />
+                    {t('auth.phone')}{role === 'alumno' ? ` ${t('auth.optional')}` : ''}
+                    <input id="auth-phone" required={role === 'maestro'} type="tel" autoComplete="tel" value={phone} onChange={event => setPhone(event.target.value)} />
                   </label>
                   <label htmlFor="auth-email">
-                    {t('auth.email')}
-                    <input id="auth-email" required type="email" autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} />
+                    {t('auth.email')}{role === 'alumno' ? ` ${t('auth.optional')}` : ''}
+                    <input id="auth-email" required={role === 'maestro'} type="email" autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} />
                   </label>
-                  <p className="auth-field-note">{t('auth.contactNote')}</p>
+                  <p className="auth-field-note">{t(role === 'maestro' ? 'auth.contactNoteTeacher' : 'auth.contactNote')}</p>
                 </>
               )}
               <label htmlFor="auth-username">

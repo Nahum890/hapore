@@ -26,7 +26,7 @@ Con Supabase:
    2. [`migrations/20260926_tutor_daily_quota.sql`](migrations/20260926_tutor_daily_quota.sql) — cuota diaria del tutor online.
    3. [`migrations/20261026_tutor_quota_fix.sql`](migrations/20261026_tutor_quota_fix.sql) — corrige la cuota (antes nunca bloqueaba) y agrega la cuota de ayudas.
 
-   En una base que ya existía, después de `schema.sql` también se pueden ejecutar las migraciones anteriores (`20260926_class_error_summary.sql`, `20260927_class_meetings.sql`, `20260927_teacher_content.sql`) y por último [`migrations/20261026_security_hardening.sql`](migrations/20261026_security_hardening.sql).
+   En una base que ya existía, después de `schema.sql` también se pueden ejecutar las migraciones anteriores (`20260926_class_error_summary.sql`, `20260927_class_meetings.sql`, `20260927_teacher_content.sql`) y por último [`migrations/20261026_security_hardening.sql`](migrations/20261026_security_hardening.sql) y, si la base es anterior al 16/11/2026, [`migrations/20261116_contact_privacy.sql`](migrations/20261116_contact_privacy.sql).
 4. En **Project Settings → API**, copiá **Project URL** y la clave pública (**publishable** o **anon public**).
 5. En la raíz del proyecto, creá o completá el archivo `.env` con:
 
@@ -52,7 +52,7 @@ La clave **anon public** está pensada para ir en el navegador: la seguridad la 
 - Fotos de perfil e imágenes del chat: solo imágenes JPEG/PNG/WebP chicas guardadas como data URL (nunca enlaces externos ni `javascript:`).
 - Límites contra el abuso: 40 clases por docente, contenido de clase de hasta 1 MB, 20 mensajes por minuto, 600 elementos de respaldo por docente.
 - Tutor online: 15 consultas de chat libre por día y 80 ayudas (pistas y evaluaciones) por día y por cuenta.
-- Teléfono y correo (obligatorios al crear la cuenta) solo los ven las personas de la misma clase: el docente y los compañeros, a través de `class_directory`.
+- Teléfono y correo: obligatorios para el docente (los ve su clase) y opcionales para el alumno (solo los ve su docente, nunca los compañeros), a través de `class_directory`.
 - Un mensaje privado solo lo pueden leer sus dos participantes; los del chat grupal, todos los de la clase. Solo el docente puede enviar imágenes, clases y actividades.
 - Las fotos de perfil y las imágenes del chat se achican en el navegador antes de subirse (no se guarda el archivo original).
 

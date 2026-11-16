@@ -244,15 +244,18 @@ function saveAccounts(list) {
   storage().setItem(ACCOUNTS_KEY, JSON.stringify(list));
 }
 
-/** Teléfono y correo son obligatorios: se usan para que docente y alumnos de
- * una misma clase puedan contactarse. */
-export function validateContact({ phone, email }) {
+/** El docente tiene que dejar teléfono y correo (sus alumnos lo contactan).
+ * Para el alumno son opcionales y solo los ve su docente; si los escribe,
+ * se validan igual. */
+export const contactRequired = role => role === 'maestro';
+
+export function validateContact({ phone, email } = {}, { required = true } = {}) {
   const cleanPhone = String(phone ?? '').trim();
   const cleanEmail = String(email ?? '').trim().toLowerCase();
-  if (!/^\+?[\d\s().-]{7,24}$/.test(cleanPhone) || cleanPhone.replace(/\D/g, '').length < 7) {
+  if ((required || cleanPhone) && (!/^\+?[\d\s().-]{7,24}$/.test(cleanPhone) || cleanPhone.replace(/\D/g, '').length < 7)) {
     throw new Error('Escribí un número de teléfono válido (al menos 7 dígitos).');
   }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(cleanEmail) || cleanEmail.length > 120) {
+  if ((required || cleanEmail) && (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(cleanEmail) || cleanEmail.length > 120)) {
     throw new Error('Escribí un correo válido, por ejemplo nombre@ejemplo.com.');
   }
   return { phone: cleanPhone, email: cleanEmail };
@@ -283,7 +286,7 @@ export function updateProfile(accountId, { phone, email, avatar } = {}) {
   if (index === -1) throw new Error('No se encontró la cuenta en este dispositivo.');
   const next = { ...saved[index] };
   if (phone !== undefined || email !== undefined) {
-    Object.assign(next, validateContact({ phone: phone ?? next.phone, email: email ?? next.email }));
+    Object.assign(next, validateContact({ phone: phone ?? next.phone, email: email ?? next.email }, { required: contactRequired(next.role) }));
   }
   if (avatar !== undefined) next.avatar = validAvatar(avatar);
   const list = [...saved];
@@ -358,7 +361,7 @@ export async function register({ name, username, password, role, phone, email })
   if (!/^[a-z0-9._-]{3,24}$/.test(cleanUsername)) throw new Error('El usuario debe tener entre 3 y 24 letras, números, puntos, guiones o guiones bajos.');
   if (String(password || '').length < 8) throw new Error('La contraseña debe tener al menos 8 caracteres.');
   if (!['alumno', 'maestro'].includes(role)) throw new Error('Elegí Alumno o Maestro.');
-  const contact = validateContact({ phone, email });
+  const contact = validateContact({ phone, email }, { required: contactRequired(role) });
   const saved = accounts();
   if (saved.some(item => item.username === cleanUsername)) throw new Error('Ese nombre de usuario ya existe en este dispositivo.');
   // Con internet, la cuenta se crea primero en la nube: así el nombre de

@@ -97,7 +97,11 @@ const server = http.createServer(async (req, res) => {
     if (!found || !isParticipant(found.id, uid)) return send(res, 200, []);
     return send(res, 200, [
       { user_id: found.teacher_id, role: 'maestro', display_name: found.teacher_name, avatar: found.teacher_avatar, phone: found.teacher_phone, email: found.teacher_email },
-      ...members.filter(m => m.class_id === found.id).map(m => ({ user_id: m.student_id, role: 'alumno', display_name: m.display_name, avatar: m.avatar, phone: m.phone, email: m.email })),
+      // Contactos de un alumno: solo para su docente y para él mismo (igual que schema.sql).
+      ...members.filter(m => m.class_id === found.id).map(m => {
+        const visible = found.teacher_id === uid || m.student_id === uid;
+        return { user_id: m.student_id, role: 'alumno', display_name: m.display_name, avatar: m.avatar, phone: visible ? m.phone : null, email: visible ? m.email : null };
+      }),
     ]);
   }
   if (url.pathname === '/rest/v1/rpc/sync_my_profile') {
