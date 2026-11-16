@@ -122,10 +122,14 @@ La app puede funcionar sin esas variables mediante el tutor offline.
 ## Verificación
 
 ```bash
+npm ci            # instala exactamente lo de package-lock.json (correlo después de cada git pull)
+npm run lint      # variables no definidas y reglas de hooks
 npm test
 npm run build
 npm run preview
 ```
+
+GitHub Actions corre `lint`, `test` y `build` en cada push a `main` y en cada pull request (`.github/workflows/ci.yml`).
 
 La suite actual cubre cuentas y roles, motor físico, contenido, códigos de clase, simulaciones, progresión, fallback, reintentos, streaming y servidor, además del currículo del MEC (datos, generadores de ejercicios y tutor de temas).
 
